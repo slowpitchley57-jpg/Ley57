@@ -6,4 +6,5 @@ slowpitch.ley57@gmail.com
 contrASEÑA: Ley57slow
 
 
-revisar que salgan resultados en esatdisticas
+revisar usuarios en pagina
+https://ley57.onrender.com/api/dev/usuarios

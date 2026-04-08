@@ -15,11 +15,16 @@
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
+        
+        /* Ajuste para el sidebar en móvil */
+        #sidebar { transition: transform 0.3s ease-in-out; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans flex min-h-screen">
+<body class="bg-slate-50 text-slate-800 font-sans flex min-h-screen relative">
 
-    <aside class="w-64 bg-blue-900 text-white p-6 hidden md:block shadow-2xl sticky top-0 h-screen flex flex-col">
+    <div id="sidebarOverlay" onclick="toggleMobileMenu()" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden"></div>
+
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-blue-900 text-white p-6 transform -translate-x-full md:relative md:translate-x-0 shadow-2xl sticky top-0 h-screen flex flex-col">
         <div class="flex items-center gap-3 mb-10">
             <img src="imgley57.pgn.png" class="w-12 h-12 bg-white rounded-full p-1 border-2 border-red-500">
             <div>
@@ -51,13 +56,18 @@
         </div>
     </aside>
 
-    <main class="flex-1 flex flex-col">
-        <header class="bg-white p-6 shadow-sm flex justify-between items-center border-b sticky top-0 z-40">
-            <div>
-                <h2 id="nombreEquipoCabecera" class="font-black text-2xl text-blue-900 uppercase tracking-tighter italic text-red-600">CARGANDO...</h2>
-                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Panel de Control de Roster</p>
+    <main class="flex-1 flex flex-col min-w-0">
+        <header class="bg-white p-4 md:p-6 shadow-sm flex justify-between items-center border-b sticky top-0 z-40">
+            <div class="flex items-center">
+                <button onclick="toggleMobileMenu()" class="md:hidden text-blue-900 text-2xl mr-4">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <div>
+                    <h2 id="nombreEquipoCabecera" class="font-black text-lg md:text-2xl text-blue-900 uppercase tracking-tighter italic text-red-600 truncate max-w-[150px] md:max-w-none">CARGANDO...</h2>
+                    <p class="text-[8px] md:text-[10px] text-slate-400 font-bold uppercase tracking-widest">Panel de Control de Roster</p>
+                </div>
             </div>
-            <div id="statusBadge" class="text-[9px] font-black px-3 py-1 rounded-full shadow-sm bg-slate-100 uppercase tracking-tighter italic">Sincronizando...</div>
+            <div id="statusBadge" class="text-[8px] md:text-[9px] font-black px-2 md:px-3 py-1 rounded-full shadow-sm bg-slate-100 uppercase tracking-tighter italic">Sincronizando...</div>
         </header>
 
         <div class="p-4 md:p-8 space-y-8 max-w-6xl mx-auto w-full">
@@ -142,6 +152,14 @@
         const API = "https://ley57.onrender.com/api";
         let equipoSeleccionado = "";
         let correoUsuario = "";
+
+        // FUNCIÓN PARA MOSTRAR/OCULTAR MENÚ EN MÓVIL
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
 
         function revisarSesion() {
             const sesion = localStorage.getItem('userLogueado');
@@ -246,58 +264,34 @@
         }
 
         async function procesarRoster() {
-    const rawText = document.getElementById('rawRoster').value;
-    
-    // Si el campo está vacío, no hacemos nada
-    if(!rawText.trim()) return alert("El campo de texto está vacío.");
+            const rawText = document.getElementById('rawRoster').value;
+            if(!rawText.trim()) return alert("El campo de texto está vacío.");
+            const confirmacion = confirm("⚠️ AVISO IMPORTANTE:\n\nUna vez guardado el roster masivo, no podrás realizar cambios directamente.\n¿Estás seguro?");
+            if(!confirmacion) return;
 
-    // MENSAJE DE CONFIRMACIÓN (REQUERIMIENTO DEL CLIENTE)
-    const confirmacion = confirm(
-        "⚠️ AVISO IMPORTANTE:\n\n" +
-        "Una vez guardado el roster masivo, no podrás realizar cambios o ediciones directamente.\n" +
-        "Cualquier corrección posterior deberá ser solicitada y autorizada por la liga.\n\n" +
-        "¿Estás seguro de que la lista es correcta y deseas continuar?"
-    );
-
-    if(!confirmacion) return; // Si cancela, se detiene la ejecución
-
-    const lineas = rawText.split('\n');
-    let procesados = 0;
-
-    for(let linea of lineas) {
-        if(linea.trim() === "") continue;
-        const regexFecha = /(\d{2}\/\d{2}\/\d{4})/;
-        const matchFecha = linea.match(regexFecha);
-        const fechaDetectada = matchFecha ? matchFecha[0] : "Sin Fecha";
-        
-        let nombreLimpio = linea.replace(/^\d+[\.\s-]*/g, '')
-                                .replace(fechaDetectada, '')
-                                .replace(/[–\-\|]/g, '')
-                                .trim();                
-        
-        if(nombreLimpio.length > 2) {
-            try {
-                await fetch(`${API}/players`, {
-                    method: 'POST',
-                    headers: {'Content-Type':'application/json'},
-                    body: JSON.stringify({ 
-                        nombre: nombreLimpio.toUpperCase(), 
-                        equipo: equipoSeleccionado, 
-                        fechaNacimiento: fechaDetectada, 
-                        categoria: "bateo" 
-                    })
-                });
-                procesados++;
-            } catch (err) {
-                console.error("Error al registrar a:", nombreLimpio);
+            const lineas = rawText.split('\n');
+            let procesados = 0;
+            for(let linea of lineas) {
+                if(linea.trim() === "") continue;
+                const regexFecha = /(\d{2}\/\d{2}\/\d{4})/;
+                const matchFecha = linea.match(regexFecha);
+                const fechaDetectada = matchFecha ? matchFecha[0] : "Sin Fecha";
+                let nombreLimpio = linea.replace(/^\d+[\.\s-]*/g, '').replace(fechaDetectada, '').replace(/[–\-\|]/g, '').trim();                
+                if(nombreLimpio.length > 2) {
+                    try {
+                        await fetch(`${API}/players`, {
+                            method: 'POST',
+                            headers: {'Content-Type':'application/json'},
+                            body: JSON.stringify({ nombre: nombreLimpio.toUpperCase(), equipo: equipoSeleccionado, fechaNacimiento: fechaDetectada, categoria: "bateo" })
+                        });
+                        procesados++;
+                    } catch (err) {}
+                }
             }
+            alert("✅ Registro completado: " + procesados + " jugadoras.");
+            document.getElementById('rawRoster').value = "";
+            cargarMiRoster();
         }
-    }
-    
-    alert("✅ Registro completado: se han guardado " + procesados + " jugadoras en el sistema.");
-    document.getElementById('rawRoster').value = "";
-    cargarMiRoster();
-}
 
         async function guardarIndividual() {
             const nombre = document.getElementById('soloNombre').value;
