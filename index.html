@@ -2,12 +2,12 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Acceso - Liga Slow Picht Ley 57</title>
+    <title>Acceso - Liga Slow Pitch Ley 57</title>
     <link rel="icon" type="image/png" href="logoley57icon.jpeg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Gradiente de fondo que se mueve lento */
+        /* Gradiente animado */
         @keyframes gradientMove {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
@@ -28,38 +28,64 @@
             box-shadow: 0 4px 20px 0 rgba(239, 68, 68, 0.5); 
         }
 
-        /* Contenedor del Login */
-        .login-card {
+        .card-style {
             background-color: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(12px);
             border-top: 8px solid #ef4444;
             z-index: 20;
         }
 
-        /* Estilo para los elementos flotantes (Pelotas/Trofeos) */
         .floating-item {
             position: absolute;
             pointer-events: none;
-            color: rgba(255, 255, 255, 0.15); /* Opacidad para que no estorbe la vista */
+            color: rgba(255, 255, 255, 0.15);
             z-index: 1;
         }
 
+        /* Animaciones */
         .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        .animate-slide-up { animation: slideUp 0.5s ease-out forwards; }
+        .animate-exit { animation: fadeExit 0.5s ease-in forwards; }
+
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeExit { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.8); visibility: hidden; } }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4 font-sans relative">
 
     <div id="animation-container" class="absolute inset-0 overflow-hidden"></div>
 
-    <div class="login-card p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md text-center relative animate-fade-in">
-        
-        <img src="logoley57icon.jpeg" alt="Liga Ley 57" class="mx-auto mb-6 w-36 h-36 object-contain drop-shadow-2xl hover:rotate-6 transition-transform duration-500">
-        
-        <h2 class="text-blue-900 text-3xl font-black mb-1 italic tracking-tighter uppercase leading-none">Slow Picht  Ley 57</h2>
-        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.4em] mb-8">Hermosillo • Softbol Slowpitch</p>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.4em] mb-8">Femenil</p>
+    <div id="welcome-screen" class="card-style p-8 rounded-[2.5rem] shadow-2xl w-full max-w-lg text-center relative animate-fade-in">
+        <img src="logoley57icon.jpeg" alt="Logo Ley 57" class="mx-auto mb-6 w-32 h-32 object-contain drop-shadow-2xl">
+        <h1 class="text-blue-900 text-3xl font-black mb-2 italic tracking-tighter uppercase leading-none">Bienvenido</h1>
+        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.4em] mb-8">Instrucciones de Acceso</p>
 
+        <div class="grid grid-cols-1 gap-4 text-left mb-8">
+            <div class="bg-blue-50 p-4 rounded-2xl border-l-4 border-blue-900">
+                <p class="text-blue-900 font-black text-[10px] uppercase italic mb-1"><i class="fa fa-users mr-2"></i> Público (Jugadora)</p>
+                <p class="text-slate-600 text-[10px]">Acceso libre. Puedes consultar resultados, estadísticas individuales y el rol de juegos.</p>
+            </div>
+            <div class="bg-red-50 p-4 rounded-2xl border-l-4 border-red-600">
+                <p class="text-red-600 font-black text-[10px] uppercase italic mb-1"><i class="fa fa-user-tie mr-2"></i> Managers</p>
+                <p class="text-slate-600 text-[10px]">Requiere clave. Permite gestionar tu roster, dar de alta jugadoras y ver tu próximo juego.</p>
+            </div>
+            <div class="bg-slate-100 p-4 rounded-2xl border-l-4 border-slate-800">
+                <p class="text-slate-800 font-black text-[10px] uppercase italic mb-1"><i class="fa fa-shield-alt mr-2"></i> Administrador</p>
+                <p class="text-slate-600 text-[10px]">Control total. Generar roles con IA, capturar marcadores y descargar reportes.</p>
+            </div>
+        </div>
+
+        <button onclick="cerrarBienvenida()" class="w-full bg-blue-900 hover:bg-red-600 text-white font-black py-4 rounded-2xl transition-all duration-300 shadow-xl uppercase tracking-widest text-xs">
+            Entrar al Portal <i class="fa fa-arrow-right ml-2"></i>
+        </button>
+    </div>
+
+    <div id="login-card" class="card-style p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md text-center relative hidden">
+        <img src="logoley57icon.jpeg" alt="Logo Ley 57" class="mx-auto mb-6 w-36 h-36 object-contain drop-shadow-2xl hover:rotate-6 transition-transform duration-500">
+        
+        <h2 class="text-blue-900 text-3xl font-black mb-1 italic tracking-tighter uppercase">Ley 57</h2>
+        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.4em] mb-8">Portal de Gestión</p>
 
         <div class="flex bg-slate-100 p-1.5 rounded-2xl mb-6 border border-slate-200">
             <button onclick="setRole('jugadora')" id="btn-jugadora" class="flex-1 py-3 text-[10px] font-black rounded-xl transition-all duration-300 active-role uppercase">Público</button>
@@ -79,75 +105,60 @@
         </div>
 
         <div id="msg-jugadora" class="py-6 text-slate-500 text-xs font-medium italic px-4">
-            <i class="fa fa-chart-line text-blue-600 mr-2"></i>Consulta Resultados, Estadisticas , Tablas y Rol de Juegos en vivo.
+            <i class="fa fa-chart-line text-blue-600 mr-2"></i>Consulta Resultados, Estadísticas y Tablas.
         </div>
         
         <button onclick="entrar()" class="w-full bg-blue-900 hover:bg-red-600 text-white font-black py-4 rounded-2xl transition-all duration-500 shadow-xl uppercase tracking-widest text-xs">
-            Ingresar al Portal
+            Ingresar
         </button>
 
-        <div class="mt-8 pt-6 border-t border-slate-100 flex justify-between items-center px-2">
-            <p class="text-slate-400 text-[8px] uppercase font-black tracking-widest">          Temporada 1 - 2026</p>
-            <div class="flex gap-2">
+        <div class="mt-8 pt-6 border-t border-slate-100 flex justify-between items-center">
+            <p class="text-slate-400 text-[8px] uppercase font-black tracking-widest">Temporada 1 - 2026</p>
+            <div class="flex gap-1">
                 <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                <p class="text-slate-400 text-[8px] uppercase font-black">En línea</p>
+                <p class="text-slate-400 text-[8px] font-black uppercase">Online</p>
             </div>
         </div>
     </div>
 
     <script>
+        // LÓGICA DE TRANSICIÓN
+        function cerrarBienvenida() {
+            const welcome = document.getElementById('welcome-screen');
+            const login = document.getElementById('login-card');
+            welcome.classList.add('animate-exit');
+            setTimeout(() => {
+                welcome.style.display = 'none';
+                login.classList.remove('hidden');
+                login.classList.add('animate-slide-up');
+            }, 500);
+        }
+
+        // ANIMACIÓN DE FONDO
         const container = document.getElementById('animation-container');
         const icons = ['fa-baseball-ball', 'fa-trophy', 'fa-medal', 'fa-star'];
-        const itemsCount = 25; // Cantidad de objetos flotando
-
         function createItem() {
             const item = document.createElement('i');
-            const iconClass = icons[Math.floor(Math.random() * icons.length)];
-            
-            item.className = `fa ${iconClass} floating-item`;
-            
-            // Tamaño aleatorio
+            item.className = `fa ${icons[Math.floor(Math.random()*icons.length)]} floating-item`;
             const size = Math.random() * 60 + 20;
             item.style.fontSize = `${size}px`;
-            
-            // Posición inicial aleatoria
-            let x = Math.random() * window.innerWidth;
-            let y = Math.random() * window.innerHeight;
-            
-            // Velocidad aleatoria
-            let speedX = (Math.random() - 0.5) * 2;
-            let speedY = (Math.random() - 0.5) * 2;
-            let rotation = 0;
-            const rotationSpeed = (Math.random() - 0.5) * 4;
-
+            let x = Math.random() * window.innerWidth, y = Math.random() * window.innerHeight;
+            let sx = (Math.random()-0.5)*2, sy = (Math.random()-0.5)*2, rot = 0, rs = (Math.random()-0.5)*4;
             container.appendChild(item);
-
             function move() {
-                x += speedX;
-                y += speedY;
-                rotation += rotationSpeed;
-
-                // Rebotar en bordes
-                if (x < -100 || x > window.innerWidth + 100) speedX *= -1;
-                if (y < -100 || y > window.innerHeight + 100) speedY *= -1;
-
-                item.style.transform = `translate(${x}px, ${y}px) rotate(${rotation}deg)`;
+                x += sx; y += sy; rot += rs;
+                if (x < -100 || x > window.innerWidth + 100) sx *= -1;
+                if (y < -100 || y > window.innerHeight + 100) sy *= -1;
+                item.style.transform = `translate(${x}px, ${y}px) rotate(${rot}deg)`;
                 requestAnimationFrame(move);
             }
-
             move();
         }
+        for (let i = 0; i < 25; i++) { createItem(); }
 
-        // Crear los elementos iniciales
-        for (let i = 0; i < itemsCount; i++) {
-            createItem();
-        }
-    </script>
-
-    <script>
+        // LÓGICA DE LOGIN
         let selectedRole = 'jugadora';
-       // Busca esta línea y cámbiala en los 4 archivos
-const API = "https://ley57.onrender.com/api";
+        const API = "https://ley57.onrender.com/api";
 
         function setRole(role) {
             selectedRole = role;
@@ -156,39 +167,29 @@ const API = "https://ley57.onrender.com/api";
                 btn.classList.remove('active-role');
                 btn.classList.add('text-slate-400');
             });
-            const activeBtn = document.getElementById(`btn-${role}`);
-            activeBtn.classList.add('active-role');
-            activeBtn.classList.remove('text-slate-400');
-
+            document.getElementById(`btn-${role}`).classList.add('active-role');
             const fields = document.getElementById('login-fields');
             const msg = document.getElementById('msg-jugadora');
-            if (role === 'jugadora') {
-                fields.classList.add('hidden');
-                msg.classList.remove('hidden');
-            } else {
-                fields.classList.remove('hidden');
-                msg.classList.add('hidden');
-            }
+            if (role === 'jugadora') { fields.classList.add('hidden'); msg.classList.remove('hidden'); }
+            else { fields.classList.remove('hidden'); msg.classList.add('hidden'); }
         }
 
         async function entrar() {
             if (selectedRole === 'jugadora') { window.location.href = 'estadisticas.html'; return; }
-            const usuario = document.getElementById('u').value;
-            const password = document.getElementById('p').value;
-            if(!usuario || !password) return alert("Ingresa tus datos.");
-
+            const u = document.getElementById('u').value, p = document.getElementById('p').value;
+            if(!u || !p) return alert("Ingresa tus datos.");
             try {
                 const res = await fetch(`${API}/login`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ correo: usuario, pass: password })
+                    body: JSON.stringify({ correo: u, pass: p })
                 });
                 if(res.ok) {
                     const user = await res.json();
-                    if (user.rol !== selectedRole) { alert("Rol incorrecto."); return; }
+                    if (user.rol !== selectedRole) return alert("Rol incorrecto.");
                     localStorage.setItem('userLogueado', JSON.stringify(user));
                     window.location.href = `${selectedRole}.html`;
-                } else { alert("Credenciales incorrectas."); }
+                } else alert("Credenciales incorrectas.");
             } catch (err) { alert("Servidor offline."); }
         }
     </script>
