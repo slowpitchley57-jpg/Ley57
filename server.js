@@ -8,10 +8,11 @@ app.use(express.json());
 app.use(cors());
 
 
-mongoose.connect(process.env.MONGO_URI)
+// SOLUCIÓN DE EMERGENCIA: Conexión directa
+mongoose.connect('mongodb+srv://rosasvillah_db_user:GhnkehSpQQGFwU3K@ley57.y2bgblz.mongodb.net/LEY57?retryWrites=true&w=majority')
     .then(() => console.log("✅ Conectado a MongoDB LEY57"))
     .catch(err => console.log("❌ Error de conexión:", err));
-
+    
 // --- MODELOS ---
 const Config = mongoose.model('Config', { permitirAltas: Boolean });
 const User = mongoose.model('User', { correo: String, pass: String, rol: String, equipo: String });
