@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estadísticas y Rol - Liga Ley 57</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .bg-ley57 { background-color: #0a0f18; }
+        .card-stats { background: linear-gradient(145deg, #161c27, #0f141d); border: 1px solid #232a35; }
+        .text-accent { color: #ff3b3b; } /* Rojo Competitivo */
+    </style>
+</head>
+<body class="bg-ley57 text-white font-sans min-h-screen">
+
+    <header class="p-6 text-center border-b border-slate-800 shadow-2xl">
+        <img src="imgley57.pgn.png" alt="Logo Ley 57" class="mx-auto w-24 mb-2">
+        <h1 class="text-2xl font-black italic tracking-widest">LIGA <span class="text-accent">LEY 57</span></h1>
+    </header>
+
+    <main class="container mx-auto p-4 space-y-8">
+
+        <section>
+            <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-calendar-check text-accent"></i> JUEGOS DE LA SEMANA
+            </h2>
+            <div id="contenedor-rol" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="card-stats p-4 rounded-xl flex justify-between items-center opacity-50 italic">
+                    Cargando rol de juegos...
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-trophy text-accent"></i> LÍDERES GENERALES (TOP 5 IA)
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <div class="card-stats p-5 rounded-2xl">
+                    <h3 class="text-sm font-bold text-slate-400 mb-4 uppercase tracking-tighter">Promedio de Bateo</h3>
+                    <div id="top-bateo" class="space-y-3">
+                        </div>
+                </div>
+
+                <div class="card-stats p-5 rounded-2xl">
+                    <h3 class="text-sm font-bold text-slate-400 mb-4 uppercase tracking-tighter">Efectividad (ERA)</h3>
+                    <div id="top-picheo" class="space-y-3">
+                        </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-circle-check text-emerald-500"></i> RESULTADOS RECIENTES
+            </h2>
+            <div id="contenedor-resultados" class="bg-slate-900/50 rounded-2xl p-4 border border-slate-800">
+                </div>
+        </section>
+
+    </main>
+
+    <script>
+        const API_BASE = "http://localhost:3000/api";
+
+        async function cargarDatos() {
+            try {
+                // 1. Cargar Rol de Juegos
+                const resGames = await fetch(`${API_BASE}/games`);
+                const games = await resGames.json();
+                const containerRol = document.getElementById('contenedor-rol');
+                containerRol.innerHTML = "";
+                
+                games.filter(g => g.status === 'pendiente').forEach(g => {
+                    containerRol.innerHTML += `
+                        <div class="card-stats p-4 rounded-xl flex justify-between items-center border-l-4 border-accent">
+                            <div>
+                                <p class="text-xs text-slate-500">${new Date(g.fecha).toLocaleDateString()}</p>
+                                <p class="font-bold">${g.local} <span class="text-accent">vs</span> ${g.visita}</p>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-slate-700"></i>
+                        </div>`;
+                });
+
+                // 2. Cargar Tops con la lógica de la IA
+                cargarTops('bateo', 'top-bateo');
+                cargarTops('picheo', 'top-picheo');
+
+            } catch (error) {
+                console.error("Error al conectar con el servidor de la liga");
+            }
+        }
+
+        async function cargarTops(cat, elementId) {
+            const res = await fetch(`${API_BASE}/stats/top5/${cat}`);
+            const data = await res.json();
+            const container = document.getElementById(elementId);
+            container.innerHTML = "";
+
+            data.forEach((p, index) => {
+                const valor = cat === 'bateo' ? p.avg.toFixed(3) : p.era.toFixed(2);
+                container.innerHTML += `
+                    <div class="flex justify-between items-center p-2 bg-slate-800/30 rounded-lg">
+                        <span class="text-sm"><span class="text-accent font-bold">#${index+1}</span> ${p.nombre}</span>
+                        <span class="font-mono font-bold text-white">${valor}</span>
+                    </div>`;
+            });
+        }
+
+        // Ejecutar al cargar la página
+        cargarDatos();
+    </script>
+</body>
+</html>

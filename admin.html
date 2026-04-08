@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Master Admin - LEY 57</title>
+    <link rel="icon" type="image/png" href="logoley57icon.jpeg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 1000; }
+        .modal.active { display: flex; }
+        .input-inline { width: 45px; border: 1px solid #ddd; border-radius: 4px; text-align: center; font-weight: bold; background: #f9f9f9; }
+        .custom-scroll::-webkit-scrollbar { width: 5px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans flex min-h-screen">
+
+    <aside class="w-64 bg-blue-900 text-white p-6 sticky top-0 h-screen shadow-2xl flex flex-col">
+        <div class="flex items-center gap-3 mb-10 italic">
+            <img src="imgley57.pgn.png" class="w-10 h-10 bg-white rounded-full p-1">
+            <h1 class="font-black text-xl italic uppercase">LEY 57 <span class="text-red-500 text-[10px] block">Admin Panel</span></h1>
+        </div>
+        
+        <nav class="space-y-4 flex-1">
+            <div class="p-3 bg-blue-800/50 rounded-xl border border-blue-700 mb-6 text-center">
+                <p class="text-[9px] font-black text-blue-300 uppercase mb-2">Altas Managers</p>
+                <input type="checkbox" id="masterSwitch" onchange="toggleAltas()" class="w-5 h-5 accent-red-600 cursor-pointer">
+            </div>
+
+            <button onclick="location.reload()" class="w-full text-left p-3 hover:bg-blue-800 rounded-xl transition flex items-center gap-3"><i class="fa fa-sync"></i> Sincronizar</button>
+            <button onclick="toggleModal('modalEquipo')" class="w-full text-left p-3 bg-emerald-600 rounded-xl font-bold flex items-center gap-3"><i class="fa fa-plus-circle"></i> Nuevo Equipo</button>
+            <button onclick="toggleModal('modalRosters')" class="w-full text-left p-3 bg-amber-500 rounded-xl font-bold flex items-center gap-3"><i class="fa fa-user-edit"></i> Roster / Stats</button>
+            <button onclick="generarRolIA()" class="w-full text-left p-3 bg-purple-600 rounded-xl font-bold flex items-center gap-3"><i class="fa fa-robot"></i> Generar Rol IA</button>
+            
+            <hr class="opacity-20">
+            <button onclick="limpiarHistorialSemanal()" class="w-full text-left p-3 bg-red-600 hover:bg-red-700 rounded-xl font-bold flex items-center gap-3 transition">
+                <i class="fa fa-broom"></i> Limpiar Semana
+            </button>
+        </nav>
+        <button onclick="descargarHistorial()" class="w-full text-left p-3 bg-slate-700 hover:bg-slate-800 rounded-xl font-bold flex items-center gap-3 transition mt-2">
+    <i class="fa fa-file-download"></i> Descargar Reporte
+</button>
+
+        <a href="estadisticas.html" target="_blank" class="block p-3 bg-blue-700 rounded-xl text-center font-black italic uppercase text-[10px] tracking-widest">Web Pública</a>
+    </aside>
+
+    <main class="flex-1 p-8 space-y-8 overflow-y-auto">
+        
+        <div class="grid grid-cols-1 gap-8">
+            <div class="bg-white rounded-3xl shadow-sm border overflow-hidden">
+                <div class="bg-blue-600 p-3 text-white font-bold text-xs uppercase tracking-widest italic">Categoría Intermedia</div>
+                <table class="w-full text-xs text-center">
+                    <thead>
+                        <tr class="bg-slate-100 border-b font-black text-slate-500 uppercase">
+                            <th class="p-4 text-left">Equipo</th>
+                            <th>JG</th><th>JP</th><th>CA</th><th>CE</th><th class="text-blue-600">DIF</th><th>X</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaIntermedia" class="divide-y font-bold text-blue-900"></tbody>
+                </table>
+            </div>
+
+            <div class="bg-white rounded-3xl shadow-sm border overflow-hidden">
+                <div class="bg-orange-500 p-3 text-white font-bold text-xs uppercase tracking-widest italic">Categoría Relax</div>
+                <table class="w-full text-xs text-center">
+                    <thead>
+                        <tr class="bg-slate-100 border-b font-black text-slate-500 uppercase">
+                            <th class="p-4 text-left">Equipo</th>
+                            <th>JG</th><th>JP</th><th>CA</th><th>CE</th><th class="text-orange-600">DIF</th><th>X</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaRelax" class="divide-y font-bold text-blue-900"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <section class="bg-white p-6 rounded-3xl border shadow-sm">
+            <h3 class="text-blue-900 font-black mb-6 uppercase text-xs italic tracking-widest border-b pb-2">Jornada Actual / Marcadores</h3>
+            <div id="listaResultados" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"></div>
+            
+            <div class="bg-slate-50 p-6 rounded-3xl border-2 border-dashed border-slate-200">
+                <p class="text-[10px] font-black text-slate-400 uppercase mb-4 text-center tracking-widest">Programación Manual</p>
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+                    <select id="selLoc" class="p-2 border rounded-xl text-xs font-bold"></select>
+                    <select id="selVis" class="p-2 border rounded-xl text-xs font-bold"></select>
+                    <input type="date" id="fec" class="p-2 border rounded-xl text-xs font-bold">
+                    <input type="time" id="hor" class="p-2 border rounded-xl text-xs font-bold">
+                    <button onclick="guardarJuego()" class="bg-blue-900 text-white p-2 rounded-xl font-black text-[10px] uppercase shadow-lg">Publicar</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white p-6 rounded-3xl border border-red-100 shadow-sm">
+            <h3 class="text-red-600 font-black mb-4 uppercase text-xs flex items-center gap-2 italic"><i class="fa fa-robot"></i> IA Scanner de Hojas (OCR)</h3>
+            <div class="flex gap-4">
+                <input type="file" id="imageInput" class="flex-1 text-xs border p-2 rounded-xl bg-slate-50">
+                <button onclick="escanearHoja()" id="btnScan" class="bg-red-600 text-white px-6 rounded-xl font-bold text-xs uppercase">Analizar</button>
+            </div>
+            <textarea id="resultadoIA" class="w-full mt-4 p-3 bg-amber-50 border rounded-xl text-[10px] h-24 font-mono" placeholder="Esperando análisis..."></textarea>
+        </section>
+    </main>
+
+    <div id="modalRosters" class="modal">
+        <div class="bg-white p-6 rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl border-t-8 border-amber-500">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="font-black text-amber-600 italic uppercase">Editor de Estadísticas</h2>
+                <select id="filterRoster" onchange="verRosterEquipo()" class="p-2 border rounded-xl font-bold text-xs"></select>
+            </div>
+            <div id="containerRoster" class="flex-1 overflow-y-auto space-y-2 custom-scroll pr-2"></div>
+            <button onclick="toggleModal('modalRosters')" class="mt-4 bg-slate-800 text-white p-3 rounded-xl font-bold uppercase text-xs">Cerrar</button>
+        </div>
+    </div>
+
+    <div id="modalEquipo" class="modal">
+        <div class="bg-white p-8 rounded-3xl w-80 shadow-2xl border-t-8 border-emerald-600">
+            <h2 class="font-black mb-4 text-center italic uppercase">Nuevo Equipo</h2>
+            <input type="text" id="teamName" placeholder="NOMBRE" class="w-full p-3 border rounded-xl mb-4 font-bold outline-none uppercase bg-slate-50">
+            <select id="teamCat" class="w-full p-3 border rounded-xl mb-6 font-bold text-xs uppercase bg-slate-50">
+                <option value="Intermedia">Intermedia</option>
+                <option value="Relax">Relax</option>
+            </select>
+            <div class="flex gap-2">
+                <button onclick="toggleModal('modalEquipo')" class="flex-1 bg-slate-200 p-3 rounded-xl font-bold text-xs uppercase">Cerrar</button>
+                <button onclick="guardarEquipo()" class="flex-1 bg-emerald-600 text-white p-3 rounded-xl font-bold text-xs uppercase">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = "http://localhost:3000/api";
+
+        function toggleModal(id) { document.getElementById(id).classList.toggle('active'); }
+
+        async function cargarConfig() {
+            const res = await fetch(`${API}/config`);
+            const conf = await res.json();
+            document.getElementById('masterSwitch').checked = conf.permitirAltas;
+        }
+
+        async function toggleAltas() {
+            const val = document.getElementById('masterSwitch').checked;
+            await fetch(`${API}/config`, { 
+                method: 'POST', 
+                headers: {'Content-Type': 'application/json'}, 
+                body: JSON.stringify({ permitirAltas: val }) 
+            });
+        }
+
+        async function cargarEquipos() {
+            const res = await fetch(`${API}/equipos`);
+            const equipos = await res.json();
+            const tInt = document.getElementById('tablaIntermedia');
+            const tRel = document.getElementById('tablaRelax');
+            const selects = [document.getElementById('selLoc'), document.getElementById('selVis'), document.getElementById('filterRoster')];
+            
+            tInt.innerHTML = ""; tRel.innerHTML = "";
+            selects.forEach(s => s.innerHTML = '<option value="">-- EQUIPO --</option>');
+
+            equipos.sort((a,b) => b.g - a.g).forEach(e => {
+                const dif = (e.ca || 0) - (e.ce || 0);
+                const fila = `
+                    <tr class="hover:bg-slate-50 border-b">
+                        <td class="p-4 text-left uppercase italic font-black text-blue-900">${e.nombre}</td>
+                        <td><input type="number" onchange="updEq('${e._id}','g',this.value)" value="${e.g}" class="input-inline text-emerald-600"></td>
+                        <td><input type="number" onchange="updEq('${e._id}','p',this.value)" value="${e.p}" class="input-inline text-red-500"></td>
+                        <td><input type="number" onchange="updEq('${e._id}','ca',this.value)" value="${e.ca}" class="input-inline"></td>
+                        <td><input type="number" onchange="updEq('${e._id}','ce',this.value)" value="${e.ce}" class="input-inline"></td>
+                        <td class="font-black ${dif>=0?'text-blue-600':'text-orange-500'}">${dif>0?'+'+dif:dif}</td>
+                        <td><button onclick="eliminarEquipo('${e._id}')" class="text-slate-300 hover:text-red-500 p-1"><i class="fa fa-trash"></i></button></td>
+                    </tr>`;
+                if(e.categoria === "Intermedia") tInt.innerHTML += fila; else tRel.innerHTML += fila;
+                selects.forEach(s => s.innerHTML += `<option value="${e.nombre}">${e.nombre}</option>`);
+            });
+        }
+
+        async function cargarResultados() {
+            const res = await fetch(`${API}/games`);
+            const games = await res.json();
+            const cont = document.getElementById('listaResultados');
+            cont.innerHTML = "";
+            
+            // Solo mostramos pendientes para capturar marcador
+            games.filter(g => g.status === 'pendiente').forEach(g => {
+                cont.innerHTML += `
+                    <div class="bg-white p-4 rounded-3xl border-2 border-blue-50 flex flex-col gap-3 shadow-md relative group transition hover:border-blue-200">
+                        <button onclick="eliminarJuego('${g._id}')" class="absolute -top-2 -right-2 bg-red-600 text-white w-7 h-7 rounded-full text-[10px] shadow-xl hover:bg-black transition z-10"><i class="fa fa-times"></i></button>
+                        <div class="flex justify-between items-center text-[10px] font-black uppercase text-slate-400 italic">
+                            <span><i class="fa fa-calendar-alt"></i> ${g.fecha}</span>
+                            <span><i class="fa fa-clock"></i> ${g.hora}</span>
+                        </div>
+                        <div class="flex justify-between items-center gap-2">
+                            <span class="text-[10px] font-black uppercase flex-1 text-blue-900 truncate">${g.local}</span>
+                            <div class="flex gap-1">
+                                <input id="sc-${g._id}-L" type="number" class="w-9 p-1 bg-slate-100 rounded-lg text-center font-bold border" placeholder="L">
+                                <input id="sc-${g._id}-V" type="number" class="w-9 p-1 bg-slate-100 rounded-lg text-center font-bold border" placeholder="V">
+                            </div>
+                            <span class="text-[10px] font-black uppercase flex-1 text-right text-blue-900 truncate">${g.visita}</span>
+                        </div>
+                        <button onclick="finalizarJuego('${g._id}','${g.local}','${g.visita}')" class="bg-blue-600 text-white text-[9px] font-black py-2 rounded-xl shadow-md uppercase italic hover:bg-emerald-600 transition">Finalizar</button>
+                    </div>`;
+            });
+        }
+
+        async function guardarJuego() {
+            const local = document.getElementById('selLoc').value;
+            const visita = document.getElementById('selVis').value;
+            const fecha = document.getElementById('fec').value;
+            const hora = document.getElementById('hor').value;
+            if(!local || !visita || !fecha || !hora) return alert("Completa todos los campos");
+            
+            const d = { local, visita, fecha, hora, status: "pendiente" };
+            await fetch(`${API}/games`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(d) });
+            alert("Juego programado");
+            cargarResultados();
+        }
+
+        async function finalizarJuego(id, loc, vis) {
+            const sL = parseInt(document.getElementById(`sc-${id}-L`).value);
+            const sV = parseInt(document.getElementById(`sc-${id}-V`).value);
+            if(isNaN(sL) || isNaN(sV)) return alert("Pon marcador válido");
+            
+            await fetch(`${API}/games/resultado`, { 
+                method: 'POST', 
+                headers: {'Content-Type': 'application/json'}, 
+                body: JSON.stringify({ id, sL, sV, ganador: sL > sV ? loc : vis, perdedor: sL > sV ? vis : loc, loc, vis }) 
+            });
+            cargarEquipos(); cargarResultados();
+        }
+
+        async function eliminarJuego(id) {
+            if(!confirm("¿Borrar juego de la DB?")) return;
+            await fetch(`${API}/games/${id}`, { method: 'DELETE' });
+            cargarResultados();
+        }
+
+        async function limpiarHistorialSemanal() {
+            if(!confirm("¿Deseas borrar TODOS los juegos ya finalizados para limpiar la semana? (Las posiciones NO se perderán)")) return;
+            const res = await fetch(`${API}/games/clear/history`, { method: 'DELETE' });
+            if(res.ok) {
+                alert("Semana limpia. El historial ha sido borrado.");
+                cargarResultados();
+            }
+        }
+
+        async function verRosterEquipo() {
+            const eq = document.getElementById('filterRoster').value;
+            const container = document.getElementById('containerRoster');
+            if(!eq) return container.innerHTML = "";
+            const res = await fetch(`${API}/players?equipo=${encodeURIComponent(eq)}`);
+            const players = await res.json();
+            container.innerHTML = "";
+            players.forEach(p => {
+                container.innerHTML += `
+                    <div class="p-3 bg-slate-50 rounded-xl flex justify-between items-center border">
+                        <p class="font-black text-blue-900 uppercase italic text-xs">${p.nombre}</p>
+                        <div class="flex gap-2 text-[10px] font-bold">
+                            JJ<input type="number" onchange="updPl('${p._id}','jj',this.value)" value="${p.jj||0}" class="input-inline">
+                            VB<input type="number" onchange="updPl('${p._id}','vb',this.value)" value="${p.vb||0}" class="input-inline">
+                            H<input type="number" onchange="updPl('${p._id}','h',this.value)" value="${p.h||0}" class="input-inline text-emerald-600">
+                            HR<input type="number" onchange="updPl('${p._id}','hr',this.value)" value="${p.hr||0}" class="input-inline text-red-500">
+                        </div>
+                    </div>`;
+            });
+        }
+
+        async function updPl(id, campo, val) {
+            let d = {}; d[campo] = Number(val);
+            await fetch(`${API}/players/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(d) });
+        }
+
+        async function updEq(id, campo, val) {
+            let d = {}; d[campo] = Number(val);
+            await fetch(`${API}/equipos/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(d) });
+            cargarEquipos();
+        }
+
+        async function escanearHoja() {
+            const img = document.getElementById('imageInput').files[0];
+            if(!img) return alert("Sube foto.");
+            Tesseract.recognize(img, 'spa').then(({ data: { text } }) => {
+                document.getElementById('resultadoIA').value = text;
+            });
+        }
+
+        async function guardarEquipo() {
+            const nombre = document.getElementById('teamName').value;
+            const categoria = document.getElementById('teamCat').value;
+            if(!nombre) return;
+            await fetch(`${API}/equipos`, { 
+                method: 'POST', 
+                headers: {'Content-Type':'application/json'}, 
+                body: JSON.stringify({ nombre: nombre.toUpperCase(), categoria }) 
+            });
+            toggleModal('modalEquipo'); cargarEquipos();
+        }
+        function descargarHistorial() {
+    // Esto abre la ruta del servidor que creamos y descarga el archivo automáticamente
+    window.location.href = `${API}/games/download`;
+}
+
+        async function eliminarEquipo(id) { if(confirm("¿Borrar equipo?")) { await fetch(`${API}/equipos/${id}`, { method: 'DELETE' }); cargarEquipos(); } }
+
+        cargarConfig(); cargarEquipos(); cargarResultados();
+    </script>
+</body>
+</html>
