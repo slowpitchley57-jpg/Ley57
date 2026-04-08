@@ -148,6 +148,48 @@ const API = "https://ley57.onrender.com/api";
                 body: JSON.stringify({ permitirAltas: val }) 
             });
         }
+        async function generarRolIA() {
+    if(!confirm("¿Deseas que la IA genere enfrentamientos automáticos con los equipos actuales?")) return;
+
+    try {
+        const res = await fetch(`${API}/equipos`);
+        const equipos = await res.json();
+
+        // Separar por categorías
+        const intermedia = equipos.filter(e => e.categoria === "Intermedia");
+        const relax = equipos.filter(e => e.categoria === "Relax");
+
+        const emparejar = async (lista) => {
+            // Barajamos los equipos aleatoriamente
+            const shuffled = lista.sort(() => 0.5 - Math.random());
+            for (let i = 0; i < shuffled.length; i += 2) {
+                if (shuffled[i] && shuffled[i+1]) {
+                    const nuevoJuego = {
+                        local: shuffled[i].nombre,
+                        visita: shuffled[i+1].nombre,
+                        fecha: "2026-04-12", // Fecha tentativa
+                        hora: "19:00",       // Hora tentativa
+                        status: "pendiente"
+                    };
+                    await fetch(`${API}/games`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(nuevoJuego)
+                    });
+                }
+            }
+        };
+
+        await emparejar(intermedia);
+        await emparejar(relax);
+
+        alert("Rol generado exitosamente. Ahora solo ajusta fechas y horas en la lista.");
+        cargarResultados();
+    } catch (error) {
+        console.error("Error al generar rol:", error);
+        alert("Hubo un error al conectar con la IA de emparejamiento.");
+    }
+}
 
         async function cargarEquipos() {
             const res = await fetch(`${API}/equipos`);

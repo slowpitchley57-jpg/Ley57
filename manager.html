@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manager Dashboard - Liga Ley 57</title>
-     <link rel="icon" type="image/png" href="logoley57icon.jpeg">
+    <link rel="icon" type="image/png" href="logoley57icon.jpeg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .sidebar-link:hover { background-color: #1e3a8a; border-left: 4px solid #ef4444; }
         .hidden { display: none; }
+        .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .custom-scroll::-webkit-scrollbar { width: 5px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -18,7 +19,7 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans flex min-h-screen">
 
-    <aside class="w-64 bg-blue-900 text-white p-6 hidden md:block shadow-2xl sticky top-0 h-screen">
+    <aside class="w-64 bg-blue-900 text-white p-6 hidden md:block shadow-2xl sticky top-0 h-screen flex flex-col">
         <div class="flex items-center gap-3 mb-10">
             <img src="imgley57.pgn.png" class="w-12 h-12 bg-white rounded-full p-1 border-2 border-red-500">
             <div>
@@ -26,12 +27,28 @@
                 <span class="text-[9px] text-blue-300 tracking-widest uppercase">Manager Panel</span>
             </div>
         </div>
-        <nav class="space-y-4">
-            <a href="#" class="sidebar-link block p-3 rounded-xl transition flex items-center gap-3 bg-blue-800 border-l-4 border-red-500"><i class="fa fa-user-tie"></i> Mi Equipo</a>
-            <a href="estadisticas.html" target="_blank" class="sidebar-link block p-3 rounded-xl transition flex items-center gap-3"><i class="fa fa-chart-line"></i> Estadísticas</a>
-            <hr class="opacity-20 mt-6">
-            <button onclick="cerrarSesion()" class="w-full text-left sidebar-link block p-3 rounded-xl transition flex items-center gap-3 text-red-400 font-bold"><i class="fa fa-power-off"></i> CERRAR SESIÓN</button>
+        
+        <nav class="space-y-4 flex-1">
+            <p class="text-[9px] font-black text-blue-400 uppercase tracking-widest ml-2">Menú Principal</p>
+            <a href="#" class="sidebar-link block p-3 rounded-xl transition flex items-center gap-3 bg-blue-800 border-l-4 border-red-500">
+                <i class="fa fa-user-tie"></i> Mi Equipo
+            </a>
+            <a href="estadisticas.html" target="_blank" class="sidebar-link block p-3 rounded-xl transition flex items-center gap-3">
+                <i class="fa fa-chart-line"></i> Estadísticas
+            </a>
+            
+            <p class="text-[9px] font-black text-blue-400 uppercase tracking-widest ml-2 mt-8">Configuración</p>
+            <button onclick="toggleModalPassword()" class="w-full text-left sidebar-link block p-3 rounded-xl transition flex items-center gap-3">
+                <i class="fa fa-key"></i> Cambiar Contraseña
+            </button>
         </nav>
+
+        <div class="mt-auto">
+            <hr class="opacity-20 mb-6">
+            <button onclick="cerrarSesion()" class="w-full text-left sidebar-link block p-3 rounded-xl transition flex items-center gap-3 text-red-400 font-bold">
+                <i class="fa fa-power-off"></i> CERRAR SESIÓN
+            </button>
+        </div>
     </aside>
 
     <main class="flex-1 flex flex-col">
@@ -66,7 +83,6 @@
                             <input type="text" id="soloFecha" placeholder="DD/MM/AAAA" class="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm">
                             <select id="soloCat" class="flex-1 p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold uppercase italic">
                                 <option value="bateo">Jugadora</option>
-                                
                             </select>
                         </div>
                         <button onclick="guardarIndividual()" class="w-full bg-emerald-600 text-white font-black py-3 rounded-xl hover:bg-emerald-700 transition text-xs uppercase tracking-widest italic">Registrar Jugadora</button>
@@ -108,34 +124,70 @@
         </div>
     </main>
 
-    <script>
-        
-const API = "https://ley57.onrender.com/api";
-        let equipoSeleccionado = "";
+    <div id="modalPassword" class="modal-bg hidden">
+        <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-sm border-t-8 border-blue-900">
+            <h3 class="text-xl font-black text-blue-900 uppercase italic mb-6">Nueva Contraseña</h3>
+            <p class="text-[10px] text-slate-400 font-bold uppercase mb-4">Esta será tu clave para el próximo inicio de sesión.</p>
+            <input type="password" id="nuevaPass" placeholder="Contraseña nueva" class="w-full p-4 bg-slate-100 rounded-2xl mb-4 outline-none font-bold">
+            <input type="password" id="confirmPass" placeholder="Confirmar contraseña" class="w-full p-4 bg-slate-100 rounded-2xl mb-6 outline-none font-bold">
+            
+            <div class="flex gap-2">
+                <button onclick="toggleModalPassword()" class="flex-1 bg-slate-200 p-3 rounded-xl font-bold text-[10px] uppercase">Cancelar</button>
+                <button onclick="actualizarPassword()" class="flex-1 bg-blue-900 text-white p-3 rounded-xl font-bold text-[10px] uppercase">Guardar</button>
+            </div>
+        </div>
+    </div>
 
-        // FUNCIÓN CLAVE: REVISAR SESIÓN DEL INDEX
+    <script>
+        const API = "https://ley57.onrender.com/api";
+        let equipoSeleccionado = "";
+        let correoUsuario = "";
+
         function revisarSesion() {
             const sesion = localStorage.getItem('userLogueado');
             if (!sesion) {
                 window.location.href = 'index.html';
                 return;
             }
-            
             const user = JSON.parse(sesion);
             equipoSeleccionado = user.equipo;
+            correoUsuario = user.correo;
             document.getElementById('nombreEquipoCabecera').innerText = equipoSeleccionado;
-            
             iniciarSincronizacionRealTime();
         }
 
+        function toggleModalPassword() {
+            document.getElementById('modalPassword').classList.toggle('hidden');
+        }
+
+        async function actualizarPassword() {
+            const pass1 = document.getElementById('nuevaPass').value;
+            const pass2 = document.getElementById('confirmPass').value;
+
+            if(!pass1 || pass1.length < 4) return alert("La contraseña debe tener al menos 4 caracteres.");
+            if(pass1 !== pass2) return alert("Las contraseñas no coinciden.");
+
+            try {
+                const res = await fetch(`${API}/users/update-password`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ correo: correoUsuario, nuevaPass: pass1 })
+                });
+
+                if(res.ok) {
+                    alert("✅ Contraseña actualizada correctamente. Úsala la próxima vez que ingreses.");
+                    toggleModalPassword();
+                }
+            } catch (error) {
+                alert("Error al conectar con el servidor.");
+            }
+        }
+
         function iniciarSincronizacionRealTime() {
-            // Carga inmediata
             cargarMiRoster();
             cargarResultados();
             cargarProximoJuego();
             verificarPermisos();
-
-            // Sincronización cada 5 segundos (Socket-like)
             setInterval(() => {
                 if (equipoSeleccionado) {
                     cargarResultados();
@@ -150,17 +202,14 @@ const API = "https://ley57.onrender.com/api";
                 const res = await fetch(`${API}/players?equipo=${encodeURIComponent(equipoSeleccionado)}`);
                 const data = await res.json();
                 const cont = document.getElementById('miRosterLista');
-                const contador = document.getElementById('contadorRoster');
-                
-                contador.innerText = data.length;
+                document.getElementById('contadorRoster').innerText = data.length;
                 cont.innerHTML = data.length ? "" : "<p class='text-center py-10 text-slate-300 italic'>Roster vacío.</p>";
-                
                 data.forEach(p => {
                     cont.innerHTML += `
                         <div class="flex justify-between items-center p-3 bg-slate-50 border rounded-xl shadow-sm border-slate-100 animate-fade-in">
                             <div class="flex flex-col">
                                 <span class="text-xs font-black uppercase text-blue-900 italic">${p.nombre}</span>
-                                <span class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">${p.categoria || 'Bateo'}</span>
+                                <span class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Jugadora</span>
                             </div>
                             <span class="text-[10px] text-slate-500 font-mono bg-white px-2 py-1 rounded border border-slate-100 italic">
                                 <i class="fa fa-birthday-cake mr-1 text-red-400"></i>${p.fechaNacimiento}
@@ -177,38 +226,12 @@ const API = "https://ley57.onrender.com/api";
                 const res = await fetch(`${API}/games`);
                 const games = await res.json();
                 const miEq = equipoSeleccionado.trim().toUpperCase();
-
-                const miJuego = games.find(g => 
-                    g.status === 'pendiente' && 
-                    (g.local.trim().toUpperCase() === miEq || g.visita.trim().toUpperCase() === miEq)
-                );
-
+                const miJuego = games.find(g => g.status === 'pendiente' && (g.local.trim().toUpperCase() === miEq || g.visita.trim().toUpperCase() === miEq));
                 if(!miJuego) {
-                    cont.innerHTML = `
-                        <div class="text-center p-6 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
-                            <i class="fa fa-calendar-times text-slate-200 text-3xl mb-2"></i>
-                            <p class="text-[10px] text-slate-400 font-bold uppercase italic">Sin juegos programados</p>
-                        </div>`;
+                    cont.innerHTML = `<div class="text-center p-6 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200"><i class="fa fa-calendar-times text-slate-200 text-3xl mb-2"></i><p class="text-[10px] text-slate-400 font-bold uppercase italic">Sin juegos programados</p></div>`;
                     return;
                 }
-
-                cont.innerHTML = `
-                    <div class="w-full space-y-4 animate-fade-in text-center">
-                        <span class="text-[10px] bg-orange-100 text-orange-600 px-3 py-1 rounded-full font-black uppercase italic tracking-wider">
-                            <i class="fa fa-clock mr-1"></i> ${miJuego.fecha} - ${miJuego.hora}
-                        </span>
-                        <div class="flex justify-between items-center bg-white p-5 rounded-3xl border-2 border-slate-50 shadow-sm relative">
-                            <div class="text-center flex-1">
-                                <p class="text-[8px] text-slate-400 font-black uppercase mb-1">Local</p>
-                                <p class="text-[11px] font-black uppercase text-blue-900 leading-tight">${miJuego.local}</p>
-                            </div>
-                            <div class="px-3"><div class="bg-blue-900 text-white text-[10px] w-8 h-8 rounded-full flex items-center justify-center font-black italic border-2 border-white shadow-lg">VS</div></div>
-                            <div class="text-center flex-1">
-                                <p class="text-[8px] text-slate-400 font-black uppercase mb-1">Visita</p>
-                                <p class="text-[11px] font-black uppercase text-blue-900 leading-tight">${miJuego.visita}</p>
-                            </div>
-                        </div>
-                    </div>`;
+                cont.innerHTML = `<div class="w-full space-y-4 animate-fade-in text-center"><span class="text-[10px] bg-orange-100 text-orange-600 px-3 py-1 rounded-full font-black uppercase italic tracking-wider"><i class="fa fa-clock mr-1"></i> ${miJuego.fecha} - ${miJuego.hora}</span><div class="flex justify-between items-center bg-white p-5 rounded-3xl border-2 border-slate-50 shadow-sm relative"><div class="text-center flex-1"><p class="text-[8px] text-slate-400 font-black uppercase mb-1">Local</p><p class="text-[11px] font-black uppercase text-blue-900 leading-tight">${miJuego.local}</p></div><div class="px-3"><div class="bg-blue-900 text-white text-[10px] w-8 h-8 rounded-full flex items-center justify-center font-black italic border-2 border-white shadow-lg">VS</div></div><div class="text-center flex-1"><p class="text-[8px] text-slate-400 font-black uppercase mb-1">Visita</p><p class="text-[11px] font-black uppercase text-blue-900 leading-tight">${miJuego.visita}</p></div></div></div>`;
             } catch (e) { console.error(e); }
         }
 
@@ -218,47 +241,72 @@ const API = "https://ley57.onrender.com/api";
             const cont = document.getElementById('resultadosJornada');
             cont.innerHTML = "";
             games.filter(g => g.status === 'finalizado').reverse().slice(0,8).forEach(g => {
-                cont.innerHTML += `
-                    <div class="bg-white p-3 rounded-xl border-2 border-slate-50 shadow-sm flex justify-between items-center gap-2">
-                        <span class="text-[10px] font-black uppercase flex-1 text-blue-900 truncate italic">${g.local}</span>
-                        <span class="bg-red-600 text-white px-2 py-1 rounded font-bold text-xs italic">${g.resultado}</span>
-                        <span class="text-[10px] font-black uppercase flex-1 text-right text-blue-900 truncate italic">${g.visita}</span>
-                    </div>`;
+                cont.innerHTML += `<div class="bg-white p-3 rounded-xl border-2 border-slate-50 shadow-sm flex justify-between items-center gap-2"><span class="text-[10px] font-black uppercase flex-1 text-blue-900 truncate italic">${g.local}</span><span class="bg-red-600 text-white px-2 py-1 rounded font-bold text-xs italic">${g.resultado}</span><span class="text-[10px] font-black uppercase flex-1 text-right text-blue-900 truncate italic">${g.visita}</span></div>`;
             });
         }
 
         async function procesarRoster() {
-            const rawText = document.getElementById('rawRoster').value;
-            if(!rawText.trim()) return;
-            const lineas = rawText.split('\n');
-            for(let linea of lineas) {
-                if(linea.trim() === "") continue;
-                const regexFecha = /(\d{2}\/\d{2}\/\d{4})/;
-                const matchFecha = linea.match(regexFecha);
-                const fechaDetectada = matchFecha ? matchFecha[0] : "Sin Fecha";
-                let nombreLimpio = linea.replace(/^\d+[\.\s-]*/g, '').replace(fechaDetectada, '').replace(/[–\-\|]/g, '').trim();                
-                if(nombreLimpio.length > 2) {
-                    await fetch(`${API}/players`, {
-                        method: 'POST',
-                        headers: {'Content-Type':'application/json'},
-                        body: JSON.stringify({ nombre: nombreLimpio.toUpperCase(), equipo: equipoSeleccionado, fechaNacimiento: fechaDetectada, categoria: "bateo" })
-                    });
-                }
+    const rawText = document.getElementById('rawRoster').value;
+    
+    // Si el campo está vacío, no hacemos nada
+    if(!rawText.trim()) return alert("El campo de texto está vacío.");
+
+    // MENSAJE DE CONFIRMACIÓN (REQUERIMIENTO DEL CLIENTE)
+    const confirmacion = confirm(
+        "⚠️ AVISO IMPORTANTE:\n\n" +
+        "Una vez guardado el roster masivo, no podrás realizar cambios o ediciones directamente.\n" +
+        "Cualquier corrección posterior deberá ser solicitada y autorizada por la liga.\n\n" +
+        "¿Estás seguro de que la lista es correcta y deseas continuar?"
+    );
+
+    if(!confirmacion) return; // Si cancela, se detiene la ejecución
+
+    const lineas = rawText.split('\n');
+    let procesados = 0;
+
+    for(let linea of lineas) {
+        if(linea.trim() === "") continue;
+        const regexFecha = /(\d{2}\/\d{2}\/\d{4})/;
+        const matchFecha = linea.match(regexFecha);
+        const fechaDetectada = matchFecha ? matchFecha[0] : "Sin Fecha";
+        
+        let nombreLimpio = linea.replace(/^\d+[\.\s-]*/g, '')
+                                .replace(fechaDetectada, '')
+                                .replace(/[–\-\|]/g, '')
+                                .trim();                
+        
+        if(nombreLimpio.length > 2) {
+            try {
+                await fetch(`${API}/players`, {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({ 
+                        nombre: nombreLimpio.toUpperCase(), 
+                        equipo: equipoSeleccionado, 
+                        fechaNacimiento: fechaDetectada, 
+                        categoria: "bateo" 
+                    })
+                });
+                procesados++;
+            } catch (err) {
+                console.error("Error al registrar a:", nombreLimpio);
             }
-            alert("Roster guardado con éxito.");
-            document.getElementById('rawRoster').value = "";
-            cargarMiRoster();
         }
+    }
+    
+    alert("✅ Registro completado: se han guardado " + procesados + " jugadoras en el sistema.");
+    document.getElementById('rawRoster').value = "";
+    cargarMiRoster();
+}
 
         async function guardarIndividual() {
             const nombre = document.getElementById('soloNombre').value;
             const fecha = document.getElementById('soloFecha').value;
-            const cat = document.getElementById('soloCat').value;
             if(!nombre || !fecha) return alert("Datos incompletos.");
             await fetch(`${API}/players`, {
                 method: 'POST',
                 headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({ nombre: nombre.toUpperCase(), equipo: equipoSeleccionado, fechaNacimiento: fecha, categoria: cat })
+                body: JSON.stringify({ nombre: nombre.toUpperCase(), equipo: equipoSeleccionado, fechaNacimiento: fecha, categoria: "bateo" })
             });
             alert("Jugadora registrada.");
             document.getElementById('soloNombre').value = ""; document.getElementById('soloFecha').value = "";
@@ -285,8 +333,6 @@ const API = "https://ley57.onrender.com/api";
         }
 
         function cerrarSesion() { localStorage.clear(); window.location.href = 'index.html'; }
-
-        // ARRANCAR
         revisarSesion();
     </script>
 </body>

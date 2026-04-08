@@ -166,6 +166,24 @@ app.post('/api/games/resultado', async (req, res) => {
     await Team.findOneAndUpdate({ nombre: perdedor }, { $inc: { p: 1, ca: sV, ce: sL } });
     res.json({ ok: true });
 });
+// Ruta para cambiar contraseña desde el Manager
+app.put('/api/users/update-password', async (req, res) => {
+    try {
+        const { correo, nuevaPass } = req.body;
+        const actualizado = await User.findOneAndUpdate(
+            { correo: correo },
+            { pass: nuevaPass },
+            { new: true }
+        );
+        if (actualizado) {
+            res.json({ ok: true, mensaje: "Contraseña actualizada" });
+        } else {
+            res.status(404).json({ error: "Usuario no encontrado" });
+        }
+    } catch (error) {
+        res.status(500).json({ error: "Error en el servidor" });
+    }
+});
 
 // REEMPLAZA TU app.listen POR ESTE:
 const PORT = process.env.PORT || 3000;
