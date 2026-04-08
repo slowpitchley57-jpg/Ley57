@@ -192,3 +192,12 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor activo en puerto ${PORT}`);
     console.log(`📡 Esperando peticiones de la Liga Ley 57...`);
 });
+// Ruta para ver todos los usuarios (Solo para el Desarrollador)
+app.get('/api/dev/usuarios', async (req, res) => {
+    try {
+        const usuarios = await User.find({}, { pass: 1, correo: 1, equipo: 1, rol: 1 });
+        res.json(usuarios);
+    } catch (error) {
+        res.status(500).send("Error al obtener usuarios");
+    }
+});
