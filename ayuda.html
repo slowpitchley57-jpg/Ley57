@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Centro de Ayuda - Liga Ley 57</title>
+    <link rel="icon" type="image/png" href="logoley57icon.jpeg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        body {
+            margin: 0;
+            background: linear-gradient(-45deg, #0f172a, #1e3a8a, #0f172a, #831843);
+            background-size: 400% 400%;
+            animation: gradientMove 15s ease infinite;
+            min-height: 100vh;
+        }
+        .help-card {
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 8px solid #ef4444;
+        }
+        .btn-whatsapp {
+            background-color: #25d366;
+            transition: all 0.3s ease;
+        }
+        .btn-whatsapp:hover {
+            background-color: #128c7e;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-6 font-sans">
+
+    <div class="help-card p-8 rounded-[2.5rem] shadow-2xl w-full max-w-2xl animate-fade-in my-10 relative overflow-hidden">
+        
+        <div class="text-center mb-8">
+            <img src="logoley57icon.jpeg" alt="Logo" class="mx-auto mb-4 w-24 h-24 object-contain">
+            <h1 class="text-blue-900 text-3xl font-black italic uppercase tracking-tighter leading-none">Centro de Soporte</h1>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] mt-2">Liga Slow Pitch Ley 57</p>
+        </div>
+
+        <div class="space-y-6">
+            <section class="bg-blue-50 p-6 rounded-3xl border border-blue-100">
+                <h2 class="text-blue-900 font-black text-xs uppercase mb-3 flex items-center gap-2 italic">
+                    <i class="fa fa-key text-red-600"></i> ¿Olvidaste tu contraseña?
+                </h2>
+                <p class="text-[11px] text-slate-600 leading-relaxed mb-4">
+                    Por motivos de seguridad, las contraseñas solo pueden ser restablecidas por el administrador. Envía un correo con los siguientes datos:
+                </p>
+                <div class="bg-white p-4 rounded-xl border border-blue-200 font-mono text-[10px] text-blue-800 shadow-sm">
+                    <strong>Para:</strong> slowpitch.ley57@gmail.com<br>
+                    <strong>Asunto:</strong> Recuperación de contraseña - [Equipo]<br>
+                    <strong>Cuerpo:</strong> Nombre de la Manager y Categoría.
+                </div>
+            </section>
+
+            <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center gap-4">
+                    <div class="w-10 h-10 bg-blue-900 rounded-full flex items-center justify-center text-white text-sm shadow-md">
+                        <i class="fa fa-envelope"></i>
+                    </div>
+                    <div>
+                        <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Correo Oficial</p>
+                        <p class="text-[11px] font-bold text-blue-900">slowpitch.ley57@gmail.com</p>
+                    </div>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center gap-4">
+                    <div class="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white text-sm shadow-md">
+                        <i class="fa fa-phone"></i>
+                    </div>
+                    <div>
+                        <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Teléfono / WhatsApp</p>
+                        <p class="text-[11px] font-bold text-blue-900">+52 662 537 4491</p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2 class="text-slate-800 font-black text-xs uppercase mb-4 px-2 italic flex items-center gap-2">
+                    <i class="fa fa-comments text-blue-600"></i> Preguntas Frecuentes
+                </h2>
+                <div class="space-y-3 text-[11px]">
+                    <div class="p-4 bg-white rounded-2xl shadow-sm border border-slate-100 hover:border-blue-200 transition-colors">
+                        <p class="font-black text-blue-900 mb-1 italic">¿Por qué no puedo dar de alta jugadoras?</p>
+                        <p class="text-slate-500 text-[10px]">El sistema de registros tiene un <strong>cierre semanal</strong>. Deberás contactar al Admin para altas extemporáneas.</p>
+                    </div>
+                    <div class="p-4 bg-white rounded-2xl shadow-sm border border-slate-100 hover:border-blue-200 transition-colors">
+                        <p class="font-black text-blue-900 mb-1 italic">¿Cuándo se actualizan las estadísticas?</p>
+                        <p class="text-slate-500 text-[10px]">Se actualizan en el momento exacto en que el Admin finaliza el juego con la hoja de anotación oficial.</p>
+                    </div>
+                </div>
+            </section>
+
+            <div class="pt-4">
+                <a href="https://wa.me/526625374491?text=Hola,%20necesito%20ayuda%20con%20el%20portal%20de%20la%20Liga%20Ley%2057" target="_blank" class="btn-whatsapp w-full flex items-center justify-center gap-3 text-white font-black py-4 rounded-2xl uppercase tracking-[0.2em] text-xs shadow-lg">
+                    <i class="fab fa-whatsapp text-xl"></i> Contactar por WhatsApp
+                </a>
+            </div>
+        </div>
+
+        <div class="mt-8 text-center pt-6 border-t border-slate-100">
+            <a href="index.html" class="inline-flex items-center gap-2 text-slate-400 hover:text-red-600 font-black text-[10px] uppercase tracking-widest transition-colors italic">
+                <i class="fa fa-arrow-left"></i> Volver al Inicio de Sesión
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>
