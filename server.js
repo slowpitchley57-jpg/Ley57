@@ -165,8 +165,10 @@ app.post('/api/games/resultado', async (req, res) => {
     res.json({ ok: true });
 });
 
-// Busca el app.listen y cámbialo a esto:
+// REEMPLAZA TU app.listen POR ESTE:
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
+
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Servidor activo en puerto ${PORT}`);
+    console.log(`📡 Esperando peticiones de la Liga Ley 57...`);
 });
