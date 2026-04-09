@@ -55,7 +55,7 @@
                     <thead>
                         <tr class="bg-slate-100 border-b font-black text-slate-500 uppercase">
                             <th class="p-4 text-left">Equipo</th>
-                            <th>JG</th><th>JP</th><th>CA</th><th>CE</th><th class="text-blue-600">DIF</th><th>X</th>
+                            <th>JG</th><th>JP</th><th>CA</th><th>CR</th><th class="text-blue-600">DIF</th><th>X</th>
                         </tr>
                     </thead>
                     <tbody id="tablaIntermedia" class="divide-y font-bold text-blue-900"></tbody>
@@ -68,7 +68,7 @@
                     <thead>
                         <tr class="bg-slate-100 border-b font-black text-slate-500 uppercase">
                             <th class="p-4 text-left">Equipo</th>
-                            <th>JG</th><th>JP</th><th>CA</th><th>CE</th><th class="text-orange-600">DIF</th><th>X</th>
+                            <th>JG</th><th>JP</th><th>CA</th><th>CR</th><th class="text-orange-600">DIF</th><th>X</th>
                         </tr>
                     </thead>
                     <tbody id="tablaRelax" class="divide-y font-bold text-blue-900"></tbody>
@@ -102,16 +102,23 @@
         </section>
     </main>
 
-    <div id="modalRosters" class="modal">
-        <div class="bg-white p-6 rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl border-t-8 border-amber-500">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="font-black text-amber-600 italic uppercase">Editor de Estadísticas</h2>
-                <select id="filterRoster" onchange="verRosterEquipo()" class="p-2 border rounded-xl font-bold text-xs"></select>
+   <div id="modalRosters" class="modal">
+    <div class="bg-white p-6 rounded-3xl w-full max-w-5xl max-h-[85vh] flex flex-col shadow-2xl border-t-8 border-amber-500">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h2 class="font-black text-amber-600 italic uppercase leading-none">Editor Maestro de Roster</h2>
+                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1">Edición de nombres, fechas y estadísticas</p>
             </div>
-            <div id="containerRoster" class="flex-1 overflow-y-auto space-y-2 custom-scroll pr-2"></div>
-            <button onclick="toggleModal('modalRosters')" class="mt-4 bg-slate-800 text-white p-3 rounded-xl font-bold uppercase text-xs">Cerrar</button>
+            <select id="filterRoster" onchange="verRosterEquipo()" class="p-3 border rounded-xl font-bold text-xs bg-slate-50 outline-none focus:ring-2 focus:ring-amber-500"></select>
         </div>
+        
+        <div id="containerRoster" class="flex-1 overflow-y-auto space-y-4 custom-scroll pr-2">
+            <p class="text-center text-slate-300 italic py-20">Selecciona un equipo para comenzar a editar...</p>
+        </div>
+
+        <button onclick="toggleModal('modalRosters')" class="mt-6 bg-slate-800 text-white p-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-black transition-all">Cerrar Editor</button>
     </div>
+</div>
 
     <div id="modalEquipo" class="modal">
         <div class="bg-white p-8 rounded-3xl w-80 shadow-2xl border-t-8 border-emerald-600">
@@ -287,37 +294,89 @@ const API = "https://ley57.onrender.com/api";
             }
         }
 
-        async function verRosterEquipo() {
-            const eq = document.getElementById('filterRoster').value;
-            const container = document.getElementById('containerRoster');
-            if(!eq) return container.innerHTML = "";
-            const res = await fetch(`${API}/players?equipo=${encodeURIComponent(eq)}`);
-            const players = await res.json();
-            container.innerHTML = "";
-            players.forEach(p => {
-                container.innerHTML += `
-                    <div class="p-3 bg-slate-50 rounded-xl flex justify-between items-center border">
-                        <p class="font-black text-blue-900 uppercase italic text-xs">${p.nombre}</p>
-                        <div class="flex gap-2 text-[10px] font-bold">
-                            JJ<input type="number" onchange="updPl('${p._id}','jj',this.value)" value="${p.jj||0}" class="input-inline">
-                            VB<input type="number" onchange="updPl('${p._id}','vb',this.value)" value="${p.vb||0}" class="input-inline">
-                            H<input type="number" onchange="updPl('${p._id}','h',this.value)" value="${p.h||0}" class="input-inline text-emerald-600">
-                            HR<input type="number" onchange="updPl('${p._id}','hr',this.value)" value="${p.hr||0}" class="input-inline text-red-500">
+        // Función para visualizar y generar los campos de edición
+async function verRosterEquipo() {
+    const eq = document.getElementById('filterRoster').value;
+    const container = document.getElementById('containerRoster');
+    if(!eq) return container.innerHTML = "";
+    
+    container.innerHTML = "<p class='text-center py-10 animate-pulse'>Cargando jugadoras...</p>";
+    
+    try {
+        const res = await fetch(`${API}/players?equipo=${encodeURIComponent(eq)}`);
+        const players = await res.json();
+        container.innerHTML = "";
+        
+        if(players.length === 0) {
+            container.innerHTML = "<p class='text-center py-10 text-slate-400 italic'>Este equipo no tiene jugadoras registradas.</p>";
+            return;
+        }
+
+        players.forEach(p => {
+            container.innerHTML += `
+                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 shadow-sm transition-all hover:border-amber-300">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div class="flex flex-col md:col-span-2">
+                            <label class="text-[8px] font-black text-slate-400 uppercase ml-2 mb-1">Nombre Completo</label>
+                            <input type="text" onchange="updPlFull('${p._id}', 'nombre', this.value)" 
+                                value="${p.nombre}" class="p-2.5 border rounded-xl font-bold text-blue-900 uppercase text-xs focus:bg-white transition-colors">
                         </div>
-                    </div>`;
-            });
-        }
+                        <div class="flex flex-col">
+                            <label class="text-[8px] font-black text-slate-400 uppercase ml-2 mb-1">Fecha de Nacimiento</label>
+                            <input type="text" onchange="updPlFull('${p._id}', 'fechaNacimiento', this.value)" 
+                                value="${p.fechaNacimiento}" class="p-2.5 border rounded-xl font-bold text-slate-600 text-xs focus:bg-white transition-colors">
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-4 items-center bg-white p-3 rounded-xl border border-dashed border-slate-300">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-black text-slate-400">JJ</span>
+                            <input type="number" onchange="updPlFull('${p._id}','jj',this.value)" value="${p.jj||0}" class="input-inline">
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-black text-slate-400">AB</span>
+                            <input type="number" onchange="updPlFull('${p._id}', ab',this.value)" value="${p.vb||0}" class="input-inline">
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-black text-emerald-600">H</span>
+                            <input type="number" onchange="updPlFull('${p._id}','h',this.value)" value="${p.h||0}" class="input-inline">
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-black text-red-500">HR</span>
+                            <input type="number" onchange="updPlFull('${p._id}','hr',this.value)" value="${p.hr||0}" class="input-inline">
+                        </div>
+                        <button onclick="eliminarJugadora('${p._id}')" class="ml-auto text-slate-300 hover:text-red-600 transition-colors p-2" title="Eliminar Jugadora">
+                            <i class="fa fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>`;
+        });
+    } catch (err) {
+        container.innerHTML = "<p class='text-center py-10 text-red-500 font-bold'>Error al conectar con la base de datos.</p>";
+    }
+}
 
-        async function updPl(id, campo, val) {
-            let d = {}; d[campo] = Number(val);
-            await fetch(`${API}/players/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(d) });
-        }
+// Función maestra para guardar cualquier cambio
+async function updPlFull(id, campo, val) {
+    let d = {};
+    d[campo] = (campo === 'nombre' || campo === 'fechaNacimiento') ? val : Number(val);
+    
+    await fetch(`${API}/players/${id}`, { 
+        method:'PUT', 
+        headers:{'Content-Type':'application/json'}, 
+        body:JSON.stringify(d) 
+    });
+}
 
-        async function updEq(id, campo, val) {
-            let d = {}; d[campo] = Number(val);
-            await fetch(`${API}/equipos/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(d) });
-            cargarEquipos();
-        }
+// Función para eliminar jugadoras de la DB
+async function eliminarJugadora(id) {
+    if(!confirm("¿Borrar definitivamente a esta jugadora? Esta acción no se puede deshacer.")) return;
+    const res = await fetch(`${API}/players/${id}`, { method: 'DELETE' });
+    if(res.ok) {
+        alert("Jugadora eliminada.");
+        verRosterEquipo();
+    }
+}
 
         async function escanearHoja() {
             const img = document.getElementById('imageInput').files[0];

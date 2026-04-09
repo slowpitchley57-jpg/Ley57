@@ -201,3 +201,13 @@ app.get('/api/dev/usuarios', async (req, res) => {
         res.status(500).send("Error al obtener usuarios");
     }
 });
+// Actualización total de jugadora (Admin)
+app.put('/api/players/:id', async (req, res) => {
+    try {
+        // Recibimos todo el objeto (nombre, equipo, fecha, stats)
+        const actualizada = await Player.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        res.json(actualizada);
+    } catch (error) {
+        res.status(500).json({ error: "Error al actualizar jugadora" });
+    }
+});
