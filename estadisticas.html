@@ -345,7 +345,7 @@ async function cargarHistorialResultados() {
 
 // Llama a cargarResumenJornada() dentro de cargarTodo()
         // Sincronización en tiempo real (cada 10 seg)
-        cargarProximos();
+        
         cargarHistorialResultados();
         cargarTodo();
         setInterval(cargarTodo, 10000);
