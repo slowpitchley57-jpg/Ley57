@@ -7,13 +7,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Gradiente animado */
         @keyframes gradientMove {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
-
         body {
             margin: 0;
             overflow: hidden;
@@ -21,28 +19,23 @@
             background-size: 400% 400%;
             animation: gradientMove 15s ease infinite;
         }
-
         .active-role { 
             background-color: #ef4444 !important; 
             color: white !important; 
             box-shadow: 0 4px 20px 0 rgba(239, 68, 68, 0.5); 
         }
-
         .card-style {
             background-color: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(12px);
             border-top: 8px solid #ef4444;
             z-index: 20;
         }
-
         .floating-item {
             position: absolute;
             pointer-events: none;
             color: rgba(255, 255, 255, 0.15);
             z-index: 1;
         }
-
-        /* Animaciones */
         .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
         .animate-slide-up { animation: slideUp 0.5s ease-out forwards; }
         .animate-exit { animation: fadeExit 0.5s ease-in forwards; }
@@ -57,54 +50,53 @@
     <div id="animation-container" class="absolute inset-0 overflow-hidden"></div>
 
     <div id="welcome-screen" class="card-style p-8 rounded-[2.5rem] shadow-2xl w-full max-w-lg text-center relative animate-fade-in">
-        <img src="logoley57icon.jpeg" alt="Logo Ley 57" class="mx-auto mb-6 w-32 h-32 object-contain drop-shadow-2xl">
+        
+        <div class="mb-8 flex flex-col items-center">
+            <p class="text-[7px] font-black text-slate-400 uppercase tracking-[0.4em] mb-3">Powered by Partnership</p>
+            <div class="flex items-center justify-center gap-6">
+                <img src="alv_sport_logo.png" alt="ALV Sport" class="h-6 w-auto drop-shadow-sm">
+                <div class="h-4 w-[1px] bg-slate-200"></div>
+                <img src="fv_digital_logo.png" alt="FV Digital" class="h-6 w-auto drop-shadow-sm">
+            </div>
+        </div>
+
+        <img src="logoley57icon.jpeg" alt="Logo Ley 57" class="mx-auto mb-6 w-24 h-24 object-contain drop-shadow-2xl">
         <h1 class="text-blue-900 text-3xl font-black mb-2 italic tracking-tighter uppercase leading-none">Bienvenido</h1>
         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.4em] mb-8">Instrucciones de Acceso</p>
 
         <div class="grid grid-cols-1 gap-4 text-left mb-8">
             <div class="bg-blue-50 p-4 rounded-2xl border-l-4 border-blue-900">
                 <p class="text-blue-900 font-black text-[10px] uppercase italic mb-1"><i class="fa fa-users mr-2"></i> Público (Jugadora)</p>
-                <p class="text-slate-600 text-[10px]">Acceso libre. Puedes consultar resultados, estadísticas individuales y el rol de juegos.</p>
+                <p class="text-slate-600 text-[10px]">Acceso libre para consultar estadísticas y rol de juegos.</p>
             </div>
             <div class="bg-red-50 p-4 rounded-2xl border-l-4 border-red-600">
                 <p class="text-red-600 font-black text-[10px] uppercase italic mb-1"><i class="fa fa-user-tie mr-2"></i> Managers</p>
-                <p class="text-slate-600 text-[10px]">Requiere clave. Permite gestionar tu roster, dar de alta jugadoras y ver tu próximo juego.</p>
-            </div>
-            <div class="bg-slate-100 p-4 rounded-2xl border-l-4 border-slate-800">
-                <p class="text-slate-800 font-black text-[10px] uppercase italic mb-1"><i class="fa fa-shield-alt mr-2"></i> Administrador</p>
-                <p class="text-slate-600 text-[10px]">Control total. Generar roles con IA, capturar marcadores y descargar reportes.</p>
+                <p class="text-slate-600 text-[10px]">Gestiona tu roster y altas de jugadoras.</p>
             </div>
         </div>
 
         <button onclick="cerrarBienvenida()" class="w-full bg-blue-900 hover:bg-red-600 text-white font-black py-4 rounded-2xl transition-all duration-300 shadow-xl uppercase tracking-widest text-xs">
             Entrar al Portal <i class="fa fa-arrow-right ml-2"></i>
         </button>
+
         <div class="mt-4">
-    <a href="ayuda.html" class="text-[10px] font-black text-blue-900/40 hover:text-red-600 transition-colors uppercase tracking-widest italic">
-        <i class="fa fa-question-circle mr-1"></i> ¿Olvidaste tu contraseña o necesitas ayuda?
-    </a>
-</div>
-<div class="mt-8 pt-4 border-t border-slate-100">
-    <p class="text-[8px] font-black text-slate-400 uppercase tracking-[0.3em] mb-3">Una colaboración de</p>
-    <div class="flex items-center justify-center gap-8">
-        <div class="flex flex-col items-center">
-            <img src="alv_sport_logo.png" alt="ALV Sport" class="h-8 w-auto grayscale opacity-70 hover:grayscale-0 hover:opacity-100 transition-all">
-            <span class="text-[7px] font-bold text-slate-400 mt-1 uppercase">ALV Sport</span>
+            <a href="ayuda.html" class="text-[9px] font-black text-slate-400 hover:text-red-600 transition-colors uppercase tracking-widest italic">
+                <i class="fa fa-question-circle mr-1"></i> Soporte y Ayuda
+            </a>
         </div>
-        
-        <div class="h-8 w-[1px] bg-slate-200"></div> <div class="flex flex-col items-center">
-            <img src="fv_digital_logo.png" alt="FV Digital" class="h-8 w-auto grayscale opacity-70 hover:grayscale-0 hover:opacity-100 transition-all">
-            <span class="text-[7px] font-bold text-slate-400 mt-1 uppercase">FV Digital</span>
-        </div>
-    </div>
-</div>
     </div>
 
     <div id="login-card" class="card-style p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md text-center relative hidden">
-        <img src="logoley57icon.jpeg" alt="Logo Ley 57" class="mx-auto mb-6 w-36 h-36 object-contain drop-shadow-2xl hover:rotate-6 transition-transform duration-500">
+        
+        <div class="mb-6 flex items-center justify-center gap-4 opacity-50 scale-75">
+            <img src="alv_sport_logo.png" alt="ALV Sport" class="h-5 w-auto">
+            <img src="fv_digital_logo.png" alt="FV Digital" class="h-5 w-auto">
+        </div>
+
+        <img src="logoley57icon.jpeg" alt="Logo Ley 57" class="mx-auto mb-6 w-32 h-32 object-contain drop-shadow-2xl">
         
         <h2 class="text-blue-900 text-3xl font-black mb-1 italic tracking-tighter uppercase">Ley 57</h2>
-        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.4em] mb-8">Portal de Gestión</p>
+        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.4em] mb-8">Hermosillo • Sonora</p>
 
         <div class="flex bg-slate-100 p-1.5 rounded-2xl mb-6 border border-slate-200">
             <button onclick="setRole('jugadora')" id="btn-jugadora" class="flex-1 py-3 text-[10px] font-black rounded-xl transition-all duration-300 active-role uppercase">Público</button>
@@ -124,24 +116,20 @@
         </div>
 
         <div id="msg-jugadora" class="py-6 text-slate-500 text-xs font-medium italic px-4">
-            <i class="fa fa-chart-line text-blue-600 mr-2"></i>Consulta Resultados, Estadísticas y Tablas.
+            <i class="fa fa-chart-line text-blue-600 mr-2"></i>Consulta Resultados y Estadísticas.
         </div>
         
         <button onclick="entrar()" class="w-full bg-blue-900 hover:bg-red-600 text-white font-black py-4 rounded-2xl transition-all duration-500 shadow-xl uppercase tracking-widest text-xs">
             Ingresar
         </button>
 
-        <div class="mt-8 pt-6 border-t border-slate-100 flex justify-between items-center">
+        <div class="mt-8 pt-6 border-t border-slate-100 flex justify-between items-center px-2">
             <p class="text-slate-400 text-[8px] uppercase font-black tracking-widest">Temporada 1 - 2026</p>
-            <div class="flex gap-1">
-                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                <p class="text-slate-400 text-[8px] font-black uppercase">Online</p>
-            </div>
+            <p class="text-slate-400 text-[8px] uppercase font-black">FV Digital & ALV Sport</p>
         </div>
     </div>
 
     <script>
-        // LÓGICA DE TRANSICIÓN
         function cerrarBienvenida() {
             const welcome = document.getElementById('welcome-screen');
             const login = document.getElementById('login-card');
@@ -153,7 +141,6 @@
             }, 500);
         }
 
-        // ANIMACIÓN DE FONDO
         const container = document.getElementById('animation-container');
         const icons = ['fa-baseball-ball', 'fa-trophy', 'fa-medal', 'fa-star'];
         function createItem() {
@@ -175,7 +162,6 @@
         }
         for (let i = 0; i < 25; i++) { createItem(); }
 
-        // LÓGICA DE LOGIN
         let selectedRole = 'jugadora';
         const API = "https://ley57.onrender.com/api";
 
