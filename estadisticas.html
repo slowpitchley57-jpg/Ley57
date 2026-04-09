@@ -310,10 +310,43 @@ async function cargarResumenJornada() {
     `).join('');
 
 }
+async function cargarHistorialResultados() {
+    const cont = document.getElementById('resultadosJornada');
+    try {
+        const res = await fetch(`${API}/games`);
+        const games = await res.json();
+        
+        // Filtramos solo los finalizados
+        const finalizados = games.filter(g => g.status === 'finalizado').reverse();
+
+        if (finalizados.length === 0) {
+            cont.innerHTML = "<p class='text-center py-10 text-slate-400 italic col-span-full'>No hay resultados registrados aún.</p>";
+            return;
+        }
+
+        cont.innerHTML = ""; // Limpiamos el mensaje de "Cargando..."
+        
+        finalizados.forEach(g => {
+            cont.innerHTML += `
+                <div class="bg-white p-4 rounded-2xl border-2 border-slate-50 shadow-sm flex justify-between items-center gap-2 hover:border-red-100 transition-all">
+                    <span class="text-[10px] font-black uppercase flex-1 text-blue-900 truncate italic">${g.local}</span>
+                    <span class="bg-red-600 text-white px-3 py-1 rounded-lg font-black text-xs italic shadow-md">
+                        ${g.resultado}
+                    </span>
+                    <span class="text-[10px] font-black uppercase flex-1 text-right text-blue-900 truncate italic">${g.visita}</span>
+                </div>`;
+        });
+    } catch (error) {
+        console.error("Error:", error);
+        cont.innerHTML = "<p class='text-center text-red-500'>Error al conectar con el servidor.</p>";
+    }
+}
 
 
 // Llama a cargarResumenJornada() dentro de cargarTodo()
         // Sincronización en tiempo real (cada 10 seg)
+        cargarProximos();
+        cargarHistorialResultados();
         cargarTodo();
         setInterval(cargarTodo, 10000);
     </script>
