@@ -103,24 +103,36 @@
                 </section>
             </div>
       
-            <div class="space-y-6">
-                <section class="bg-white rounded-3xl shadow-lg border border-slate-200 overflow-hidden">
-                    <div class="bg-slate-900 p-4 text-white font-black text-xs uppercase tracking-widest text-center">📅 Próximos Encuentros</div>
-                    <div id="listaEncuentros" class="p-4 space-y-4 max-h-[800px] overflow-y-auto custom-scroll">
-                        
-                        </div>
-                          <section class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-    <h3 class="text-blue-900 font-black mb-6 flex items-center gap-2 uppercase text-xs italic tracking-widest border-b pb-4">
-        <i class="fa fa-history text-red-600"></i> Resumen de la Jornada (Resultados)
-    </h3>
-    <div id="resultadosJornada" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <p class="text-center text-slate-300 italic py-10 col-span-full">Cargando resultados oficiales...</p>
-    </div>
-</section>
-                </section>
-              
-            </div>
-            
+           <div class="space-y-10 max-w-7xl mx-auto">
+    
+    <section class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden">
+        <div class="bg-blue-900 p-5 text-white flex items-center justify-center gap-3">
+            <i class="fa fa-calendar-alt text-red-500"></i>
+            <h3 class="font-black text-xs md:text-sm uppercase tracking-[0.3em] italic">Próximos Encuentros</h3>
+        </div>
+        
+        <div id="listaEncuentros" class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-h-[600px] overflow-y-auto custom-scroll bg-slate-50/50">
+            <p class="text-center text-slate-300 italic py-10 col-span-full">Sincronizando calendario...</p>
+        </div>
+    </section>
+
+    <section class="bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-100 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-2 h-full bg-red-600"></div>
+        
+        <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 border-b pb-4 border-slate-100 gap-4">
+            <h3 class="text-blue-900 font-black flex items-center gap-3 uppercase text-sm italic tracking-widest">
+                <i class="fa fa-history text-red-600 animate-pulse"></i> 
+                Resumen de la Jornada (Resultados)
+            </h3>
+            <span class="bg-slate-100 text-slate-500 text-[9px] px-3 py-1 rounded-full font-bold uppercase tracking-tighter">Temporada 2026</span>
+        </div>
+
+        <div id="resultadosJornada" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <p class="text-center text-slate-300 italic py-10 col-span-full">Cargando resultados oficiales...</p>
+        </div>
+    </section>
+
+</div>
         </div>
     </main>
 
@@ -298,47 +310,7 @@ async function cargarResumenJornada() {
     `).join('');
 
 }
-async function cargarHistorialResultados() {
-    try {
-        const res = await fetch(`${API}/games`);
-        const games = await res.json();
-        const cont = document.getElementById('resultadosJornada');
-        
-        // Filtramos solo los finalizados y los invertimos para ver los últimos primero
-        const finalizados = games.filter(g => g.status === 'finalizado').reverse();
 
-        if (finalizados.length === 0) {
-            cont.innerHTML = "<p class='text-center py-10 text-slate-400 italic col-span-full'>Aún no hay juegos finalizados en esta jornada.</p>";
-            return;
-        }
-
-        cont.innerHTML = "";
-        finalizados.forEach(g => {
-            cont.innerHTML += `
-                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex justify-between items-center gap-3 shadow-sm hover:shadow-md transition-shadow">
-                    <div class="flex-1 text-left">
-                        <p class="text-[10px] font-black uppercase text-blue-900 leading-tight truncate">${g.local}</p>
-                        <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tighter">Local</p>
-                    </div>
-                    
-                    <div class="bg-blue-900 text-white px-3 py-1 rounded-lg font-black italic text-sm shadow-inner min-w-[60px] text-center">
-                        ${g.resultado}
-                    </div>
-                    
-                    <div class="flex-1 text-right">
-                        <p class="text-[10px] font-black uppercase text-blue-900 leading-tight truncate">${g.visita}</p>
-                        <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tighter">Visita</p>
-                    </div>
-                </div>`;
-        });
-    } catch (error) {
-        console.error("Error al cargar historial:", error);
-    }
-}
-
-// NO OLVIDES LLAMAR LA FUNCIÓN AL CARGAR LA PÁGINA
-// Dentro de tu window.onload o al final del script:
-cargarHistorialResultados();
 
 // Llama a cargarResumenJornada() dentro de cargarTodo()
         // Sincronización en tiempo real (cada 10 seg)
