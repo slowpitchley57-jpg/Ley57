@@ -111,14 +111,14 @@
                         </div>
                         
                 </section>
-                <section class="bg-white rounded-3xl shadow-lg border border-slate-200 overflow-hidden mb-10">
-             <div class="bg-red-600 p-4 text-white font-black text-xs uppercase tracking-widest italic flex justify-between items-center">
-            <span><i class="fa fa-history mr-2"></i> Resumen de la Jornada</span>
-            <span class="text-[9px] opacity-80">Resultados Recientes</span>
-            </div>
-            <div id="resumenJornada" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6 bg-slate-50">
-            </div>
-        </section>
+                <section class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+    <h3 class="text-blue-900 font-black mb-6 flex items-center gap-2 uppercase text-xs italic tracking-widest border-b pb-4">
+        <i class="fa fa-history text-red-600"></i> Resumen de la Jornada (Resultados)
+    </h3>
+    <div id="resultadosJornada" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <p class="text-center text-slate-300 italic py-10 col-span-full">Cargando resultados oficiales...</p>
+    </div>
+</section>
             </div>
             
         </div>
@@ -296,7 +296,49 @@ async function cargarResumenJornada() {
             </div>
         </div>
     `).join('');
+
 }
+async function cargarHistorialResultados() {
+    try {
+        const res = await fetch(`${API}/games`);
+        const games = await res.json();
+        const cont = document.getElementById('resultadosJornada');
+        
+        // Filtramos solo los finalizados y los invertimos para ver los últimos primero
+        const finalizados = games.filter(g => g.status === 'finalizado').reverse();
+
+        if (finalizados.length === 0) {
+            cont.innerHTML = "<p class='text-center py-10 text-slate-400 italic col-span-full'>Aún no hay juegos finalizados en esta jornada.</p>";
+            return;
+        }
+
+        cont.innerHTML = "";
+        finalizados.forEach(g => {
+            cont.innerHTML += `
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex justify-between items-center gap-3 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex-1 text-left">
+                        <p class="text-[10px] font-black uppercase text-blue-900 leading-tight truncate">${g.local}</p>
+                        <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tighter">Local</p>
+                    </div>
+                    
+                    <div class="bg-blue-900 text-white px-3 py-1 rounded-lg font-black italic text-sm shadow-inner min-w-[60px] text-center">
+                        ${g.resultado}
+                    </div>
+                    
+                    <div class="flex-1 text-right">
+                        <p class="text-[10px] font-black uppercase text-blue-900 leading-tight truncate">${g.visita}</p>
+                        <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tighter">Visita</p>
+                    </div>
+                </div>`;
+        });
+    } catch (error) {
+        console.error("Error al cargar historial:", error);
+    }
+}
+
+// NO OLVIDES LLAMAR LA FUNCIÓN AL CARGAR LA PÁGINA
+// Dentro de tu window.onload o al final del script:
+cargarHistorialResultados();
 
 // Llama a cargarResumenJornada() dentro de cargarTodo()
         // Sincronización en tiempo real (cada 10 seg)
