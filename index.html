@@ -25,7 +25,7 @@
             box-shadow: 0 4px 20px 0 rgba(239, 68, 68, 0.5); 
         }
         .card-style {
-            background-color: rgba(255, 255, 255, 0.92);
+            background-color: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(12px);
             border-top: 8px solid #ef4444;
             z-index: 20;
@@ -51,35 +51,38 @@
 
     <div id="welcome-screen" class="card-style p-8 rounded-[2.5rem] shadow-2xl w-full max-w-lg text-center relative animate-fade-in">
         
-       <div class="mb-10 flex flex-col items-center bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100 shadow-inner">
-    <p class="text-[9px] font-black text-blue-900 uppercase tracking-[0.5em] mb-5 italic">Alianza Estratégica</p>
-    <div class="flex items-center justify-center gap-10">
-        <img src="alv_sport_logo.png" alt="ALV Sport" class="h-16 md:h-20 w-auto drop-shadow-lg transition-transform hover:scale-110 duration-300">
-        
-        <div class="h-12 w-[2px] bg-red-500/30"></div> <img src="fv_digital_logo.png" alt="FV Digital" class="h-16 md:h-20 w-auto drop-shadow-lg transition-transform hover:scale-110 duration-300">
-    </div>
-</div>
-        <img src="logoley57icon.jpeg" alt="Logo Ley 57" class="mx-auto mb-6 w-24 h-24 object-contain drop-shadow-2xl">
-        <h1 class="text-blue-900 text-3xl font-black mb-2 italic tracking-tighter uppercase leading-none">Bienvenido</h1>
-        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.4em] mb-8">Instrucciones de Acceso</p>
+        <div class="mb-10 flex flex-col items-center bg-slate-50/80 p-6 rounded-[2rem] border border-slate-100 shadow-inner">
+            <p class="text-[10px] font-black text-blue-900 uppercase tracking-[0.4em] mb-4 italic">En colaboración con</p>
+            <div class="flex items-center justify-center gap-8 md:gap-12">
+                <img src="alv_sport_logo.png.jpeg" alt="ALV Sport" class="h-16 md:h-24 w-auto drop-shadow-md transition-transform hover:scale-110 duration-300">
+                
+                <div class="h-12 w-[2px] bg-red-500/40"></div>
+                
+                <img src="fv_digital_logo.png.webp" alt="FV Digital" class="h-16 md:h-24 w-auto drop-shadow-md transition-transform hover:scale-110 duration-300">
+            </div>
+        </div>
 
-        <div class="grid grid-cols-1 gap-4 text-left mb-8">
+        <img src="logoley57icon.jpeg" alt="Logo Ley 57" class="mx-auto mb-4 w-24 h-24 object-contain drop-shadow-xl">
+        <h1 class="text-blue-900 text-3xl font-black mb-1 italic tracking-tighter uppercase leading-none">Bienvenido</h1>
+        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.4em] mb-8 italic text-red-600">Liga de Softbol Femenil</p>
+
+        <div class="grid grid-cols-1 gap-3 text-left mb-8">
             <div class="bg-blue-50 p-4 rounded-2xl border-l-4 border-blue-900">
-                <p class="text-blue-900 font-black text-[10px] uppercase italic mb-1"><i class="fa fa-users mr-2"></i> Público (Jugadora)</p>
-                <p class="text-slate-600 text-[10px]">Acceso libre para consultar estadísticas y rol de juegos.</p>
+                <p class="text-blue-900 font-black text-[10px] uppercase italic mb-1"><i class="fa fa-users mr-2"></i> Perfil Público</p>
+                <p class="text-slate-600 text-[10px]">Resultados, estadísticas y rol de juegos.</p>
             </div>
             <div class="bg-red-50 p-4 rounded-2xl border-l-4 border-red-600">
-                <p class="text-red-600 font-black text-[10px] uppercase italic mb-1"><i class="fa fa-user-tie mr-2"></i> Managers</p>
-                <p class="text-slate-600 text-[10px]">Gestiona tu roster y altas de jugadoras.</p>
+                <p class="text-red-600 font-black text-[10px] uppercase italic mb-1"><i class="fa fa-user-tie mr-2"></i> Perfil Manager</p>
+                <p class="text-slate-600 text-[10px]">Gestión de roster y próximos encuentros.</p>
             </div>
         </div>
 
         <button onclick="cerrarBienvenida()" class="w-full bg-blue-900 hover:bg-red-600 text-white font-black py-4 rounded-2xl transition-all duration-300 shadow-xl uppercase tracking-widest text-xs">
-            Entrar al Portal <i class="fa fa-arrow-right ml-2"></i>
+            Ingresar al Portal <i class="fa fa-arrow-right ml-2"></i>
         </button>
 
         <div class="mt-4">
-            <a href="ayuda.html" class="text-[9px] font-black text-slate-400 hover:text-red-600 transition-colors uppercase tracking-widest italic">
+            <a href="ayuda.html" class="text-[10px] font-black text-slate-400 hover:text-red-600 transition-colors uppercase tracking-widest italic">
                 <i class="fa fa-question-circle mr-1"></i> Soporte y Ayuda
             </a>
         </div>
@@ -87,15 +90,19 @@
 
     <div id="login-card" class="card-style p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md text-center relative hidden">
         
-        <div class="mb-8 flex items-center justify-center gap-8 p-4 bg-slate-100/50 rounded-2xl">
-    <img src="alv_sport_logo.png.jpeg" alt="ALV Sport" class="h-10 w-auto drop-shadow-sm">
-    <div class="h-6 w-[1px] bg-slate-300"></div>
-    <img src="fv_digital_logo.png.webp" alt="FV Digital" class="h-10 w-auto drop-shadow-sm">
-</div>
+        <div class="mb-8 flex flex-col items-center bg-slate-100/50 p-4 rounded-2xl">
+            <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-3 italic">En colaboración con</p>
+            <div class="flex items-center justify-center gap-6">
+                <img src="alv_sport_logo.png.jpeg" alt="ALV Sport" class="h-10 w-auto drop-shadow-sm">
+                <div class="h-6 w-[1px] bg-slate-300"></div>
+                <img src="fv_digital_logo.png.webp" alt="FV Digital" class="h-10 w-auto drop-shadow-sm">
+            </div>
+        </div>
+
         <img src="logoley57icon.jpeg" alt="Logo Ley 57" class="mx-auto mb-6 w-32 h-32 object-contain drop-shadow-2xl">
         
         <h2 class="text-blue-900 text-3xl font-black mb-1 italic tracking-tighter uppercase">Ley 57</h2>
-        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.4em] mb-8">Hermosillo • Sonora</p>
+        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.4em] mb-8">Portal de Gestión 2026</p>
 
         <div class="flex bg-slate-100 p-1.5 rounded-2xl mb-6 border border-slate-200">
             <button onclick="setRole('jugadora')" id="btn-jugadora" class="flex-1 py-3 text-[10px] font-black rounded-xl transition-all duration-300 active-role uppercase">Público</button>
@@ -122,9 +129,9 @@
             Ingresar
         </button>
 
-        <div class="mt-8 pt-6 border-t border-slate-100 flex justify-between items-center px-2">
-            <p class="text-slate-400 text-[8px] uppercase font-black tracking-widest">Temporada 1 - 2026</p>
-            <p class="text-slate-400 text-[8px] uppercase font-black">FV Digital & ALV Sport</p>
+        <div class="mt-8 pt-6 border-t border-slate-100 flex justify-between items-center px-2 text-slate-400 font-black uppercase text-[8px]">
+            <p>Temporada 1 - 2026</p>
+            <p>FV Digital & ALV Sport</p>
         </div>
     </div>
 
