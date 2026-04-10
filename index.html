@@ -214,16 +214,13 @@
         if(res.ok) {
             const user = await res.json();
             
-            // 1. Validamos que el rol coincida con el botón seleccionado
-            if (user.rol !== selectedRole) {
-                return alert("Acceso denegado: Tu usuario no tiene permisos de " + selectedRole);
-            }
-
-            // 2. Guardamos la sesión en el navegador (Clave para mostrar el nombre después)
-            localStorage.setItem('userLogueado', JSON.stringify(user));
-            
-            // 3. Redireccionamos a la página correspondiente (admin.html o manager.html)
-            window.location.href = `${selectedRole}.html`;
+            if (user.rol === 'admin') {
+        localStorage.setItem('userLogueado', JSON.stringify(user)); // Llave para Admin
+    } else {
+        localStorage.setItem('managerLogueado', JSON.stringify(user)); // Llave diferente para Manager
+    }
+    
+    window.location.href = `${user.rol}.html`;
 
         } else {
             alert("Correo o contraseña incorrectos.");

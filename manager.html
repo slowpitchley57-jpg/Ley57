@@ -155,9 +155,11 @@
         }
 
         function revisarSesion() {
-            const sesion = localStorage.getItem('userLogueado');
-            if (!sesion) { window.location.href = 'index.html'; return; }
-            const user = JSON.parse(sesion);
+            const sesionManager = localStorage.getItem('managerLogueado');
+if (!sesionManager) {
+    window.location.href = 'index.html';
+}
+const datosManager = JSON.parse(sesionManager);
             equipoSeleccionado = user.equipo;
             correoUsuario = user.correo;
             document.getElementById('nombreEquipoCabecera').innerText = equipoSeleccionado;
