@@ -50,13 +50,16 @@ function mostrarNombreAdmin() {
     const sesion = localStorage.getItem('userLogueado');
     if (sesion) {
         const user = JSON.parse(sesion);
-        // Extraemos la parte antes del @ del correo
+        // Convierte "javier@ley57.com" en "JAVIER"
         const nombreSimple = user.correo.split('@')[0].toUpperCase();
         
         const elemento = document.getElementById('nombreUsuarioActivo');
         if (elemento) {
             elemento.innerText = nombreSimple;
         }
+    } else {
+        // Si no hay sesión, manda al login (Seguridad)
+        window.location.href = 'index.html';
     }
 }
 
@@ -222,6 +225,7 @@ app.put('/api/players/:id', async (req, res) => {
 
 // REEMPLAZA TU app.listen POR ESTE:
 const PORT = process.env.PORT || 3000;
+
 
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor activo en puerto ${PORT}`);

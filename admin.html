@@ -415,7 +415,7 @@ async function eliminarJugadora(id) {
 
         async function eliminarEquipo(id) { if(confirm("¿Borrar equipo?")) { await fetch(`${API}/equipos/${id}`, { method: 'DELETE' }); cargarEquipos(); } }
 
-        cargarConfig(); cargarEquipos(); cargarResultados();
+        cargarConfig(); cargarEquipos(); cargarResultados();mostrarNombreAdmin();
     </script>
 </body>
 </html>
