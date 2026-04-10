@@ -53,7 +53,6 @@
             <button onclick="descargarHistorial()" class="w-full text-left p-3 bg-slate-700 hover:bg-slate-800 rounded-xl font-bold flex items-center gap-3 transition">
                 <i class="fa fa-file-download"></i> Descargar Reporte
             </button>
-            <a href="estadisticas.html" target="_blank" class="block p-3 bg-blue-700 rounded-xl text-center font-black italic uppercase text-[10px] tracking-widest">Web Pública</a>
             <button onclick="cerrarSesion()" class="w-full text-left p-2 text-red-400 font-bold uppercase text-[9px] mt-2 hover:text-white transition"><i class="fa fa-power-off mr-2"></i> Salir del Sistema</button>
         </div>
     </aside>
@@ -62,12 +61,12 @@
         <div class="grid grid-cols-1 gap-8">
             <div class="bg-white rounded-3xl shadow-sm border overflow-hidden">
                 <div class="bg-blue-600 p-3 text-white font-bold text-xs uppercase tracking-widest italic">Categoría Intermedia</div>
-                <table class="w-full text-xs text-center"><thead class="bg-slate-100 border-b font-black text-slate-500 uppercase"><tr class="bg-slate-100 border-b font-black text-slate-500 uppercase"><th class="p-4 text-left">Equipo</th><th>JG</th><th>JP</th><th>CA</th><th>CR</th><th class="text-blue-600">DIF</th><th>X</th></tr></thead><tbody id="tablaIntermedia" class="divide-y font-bold text-blue-900"></tbody></table>
+                <table class="w-full text-xs text-center"><thead class="bg-slate-100 border-b font-black text-slate-500 uppercase"><tr class="bg-slate-100 border-b font-black text-slate-500 uppercase"><th class="p-4 text-left">Equipo</th><th>JJ</th><th>JG</th><th>JP</th><th>CA</th><th>CR</th><th class="text-blue-600">DIF</th><th>X</th></tr></thead><tbody id="tablaIntermedia" class="divide-y font-bold text-blue-900"></tbody></table>
             </div>
 
             <div class="bg-white rounded-3xl shadow-sm border overflow-hidden">
                 <div class="bg-orange-500 p-3 text-white font-bold text-xs uppercase tracking-widest italic">Categoría Relax</div>
-                <table class="w-full text-xs text-center"><thead class="bg-slate-100 border-b font-black text-slate-500 uppercase"><tr class="bg-slate-100 border-b font-black text-slate-500 uppercase"><th class="p-4 text-left">Equipo</th><th>JG</th><th>JP</th><th>CA</th><th>CR</th><th class="text-orange-600">DIF</th><th>X</th></tr></thead><tbody id="tablaRelax" class="divide-y font-bold text-blue-900"></tbody></table>
+                <table class="w-full text-xs text-center"><thead class="bg-slate-100 border-b font-black text-slate-500 uppercase"><tr class="bg-slate-100 border-b font-black text-slate-500 uppercase"><th class="p-4 text-left">Equipo</th><th>JJ</th><th>JG</th><th>JP</th><th>CA</th><th>CR</th><th class="text-orange-600">DIF</th><th>X</th></tr></thead><tbody id="tablaRelax" class="divide-y font-bold text-blue-900"></tbody></table>
             </div>
         </div>
 
@@ -165,6 +164,38 @@
         }
 
         async function cargarEquipos() {
+    const res = await fetch(`${API}/equipos`);
+    const equipos = await res.json();
+    const tInt = document.getElementById('tablaIntermedia');
+    const tRel = document.getElementById('tablaRelax');
+    const selects = [document.getElementById('selLoc'), document.getElementById('selVis'), document.getElementById('filterRoster')];
+    
+    tInt.innerHTML = ""; tRel.innerHTML = "";
+    selects.forEach(s => s.innerHTML = '<option value="">-- EQUIPO --</option>');
+
+    // Ordenamos por Ganados
+    equipos.sort((a,b) => b.g - a.g).forEach(e => {
+        const jj = (e.g || 0) + (e.p || 0); // CÁLCULO AUTOMÁTICO DE JJ
+        const dif = (e.ca || 0) - (e.ce || 0);
+        
+        const fila = `
+            <tr class="hover:bg-slate-50 border-b">
+                <td class="p-4 text-left uppercase italic font-black text-blue-900">${e.nombre}</td>
+                <td class="font-bold text-slate-500 bg-slate-50/50">${jj}</td>
+                
+                <td><input type="number" onchange="updEq('${e._id}','g',this.value)" value="${e.g}" class="input-inline text-emerald-600"></td>
+                <td><input type="number" onchange="updEq('${e._id}','p',this.value)" value="${e.p}" class="input-inline text-red-500"></td>
+                <td><input type="number" onchange="updEq('${e._id}','ca',this.value)" value="${e.ca}" class="input-inline"></td>
+                <td><input type="number" onchange="updEq('${e._id}','ce',this.value)" value="${e.ce}" class="input-inline"></td>
+                <td class="font-black ${dif>=0?'text-blue-600':'text-orange-500'}">${dif>0?'+'+dif:dif}</td>
+                <td><button onclick="eliminarEquipo('${e._id}')" class="text-slate-300 hover:text-red-500"><i class="fa fa-trash"></i></button></td>
+            </tr>`;
+            
+        if(e.categoria === "Intermedia") tInt.innerHTML += fila; else tRel.innerHTML += fila;
+        selects.forEach(s => s.innerHTML += `<option value="${e.nombre}">${e.nombre}</option>`);
+    });
+}
+       /* async function cargarEquipos() {
             const res = await fetch(`${API}/equipos`);
             const equipos = await res.json();
             const tInt = document.getElementById('tablaIntermedia'), tRel = document.getElementById('tablaRelax');
@@ -173,12 +204,13 @@
             selects.forEach(s => s.innerHTML = '<option value="">-- EQUIPO --</option>');
             
             equipos.sort((a,b) => b.g - a.g).forEach(e => {
+                const jj = (e.g || 0) + (e.p || 0);
                 const dif = (e.ca || 0) - (e.ce || 0);
                 const fila = `<tr class="hover:bg-slate-50 border-b"><td class="p-4 text-left uppercase italic font-black text-blue-900">${e.nombre}</td><td><input type="number" onchange="updEq('${e._id}','g',this.value)" value="${e.g}" class="input-inline"></td><td><input type="number" onchange="updEq('${e._id}','p',this.value)" value="${e.p}" class="input-inline"></td><td><input type="number" onchange="updEq('${e._id}','ca',this.value)" value="${e.ca}" class="input-inline"></td><td><input type="number" onchange="updEq('${e._id}','ce',this.value)" value="${e.ce}" class="input-inline"></td><td class="font-black text-blue-600">${dif>0?'+'+dif:dif}</td><td><button onclick="eliminarEquipo('${e._id}')" class="text-slate-300 hover:text-red-500"><i class="fa fa-trash"></i></button></td></tr>`;
                 if(e.categoria === "Intermedia") tInt.innerHTML += fila; else tRel.innerHTML += fila;
                 selects.forEach(s => s.innerHTML += `<option value="${e.nombre}">${e.nombre}</option>`);
             });
-        }
+        }*/
 
         async function updEq(id, campo, val) {
             let d = {}; d[campo] = Number(val);
