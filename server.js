@@ -46,19 +46,21 @@ app.post('/api/login', async (req, res) => {
         res.status(401).json({ error: "Acceso denegado" });
     }
 });
-function mostrarUsuarioLogueado() {
+function mostrarNombreAdmin() {
     const sesion = localStorage.getItem('userLogueado');
     if (sesion) {
         const user = JSON.parse(sesion);
-        // Sacamos el nombre del correo (antes del @) y lo hacemos mayúsculas
+        // Extraemos la parte antes del @ del correo
         const nombreSimple = user.correo.split('@')[0].toUpperCase();
         
-        const etiqueta = document.getElementById('nombreUsuarioActivo');
-        if (etiqueta) {
-            etiqueta.innerText = nombreSimple;
+        const elemento = document.getElementById('nombreUsuarioActivo');
+        if (elemento) {
+            elemento.innerText = nombreSimple;
         }
     }
 }
+
+
 // Config
 app.get('/api/config', async (req, res) => res.json(await Config.findOne() || { permitirAltas: true }));
 app.post('/api/config', async (req, res) => {
