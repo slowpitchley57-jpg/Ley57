@@ -62,11 +62,13 @@
                         <table class="w-full text-left text-xs">
                             <thead>
                                 <tr class="bg-slate-50 text-slate-400 font-black uppercase border-b">
-                                    <th class="p-4">Equipo</th>
-                                    <th class="text-center">JG</th><th class="text-center">JP</th>
-                                    <th class="text-center">CA</th><th class="text-center">CR</th>
-                                    <th class="text-center text-blue-600">DIF</th>
-                                </tr>
+    <th class="p-4">Equipo</th>
+    <th class="text-center text-blue-600">JJ</th> <th class="text-center">JG</th>
+    <th class="text-center">JP</th>
+    <th class="text-center">CA</th>
+    <th class="text-center">CR</th>
+    <th class="text-center text-orange-600">DIF</th>
+</tr>
                             </thead>
                             <tbody id="tablaIntermedia" class="divide-y font-bold"></tbody>
                         </table>
@@ -78,12 +80,14 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs">
                             <thead>
-                                <tr class="bg-slate-50 text-slate-400 font-black uppercase border-b">
-                                    <th class="p-4">Equipo</th>
-                                    <th class="text-center">JG</th><th class="text-center">JP</th>
-                                    <th class="text-center">CA</th><th class="text-center">CR</th>
-                                    <th class="text-center text-orange-600">DIF</th>
-                                </tr>
+                               <tr class="bg-slate-50 text-slate-400 font-black uppercase border-b">
+    <th class="p-4">Equipo</th>
+    <th class="text-center text-blue-600">JJ</th> <th class="text-center">JG</th>
+    <th class="text-center">JP</th>
+    <th class="text-center">CA</th>
+    <th class="text-center">CR</th>
+    <th class="text-center text-orange-600">DIF</th>
+</tr>
                             </thead>
                             <tbody id="tablaRelax" class="divide-y font-bold"></tbody>
                         </table>
@@ -163,26 +167,50 @@
             cargarHistorialResultados(); // <-- ESTO ES LO QUE HACÍA FALTA LLAMAR
         }
 
-        async function cargarTablas() {
-            try {
-                const res = await fetch(`${API}/equipos`);
-                const equipos = await res.json();
-                const tInt = document.getElementById('tablaIntermedia');
-                const tRel = document.getElementById('tablaRelax');
-                tInt.innerHTML = ""; tRel.innerHTML = "";
-                equipos.sort((a,b) => b.g - a.g);
-                const lInt = equipos.find(e => e.categoria === "Intermedia");
-                const lRel = equipos.find(e => e.categoria === "Relax");
-                if(lInt) document.getElementById('txtLiderInt').innerText = lInt.nombre;
-                if(lRel) document.getElementById('txtLiderRel').innerText = lRel.nombre;
-                equipos.forEach((e) => {
-                    const dif = (e.ca || 0) - (e.ce || 0);
-                    const fila = `<tr class="hover:bg-slate-50 cursor-pointer border-b" onclick="verDetalleRoster('${e.nombre}')"><td class="p-4 uppercase italic font-black text-blue-900">${e.nombre}</td><td class="text-center">${e.g}</td><td class="text-center">${e.p}</td><td class="text-center">${e.ca}</td><td class="text-center">${e.ce}</td><td class="text-center font-black ${dif>=0?'text-blue-600':'text-orange-600'}">${dif>0?'+'+dif:dif}</td></tr>`;
-                    if(e.categoria === "Intermedia") tInt.innerHTML += fila; else tRel.innerHTML += fila;
-                });
-            } catch (e) { console.error(e); }
-        }
+       async function cargarTablas() {
+    try {
+        const res = await fetch(`${API}/equipos`);
+        const equipos = await res.json();
+        const tInt = document.getElementById('tablaIntermedia');
+        const tRel = document.getElementById('tablaRelax');
+        
+        tInt.innerHTML = ""; 
+        tRel.innerHTML = "";
+        
+        // Ordenar por juegos ganados
+        equipos.sort((a,b) => b.g - a.g);
 
+        const lInt = equipos.find(e => e.categoria === "Intermedia");
+        const lRel = equipos.find(e => e.categoria === "Relax");
+        
+        if(lInt) document.getElementById('txtLiderInt').innerText = lInt.nombre;
+        if(lRel) document.getElementById('txtLiderRel').innerText = lRel.nombre;
+
+        equipos.forEach((e) => {
+            // CÁLCULO AUTOMÁTICO DE JJ Y DIFERENCIA
+            const jj = (e.g || 0) + (e.p || 0);
+            const dif = (e.ca || 0) - (e.ce || 0);
+
+            const fila = `
+                <tr class="hover:bg-slate-50 cursor-pointer border-b" onclick="verDetalleRoster('${e.nombre}')">
+                    <td class="p-4 uppercase italic font-black text-blue-900">${e.nombre}</td>
+                    <td class="text-center font-bold text-slate-500 bg-slate-50/30">${jj}</td>
+                    <td class="text-center">${e.g}</td>
+                    <td class="text-center">${e.p}</td>
+                    <td class="text-center">${e.ca}</td>
+                    <td class="text-center">${e.ce}</td>
+                    <td class="text-center font-black ${dif>=0 ? 'text-blue-600' : 'text-orange-600'}">
+                        ${dif > 0 ? '+' + dif : dif}
+                    </td>
+                </tr>`;
+
+            if(e.categoria === "Intermedia") tInt.innerHTML += fila; 
+            else tRel.innerHTML += fila;
+        });
+    } catch (e) { 
+        console.error("Error al cargar tablas:", e); 
+    }
+}
         async function cargarEncuentros() {
             const res = await fetch(`${API}/games`);
             const games = await res.json();
