@@ -46,6 +46,19 @@ app.post('/api/login', async (req, res) => {
         res.status(401).json({ error: "Acceso denegado" });
     }
 });
+function mostrarUsuarioLogueado() {
+    const sesion = localStorage.getItem('userLogueado');
+    if (sesion) {
+        const user = JSON.parse(sesion);
+        // Sacamos el nombre del correo (antes del @) y lo hacemos mayúsculas
+        const nombreSimple = user.correo.split('@')[0].toUpperCase();
+        
+        const etiqueta = document.getElementById('nombreUsuarioActivo');
+        if (etiqueta) {
+            etiqueta.innerText = nombreSimple;
+        }
+    }
+}
 // Config
 app.get('/api/config', async (req, res) => res.json(await Config.findOne() || { permitirAltas: true }));
 app.post('/api/config', async (req, res) => {
@@ -185,13 +198,6 @@ app.put('/api/users/update-password', async (req, res) => {
     }
 });
 
-// REEMPLAZA TU app.listen POR ESTE:
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Servidor activo en puerto ${PORT}`);
-    console.log(`📡 Esperando peticiones de la Liga Ley 57...`);
-});
 // Ruta para ver todos los usuarios (Solo para el Desarrollador)
 app.get('/api/dev/usuarios', async (req, res) => {
     try {
@@ -210,4 +216,12 @@ app.put('/api/players/:id', async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: "Error al actualizar jugadora" });
     }
+});
+
+// REEMPLAZA TU app.listen POR ESTE:
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Servidor activo en puerto ${PORT}`);
+    console.log(`📡 Esperando peticiones de la Liga Ley 57...`);
 });
