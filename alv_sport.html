@@ -251,17 +251,13 @@
 
         async function cargarEncuentros() {
     try {
-        // Pedimos todos los juegos para no dejar fuera los que no tienen etiqueta de liga
-        const res = await fetch(`${API}/games`);
+        // Forzamos la petición con el filtro de liga
+        const res = await fetch(`${API}/games?liga=varonil`);
         const games = await res.json();
         const cont = document.getElementById('listaEncuentros');
         
-        // FILTRO INTELIGENTE:
-        // 1. Que estatus sea 'pendiente'
-        // 2. Que la liga sea 'femenil' O que el campo liga no exista (juegos viejos)
-        const pendientes = games.filter(g => 
-            g.status === 'pendiente' && (!g.liga || g.liga === 'femenil')
-        );
+        // Filtramos por estatus y aseguramos que sean de la liga correcta
+        const pendientes = games.filter(g => g.status === 'pendiente');
         
         if(pendientes.length === 0) {
             cont.innerHTML = `
@@ -292,15 +288,11 @@
 async function cargarHistorialResultados() {
     const cont = document.getElementById('resultadosJornada');
     try {
-        // Pedimos todos los juegos
-        const res = await fetch(`${API}/games`);
+        const res = await fetch(`${API}/games?liga=varonil`);
         const games = await res.json();
         
-        // FILTRO INTELIGENTE:
-        // Que estatus sea 'finalizado' Y (que sea liga femenil O que no tenga liga asignada)
-        const finalizados = games.filter(g => 
-            g.status === 'finalizado' && (!g.liga || g.liga === 'femenil')
-        ).reverse();
+        // Invertimos para ver los más recientes primero
+        const finalizados = games.filter(g => g.status === 'finalizado').reverse();
         
         if (finalizados.length === 0) {
             cont.innerHTML = "<p class='text-center py-10 text-slate-400 italic text-xs uppercase tracking-widest opacity-50'>No hay resultados registrados.</p>";

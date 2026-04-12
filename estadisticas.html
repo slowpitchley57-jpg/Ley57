@@ -243,57 +243,35 @@
 
         function cerrarDetalle() { document.getElementById('modalDetalleEquipo').classList.add('hidden'); }
 
-        async function cargarHistorialResultados() {
-            const cont = document.getElementById('resultadosJornada');
-            try {
-                // FILTRO: Solo juegos femeniles finalizados
-                const res = await fetch(`${API}/games?liga=femenil`);
-                const games = await res.json();
-                const finalizados = games.filter(g => g.status === 'finalizado').reverse();
-                
-                if (finalizados.length === 0) {
-                    cont.innerHTML = "<p class='text-center py-10 text-slate-400 italic'>No hay resultados registrados.</p>";
-                    return;
-                }
-                cont.innerHTML = finalizados.map(g => `
-                    <div class="bg-slate-50 p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-2">
-                        <div class="flex justify-between text-[8px] font-black text-slate-400 uppercase">
-                            <span>${g.fecha}</span>
-                            <span class="text-red-500">FINALIZADO</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <div class="flex-1 text-center"><p class="text-[10px] font-black text-blue-900 uppercase truncate">${g.local}</p></div>
-                            <div class="mx-3 bg-slate-900 text-white px-3 py-1 rounded-lg font-black text-sm italic">${g.resultado}</div>
-                            <div class="flex-1 text-center"><p class="text-[10px] font-black text-blue-900 uppercase truncate">${g.visita}</p></div>
-                        </div>
-                    </div>`).join('');
-            } catch (error) { console.error(error); }
-        }
-        async function cargarEncuentros() {
+        
+       async function cargarEncuentros() {
     try {
-        // 1. Agregamos el filtro de liga en la petición al servidor
-        const res = await fetch(`${API}/games?liga=femenil`);
+        // Pedimos todos los juegos para no dejar fuera los que no tienen etiqueta de liga
+        const res = await fetch(`${API}/games`);
         const games = await res.json();
         const cont = document.getElementById('listaEncuentros');
         
-        // 2. Filtramos solo los que están pendientes de jugarse
-        const pendientes = games.filter(g => g.status === 'pendiente');
+        // FILTRO INTELIGENTE:
+        // 1. Que estatus sea 'pendiente'
+        // 2. Que la liga sea 'femenil' O que el campo liga no exista (juegos viejos)
+        const pendientes = games.filter(g => 
+            g.status === 'pendiente' && (!g.liga || g.liga === 'femenil')
+        );
         
         if(pendientes.length === 0) {
             cont.innerHTML = `
-                <div class="py-10 text-center">
-                    <i class="fa fa-calendar-times text-slate-200 text-4xl mb-3"></i>
-                    <p class="text-slate-400 italic text-xs uppercase tracking-widest">Sin juegos programados</p>
+                <div class="py-10 text-center opacity-40">
+                    <i class="fa fa-calendar-times text-4xl mb-2"></i>
+                    <p class="italic text-xs uppercase tracking-widest">Sin juegos programados</p>
                 </div>`;
             return;
         }
 
-        // 3. Renderizamos las tarjetas de los juegos
         cont.innerHTML = pendientes.map(g => `
-            <div class="bg-white p-4 rounded-2xl border-2 border-slate-100 shadow-sm hover:border-blue-200 transition-colors">
+            <div class="bg-white p-4 rounded-2xl border-2 border-slate-100 shadow-sm">
                 <div class="flex justify-between text-[8px] font-bold text-slate-400 uppercase mb-2">
-                    <span><i class="fa fa-calendar-alt text-blue-600"></i> ${g.fecha}</span>
-                    <span><i class="fa fa-clock text-red-500"></i> ${g.hora}</span>
+                    <span><i class="fa fa-calendar-alt"></i> ${g.fecha}</span>
+                    <span><i class="fa fa-clock"></i> ${g.hora}</span>
                 </div>
                 <div class="flex justify-between items-center gap-2">
                     <span class="text-[10px] font-black uppercase text-blue-900 truncate flex-1">${g.local}</span>
@@ -301,9 +279,43 @@
                     <span class="text-[10px] font-black uppercase text-blue-900 truncate flex-1 text-right">${g.visita}</span>
                 </div>
             </div>`).join('');
+    } catch (e) { 
+        console.error("Error en encuentros:", e);
+    }
+}
 
-    } catch (error) {
-        console.error("Error al cargar encuentros femeniles:", error);
+async function cargarHistorialResultados() {
+    const cont = document.getElementById('resultadosJornada');
+    try {
+        // Pedimos todos los juegos
+        const res = await fetch(`${API}/games`);
+        const games = await res.json();
+        
+        // FILTRO INTELIGENTE:
+        // Que estatus sea 'finalizado' Y (que sea liga femenil O que no tenga liga asignada)
+        const finalizados = games.filter(g => 
+            g.status === 'finalizado' && (!g.liga || g.liga === 'femenil')
+        ).reverse();
+        
+        if (finalizados.length === 0) {
+            cont.innerHTML = "<p class='text-center py-10 text-slate-400 italic text-xs uppercase tracking-widest opacity-50'>No hay resultados registrados.</p>";
+            return;
+        }
+
+        cont.innerHTML = finalizados.map(g => `
+            <div class="bg-slate-50 p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-2">
+                <div class="flex justify-between text-[8px] font-black text-slate-400 uppercase">
+                    <span>${g.fecha}</span>
+                    <span class="text-red-500">FINALIZADO</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <div class="flex-1 text-center"><p class="text-[10px] font-black text-blue-900 uppercase truncate">${g.local}</p></div>
+                    <div class="mx-3 bg-slate-900 text-white px-3 py-1 rounded-lg font-black text-sm italic shadow-md">${g.resultado}</div>
+                    <div class="flex-1 text-center"><p class="text-[10px] font-black text-blue-900 uppercase truncate">${g.visita}</p></div>
+                </div>
+            </div>`).join('');
+    } catch (error) { 
+        console.error("Error en historial:", error); 
     }
 }
 
