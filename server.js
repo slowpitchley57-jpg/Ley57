@@ -12,22 +12,47 @@ app.use(cors());
 mongoose.connect('mongodb+srv://rosasvillah_db_user:GhnkehSpQQGFwU3K@ley57.y2bgblz.mongodb.net/LEY57?retryWrites=true&w=majority')
     .then(() => console.log("✅ Conectado a MongoDB LEY57"))
     .catch(err => console.log("❌ Error de conexión:", err));
-    
-// --- MODELOS ---
-const Config = mongoose.model('Config', { permitirAltas: Boolean });
-const User = mongoose.model('User', { correo: String, pass: String, rol: String, equipo: String });
+// --- MODELOS ACTUALIZADOS ---
+
+// Agregamos liga a los equipos para saber si son de LEY 57 o ALV SPORT
 const Team = mongoose.model('Team', { 
-    nombre: String, categoria: String, 
-    g: { type: Number, default: 0 }, p: { type: Number, default: 0 },
-    ca: { type: Number, default: 0 }, ce: { type: Number, default: 0 } 
+    nombre: String, 
+    categoria: String, 
+    liga: { type: String, default: "femenil" }, // "femenil" (Ley 57) o "varonil" (ALV Sport)
+    g: { type: Number, default: 0 }, 
+    p: { type: Number, default: 0 },
+    ca: { type: Number, default: 0 }, 
+    ce: { type: Number, default: 0 } 
 });
-const Game = mongoose.model('Game', { local: String, visita: String, fecha: String, hora: String, resultado: { type: String, default: "0-0" }, status: { type: String, default: "pendiente" } });
+
+// Agregamos liga a los juegos para que el rol no se mezcle
+const Game = mongoose.model('Game', { 
+    local: String, 
+    visita: String, 
+    fecha: String, 
+    hora: String, 
+    liga: { type: String, default: "femenil" }, // Identificador de liga
+    resultado: { type: String, default: "0-0" }, 
+    status: { type: String, default: "pendiente" } 
+});
+
+// Agregamos liga a los jugadores
 const Player = mongoose.model('Player', { 
-    nombre: String, equipo: String, fechaNacimiento: String, categoria: String,
-    jj: { type: Number, default: 0 }, vb: { type: Number, default: 0 }, 
-    h: { type: Number, default: 0 }, hr: { type: Number, default: 0 }, 
+    nombre: String, 
+    equipo: String, 
+    fechaNacimiento: String, 
+    categoria: String,
+    liga: { type: String, default: "femenil" }, // Identificador de liga
+    jj: { type: Number, default: 0 }, 
+    vb: { type: Number, default: 0 }, 
+    h: { type: Number, default: 0 }, 
+    hr: { type: Number, default: 0 }, 
     avg: { type: Number, default: 0 }
 });
+
+// Los modelos de Config y User se quedan igual, ya que el Admin es el mismo para ambas
+const Config = mongoose.model('Config', { permitirAltas: Boolean });
+const User = mongoose.model('User', { correo: String, pass: String, rol: String, equipo: String });
 
 // --- RUTAS ---
 
@@ -72,9 +97,17 @@ app.post('/api/config', async (req, res) => {
 });
 
 // Equipos (CRUD)
-app.get('/api/equipos', async (req, res) => res.json(await Team.find()));
+app.get('/api/equipos', async (req, res) => {
+    const { liga } = req.query;
+    const filtro = liga ? { liga } : {};
+    const equipos = await Team.find(filtro);
+    res.json(equipos);
+});
+// El POST de equipos y juegos debe recibir el campo 'liga' del body
 app.post('/api/equipos', async (req, res) => {
-    const e = new Team(req.body); await e.save(); res.json(e);
+    const nuevoEquipo = new Team(req.body);
+    await nuevoEquipo.save();
+    res.json(nuevoEquipo);
 });
 app.put('/api/equipos/:id', async (req, res) => {
     await Team.findByIdAndUpdate(req.params.id, req.body);
@@ -92,7 +125,16 @@ app.get('/api/players', async (req, res) => {
     res.json(await Player.find(filter));
 });
 app.post('/api/players', async (req, res) => {
-    const p = new Player(req.body); await p.save(); res.json(p);
+    // Buscamos al equipo para saber su liga antes de guardar al jugador
+    const equipoInfo = await Team.findOne({ nombre: req.body.equipo });
+    const ligaDelEquipo = equipoInfo ? equipoInfo.liga : "femenil";
+    
+    const nuevoPlayer = new Player({
+        ...req.body,
+        liga: ligaDelEquipo // Así se guarda automáticamente en la liga correcta
+    });
+    await nuevoPlayer.save();
+    res.json(nuevoPlayer);
 });
 // BUSCA ESTA RUTA EN TU SERVER.JS Y REEMPLÁZALA TODA
 app.put('/api/players/:id', async (req, res) => {
@@ -173,7 +215,12 @@ app.get('/api/games/download', async (req, res) => {
 });
 
 // Juegos
-app.get('/api/games', async (req, res) => res.json(await Game.find()));
+app.get('/api/games', async (req, res) => {
+    const { liga } = req.query;
+    const filtro = liga ? { liga } : {};
+    const juegos = await Game.find(filtro);
+    res.json(juegos);
+});
 app.post('/api/games', async (req, res) => {
     const g = new Game(req.body); await g.save(); res.json(g);
 });

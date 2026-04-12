@@ -3,232 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso - Liga Slow Pitch Ley 57</title>
-    <link rel="icon" type="image/png" href="logoley57icon.jpeg">
+    <title>Portal LEY 57 & ALV SPORT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @keyframes gradientMove {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        body {
-            margin: 0;
-            background: linear-gradient(-45deg, #0f172a, #1e3a8a, #0f172a, #831843);
-            background-size: 400% 400%;
-            animation: gradientMove 15s ease infinite;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .active-role { 
-            background-color: #ef4444 !important; 
-            color: white !important; 
-            box-shadow: 0 4px 20px 0 rgba(239, 68, 68, 0.5); 
-        }
-        .card-style {
-            background-color: rgba(255, 255, 255, 0.96);
-            backdrop-filter: blur(12px);
-            border-top: 8px solid #ef4444;
-            z-index: 20;
-            max-height: 90vh; /* No permite que la tarjeta sea más alta que la pantalla */
-            overflow-y: auto; /* Si el contenido es mucho, permite scroll dentro de la tarjeta */
-        }
-        /* Ocultar barra de scroll en la tarjeta para que se vea limpio */
-        .card-style::-webkit-scrollbar { width: 0px; }
-
-        .floating-item {
-            position: absolute;
-            pointer-events: none;
-            color: rgba(255, 255, 255, 0.15);
-            z-index: 1;
-        }
-        .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
-        .animate-slide-up { animation: slideUp 0.5s ease-out forwards; }
-        .animate-exit { animation: fadeExit 0.5s ease-in forwards; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeExit { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.8); visibility: hidden; } }
+        .card-hover { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .card-hover:hover { transform: translateY(-10px); }
     </style>
 </head>
-<body class="p-4 font-sans relative">
+<body class="bg-slate-900 min-h-screen flex items-center justify-center p-6">
 
-    <div id="animation-container" class="absolute inset-0 overflow-hidden"></div>
-
-    <div id="welcome-screen" class="card-style p-6 md:p-8 rounded-[2.5rem] shadow-2xl w-full max-w-lg text-center relative animate-fade-in">
+    <div class="max-w-5xl w-full grid grid-cols-1 md:grid-cols-2 gap-8">
         
-        <div class="mb-6 flex flex-col items-center bg-slate-50/80 p-4 md:p-6 rounded-[2rem] border border-slate-100 shadow-inner">
-            <p class="text-[9px] font-black text-blue-900 uppercase tracking-[0.4em] mb-4 italic">En colaboración con</p>
-            <div class="flex items-center justify-center gap-6 md:gap-10">
-                <img src="alv_sport_logo.png.jpeg" alt="ALV Sport" class="h-12 md:h-16 w-auto drop-shadow-md transition-transform hover:scale-110 duration-300">
-                <div class="h-10 w-[2px] bg-red-500/40"></div>
-                <img src="fv_digital_logo.png.webp" alt="FV Digital" class="h-12 md:h-16 w-auto drop-shadow-md transition-transform hover:scale-110 duration-300">
+        <div onclick="location.href='estadisticas.html'" class="card-hover cursor-pointer bg-white rounded-[2.5rem] overflow-hidden shadow-2xl group">
+            <div class="h-64 bg-blue-900 flex items-center justify-center p-8 relative">
+                <img src="imgley57.pgn.png" class="h-40 z-10">
+                <div class="absolute inset-0 bg-blue-800 opacity-0 group-hover:opacity-20 transition-opacity"></div>
+            </div>
+            <div class="p-8 text-center">
+                <h2 class="text-3xl font-black text-blue-900 italic uppercase">LEY 57</h2>
+                <p class="text-slate-400 font-bold uppercase tracking-widest text-sm mt-2">Liga Softbol Femenil</p>
+                <div class="mt-6 inline-block bg-blue-900 text-white px-6 py-2 rounded-full font-black text-xs uppercase italic">Entrar</div>
             </div>
         </div>
 
-        <img src="logoley57icon.jpeg" alt="Logo Ley 57" class="mx-auto mb-4 w-20 md:w-24 h-20 md:h-24 object-contain drop-shadow-xl">
-        <h1 class="text-blue-900 text-2xl md:text-3xl font-black mb-1 italic tracking-tighter uppercase leading-none">Bienvenido</h1>
-        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.4em] mb-6 italic text-red-600">Liga de Softbol y Slow Picht Femenil</p>
-
-        <div class="grid grid-cols-1 gap-3 text-left mb-6">
-            <div class="bg-blue-50 p-4 rounded-2xl border-l-4 border-blue-900">
-                <p class="text-blue-900 font-black text-[10px] uppercase italic mb-1"><i class="fa fa-users mr-2"></i> Perfil Público</p>
-                <p class="text-slate-600 text-[10px]">Resultados, estadísticas y rol de juegos.</p>
+        <div onclick="location.href='alv_sport.html'" class="card-hover cursor-pointer bg-white rounded-[2.5rem] overflow-hidden shadow-2xl group">
+            <div class="h-64 bg-red-600 flex items-center justify-center p-8 relative">
+                <i class="fa fa-medal text-white text-8xl z-10"></i>
+                <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity"></div>
             </div>
-            <div class="bg-red-50 p-4 rounded-2xl border-l-4 border-red-600">
-                <p class="text-red-600 font-black text-[10px] uppercase italic mb-1"><i class="fa fa-user-tie mr-2"></i> Perfil Manager</p>
-                <p class="text-slate-600 text-[10px]">Gestión de roster y próximos encuentros.</p>
+            <div class="p-8 text-center">
+                <h2 class="text-3xl font-black text-red-600 italic uppercase">ALV SPORT</h2>
+                <p class="text-slate-400 font-bold uppercase tracking-widest text-sm mt-2">Easy Pitch Varonil</p>
+                <div class="mt-6 inline-block bg-red-600 text-white px-6 py-2 rounded-full font-black text-xs uppercase italic">Entrar</div>
             </div>
         </div>
 
-        <button onclick="cerrarBienvenida()" class="w-full bg-blue-900 hover:bg-red-600 text-white font-black py-4 rounded-2xl transition-all duration-300 shadow-xl uppercase tracking-widest text-xs">
-            Ingresar al Portal <i class="fa fa-arrow-right ml-2"></i>
-        </button>
-
-        <div class="mt-4">
-            <a href="ayuda.html" class="text-[9px] font-black text-slate-400 hover:text-red-600 transition-colors uppercase tracking-widest italic">
-                <i class="fa fa-question-circle mr-1"></i> Soporte y Ayuda
-            </a>
-        </div>
     </div>
 
-    <div id="login-card" class="card-style p-6 md:p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md text-center relative hidden">
-        
-        <div class="mb-6 flex flex-col items-center bg-slate-100/50 p-4 rounded-2xl">
-            <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-3 italic">En colaboración con</p>
-            <div class="flex items-center justify-center gap-6">
-                <img src="alv_sport_logo.png.jpeg" alt="ALV Sport" class="h-8 md:h-10 w-auto drop-shadow-sm">
-                <div class="h-6 w-[1px] bg-slate-300"></div>
-                <img src="fv_digital_logo.png.webp" alt="FV Digital" class="h-8 md:h-10 w-auto drop-shadow-sm">
-            </div>
-        </div>
-
-        <img src="logoley57icon.jpeg" alt="Logo Ley 57" class="mx-auto mb-4 w-24 md:w-32 h-24 md:h-32 object-contain drop-shadow-2xl">
-        
-        <h2 class="text-blue-900 text-2xl md:text-3xl font-black mb-1 italic tracking-tighter uppercase">Slow Picht Ley 57</h2>
-        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.4em] mb-6">Portal de Gestión 2026 - 1</p>
-
-        <div class="flex bg-slate-100 p-1.5 rounded-2xl mb-6 border border-slate-200">
-            <button onclick="setRole('jugadora')" id="btn-jugadora" class="flex-1 py-3 text-[10px] font-black rounded-xl transition-all duration-300 active-role uppercase">Público</button>
-            <button onclick="setRole('manager')" id="btn-manager" class="flex-1 py-3 text-[10px] font-black rounded-xl transition-all duration-300 text-slate-400 uppercase">Manager</button>
-            <button onclick="setRole('admin')" id="btn-admin" class="flex-1 py-3 text-[10px] font-black rounded-xl transition-all duration-300 text-slate-400 uppercase">Admin</button>
-        </div>
-
-        <div id="login-fields" class="hidden space-y-4 mb-6">
-            <div class="relative">
-                <i class="fa fa-user absolute left-4 top-4 text-slate-300"></i>
-                <input type="text" id="u" placeholder="Correo" class="w-full p-4 pl-12 rounded-2xl bg-slate-50 border border-slate-200 text-blue-900 font-bold text-sm outline-none focus:border-red-500 transition-all">
-            </div>
-            <div class="relative">
-                <i class="fa fa-lock absolute left-4 top-4 text-slate-300"></i>
-                <input type="password" id="p" placeholder="Contraseña" class="w-full p-4 pl-12 rounded-2xl bg-slate-50 border border-slate-200 text-blue-900 font-bold text-sm outline-none focus:border-red-500 transition-all">
-            </div>
-        </div>
-
-        <div id="msg-jugadora" class="py-4 text-slate-500 text-xs font-medium italic px-4">
-            <i class="fa fa-chart-line text-blue-600 mr-2"></i>Resultados, Estadísticas y Mas.
-        </div>
-        
-        <button onclick="entrar()" class="w-full bg-blue-900 hover:bg-red-600 text-white font-black py-4 rounded-2xl transition-all duration-500 shadow-xl uppercase tracking-widest text-xs">
-            Ingresar
-        </button>
-
-        <div class="mt-6 pt-6 border-t border-slate-100 flex justify-between items-center px-2 text-slate-400 font-black uppercase text-[8px]">
-            <p>Temporada 1 - 2026</p>
-            <p>FV Digital & ALV Sport</p>
-        </div>
+    <div class="absolute bottom-8 text-slate-500">
+        <a href="login.html" class="text-[10px] uppercase font-black tracking-[0.3em] hover:text-white transition italic">Acceso Administrativo</a>
     </div>
 
-    <script>
-        function cerrarBienvenida() {
-            const welcome = document.getElementById('welcome-screen');
-            const login = document.getElementById('login-card');
-            welcome.classList.add('animate-exit');
-            setTimeout(() => {
-                welcome.style.display = 'none';
-                login.classList.remove('hidden');
-                login.classList.add('animate-slide-up');
-            }, 500);
-        }
-
-        const container = document.getElementById('animation-container');
-        const icons = ['fa-baseball-ball', 'fa-trophy', 'fa-medal', 'fa-star'];
-        function createItem() {
-            const item = document.createElement('i');
-            item.className = `fa ${icons[Math.floor(Math.random()*icons.length)]} floating-item`;
-            const size = Math.random() * 60 + 20;
-            item.style.fontSize = `${size}px`;
-            let x = Math.random() * window.innerWidth, y = Math.random() * window.innerHeight;
-            let sx = (Math.random()-0.5)*2, sy = (Math.random()-0.5)*2, rot = 0, rs = (Math.random()-0.5)*4;
-            container.appendChild(item);
-            function move() {
-                x += sx; y += sy; rot += rs;
-                if (x < -100 || x > window.innerWidth + 100) sx *= -1;
-                if (y < -100 || y > window.innerHeight + 100) sy *= -1;
-                item.style.transform = `translate(${x}px, ${y}px) rotate(${rot}deg)`;
-                requestAnimationFrame(move);
-            }
-            move();
-        }
-        for (let i = 0; i < 20; i++) { createItem(); }
-
-        let selectedRole = 'jugadora';
-        const API = "https://ley57.onrender.com/api";
-
-        function setRole(role) {
-            selectedRole = role;
-            ['jugadora', 'manager', 'admin'].forEach(r => {
-                const btn = document.getElementById(`btn-${r}`);
-                btn.classList.remove('active-role');
-                btn.classList.add('text-slate-400');
-            });
-            document.getElementById(`btn-${role}`).classList.add('active-role');
-            const fields = document.getElementById('login-fields');
-            const msg = document.getElementById('msg-jugadora');
-            if (role === 'jugadora') { fields.classList.add('hidden'); msg.classList.remove('hidden'); }
-            else { fields.classList.remove('hidden'); msg.classList.add('hidden'); }
-        }
-
-        async function entrar() {
-    // Si es público, no necesita login
-    if (selectedRole === 'jugadora') { 
-        window.location.href = 'estadisticas.html'; 
-        return; 
-    }
-
-    const u = document.getElementById('u').value;
-    const p = document.getElementById('p').value;
-
-    if(!u || !p) return alert("Ingresa tus datos.");
-
-    try {
-        const res = await fetch(`${API}/login`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ correo: u, pass: p })
-        });
-
-        if(res.ok) {
-            const user = await res.json();
-            
-            if (user.rol === 'admin') {
-        localStorage.setItem('userLogueado', JSON.stringify(user)); // Llave para Admin
-    } else {
-        localStorage.setItem('managerLogueado', JSON.stringify(user)); // Llave diferente para Manager
-    }
-    
-    window.location.href = `${user.rol}.html`;
-
-        } else {
-            alert("Correo o contraseña incorrectos.");
-        }
-    } catch (err) { 
-        alert("El servidor está despertando o se encuentra offline. Intenta de nuevo en unos segundos."); 
-    }
-}
-    </script>
 </body>
 </html>

@@ -79,16 +79,18 @@
             <h3 class="text-blue-900 font-black mb-6 uppercase text-xs italic tracking-widest border-b pb-2">Jornada Actual / Marcadores</h3>
             <div id="listaResultados" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"></div>
             
-            <div class="bg-slate-50 p-6 rounded-3xl border-2 border-dashed border-slate-200">
-                <p class="text-[10px] font-black text-slate-400 uppercase mb-4 text-center tracking-widest">Programación Manual</p>
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
-                    <select id="selLoc" class="p-2 border rounded-xl text-xs font-bold bg-white"></select>
-                    <select id="selVis" class="p-2 border rounded-xl text-xs font-bold bg-white"></select>
-                    <input type="date" id="fec" class="p-2 border rounded-xl text-xs font-bold">
-                    <input type="time" id="hor" class="p-2 border rounded-xl text-xs font-bold">
-                    <button onclick="guardarJuego()" class="bg-blue-900 text-white p-2 rounded-xl font-black text-[10px] uppercase shadow-lg">Publicar</button>
-                </div>
-            </div>
+            <div class="grid grid-cols-1 md:grid-cols-6 gap-3"> <select id="selLoc" class="p-2 border rounded-xl text-xs font-bold bg-white"></select>
+    <select id="selVis" class="p-2 border rounded-xl text-xs font-bold bg-white"></select>
+    
+    <select id="selLigaJuego" class="p-2 border rounded-xl text-xs font-bold bg-slate-100">
+        <option value="femenil">Femenil</option>
+        <option value="varonil">Varonil</option>
+    </select>
+
+    <input type="date" id="fec" class="p-2 border rounded-xl text-xs font-bold">
+    <input type="time" id="hor" class="p-2 border rounded-xl text-xs font-bold">
+    <button onclick="guardarJuego()" class="bg-blue-900 text-white p-2 rounded-xl font-black text-[10px] uppercase shadow-lg">Publicar</button>
+</div>
         </section>
 
         <section class="bg-white p-6 rounded-3xl border border-red-100 shadow-sm">
@@ -113,16 +115,28 @@
     </div>
 
     <div id="modalEquipo" class="modal">
-        <div class="bg-white p-8 rounded-3xl w-80 shadow-2xl border-t-8 border-emerald-600">
-            <h2 class="font-black mb-4 text-center italic uppercase">Nuevo Equipo</h2>
-            <input type="text" id="teamName" placeholder="NOMBRE" class="w-full p-3 border rounded-xl mb-4 font-bold outline-none uppercase bg-slate-50">
-            <select id="teamCat" class="w-full p-3 border rounded-xl mb-6 font-bold text-xs uppercase bg-slate-50"><option value="Intermedia">Intermedia</option><option value="Relax">Relax</option></select>
-            <div class="flex gap-2">
-                <button onclick="toggleModal('modalEquipo')" class="flex-1 bg-slate-200 p-3 rounded-xl font-bold text-xs uppercase">Cerrar</button>
-                <button onclick="guardarEquipo()" class="flex-1 bg-emerald-600 text-white p-3 rounded-xl font-bold text-xs uppercase">Guardar</button>
-            </div>
+    <div class="bg-white p-8 rounded-3xl w-80 shadow-2xl border-t-8 border-emerald-600">
+        <h2 class="font-black mb-4 text-center italic uppercase">Nuevo Equipo</h2>
+        
+        <input type="text" id="teamName" placeholder="NOMBRE" class="w-full p-3 border rounded-xl mb-4 font-bold outline-none uppercase bg-slate-50">
+        
+        <select id="teamCat" class="w-full p-3 border rounded-xl mb-4 font-bold text-xs uppercase bg-slate-50">
+            <option value="Intermedia">Intermedia</option>
+            <option value="Relax">Relax</option>
+        </select>
+
+        <p class="text-[9px] font-black text-slate-400 uppercase mb-1 ml-1">Seleccionar Liga</p>
+        <select id="teamLiga" class="w-full p-3 border rounded-xl mb-6 font-bold text-xs uppercase bg-slate-50">
+            <option value="femenil">Ley 57 (Femenil)</option>
+            <option value="varonil">ALV Sport (Varonil)</option>
+        </select>
+
+        <div class="flex gap-2">
+            <button onclick="toggleModal('modalEquipo')" class="flex-1 bg-slate-200 p-3 rounded-xl font-bold text-xs uppercase">Cerrar</button>
+            <button onclick="guardarEquipo()" class="flex-1 bg-emerald-600 text-white p-3 rounded-xl font-bold text-xs uppercase">Guardar</button>
         </div>
     </div>
+</div>
 
     <script>
         const API = "https://ley57.onrender.com/api";
@@ -234,11 +248,23 @@
         }
 
         async function guardarJuego() {
-            const local = document.getElementById('selLoc').value, visita = document.getElementById('selVis').value, fecha = document.getElementById('fec').value, hora = document.getElementById('hor').value;
-            if(!local || !visita || !fecha || !hora) return alert("Completa los datos");
-            await fetch(`${API}/games`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ local, visita, fecha, hora, status: "pendiente" }) });
-            cargarResultados();
-        }
+    const local = document.getElementById('selLoc').value;
+    const visita = document.getElementById('selVis').value;
+    const liga = document.getElementById('selLigaJuego').value; // Capturamos la liga del juego
+    const fecha = document.getElementById('fec').value;
+    const hora = document.getElementById('hor').value;
+
+    if(!local || !visita || !fecha || !hora) return alert("Completa los datos");
+
+    await fetch(`${API}/games`, { 
+        method:'POST', 
+        headers:{'Content-Type':'application/json'}, 
+        body:JSON.stringify({ 
+            local, visita, fecha, hora, liga, status: "pendiente" 
+        }) 
+    });
+    cargarResultados();
+}
 
         async function finalizarJuego(id, loc, vis) {
             const sL = parseInt(document.getElementById(`sc-${id}-L`).value), sV = parseInt(document.getElementById(`sc-${id}-V`).value);
@@ -264,7 +290,30 @@
         async function eliminarJugadora(id) { if(confirm("¿Borrar?")) { await fetch(`${API}/players/${id}`, { method: 'DELETE' }); verRosterEquipo(); } }
         async function eliminarEquipo(id) { if(confirm("¿Borrar equipo?")) { await fetch(`${API}/equipos/${id}`, { method: 'DELETE' }); cargarEquipos(); } }
         async function eliminarJuego(id) { if(confirm("¿Borrar juego?")) { await fetch(`${API}/games/${id}`, { method: 'DELETE' }); cargarResultados(); } }
-        async function guardarEquipo() { const n = document.getElementById('teamName').value, c = document.getElementById('teamCat').value; if(!n) return; await fetch(`${API}/equipos`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ nombre: n.toUpperCase(), categoria: c }) }); toggleModal('modalEquipo'); cargarEquipos(); }
+
+
+async function guardarEquipo() {
+    const n = document.getElementById('teamName').value;
+    const c = document.getElementById('teamCat').value;
+    const l = document.getElementById('teamLiga').value; // Captura la liga seleccionada
+
+    if(!n) return alert("Escribe el nombre del equipo");
+
+    await fetch(`${API}/equipos`, { 
+        method: 'POST', 
+        headers: {'Content-Type':'application/json'}, 
+        body: JSON.stringify({ 
+            nombre: n.toUpperCase(), 
+            categoria: c,
+            liga: l // Enviamos la liga (femenil o varonil)
+        }) 
+    });
+
+    toggleModal('modalEquipo'); 
+    cargarEquipos(); // Refresca las tablas
+    document.getElementById('teamName').value = ""; // Limpia el input
+}
+
         function descargarHistorial() { window.location.href = `${API}/games/download`; }
         async function limpiarHistorialSemanal() { if(confirm("¿Limpiar todo el historial de juegos finalizados?")) { await fetch(`${API}/games/clear/history`, { method: 'DELETE' }); cargarResultados(); } }
         async function escanearHoja() { const img = document.getElementById('imageInput').files[0]; if(!img) return alert("Sube foto"); Tesseract.recognize(img, 'spa').then(({ data: { text } }) => { document.getElementById('resultadoIA').value = text; }); }
