@@ -88,22 +88,34 @@
         </div>
     </main>
 
-   <footer class="w-full max-w-7xl mx-auto py-12 mt-10 border-t border-slate-800 flex flex-col items-center gap-6">
+  <footer class="w-full max-w-7xl mx-auto py-16 mt-10 border-t border-slate-800 flex flex-col items-center">
         
-        <div class="flex flex-col items-center gap-2">
-            <p class="text-[8px] uppercase font-black text-slate-500 tracking-[0.5em]">Desarrollado por</p>
-            <img src="fv_digital_logo.png.webp" class="h-10 opacity-50 hover:opacity-100 transition-opacity duration-500 grayscale hover:grayscale-0">
-        </div>
-
-        <a href="login.html" class="group flex items-center gap-3 text-slate-500 hover:text-white transition-all">
-            <span class="h-[1px] w-8 bg-slate-700 group-hover:w-12 group-hover:bg-red-600 transition-all"></span>
-            <span class="text-[10px] uppercase font-black tracking-[0.4em] italic">Acceso Panel Administrativo</span>
-            <span class="h-[1px] w-8 bg-slate-700 group-hover:w-12 group-hover:bg-red-600 transition-all"></span>
+        <a href="login.html" class="group flex items-center gap-3 text-slate-500 hover:text-red-500 transition-all mb-12">
+            <span class="h-[1px] w-6 bg-slate-700 group-hover:bg-red-600 transition-all"></span>
+            <span class="text-[9px] uppercase font-black tracking-[0.4em] italic">Acceso Administrativo</span>
+            <span class="h-[1px] w-6 bg-slate-700 group-hover:bg-red-600 transition-all"></span>
         </a>
 
-        <p class="text-slate-600 text-[9px] font-bold uppercase tracking-widest">
-            © 2026 FV Digital | Software Engineering
-        </p>
+        <div class="flex flex-col items-center gap-4 mb-6">
+            <p class="text-[10px] uppercase font-black text-slate-400 tracking-[0.6em] opacity-40">Desarrollado por</p>
+            <div class="relative group">
+                <div class="absolute inset-0 bg-blue-500/20 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                
+                <img src="fv_digital_logo.png.webp" 
+                     class="h-24 md:h-32 relative z-10 drop-shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:drop-shadow-[0_0_30px_rgba(59,130,246,0.5)] transition-all duration-500 transform hover:scale-110"
+                     alt="FV Digital Logo">
+            </div>
+        </div>
+
+        <div class="text-center">
+            <p class="text-white text-sm font-black italic uppercase tracking-tighter">
+                FV <span class="text-red-600">Digital</span>
+            </p>
+            <p class="text-slate-500 text-[10px] font-bold uppercase tracking-[0.3em] mt-1">
+                © 2026 Software Engineering
+            </p>
+        </div>
+
     </footer>
 
 </body>
