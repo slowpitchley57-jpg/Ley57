@@ -223,31 +223,35 @@
             document.getElementById('topHR').innerHTML = topHR.map((p, i) => `<div class="flex justify-between items-center border-b border-slate-700 pb-1"><span class="font-bold uppercase text-[11px]"><span class="text-blue-500 mr-2">#${i+1}</span> ${p.nombre}</span><span class="font-black text-blue-400 italic">${p.hr || 0} HR</span></div>`).join('');
         }
 
-        async function verDetalleRoster(nombreEquipo) {
+           async function verDetalleRoster(nombreEquipo) {
+    // 1. Mostramos el nombre en el título tal cual viene
     document.getElementById('detNombreEquipo').innerText = nombreEquipo;
     
-    // 1. Quitamos el filtro de liga de la URL para que el servidor mande TODO lo de ese equipo
-    const res = await fetch(`${API}/players?equipo=${encodeURIComponent(nombreEquipo)}`);
+    // 2. Traemos a TODOS los jugadores de la liga femenil primero
+    // Esto es más seguro que filtrar por nombre en la URL si hay dudas con las mayúsculas
+    const res = await fetch(`${API}/players?liga=femenil`);
     const allPlayers = await res.json();
     
-    // 2. Filtramos en el navegador: 
-    // Que el equipo coincida Y (que la liga sea femenil O que no tenga liga definida)
+    // 3. FILTRO DINÁMICO: 
+    // Comparamos el nombre del equipo ignorando mayúsculas/minúsculas y espacios
     const players = allPlayers.filter(p => 
-        (!p.liga || p.liga === 'femenil')
+        p.equipo.trim().toUpperCase() === nombreEquipo.trim().toUpperCase()
     );
     
+    const container = document.getElementById('bodyDetalleJugadoras');
+
     if(players.length === 0) {
-        document.getElementById('bodyDetalleJugadoras').innerHTML = `
-            <tr><td colspan="6" class="p-10 text-center text-slate-400 italic">No hay jugadoras registradas en este roster.</td></tr>`;
+        container.innerHTML = `
+            <tr><td colspan="6" class="p-10 text-center text-slate-400 italic">No hay jugadoras registradas para ${nombreEquipo}.</td></tr>`;
     } else {
-        document.getElementById('bodyDetalleJugadoras').innerHTML = players.map(p => `
-            <tr class="hover:bg-slate-50 border-b">
+        container.innerHTML = players.map(p => `
+            <tr class="hover:bg-slate-50 border-b transition-colors">
                 <td class="p-3 font-bold uppercase text-blue-900">${p.nombre}</td>
                 <td class="text-center font-semibold text-slate-500">${p.jj || 0}</td>
                 <td class="text-center font-semibold text-slate-500">${p.vb || 0}</td>
                 <td class="text-center text-emerald-600 font-black">${p.h || 0}</td>
                 <td class="text-center text-red-500 font-black">${p.hr || 0}</td>
-                <td class="text-center text-blue-600 font-black bg-blue-50/50">${(p.avg || 0).toFixed(3)}</td>
+                <td class="text-center text-blue-600 font-black bg-blue-50/30">${(p.avg || 0).toFixed(3)}</td>
             </tr>`).join('');
     }
 
