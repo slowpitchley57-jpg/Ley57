@@ -75,7 +75,7 @@
             <div onclick="location.href='estadisticas.html'" class="card-hover cursor-pointer bg-white rounded-[3rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)] group border-4 border-transparent hover:border-blue-500 transition-all">
                 <div class="h-72 bg-gradient-to-br from-blue-800 to-blue-950 flex items-center justify-center p-10 relative shine text-white">
                     <img src="imgley57.pgn.png" class="h-44 z-10 drop-shadow-2xl">
-                    <div class="absolute top-4 right-6 text-white/10 text-6xl font-black italic">SLOW PICHT</div>
+                    <div class="absolute top-4 right-6 text-white/10 text-6xl font-black italic">SLOW PITCH</div>
                 </div>
                 <div class="p-10 text-center">
                     <h2 class="text-4xl font-black text-blue-900 italic uppercase tracking-tighter leading-none">Slow Pitch LEY 57</h2>
@@ -103,34 +103,44 @@
         </div>
     </main>
 
-    <footer class="w-full max-w-7xl mx-auto py-16 mt-10 border-t border-slate-800 flex flex-col items-center">
+    <footer class="w-full max-w-7xl mx-auto py-20 mt-10 border-t border-slate-800 flex flex-col items-center">
         
-        <a href="login.html" class="group flex items-center gap-3 text-slate-500 hover:text-red-500 transition-all mb-12">
-            <span class="h-[1px] w-6 bg-slate-700 group-hover:bg-red-600 transition-all"></span>
-            <span class="text-[9px] uppercase font-black tracking-[0.4em] italic">Acceso Administrativo</span>
-            <span class="h-[1px] w-6 bg-slate-700 group-hover:bg-red-600 transition-all"></span>
-        </a>
+        <div class="flex flex-col items-center gap-3 mb-16">
+            <a href="login.html" class="bg-slate-900 hover:bg-red-600 border border-slate-700 hover:border-red-500 text-white px-10 py-4 rounded-2xl transition-all duration-500 shadow-xl flex items-center gap-3 group">
+                <i class="fa fa-lock text-slate-500 group-hover:text-white transition-colors"></i>
+                <span class="text-[10px] uppercase font-black tracking-[0.3em] italic">Acceso Panel de Control</span>
+            </a>
+            <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest animate-pulse">
+                <i class="fa fa-info-circle text-red-600 mr-1"></i> Clic aquí si eres Manager o Administrador
+            </p>
+        </div>
 
-        <div class="flex flex-col items-center gap-4 mb-6">
-            <p class="text-[10px] uppercase font-black text-slate-400 tracking-[0.6em] opacity-40">Desarrollado por</p>
-           <div class="relative group">
-    <div class="absolute inset-0 bg-blue-500/20 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-    
-    <a href="https://wa.me/526625374491?text=Hola%20FV%20Digital,%20me%20interesa%20obtener%20información%20sobre%20tus%20servicios%20de%20software" 
-       target="_blank" 
-       class="block relative z-10">
-        <img src="fv_digital_logo.png.webp" 
-             class="h-24 md:h-32 drop-shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:drop-shadow-[0_0_30px_rgba(59,130,246,0.5)] transition-all duration-500 transform hover:scale-110"
-             alt="FV Digital Logo">
-    </a>
-</div>
+        <div class="flex flex-col items-center gap-6 mb-8">
+            <div class="text-center">
+                <p class="text-[10px] uppercase font-black text-slate-400 tracking-[0.6em] opacity-40 mb-2">Desarrollado por</p>
+                <div class="bg-blue-600/10 border border-blue-500/20 text-blue-400 text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-widest mb-4 inline-block">
+                    Clic al logo para información de la marca
+                </div>
+            </div>
+
+            <div class="relative group">
+                <div class="absolute inset-0 bg-blue-600/20 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                
+                <a href="https://wa.me/526625374491?text=Hola%20FV%20Digital,%20me%20interesa%20obtener%20información%20sobre%20tus%20servicios%20de%20software" 
+                   target="_blank" 
+                   class="block relative z-10">
+                    <img src="fv_digital_logo.png.webp" 
+                         class="h-28 md:h-36 drop-shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:drop-shadow-[0_0_40px_rgba(59,130,246,0.6)] transition-all duration-500 transform hover:scale-110"
+                         alt="FV Digital Logo">
+                </a>
+            </div>
         </div>
 
         <div class="text-center">
-            <p class="text-white text-sm font-black italic uppercase tracking-tighter leading-none">
+            <p class="text-white text-base font-black italic uppercase tracking-tighter leading-none">
                 FV <span class="text-red-600">Digital</span>
             </p>
-            <p class="text-slate-500 text-[10px] font-bold uppercase tracking-[0.3em] mt-2">
+            <p class="text-slate-500 text-[10px] font-bold uppercase tracking-[0.3em] mt-3">
                 © 2026 Software Engineering
             </p>
         </div>
