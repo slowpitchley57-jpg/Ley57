@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Master Admin - LEY 57 & ALV SPORT</title>
+    <title>Master Admin - Multiliga Pro</title>
     <link rel="icon" type="image/png" href="logoley57icon.jpeg">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js"></script>
@@ -39,18 +39,11 @@
             <button onclick="location.reload()" class="w-full text-left p-3 hover:bg-blue-800 rounded-xl transition flex items-center gap-3"><i class="fa fa-sync"></i> Sincronizar</button>
             <button onclick="toggleModal('modalEquipo')" class="w-full text-left p-3 bg-emerald-600 rounded-xl font-bold flex items-center gap-3"><i class="fa fa-plus-circle"></i> Nuevo Equipo</button>
             <button onclick="toggleModal('modalRosters')" class="w-full text-left p-3 bg-amber-500 rounded-xl font-bold flex items-center gap-3"><i class="fa fa-user-edit"></i> Roster / Stats</button>
-            <button onclick="toggleModal('modalIA')" class="w-full text-left p-3 bg-purple-600 rounded-xl font-bold flex items-center gap-3 hover:bg-purple-700 transition">
-                <i class="fa fa-robot"></i> Generar Rol IA
-            </button> 
+            <button onclick="toggleModal('modalIA')" class="w-full text-left p-3 bg-purple-600 rounded-xl font-bold flex items-center gap-3"><i class="fa fa-robot"></i> Generar Rol IA</button> 
             <hr class="opacity-20">
             <button onclick="limpiarHistorialSemanal()" class="w-full text-left p-3 bg-red-600 hover:bg-red-700 rounded-xl font-bold flex items-center gap-3 transition"><i class="fa fa-broom"></i> Limpiar Semana</button>
             <a href="index.html" target="_blank" class="block p-3 bg-blue-700 rounded-xl text-center font-black italic uppercase text-[10px] tracking-widest no-underline text-white">Ver Portal Público</a>
         </nav>
-
-        <div class="mt-auto pt-4 border-t border-blue-800 flex-shrink-0 space-y-2">
-            <button onclick="descargarHistorial()" class="w-full text-left p-3 bg-slate-700 hover:bg-slate-800 rounded-xl font-bold flex items-center gap-3 transition"><i class="fa fa-file-download"></i> Reporte</button>
-            <button onclick="cerrarSesion()" class="w-full text-left p-2 text-red-400 font-bold uppercase text-[9px] hover:text-white transition"><i class="fa fa-power-off mr-2"></i> Salir</button>
-        </div>
     </aside>
 
     <main class="flex-1 p-8 space-y-8 overflow-y-auto">
@@ -79,29 +72,26 @@
         </div>
 
         <section class="bg-white p-6 rounded-3xl border shadow-sm">
-            <h3 class="text-blue-900 font-black mb-6 uppercase text-xs italic tracking-widest border-b pb-2">Marcadores Pendientes</h3>
-            <div id="listaResultados" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"></div>
+            <h3 class="text-blue-900 font-black mb-4 uppercase text-xs italic tracking-widest border-b pb-2">Programar Jornada</h3>
             
-            <div class="grid grid-cols-1 md:grid-cols-6 gap-3 bg-slate-50 p-4 rounded-2xl border border-dashed"> 
+            <div class="mb-4 bg-slate-100 p-3 rounded-xl flex items-center gap-4">
+                <span class="text-[10px] font-black uppercase text-slate-500">1. Filtrar Liga:</span>
+                <select id="filtroLigaGlobal" onchange="cargarEquipos()" class="p-2 border rounded-lg text-xs font-bold bg-white text-blue-900">
+                    <option value="femenil">LEY 57 (FEMENIL)</option>
+                    <option value="varonil">ALV SPORT (VARONIL)</option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-3 bg-slate-50 p-4 rounded-2xl border border-dashed"> 
                 <select id="selLoc" class="p-2 border rounded-xl text-xs font-bold bg-white"></select>
                 <select id="selVis" class="p-2 border rounded-xl text-xs font-bold bg-white"></select>
-                <select id="selLigaJuego" class="p-2 border rounded-xl text-xs font-bold bg-white">
-                    <option value="femenil">Liga Femenil</option>
-                    <option value="varonil">Liga Varonil</option>
-                </select>
                 <input type="date" id="fec" class="p-2 border rounded-xl text-xs font-bold">
                 <input type="time" id="hor" class="p-2 border rounded-xl text-xs font-bold">
-                <button onclick="guardarJuego()" class="bg-blue-900 text-white p-2 rounded-xl font-black text-[10px] uppercase shadow-lg hover:bg-black">Programar</button>
+                <button onclick="guardarJuego()" class="bg-blue-900 text-white p-2 rounded-xl font-black text-[10px] uppercase shadow-lg hover:bg-black">Programar Juego</button>
             </div>
-        </section>
 
-        <section class="bg-white p-6 rounded-3xl border border-red-100 shadow-sm opacity-50">
-            <h3 class="text-red-600 font-black mb-4 uppercase text-xs flex items-center gap-2 italic"><i class="fa fa-robot"></i> IA Scanner OCR</h3>
-            <div class="flex gap-4">
-                <input type="file" id="imageInput" class="flex-1 text-xs border p-2 rounded-xl bg-slate-50">
-                <button onclick="escanearHoja()" class="bg-red-600 text-white px-6 rounded-xl font-bold text-xs uppercase">Escanear</button>
-            </div>
-            <textarea id="resultadoIA" class="w-full mt-4 p-3 bg-amber-50 border rounded-xl text-[10px] h-20 font-mono" placeholder="Resultado..."></textarea>
+            <h3 class="text-blue-900 font-black my-6 uppercase text-xs italic tracking-widest border-b pb-2">Resultados Pendientes</h3>
+            <div id="listaResultados" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </section>
     </main>
 
@@ -109,7 +99,13 @@
         <div class="bg-white p-6 rounded-3xl w-full max-w-5xl max-h-[85vh] flex flex-col shadow-2xl border-t-8 border-amber-500">
             <div class="flex justify-between items-center mb-6">
                 <div><h2 class="font-black text-amber-600 italic uppercase text-xl">Editor Roster</h2></div>
-                <select id="filterRoster" onchange="verRosterEquipo()" class="p-3 border rounded-xl font-bold text-xs bg-slate-50"></select>
+                <div class="flex gap-2">
+                   <select id="ligaRoster" onchange="actualizarSelectRoster()" class="p-3 border rounded-xl font-bold text-xs bg-slate-50">
+                       <option value="femenil">Femenil</option>
+                       <option value="varonil">Varonil</option>
+                   </select>
+                   <select id="filterRoster" onchange="verRosterEquipo()" class="p-3 border rounded-xl font-bold text-xs bg-slate-50"></select>
+                </div>
             </div>
             <div id="containerRoster" class="flex-1 overflow-y-auto space-y-4 custom-scroll pr-2"></div>
             <button onclick="toggleModal('modalRosters')" class="mt-6 bg-slate-800 text-white p-4 rounded-2xl font-black uppercase text-xs">Cerrar</button>
@@ -138,71 +134,46 @@
     <div id="modalIA" class="modal">
         <div class="bg-white p-8 rounded-3xl w-80 shadow-2xl border-t-8 border-purple-600">
             <h2 class="font-black mb-2 text-center italic uppercase">Generar Rol IA</h2>
-            <p class="text-[9px] text-slate-400 font-bold uppercase text-center mb-6">Elige la liga destino</p>
             <select id="ligaIA" class="w-full p-3 border rounded-xl mb-6 font-bold text-xs uppercase bg-slate-50">
                 <option value="femenil">Ley 57 (Femenil)</option>
                 <option value="varonil">ALV Sport (Varonil)</option>
             </select>
             <div class="flex gap-2">
                 <button onclick="toggleModal('modalIA')" class="flex-1 bg-slate-200 p-3 rounded-xl font-bold text-xs uppercase">Cerrar</button>
-                <button onclick="ejecutarIA()" class="flex-1 bg-purple-600 text-white p-3 rounded-xl font-bold text-xs uppercase shadow-lg">Generar</button>
+                <button onclick="ejecutarIA()" class="flex-1 bg-purple-600 text-white p-3 rounded-xl font-bold text-xs uppercase">Generar</button>
             </div>
         </div>
     </div>
 
     <script>
         const API = "https://ley57.onrender.com/api";
-
-        function gestionarSesion() {
-            const sesion = localStorage.getItem('userLogueado');
-            if (sesion) {
-                const user = JSON.parse(sesion);
-                document.getElementById('nombreUsuarioActivo').innerText = user.correo.split('@')[0].toUpperCase();
-            } else { window.location.href = 'index.html'; }
-        }
-
-        function cerrarSesion() { 
-            if(confirm("¿Cerrar sesión?")) { localStorage.clear(); window.location.href = 'index.html'; }
-        }
-
-        function toggleModal(id) { document.getElementById(id).classList.toggle('active'); }
+        let todosLosEquipos = []; // Guardamos todos para filtrar rápido en memoria
 
         async function cargarTodo() {
             gestionarSesion();
             cargarConfig();
-            cargarEquipos();
+            await cargarEquipos();
             cargarResultados();
-        }
-
-        async function cargarConfig() {
-            const res = await fetch(`${API}/config`);
-            const conf = await res.json();
-            document.getElementById('masterSwitch').checked = conf.permitirAltas;
-        }
-
-        async function toggleAltas() {
-            const val = document.getElementById('masterSwitch').checked;
-            await fetch(`${API}/config`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ permitirAltas: val }) });
         }
 
         async function cargarEquipos() {
             const res = await fetch(`${API}/equipos`);
-            const equipos = await res.json();
-            
+            todosLosEquipos = await res.json();
+            renderizarTablas();
+            actualizarSelectores();
+        }
+
+        function renderizarTablas() {
             const tIntFem = document.getElementById('tablaIntermedia');
             const tRelFem = document.getElementById('tablaRelax');
             const tIntVar = document.getElementById('tablaIntermediaVar');
             const tRelVar = document.getElementById('tablaRelaxVar');
             
-            const selects = [document.getElementById('selLoc'), document.getElementById('selVis'), document.getElementById('filterRoster')];
-            
             tIntFem.innerHTML = ""; tRelFem.innerHTML = ""; tIntVar.innerHTML = ""; tRelVar.innerHTML = "";
-            selects.forEach(s => s.innerHTML = '<option value="">-- EQUIPO --</option>');
 
-            equipos.sort((a,b) => b.g - a.g).forEach(e => {
+            todosLosEquipos.sort((a,b) => b.g - a.g).forEach(e => {
                 const jj = (e.g || 0) + (e.p || 0);
                 const dif = (e.ca || 0) - (e.ce || 0);
-                
                 const fila = `
                     <tr class="hover:bg-slate-50 border-b">
                         <td class="p-4 text-left uppercase italic font-black ${e.liga === 'varonil' ? 'text-red-600' : 'text-blue-900'}">${e.nombre}</td>
@@ -214,16 +185,74 @@
                         <td class="font-black ${dif>=0 ? 'text-blue-600' : 'text-orange-500'}">${dif>0?'+'+dif:dif}</td>
                         <td><button onclick="eliminarEquipo('${e._id}')" class="text-slate-300 hover:text-red-500"><i class="fa fa-trash"></i></button></td>
                     </tr>`;
-                    
+                
                 if(e.liga === 'varonil') {
                     if(e.categoria === "Intermedia") tIntVar.innerHTML += fila; else tRelVar.innerHTML += fila;
                 } else {
                     if(e.categoria === "Intermedia") tIntFem.innerHTML += fila; else tRelFem.innerHTML += fila;
                 }
-                selects.forEach(s => s.innerHTML += `<option value="${e.nombre}">${e.nombre} (${e.liga === 'varonil' ? 'V' : 'F'})</option>`);
             });
         }
 
+        function actualizarSelectores() {
+            const ligaSeleccionada = document.getElementById('filtroLigaGlobal').value;
+            const sLoc = document.getElementById('selLoc');
+            const sVis = document.getElementById('selVis');
+            
+            const filtrados = todosLosEquipos.filter(e => e.liga === ligaSeleccionada);
+            
+            let options = '<option value="">-- EQUIPO --</option>';
+            filtrados.forEach(e => options += `<option value="${e.nombre}">${e.nombre}</option>`);
+            
+            sLoc.innerHTML = options;
+            sVis.innerHTML = options;
+            actualizarSelectRoster();
+        }
+
+        function actualizarSelectRoster() {
+            const liga = document.getElementById('ligaRoster').value;
+            const filter = document.getElementById('filterRoster');
+            const filtrados = todosLosEquipos.filter(e => e.liga === liga);
+            
+            let options = '<option value="">-- SELECCIONAR --</option>';
+            filtrados.forEach(e => options += `<option value="${e.nombre}">${e.nombre}</option>`);
+            filter.innerHTML = options;
+        }
+
+        async function guardarJuego() {
+            const local = document.getElementById('selLoc').value;
+            const visita = document.getElementById('selVis').value;
+            const liga = document.getElementById('filtroLigaGlobal').value;
+            const fecha = document.getElementById('fec').value;
+            const hora = document.getElementById('hor').value;
+            if(!local || !visita || !fecha || !hora) return alert("Faltan datos");
+            await fetch(`${API}/games`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ local, visita, fecha, hora, liga, status: "pendiente" }) });
+            cargarResultados();
+        }
+
+        async function verRosterEquipo() {
+            const eq = document.getElementById('filterRoster').value, cont = document.getElementById('containerRoster');
+            if(!eq) return;
+            cont.innerHTML = "<p class='text-center py-4'>Cargando...</p>";
+            const res = await fetch(`${API}/players?equipo=${encodeURIComponent(eq)}`);
+            const players = await res.json();
+            cont.innerHTML = players.map(p => `
+                <div class="p-3 bg-slate-50 rounded-xl border flex flex-col gap-2 shadow-sm">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" onchange="updPlFull('${p._id}','nombre',this.value)" value="${p.nombre}" class="w-full p-2 border rounded font-bold text-xs uppercase bg-white">
+                        <input type="text" value="${p.fechaNacimiento}" class="w-full p-2 border rounded text-xs bg-slate-100" readonly>
+                    </div>
+                    <div class="flex items-center gap-2 text-[10px] font-bold">
+                        JJ <input type="number" onchange="updPlFull('${p._id}','jj',this.value)" value="${p.jj||0}" class="input-inline">
+                        AB <input type="number" onchange="updPlFull('${p._id}','vb',this.value)" value="${p.vb||0}" class="input-inline">
+                        H <input type="number" onchange="updPlFull('${p._id}','h',this.value)" value="${p.h||0}" class="input-inline">
+                        HR <input type="number" onchange="updPlFull('${p._id}','hr',this.value)" value="${p.hr||0}" class="input-inline">
+                        <button onclick="eliminarJugadora('${p._id}')" class="ml-auto text-red-500 hover:text-red-700 transition"><i class="fa fa-trash"></i></button>
+                    </div>
+                </div>`).join('');
+        }
+
+        // --- FUNCIONES DE APOYO RESTANTES ---
         async function updEq(id, campo, val) {
             let d = {}; d[campo] = Number(val);
             await fetch(`${API}/equipos/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(d) });
@@ -236,7 +265,8 @@
             const cont = document.getElementById('listaResultados');
             cont.innerHTML = "";
             games.filter(g => g.status === 'pendiente').forEach(g => {
-                cont.innerHTML += `<div class="bg-white p-4 rounded-3xl border shadow-sm relative border-l-4 ${g.liga === 'varonil' ? 'border-red-600':'border-blue-600'}">
+                cont.innerHTML += `
+                <div class="bg-white p-4 rounded-3xl border shadow-sm relative border-l-4 ${g.liga === 'varonil' ? 'border-red-600':'border-blue-600'}">
                     <button onclick="eliminarJuego('${g._id}')" class="absolute -top-2 -right-2 bg-red-600 text-white w-6 h-6 rounded-full text-[8px] shadow-xl"><i class="fa fa-times"></i></button>
                     <div class="flex justify-between text-[8px] font-black text-slate-400 uppercase"><span>${g.fecha}</span><span>${g.hora}</span></div>
                     <div class="flex justify-between items-center py-3">
@@ -249,55 +279,11 @@
             });
         }
 
-        async function guardarJuego() {
-            const local = document.getElementById('selLoc').value;
-            const visita = document.getElementById('selVis').value;
-            const liga = document.getElementById('selLigaJuego').value;
-            const fecha = document.getElementById('fec').value;
-            const hora = document.getElementById('hor').value;
-            if(!local || !visita || !fecha || !hora) return alert("Faltan datos");
-            await fetch(`${API}/games`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ local, visita, fecha, hora, liga, status: "pendiente" }) });
-            cargarResultados();
-        }
-
         async function finalizarJuego(id, loc, vis) {
             const sL = parseInt(document.getElementById(`sc-${id}-L`).value), sV = parseInt(document.getElementById(`sc-${id}-V`).value);
             if(isNaN(sL) || isNaN(sV)) return alert("Pon marcador");
             await fetch(`${API}/games/resultado`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id, sL, sV, ganador: sL > sV ? loc : vis, perdedor: sL > sV ? vis : loc, loc, vis }) });
             cargarEquipos(); cargarResultados();
-        }
-
-        async function verRosterEquipo() {
-            const eq = document.getElementById('filterRoster').value, cont = document.getElementById('containerRoster');
-            if(!eq) return;
-            cont.innerHTML = "<p class='text-center py-4'>Cargando...</p>";
-            const res = await fetch(`${API}/players?equipo=${encodeURIComponent(eq)}`);
-            const players = await res.json();
-            cont.innerHTML = players.map(p => `<div class="p-3 bg-slate-50 rounded-xl border flex flex-col gap-2">
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="text" onchange="updPlFull('${p._id}','nombre',this.value)" value="${p.nombre}" class="w-full p-2 border rounded font-bold text-xs uppercase">
-                    <input type="text" value="${p.fechaNacimiento}" class="w-full p-2 border rounded text-xs" readonly>
-                </div>
-                <div class="flex items-center gap-2 text-[10px] font-bold">
-                    JJ <input type="number" onchange="updPlFull('${p._id}','jj',this.value)" value="${p.jj||0}" class="input-inline">
-                    AB <input type="number" onchange="updPlFull('${p._id}','vb',this.value)" value="${p.vb||0}" class="input-inline">
-                    H <input type="number" onchange="updPlFull('${p._id}','h',this.value)" value="${p.h||0}" class="input-inline">
-                    HR <input type="number" onchange="updPlFull('${p._id}','hr',this.value)" value="${p.hr||0}" class="input-inline">
-                    <button onclick="eliminarJugadora('${p._id}')" class="ml-auto text-red-500"><i class="fa fa-trash"></i></button>
-                </div>
-            </div>`).join('');
-        }
-
-        async function updPlFull(id, campo, val) {
-            let d = {}; d[campo] = (campo === 'nombre') ? val : Number(val);
-            await fetch(`${API}/players/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(d) });
-        }
-
-        async function guardarEquipo() {
-            const n = document.getElementById('teamName').value, c = document.getElementById('teamCat').value, l = document.getElementById('teamLiga').value;
-            if(!n) return alert("Escribe nombre");
-            await fetch(`${API}/equipos`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ nombre: n.toUpperCase(), categoria: c, liga: l }) });
-            toggleModal('modalEquipo'); cargarEquipos();
         }
 
         async function ejecutarIA() {
@@ -307,9 +293,7 @@
             const equipos = await res.json();
             const intermedia = equipos.filter(e => e.categoria === "Intermedia"), relax = equipos.filter(e => e.categoria === "Relax");
             if (equipos.length < 2) return alert("No hay suficientes equipos");
-
             const emparejar = async (lista) => {
-                if (lista.length < 2) return;
                 const shuffled = lista.sort(() => 0.5 - Math.random());
                 for (let i = 0; i < shuffled.length; i += 2) {
                     if (shuffled[i] && shuffled[i+1]) {
@@ -317,18 +301,45 @@
                     }
                 }
             };
-
             if (confirm(`¿Generar rol para ${liga.toUpperCase()}?`)) {
                 await emparejar(intermedia); await emparejar(relax);
                 alert("Rol generado"); cargarResultados();
             }
         }
 
+        async function guardarEquipo() {
+            const n = document.getElementById('teamName').value, c = document.getElementById('teamCat').value, l = document.getElementById('teamLiga').value;
+            if(!n) return alert("Escribe nombre");
+            await fetch(`${API}/equipos`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ nombre: n.toUpperCase(), categoria: c, liga: l }) });
+            toggleModal('modalEquipo'); cargarEquipos();
+        }
+
+        async function updPlFull(id, campo, val) {
+            let d = {}; d[campo] = (campo === 'nombre') ? val : Number(val);
+            await fetch(`${API}/players/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(d) });
+        }
+
+        async function toggleModal(id) { document.getElementById(id).classList.toggle('active'); }
+        function gestionarSesion() {
+            const sesion = localStorage.getItem('userLogueado');
+            if (sesion) {
+                const user = JSON.parse(sesion);
+                document.getElementById('nombreUsuarioActivo').innerText = user.correo.split('@')[0].toUpperCase();
+            } else { window.location.href = 'index.html'; }
+        }
+        async function cargarConfig() {
+            const res = await fetch(`${API}/config`);
+            const conf = await res.json();
+            document.getElementById('masterSwitch').checked = conf.permitirAltas;
+        }
+        async function toggleAltas() {
+            const val = document.getElementById('masterSwitch').checked;
+            await fetch(`${API}/config`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ permitirAltas: val }) });
+        }
         async function eliminarJugadora(id) { if(confirm("¿Borrar?")) { await fetch(`${API}/players/${id}`, { method: 'DELETE' }); verRosterEquipo(); } }
         async function eliminarEquipo(id) { if(confirm("¿Borrar?")) { await fetch(`${API}/equipos/${id}`, { method: 'DELETE' }); cargarEquipos(); } }
         async function eliminarJuego(id) { if(confirm("¿Borrar?")) { await fetch(`${API}/games/${id}`, { method: 'DELETE' }); cargarResultados(); } }
-        function descargarHistorial() { window.location.href = `${API}/games/download`; }
-        async function limpiarHistorialSemanal() { if(confirm("¿Limpiar historial?")) { await fetch(`${API}/games/clear/history`, { method: 'DELETE' }); cargarResultados(); } }
+        function cerrarSesion() { if(confirm("¿Cerrar?")) { localStorage.clear(); window.location.href = 'index.html'; } }
         async function escanearHoja() { const img = document.getElementById('imageInput').files[0]; if(!img) return alert("Sube foto"); Tesseract.recognize(img, 'spa').then(({ data: { text } }) => { document.getElementById('resultadoIA').value = text; }); }
 
         document.addEventListener('DOMContentLoaded', cargarTodo);
