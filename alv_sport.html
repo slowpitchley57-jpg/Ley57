@@ -240,12 +240,22 @@
         }
 
         async function verDetalleRoster(nombreEquipo) {
-            document.getElementById('detNombreEquipo').innerText = nombreEquipo;
-            const res = await fetch(`${API}/players?liga=varonil`);
-            const players = await res.json();
-            document.getElementById('bodyDetalleJugadoras').innerHTML = players.map(p => `<tr class="hover:bg-white border-b"><td class="p-3 font-bold uppercase text-blue-900">${p.nombre}</td><td class="text-center">${p.jj || 0}</td><td class="text-center">${p.vb || 0}</td><td class="text-center text-emerald-600 font-black">${p.h || 0}</td><td class="text-center text-red-500 font-black">${p.hr || 0}</td><td class="text-center text-blue-600 font-black">${(p.avg || 0).toFixed(3)}</td></tr>`).join('');
-            document.getElementById('modalDetalleEquipo').classList.remove('hidden');
-        }
+    document.getElementById('detNombreEquipo').innerText = nombreEquipo;
+    // ERROR CORREGIDO: Ahora filtramos por equipo Y por liga varonil
+    const res = await fetch(`${API}/players?equipo=${encodeURIComponent(nombreEquipo)}&liga=varonil`);
+    const players = await res.json();
+    
+    document.getElementById('bodyDetalleJugadores').innerHTML = players.map(p => `
+        <tr class="hover:bg-white border-b">
+            <td class="p-3 font-bold uppercase text-blue-900">${p.nombre}</td>
+            <td class="text-center">${p.jj || 0}</td>
+            <td class="text-center">${p.vb || 0}</td>
+            <td class="text-center text-emerald-600 font-black">${p.h || 0}</td>
+            <td class="text-center text-red-500 font-black">${p.hr || 0}</td>
+            <td class="text-center text-blue-600 font-black">${(p.avg || 0).toFixed(3)}</td>
+        </tr>`).join('');
+    document.getElementById('modalDetalleEquipo').classList.remove('hidden');
+}
 
         function cerrarDetalle() { document.getElementById('modalDetalleEquipo').classList.add('hidden'); }
 

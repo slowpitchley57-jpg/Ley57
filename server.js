@@ -120,9 +120,13 @@ app.delete('/api/equipos/:id', async (req, res) => {
 
 // Jugadores (CRUD)
 app.get('/api/players', async (req, res) => {
-    const { equipo } = req.query;
-    const filter = equipo ? { equipo: equipo.split(' (')[0].trim() } : {};
-    res.json(await Player.find(filter));
+    const { equipo, liga } = req.query;
+    let filtro = {};
+    if (equipo) filtro.equipo = equipo;
+    if (liga) filtro.liga = liga; // ESTO ES LO QUE FALTA
+    
+    const players = await Player.find(filtro);
+    res.json(players);
 });
 app.post('/api/players', async (req, res) => {
     // Buscamos al equipo para saber su liga antes de guardar al jugador

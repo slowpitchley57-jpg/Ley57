@@ -3,47 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal LEY 57 & ALV SPORT</title>
+    <title>Portal LEY 57 & ALV SPORT - Powered by FV Digital</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .card-hover { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .card-hover:hover { transform: translateY(-10px); }
+        .card-hover { transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .card-hover:hover { transform: translateY(-15px) scale(1.02); }
+        
+        /* Textura de Carbono para ALV Sport */
+        .bg-carbon {
+            background-color: #111;
+            background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+        }
+        
+        /* Efecto de Brillo */
+        .shine {
+            position: relative;
+            overflow: hidden;
+        }
+        .shine::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            transition: 0.8s;
+        }
+        .card-hover:hover .shine::after {
+            left: 120%;
+        }
     </style>
 </head>
-<body class="bg-slate-900 min-h-screen flex items-center justify-center p-6">
+<body class="bg-[#0f172a] min-h-screen flex flex-col items-center p-6 font-sans">
 
-    <div class="max-w-5xl w-full grid grid-cols-1 md:grid-cols-2 gap-8">
+    <header class="w-full max-w-7xl mx-auto py-10 mb-6 flex flex-col items-center border-b border-slate-800">
+        <div class="flex items-center gap-8 md:gap-12 mb-5">
+            <img src="alv_sport_logo.png.jpeg" class="h-16 md:h-20 object-contain drop-shadow-[0_0_10px_rgba(239,68,68,0.2)]">
+            
+            <div class="h-16 w-px bg-slate-700 opacity-50"></div>
+            
+            <img src="fv_digital_logo.png.webp" class="h-16 md:h-20 object-contain drop-shadow-[0_0_10px_rgba(59,130,246,0.2)]">
+        </div>
         
-        <div onclick="location.href='estadisticas.html'" class="card-hover cursor-pointer bg-white rounded-[2.5rem] overflow-hidden shadow-2xl group">
-            <div class="h-64 bg-blue-900 flex items-center justify-center p-8 relative">
-                <img src="imgley57.pgn.png" class="h-40 z-10">
-                <div class="absolute inset-0 bg-blue-800 opacity-0 group-hover:opacity-20 transition-opacity"></div>
-            </div>
-            <div class="p-8 text-center">
-                <h2 class="text-3xl font-black text-blue-900 italic uppercase">LEY 57</h2>
-                <p class="text-slate-400 font-bold uppercase tracking-widest text-sm mt-2">Liga Softbol Femenil</p>
-                <div class="mt-6 inline-block bg-blue-900 text-white px-6 py-2 rounded-full font-black text-xs uppercase italic">Entrar</div>
-            </div>
+        <div class="text-center">
+            <span class="text-white text-[10px] font-black uppercase tracking-[0.8em] opacity-60">En Colaboración Presentan</span>
+            <div class="h-1 w-24 bg-red-600 mx-auto rounded-full mt-3"></div>
         </div>
+    </header>
 
-        <div onclick="location.href='alv_sport.html'" class="card-hover cursor-pointer bg-white rounded-[2.5rem] overflow-hidden shadow-2xl group">
-            <div class="h-64 bg-red-600 flex items-center justify-center p-8 relative">
-                <i class="fa fa-medal text-white text-8xl z-10"></i>
-                <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity"></div>
+    <main class="flex-grow flex items-center justify-center w-full">
+        <div class="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-10">
+            
+            <div onclick="location.href='estadisticas.html'" class="card-hover cursor-pointer bg-white rounded-[3rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)] group border-4 border-transparent hover:border-blue-500 transition-all">
+                <div class="h-72 bg-gradient-to-br from-blue-800 to-blue-950 flex items-center justify-center p-10 relative shine">
+                    <img src="imgley57.pgn.png" class="h-44 z-10 drop-shadow-2xl">
+                    <div class="absolute top-4 right-6 text-white/10 text-6xl font-black italic">SOFTBOL</div>
+                </div>
+                <div class="p-10 text-center">
+                    <h2 class="text-4xl font-black text-blue-900 italic uppercase tracking-tighter">LEY 57</h2>
+                    <p class="text-slate-400 font-bold uppercase tracking-[0.2em] text-[10px] mt-2">Liga Femenil de Hermosillo</p>
+                    <div class="mt-8 inline-flex items-center gap-2 bg-blue-900 text-white px-8 py-3 rounded-full font-black text-xs uppercase italic group-hover:bg-red-600 transition-colors">
+                        Ver Estadísticas <i class="fa fa-arrow-right text-[10px]"></i>
+                    </div>
+                </div>
             </div>
-            <div class="p-8 text-center">
-                <h2 class="text-3xl font-black text-red-600 italic uppercase">ALV SPORT</h2>
-                <p class="text-slate-400 font-bold uppercase tracking-widest text-sm mt-2">Easy Pitch Varonil</p>
-                <div class="mt-6 inline-block bg-red-600 text-white px-6 py-2 rounded-full font-black text-xs uppercase italic">Entrar</div>
+
+            <div onclick="location.href='alv_sport.html'" class="card-hover cursor-pointer bg-zinc-900 rounded-[3rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] group border-4 border-transparent hover:border-red-600 transition-all">
+                <div class="h-72 bg-carbon flex items-center justify-center p-10 relative shine border-b border-white/5">
+                    <img src="alv_sport_logo.png.jpeg" class="h-44 z-10 drop-shadow-[0_0_15px_rgba(239,68,68,0.3)]">
+                    <div class="absolute top-4 right-6 text-white/5 text-6xl font-black italic">EASY PITCH</div>
+                </div>
+                <div class="p-10 text-center">
+                    <h2 class="text-4xl font-black text-white italic uppercase tracking-tighter">ALV <span class="text-red-600">SPORT</span></h2>
+                    <p class="text-zinc-500 font-bold uppercase tracking-[0.2em] text-[10px] mt-2">Amigos del Easy Sonora</p>
+                    <div class="mt-8 inline-flex items-center gap-2 bg-red-600 text-white px-8 py-3 rounded-full font-black text-xs uppercase italic group-hover:bg-white group-hover:text-red-600 transition-colors">
+                        Ver Estadísticas <i class="fa fa-arrow-right text-[10px]"></i>
+                    </div>
+                </div>
             </div>
+
         </div>
+    </main>
 
-    </div>
-
-    <div class="absolute bottom-8 text-slate-500">
-        <a href="login.html" class="text-[10px] uppercase font-black tracking-[0.3em] hover:text-white transition italic">Acceso Administrativo</a>
-    </div>
+    <footer class="w-full max-w-7xl mx-auto py-12 mt-10 border-t border-slate-800 flex justify-center">
+        <a href="login.html" class="group flex items-center gap-3 text-slate-500 hover:text-white transition-all">
+            <span class="h-[1px] w-8 bg-slate-700 group-hover:w-12 group-hover:bg-red-600 transition-all"></span>
+            <span class="text-[10px] uppercase font-black tracking-[0.4em] italic">Panel Administrativo (FV Digital)</span>
+        </a>
+    </footer>
 
 </body>
 </html>
