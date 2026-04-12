@@ -19,13 +19,20 @@
             background-size: 400% 400%;
             animation: gradientMove 15s ease infinite;
             min-height: 100vh;
+            /* Usamos h-screen dinámico para móviles */
+            height: 100dvh; 
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            position: relative;
         }
         .bg-carbon {
             background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.4;
         }
         .active-role { 
             background-color: #ef4444 !important; 
@@ -38,7 +45,14 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-top: 6px solid #ef4444;
             z-index: 20;
+            width: 90%;
+            max-width: 400px;
+            /* Ajuste para que no se corte en pantallas pequeñas */
+            max-height: 95vh;
+            overflow-y: auto;
         }
+        .card-style::-webkit-scrollbar { width: 0px; }
+        
         .floating-item {
             position: absolute;
             pointer-events: none;
@@ -49,50 +63,50 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="p-4 font-sans relative bg-carbon">
+<body class="p-4 font-sans">
 
+    <div class="bg-carbon"></div>
     <div id="animation-container" class="absolute inset-0 overflow-hidden"></div>
 
-    <div id="login-card" class="card-style p-8 md:p-10 rounded-[3rem] shadow-2xl w-full max-w-md text-center relative animate-fade-in">
+    <div id="login-card" class="card-style p-6 md:p-10 rounded-[2.5rem] shadow-2xl relative animate-fade-in">
         
-        <div class="mb-8 flex flex-col items-center">
-            <p class="text-[8px] font-black text-slate-500 uppercase tracking-[0.6em] mb-4">Plataforma de Gestión</p>
-            <div class="flex items-center justify-center gap-6">
-                <img src="logoalvnegro.jpeg" alt="ALV Sport" class="h-16 md:h-20 w-auto drop-shadow-[0_0_10px_rgba(255,255,255,0.1)] rounded-xl">
-            </div>
-            <div class="h-1 w-16 bg-red-600 mt-6 rounded-full shadow-[0_0_15px_rgba(220,38,38,0.5)]"></div>
+        <div class="mb-6 flex flex-col items-center">
+            <p class="text-[8px] font-black text-slate-500 uppercase tracking-[0.6em] mb-4 text-center">Gestión Profesional</p>
+            <img src="logoalvnegro.jpeg" alt="ALV Sport" class="h-16 md:h-20 w-auto rounded-xl shadow-lg border border-white/5">
+            <div class="h-1 w-12 bg-red-600 mt-4 rounded-full shadow-[0_0_10px_rgba(220,38,38,0.5)]"></div>
         </div>
 
-        <h2 class="text-white text-2xl font-black mb-1 italic uppercase tracking-tighter">Panel de Control</h2>
-        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.4em] mb-8">Acceso Privado 2026</p>
+        <div class="mb-6">
+            <h2 class="text-white text-xl md:text-2xl font-black italic uppercase tracking-tighter">Panel Central</h2>
+            <p class="text-[9px] font-bold text-slate-500 uppercase tracking-[0.4em]">Acceso Administrativo</p>
+        </div>
 
-        <div class="flex bg-slate-900/50 p-1.5 rounded-2xl mb-8 border border-white/5">
+        <div class="flex bg-slate-900/80 p-1 rounded-2xl mb-6 border border-white/5">
             <button onclick="setRole('manager')" id="btn-manager" class="flex-1 py-3 text-[10px] font-black rounded-xl transition-all duration-300 active-role uppercase">Manager</button>
-            <button onclick="setRole('admin')" id="btn-admin" class="flex-1 py-3 text-[10px] font-black rounded-xl transition-all duration-300 text-slate-500 uppercase">Administrador</button>
+            <button onclick="setRole('admin')" id="btn-admin" class="flex-1 py-3 text-[10px] font-black rounded-xl transition-all duration-300 text-slate-500 uppercase">Admin</button>
         </div>
 
-        <div id="login-fields" class="space-y-4 mb-8">
-            <div class="relative group">
-                <i class="fa fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-red-500 transition-colors"></i>
-                <input type="text" id="u" placeholder="Correo Electrónico" class="w-full p-4 pl-12 rounded-2xl bg-black/40 border border-white/10 text-white font-bold text-sm outline-none focus:border-red-600/50 transition-all placeholder:text-slate-600">
+        <div id="login-fields" class="space-y-3 mb-6">
+            <div class="relative">
+                <i class="fa fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                <input type="text" id="u" placeholder="Usuario / Correo" class="w-full p-3.5 pl-11 rounded-xl bg-black/40 border border-white/10 text-white font-bold text-sm outline-none focus:border-red-600/50 transition-all placeholder:text-slate-600">
             </div>
-            <div class="relative group">
-                <i class="fa fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-red-500 transition-colors"></i>
-                <input type="password" id="p" placeholder="Contraseña" class="w-full p-4 pl-12 rounded-2xl bg-black/40 border border-white/10 text-white font-bold text-sm outline-none focus:border-red-600/50 transition-all placeholder:text-slate-600">
+            <div class="relative">
+                <i class="fa fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                <input type="password" id="p" placeholder="Contraseña" class="w-full p-3.5 pl-11 rounded-xl bg-black/40 border border-white/10 text-white font-bold text-sm outline-none focus:border-red-600/50 transition-all placeholder:text-slate-600">
             </div>
         </div>
         
-        <button onclick="entrar()" class="w-full bg-red-600 hover:bg-white hover:text-red-600 text-white font-black py-4 rounded-2xl transition-all duration-500 shadow-[0_10px_30px_rgba(220,38,38,0.3)] uppercase tracking-widest text-xs italic">
-            Iniciar Sesión <i class="fa fa-sign-in-alt ml-2"></i>
+        <button onclick="entrar()" class="w-full bg-red-600 hover:bg-white hover:text-red-600 text-white font-black py-4 rounded-xl transition-all duration-500 shadow-xl uppercase tracking-widest text-[10px] italic">
+            Entrar al Sistema <i class="fa fa-shield-alt ml-2"></i>
         </button>
 
-        <div class="mt-10 pt-8 border-t border-white/5 flex flex-col items-center">
-            <p class="text-[8px] font-black text-slate-500 uppercase tracking-[0.5em] mb-3">Desarrollado por</p>
+        <div class="mt-8 pt-6 border-t border-white/5 flex flex-col items-center">
             <div class="flex items-center gap-3">
-                <img src="fv_digital_logo.png.webp" class="h-8 opacity-80">
-                <div class="text-left">
-                    <p class="text-white text-[10px] font-black italic uppercase leading-none">FV DIGITAL</p>
-                    <p class="text-slate-600 text-[7px] font-bold uppercase tracking-widest">© 2026 Software Eng.</p>
+                <img src="fv_digital_logo.png.webp" class="h-8 opacity-70">
+                <div class="text-left border-l border-white/10 pl-3">
+                    <p class="text-white text-[9px] font-black italic uppercase leading-none">FV DIGITAL</p>
+                    <p class="text-slate-600 text-[7px] font-bold uppercase tracking-widest">© 2026 Software Engineering</p>
                 </div>
             </div>
         </div>
@@ -115,8 +129,7 @@
         async function entrar() {
             const u = document.getElementById('u').value;
             const p = document.getElementById('p').value;
-
-            if(!u || !p) return alert("Por favor, ingresa tus credenciales.");
+            if(!u || !p) return alert("Ingresa tus datos.");
 
             try {
                 const res = await fetch(`${API}/login`, {
@@ -129,32 +142,28 @@
                     const user = await res.json();
                     if (user.rol === 'admin') {
                         localStorage.setItem('userLogueado', JSON.stringify(user));
-                        localStorage.removeItem('managerLogueado'); 
                         window.location.href = 'admin.html';
-                    } else if (user.rol === 'manager') {
+                    } else {
                         localStorage.setItem('managerLogueado', JSON.stringify(user));
-                        localStorage.removeItem('userLogueado');
                         window.location.href = 'manager.html'; 
                     }
                 } else {
-                    const error = await res.json();
-                    alert(error.mensaje || "Credenciales incorrectas");
+                    alert("Credenciales incorrectas.");
                 }
             } catch (error) {
-                alert("Error al conectar con el servidor ALV.");
+                alert("Error de conexión.");
             }
         }
 
-        // Animación de fondo
         const container = document.getElementById('animation-container');
-        const icons = ['fa-baseball-ball', 'fa-shield-halved', 'fa-bolt'];
+        const icons = ['fa-baseball-ball', 'fa-trophy', 'fa-star'];
         function createItem() {
             const item = document.createElement('i');
             item.className = `fa ${icons[Math.floor(Math.random()*icons.length)]} floating-item`;
-            const size = Math.random() * 40 + 20;
+            const size = Math.random() * 30 + 15;
             item.style.fontSize = `${size}px`;
             let x = Math.random() * window.innerWidth, y = Math.random() * window.innerHeight;
-            let sx = (Math.random()-0.5)*1.5, sy = (Math.random()-0.5)*1.5;
+            let sx = (Math.random()-0.5)*1, sy = (Math.random()-0.5)*1;
             container.appendChild(item);
             function move() {
                 x += sx; y += sy;
