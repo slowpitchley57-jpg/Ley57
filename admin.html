@@ -41,8 +41,9 @@
         <button onclick="location.reload()" class="w-full text-left p-3 hover:bg-blue-800 rounded-xl transition flex items-center gap-3"><i class="fa fa-sync"></i> Sincronizar</button>
         <button onclick="toggleModal('modalEquipo')" class="w-full text-left p-3 bg-emerald-600 rounded-xl font-bold flex items-center gap-3"><i class="fa fa-plus-circle"></i> Nuevo Equipo</button>
         <button onclick="toggleModal('modalRosters')" class="w-full text-left p-3 bg-amber-500 rounded-xl font-bold flex items-center gap-3"><i class="fa fa-user-edit"></i> Roster / Stats</button>
-        <button onclick="generarRolIA()" class="w-full text-left p-3 bg-purple-600 rounded-xl font-bold flex items-center gap-3"><i class="fa fa-robot"></i> Generar Rol IA</button>
-        
+        <button onclick="generarRolIA()" class="w-full text-left p-3 bg-purple-600 rounded-xl font-bold flex items-center gap-3 hover:bg-purple-700 transition">
+    <i class="fa fa-robot"></i> Generar Rol IA
+</button>        
         <hr class="opacity-20">
         
         <button onclick="limpiarHistorialSemanal()" class="w-full text-left p-3 bg-red-600 hover:bg-red-700 rounded-xl font-bold flex items-center gap-3 transition">
@@ -154,6 +155,22 @@
         <div class="flex gap-2">
             <button onclick="toggleModal('modalEquipo')" class="flex-1 bg-slate-200 p-3 rounded-xl font-bold text-xs uppercase">Cerrar</button>
             <button onclick="guardarEquipo()" class="flex-1 bg-emerald-600 text-white p-3 rounded-xl font-bold text-xs uppercase">Guardar</button>
+        </div>
+    </div>
+</div>
+<div id="modalIA" class="modal">
+    <div class="bg-white p-8 rounded-3xl w-80 shadow-2xl border-t-8 border-purple-600">
+        <h2 class="font-black mb-2 text-center italic uppercase">Generar Rol IA</h2>
+        <p class="text-[9px] text-slate-400 font-bold uppercase text-center mb-6 tracking-widest">Selecciona la liga de destino</p>
+        
+        <select id="ligaIA" class="w-full p-3 border rounded-xl mb-6 font-bold text-xs uppercase bg-slate-50 outline-none focus:ring-2 focus:ring-purple-500">
+            <option value="femenil">Ley 57 (Femenil)</option>
+            <option value="varonil">ALV Sport (Varonil)</option>
+        </select>
+
+        <div class="flex gap-2">
+            <button onclick="toggleModal('modalIA')" class="flex-1 bg-slate-200 p-3 rounded-xl font-bold text-xs uppercase text-slate-600">Cerrar</button>
+            <button onclick="ejecutarIA()" class="flex-1 bg-purple-600 text-white p-3 rounded-xl font-bold text-xs uppercase shadow-lg hover:bg-purple-700 transition-all">Generar</button>
         </div>
     </div>
 </div>
@@ -333,21 +350,52 @@ async function guardarEquipo() {
         async function limpiarHistorialSemanal() { if(confirm("¿Limpiar todo el historial de juegos finalizados?")) { await fetch(`${API}/games/clear/history`, { method: 'DELETE' }); cargarResultados(); } }
         async function escanearHoja() { const img = document.getElementById('imageInput').files[0]; if(!img) return alert("Sube foto"); Tesseract.recognize(img, 'spa').then(({ data: { text } }) => { document.getElementById('resultadoIA').value = text; }); }
 
-        async function generarRolIA() {
-            const res = await fetch(`${API}/equipos`);
-            const equipos = await res.json();
-            const intermedia = equipos.filter(e => e.categoria === "Intermedia"), relax = equipos.filter(e => e.categoria === "Relax");
-            const emparejar = async (lista) => {
-                const shuffled = lista.sort(() => 0.5 - Math.random());
-                for (let i = 0; i < shuffled.length; i += 2) {
-                    if (shuffled[i] && shuffled[i+1]) {
-                        await fetch(`${API}/games`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ local: shuffled[i].nombre, visita: shuffled[i+1].nombre, fecha: "2026-04-12", hora: "19:00", status: "pendiente" }) });
-                    }
-                }
-            };
-            await emparejar(intermedia); await emparejar(relax);
-            alert("Rol generado"); cargarResultados();
+            async function ejecutarIA() {
+    const ligaSeleccionada = document.getElementById('ligaIA').value;
+    
+    // Cerramos el modal para mostrar que está trabajando
+    toggleModal('modalIA');
+
+    // 1. Cargamos equipos filtrados por la liga seleccionada
+    const res = await fetch(`${API}/equipos?liga=${ligaSeleccionada}`);
+    const equipos = await res.json();
+    
+    const intermedia = equipos.filter(e => e.categoria === "Intermedia");
+    const relax = equipos.filter(e => e.categoria === "Relax");
+
+    if (equipos.length < 2) {
+        return alert("No hay suficientes equipos en esta liga para generar un rol.");
+    }
+
+    const emparejar = async (lista) => {
+        if (lista.length < 2) return;
+        const shuffled = lista.sort(() => 0.5 - Math.random());
+        
+        for (let i = 0; i < shuffled.length; i += 2) {
+            if (shuffled[i] && shuffled[i+1]) {
+                await fetch(`${API}/games`, { 
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({ 
+                        local: shuffled[i].nombre, 
+                        visita: shuffled[i+1].nombre, 
+                        fecha: "2026-04-12", // Puedes ajustar la fecha aquí
+                        hora: "19:00", 
+                        liga: ligaSeleccionada, 
+                        status: "pendiente" 
+                    }) 
+                });
+            }
         }
+    };
+
+    if (confirm(`¿Confirmas generar el rol aleatorio para la liga ${ligaSeleccionada.toUpperCase()}?`)) {
+        await emparejar(intermedia);
+        await emparejar(relax);
+        alert(`¡Rol generado con éxito para ${ligaSeleccionada.toUpperCase()}!`);
+        cargarResultados(); // Refresca la lista de juegos en el admin
+    }
+}
 
         // --- INICIALIZACIÓN ---
         document.addEventListener('DOMContentLoaded', cargarTodo);
