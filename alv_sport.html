@@ -183,15 +183,52 @@
             cargarHistorialResultados();
         }
 
-        async function cargarTablas() {
+             async function cargarTablas() {
             try {
-                const res = await fetch(`${API}/equipos?liga=varonil`);
+                // FILTRO: Solo equipos de liga femenil
+                const res = await fetch(`${API}/equipos?liga=femenil`);
                 const equipos = await res.json();
                 const tInt = document.getElementById('tablaIntermedia');
                 const tRel = document.getElementById('tablaRelax');
                 
-                tInt.innerHTML = ""; tRel.innerHTML = "";
-                equipos.sort((a,b) => b.g - a.g);
+                tInt.innerHTML = ""; 
+                tRel.innerHTML = "";
+                
+                  // Suponiendo que 'todosLosJuegos' es el array donde guardas los resultados de la API
+equipos.sort((a, b) => {
+    // 1. JUEGOS GANADOS
+    if (b.g !== a.g) return b.g - a.g;
+
+    // 2. DIFERENCIA DE CARRERAS (DIF)
+    const difA = (a.ca || 0) - (a.ce || 0);
+    const difB = (b.ca || 0) - (b.ce || 0);
+    if (difB !== difA) return difB - difA;
+
+    // 3. ENFRENTAMIENTO DIRECTO (Head-to-Head)
+    // Buscamos el juego donde se enfrentaron A y B
+    const juegoEntreEllos = todosLosJuegos.find(j => 
+        j.status === 'finalizado' && 
+        ((j.local === a.nombre && j.visita === b.nombre) || (j.local === b.nombre && j.visita === a.nombre))
+    );
+
+    if (juegoEntreEllos) {
+        // Extraemos los scores (ejemplo de formato "10-5")
+        const [scoreLocal, scoreVisita] = juegoEntreEllos.resultado.split('-').map(Number);
+        
+        let ganadorEncuentro = "";
+        if (scoreLocal > scoreVisita) ganadorEncuentro = juegoEntreEllos.local;
+        else if (scoreVisita > scoreLocal) ganadorEncuentro = juegoEntreEllos.visita;
+
+        if (ganadorEncuentro === a.nombre) return -1; // A va arriba
+        if (ganadorEncuentro === b.nombre) return 1;  // B va arriba
+    }
+
+    // 4. CARRERAS ANOTADAS (CA)
+    if (b.ca !== a.ca) return (b.ca || 0) - (a.ca || 0);
+
+    // 5. CARRERAS RECIBIDAS (CR/CE) - El que tenga MENOS va arriba
+    return (a.ce || 0) - (b.ce || 0);
+});
 
                 const lInt = equipos.find(e => e.categoria === "Intermedia");
                 const lRel = equipos.find(e => e.categoria === "Relax");
@@ -202,18 +239,20 @@
                 equipos.forEach((e) => {
                     const jj = (e.g || 0) + (e.p || 0);
                     const dif = (e.ca || 0) - (e.ce || 0);
+
                     const fila = `
-                        <tr class="hover:bg-zinc-800/50 cursor-pointer border-b border-zinc-800" onclick="verDetalleRoster('${e.nombre}')">
-                            <td class="p-4 uppercase italic font-black text-white">${e.nombre}</td>
-                            <td class="text-center font-bold text-zinc-500 bg-zinc-800/20">${jj}</td>
-                            <td class="text-center text-red-500">${e.g}</td>
+                        <tr class="hover:bg-slate-50 cursor-pointer border-b" onclick="verDetalleRoster('${e.nombre}')">
+                            <td class="p-4 uppercase italic font-black text-blue-900">${e.nombre}</td>
+                            <td class="text-center font-bold text-slate-500 bg-slate-50/30">${jj}</td>
+                            <td class="text-center">${e.g}</td>
                             <td class="text-center">${e.p}</td>
                             <td class="text-center">${e.ca}</td>
                             <td class="text-center">${e.ce}</td>
-                            <td class="text-center font-black ${dif>=0 ? 'text-fire' : 'text-zinc-500'}">
+                            <td class="text-center font-black ${dif>=0 ? 'text-blue-600' : 'text-orange-500'}">
                                 ${dif > 0 ? '+' + dif : dif}
                             </td>
                         </tr>`;
+
                     if(e.categoria === "Intermedia") tInt.innerHTML += fila; 
                     else tRel.innerHTML += fila;
                 });
