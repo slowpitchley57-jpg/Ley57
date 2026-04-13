@@ -203,7 +203,41 @@
                 tInt.innerHTML = ""; 
                 tRel.innerHTML = "";
                 
-                equipos.sort((a,b) => b.g - a.g);
+                  // Suponiendo que 'todosLosJuegos' es el array donde guardas los resultados de la API
+equipos.sort((a, b) => {
+    // 1. JUEGOS GANADOS
+    if (b.g !== a.g) return b.g - a.g;
+
+    // 2. DIFERENCIA DE CARRERAS (DIF)
+    const difA = (a.ca || 0) - (a.ce || 0);
+    const difB = (b.ca || 0) - (b.ce || 0);
+    if (difB !== difA) return difB - difA;
+
+    // 3. ENFRENTAMIENTO DIRECTO (Head-to-Head)
+    // Buscamos el juego donde se enfrentaron A y B
+    const juegoEntreEllos = todosLosJuegos.find(j => 
+        j.status === 'finalizado' && 
+        ((j.local === a.nombre && j.visita === b.nombre) || (j.local === b.nombre && j.visita === a.nombre))
+    );
+
+    if (juegoEntreEllos) {
+        // Extraemos los scores (ejemplo de formato "10-5")
+        const [scoreLocal, scoreVisita] = juegoEntreEllos.resultado.split('-').map(Number);
+        
+        let ganadorEncuentro = "";
+        if (scoreLocal > scoreVisita) ganadorEncuentro = juegoEntreEllos.local;
+        else if (scoreVisita > scoreLocal) ganadorEncuentro = juegoEntreEllos.visita;
+
+        if (ganadorEncuentro === a.nombre) return -1; // A va arriba
+        if (ganadorEncuentro === b.nombre) return 1;  // B va arriba
+    }
+
+    // 4. CARRERAS ANOTADAS (CA)
+    if (b.ca !== a.ca) return (b.ca || 0) - (a.ca || 0);
+
+    // 5. CARRERAS RECIBIDAS (CR/CE) - El que tenga MENOS va arriba
+    return (a.ce || 0) - (b.ce || 0);
+});
 
                 const lInt = equipos.find(e => e.categoria === "Intermedia");
                 const lRel = equipos.find(e => e.categoria === "Relax");
@@ -344,18 +378,19 @@ async function cargarHistorialResultados() {
             return;
         }
 
-        cont.innerHTML = finalizados.map(g => `
-            <div class="bg-slate-50 p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-2">
-                <div class="flex justify-between text-[8px] font-black text-slate-400 uppercase">
-                    <span>${g.fecha}</span>
-                    <span class="text-red-500">FINALIZADO</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <div class="flex-1 text-center"><p class="text-[10px] font-black text-blue-900 uppercase truncate">${g.local}</p></div>
-                    <div class="mx-3 bg-slate-900 text-white px-3 py-1 rounded-lg font-black text-sm italic shadow-md">${g.resultado}</div>
-                    <div class="flex-1 text-center"><p class="text-[10px] font-black text-blue-900 uppercase truncate">${g.visita}</p></div>
-                </div>
-            </div>`).join('');
+        // Busca esta parte en tu función cargarHistorialResultados y agrega la clase:
+cont.innerHTML = finalizados.map(g => `
+    <div class="tarjeta-resultado bg-slate-50 p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-2">
+        <div class="flex justify-between text-[8px] font-black text-slate-400 uppercase">
+            <span>${g.fecha}</span>
+            <span class="text-red-500">FINALIZADO</span>
+        </div>
+        <div class="flex justify-between items-center">
+            <div class="flex-1 text-center"><p class="text-[10px] font-black text-blue-900 uppercase truncate">${g.local}</p></div>
+            <div class="mx-3 bg-slate-900 text-white px-3 py-1 rounded-lg font-black text-sm italic shadow-md">${g.resultado}</div>
+            <div class="flex-1 text-center"><p class="text-[10px] font-black text-blue-900 uppercase truncate">${g.visita}</p></div>
+        </div>
+    </div>`).join('');
     } catch (error) { 
         console.error("Error en historial:", error); 
     }
