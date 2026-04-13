@@ -206,17 +206,28 @@
         todosLosEquipos.forEach(e => {
             const jj = e.g + e.p;
             const dif = e.ca - e.ce;
-            const fila = `
-                <tr class="hover:bg-slate-50 border-b text-center">
-                    <td class="p-4 text-left uppercase italic font-black ${e.liga === 'varonil' ? 'text-red-600' : 'text-blue-900'}">${e.nombre}</td>
-                    <td class="font-bold text-slate-500 bg-slate-50/50">${jj}</td>
-                    <td><input type="number" onchange="updEq('${e._id}','g',this.value)" value="${e.g}" class="input-inline"></td>
-                    <td><input type="number" onchange="updEq('${e._id}','p',this.value)" value="${e.p}" class="input-inline"></td>
-                    <td><input type="number" onchange="updEq('${e._id}','ca',this.value)" value="${e.ca}" class="input-inline"></td>
-                    <td><input type="number" onchange="updEq('${e._id}','ce',this.value)" value="${e.ce}" class="input-inline"></td>
-                    <td class="font-black ${dif>=0 ? 'text-blue-600' : 'text-orange-500'}">${dif>0?'+'+dif:dif}</td>
-                    <td><button onclick="eliminarEquipo('${e._id}')" class="text-slate-300 hover:text-red-500"><i class="fa fa-trash"></i></button></td>
-                </tr>`;
+            // Busca esta parte en tu renderizarTablas y cámbiala por esta:
+const fila = `
+    <tr class="hover:bg-slate-50 border-b text-center">
+        <td class="p-4 text-left uppercase italic font-black ${e.liga === 'varonil' ? 'text-red-600' : 'text-blue-900'}">
+            ${e.nombre}
+            <p class="text-[8px] text-slate-400 font-normal">${e.categoria}</p>
+        </td>
+        <td class="font-bold text-slate-500 bg-slate-50/50">${jj}</td>
+        <td><input type="number" onchange="updEq('${e._id}','g',this.value)" value="${e.g}" class="input-inline"></td>
+        <td><input type="number" onchange="updEq('${e._id}','p',this.value)" value="${e.p}" class="input-inline"></td>
+        <td><input type="number" onchange="updEq('${e._id}','ca',this.value)" value="${e.ca}" class="input-inline"></td>
+        <td><input type="number" onchange="updEq('${e._id}','ce',this.value)" value="${e.ce}" class="input-inline"></td>
+        <td class="font-black ${dif>=0 ? 'text-blue-600' : 'text-orange-500'}">${dif>0?'+'+dif:dif}</td>
+        <td class="flex gap-2 justify-center p-4">
+            <button onclick="cambiarCategoria('${e._id}', '${e.categoria}')" class="text-blue-500 hover:text-blue-700" title="Cambiar Categoría">
+                <i class="fa fa-exchange-alt"></i>
+            </button>
+            <button onclick="eliminarEquipo('${e._id}')" class="text-slate-300 hover:text-red-500">
+                <i class="fa fa-trash"></i>
+            </button>
+        </td>
+    </tr>`;
             
             if(e.liga === 'varonil') {
                 if(e.categoria === "Intermedia") tIntVar.innerHTML += fila; else tRelVar.innerHTML += fila;
@@ -375,6 +386,29 @@
         function cerrarSesion() { if(confirm("¿Cerrar?")) { localStorage.clear(); window.location.href = 'index.html'; } }
         async function escanearHoja() { const img = document.getElementById('imageInput').files[0]; if(!img) return alert("Sube foto"); Tesseract.recognize(img, 'spa').then(({ data: { text } }) => { document.getElementById('resultadoIA').value = text; }); }
 
+        async function cambiarCategoria(id, catActual) {
+    const nuevaCat = catActual === "Intermedia" ? "Relax" : "Intermedia";
+    
+    if(!confirm(`¿Deseas mover este equipo a la categoría ${nuevaCat}? Las estadísticas se mantendrán iguales.`)) return;
+
+    try {
+        const res = await fetch(`${API}/equipos/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ categoria: nuevaCat })
+        });
+
+        if(res.ok) {
+            alert("Categoría actualizada correctamente");
+            renderizarTablas(); // Recargamos para que se mueva de tabla visualmente
+        } else {
+            alert("Error al cambiar de categoría");
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Error de conexión");
+    }
+}
         document.addEventListener('DOMContentLoaded', cargarTodo);
     </script>
 </body>
