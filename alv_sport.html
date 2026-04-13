@@ -278,14 +278,27 @@
     }
 
     async function cargarEncuentros() {
+    try {
+        // 1. Pedimos los juegos de la liga varonil
         const res = await fetch(`${API}/games?liga=varonil&status=pendiente`);
         const games = await res.json();
         const cont = document.getElementById('listaEncuentros');
-        if (games.length === 0) { cont.innerHTML = "<p class='text-center py-10 text-zinc-600 italic text-[10px] uppercase'>Sin juegos programados</p>"; return; }
-        cont.innerHTML = games.map(g => `
-            <div class="bg-zinc-900 p-4 rounded-2xl border border-zinc-800">
+        
+        // 2. Filtramos localmente por 'pendiente' para estar 100% seguros
+        const pendientes = games.filter(g => g.status === 'pendiente');
+
+        // 3. Validamos sobre la lista de PENDIENTES, no sobre todos los games
+        if (pendientes.length === 0) { 
+            cont.innerHTML = "<p class='text-center py-10 text-zinc-600 italic text-[10px] uppercase'>Sin juegos programados</p>"; 
+            return; 
+        }
+
+        // 4. Mapeamos solo los pendientes
+        cont.innerHTML = pendientes.map(g => `
+            <div class="bg-zinc-900 p-4 rounded-2xl border border-zinc-800 mb-4">
                 <div class="flex justify-between text-[8px] font-bold text-zinc-500 uppercase mb-2">
-                    <span>${g.fecha}</span><span>${g.hora}</span>
+                    <span><i class="fa fa-calendar-alt"></i> ${g.fecha}</span>
+                    <span><i class="fa fa-clock"></i> ${g.hora}</span>
                 </div>
                 <div class="flex justify-between items-center gap-2">
                     <span class="text-[10px] font-black uppercase text-white truncate flex-1">${g.local}</span>
@@ -293,7 +306,10 @@
                     <span class="text-[10px] font-black uppercase text-white truncate flex-1 text-right">${g.visita}</span>
                 </div>
             </div>`).join('');
+    } catch (error) {
+        console.error("Error cargando encuentros:", error);
     }
+}
 
     async function cargarLideresIndividuales() {
         const res = await fetch(`${API}/players?liga=varonil`);

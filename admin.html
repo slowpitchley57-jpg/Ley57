@@ -163,68 +163,68 @@
             actualizarSelectores();
         }
 
-       function renderizarTablas() {
-    const tIntFem = document.getElementById('tablaIntermedia');
-    const tRelFem = document.getElementById('tablaRelax');
-    const tIntVar = document.getElementById('tablaIntermediaVar');
-    const tRelVar = document.getElementById('tablaRelaxVar');
-    
-    tIntFem.innerHTML = ""; tRelFem.innerHTML = ""; tIntVar.innerHTML = ""; tRelVar.innerHTML = "";
-
-    // 1. APLICAMOS EL ORDENAMIENTO PRO
-    todosLosEquipos.sort((a, b) => {
-        // A. Juegos Ganados
-        if (b.g !== a.g) return b.g - a.g;
-
-        // B. Diferencial de Carreras
-        const difA = (a.ca || 0) - (a.ce || 0);
-        const difB = (b.ca || 0) - (b.ce || 0);
-        if (difB !== difA) return difB - difA;
-
-        // C. Enfrentamiento Directo (Head-to-Head)
-        // Nota: Asegúrate de que 'todosLosJuegos' esté disponible globalmente en tu admin
-        if (typeof todosLosJuegos !== 'undefined') {
-            const duelo = todosLosJuegos.find(j => 
-                j.status === 'finalizado' && 
-                ((j.local === a.nombre && j.visita === b.nombre) || (j.local === b.nombre && j.visita === a.nombre))
-            );
-            if (duelo) {
-                const [scL, scV] = duelo.resultado.split('-').map(Number);
-                let win = scL > scV ? duelo.local : (scV > scL ? duelo.visita : "");
-                if (win === a.nombre) return -1;
-                if (win === b.nombre) return 1;
-            }
-        }
-
-        // D. Carreras Anotadas (Más es mejor)
-        if (b.ca !== a.ca) return (b.ca || 0) - (a.ca || 0);
-
-        // E. Carreras Recibidas (Menos es mejor)
-        return (a.ce || 0) - (b.ce || 0);
-    });
-
-    // 2. RENDERIZAMOS LAS FILAS YA ORDENADAS
-    todosLosEquipos.forEach(e => {
-        const jj = (e.g || 0) + (e.p || 0);
-        const dif = (e.ca || 0) - (e.ce || 0);
-        const fila = `
-            <tr class="hover:bg-slate-50 border-b text-center">
-                <td class="p-4 text-left uppercase italic font-black ${e.liga === 'varonil' ? 'text-red-600' : 'text-blue-900'}">${e.nombre}</td>
-                <td class="font-bold text-slate-500 bg-slate-50/50">${jj}</td>
-                <td><input type="number" onchange="updEq('${e._id}','g',this.value)" value="${e.g}" class="input-inline"></td>
-                <td><input type="number" onchange="updEq('${e._id}','p',this.value)" value="${e.p}" class="input-inline"></td>
-                <td><input type="number" onchange="updEq('${e._id}','ca',this.value)" value="${e.ca}" class="input-inline"></td>
-                <td><input type="number" onchange="updEq('${e._id}','ce',this.value)" value="${e.ce}" class="input-inline"></td>
-                <td class="font-black ${dif>=0 ? 'text-blue-600' : 'text-orange-500'}">${dif>0?'+'+dif:dif}</td>
-                <td><button onclick="eliminarEquipo('${e._id}')" class="text-slate-300 hover:text-red-500"><i class="fa fa-trash"></i></button></td>
-            </tr>`;
+       async function renderizarTablas() {
+    try {
+        const tIntFem = document.getElementById('tablaIntermedia');
+        const tRelFem = document.getElementById('tablaRelax');
+        const tIntVar = document.getElementById('tablaIntermediaVar');
+        const tRelVar = document.getElementById('tablaRelaxVar');
         
-        if(e.liga === 'varonil') {
-            if(e.categoria === "Intermedia") tIntVar.innerHTML += fila; else tRelVar.innerHTML += fila;
-        } else {
-            if(e.categoria === "Intermedia") tIntFem.innerHTML += fila; else tRelFem.innerHTML += fila;
-        }
-    });
+        tIntFem.innerHTML = ""; tRelFem.innerHTML = ""; tIntVar.innerHTML = ""; tRelVar.innerHTML = "";
+
+        // Traemos equipos y juegos para calcular en tiempo real
+        const [resEq, resGames] = await Promise.all([
+            fetch(`${API}/equipos`),
+            fetch(`${API}/games?status=finalizado`)
+        ]);
+        const equiposRaw = await resEq.json();
+        const juegos = await resGames.json();
+
+        // Calculamos estadísticas basadas en los juegos finalizados
+        const todosLosEquipos = equiposRaw.map(eq => {
+            let g = 0, p = 0, ca = 0, ce = 0;
+            juegos.forEach(j => {
+                if (!j.resultado) return;
+                const s = j.resultado.split('-').map(Number);
+                if (j.local === eq.nombre) {
+                    ca += s[0]; ce += s[1];
+                    if (s[0] > s[1]) g++; else if (s[0] < s[1]) p++;
+                } else if (j.visita === eq.nombre) {
+                    ca += s[1]; ce += s[0];
+                    if (s[1] > s[0]) g++; else if (s[1] < s[0]) p++;
+                }
+            });
+            return { ...eq, g, p, ca, ce };
+        });
+
+        // Ordenamos por Ganados y Diferencial
+        todosLosEquipos.sort((a, b) => {
+            if (b.g !== a.g) return b.g - a.g;
+            return (b.ca - b.ce) - (a.ca - a.ce);
+        });
+
+        todosLosEquipos.forEach(e => {
+            const jj = e.g + e.p;
+            const dif = e.ca - e.ce;
+            const fila = `
+                <tr class="hover:bg-slate-50 border-b text-center">
+                    <td class="p-4 text-left uppercase italic font-black ${e.liga === 'varonil' ? 'text-red-600' : 'text-blue-900'}">${e.nombre}</td>
+                    <td class="font-bold text-slate-500 bg-slate-50/50">${jj}</td>
+                    <td><input type="number" onchange="updEq('${e._id}','g',this.value)" value="${e.g}" class="input-inline"></td>
+                    <td><input type="number" onchange="updEq('${e._id}','p',this.value)" value="${e.p}" class="input-inline"></td>
+                    <td><input type="number" onchange="updEq('${e._id}','ca',this.value)" value="${e.ca}" class="input-inline"></td>
+                    <td><input type="number" onchange="updEq('${e._id}','ce',this.value)" value="${e.ce}" class="input-inline"></td>
+                    <td class="font-black ${dif>=0 ? 'text-blue-600' : 'text-orange-500'}">${dif>0?'+'+dif:dif}</td>
+                    <td><button onclick="eliminarEquipo('${e._id}')" class="text-slate-300 hover:text-red-500"><i class="fa fa-trash"></i></button></td>
+                </tr>`;
+            
+            if(e.liga === 'varonil') {
+                if(e.categoria === "Intermedia") tIntVar.innerHTML += fila; else tRelVar.innerHTML += fila;
+            } else {
+                if(e.categoria === "Intermedia") tIntFem.innerHTML += fila; else tRelFem.innerHTML += fila;
+            }
+        });
+    } catch (err) { console.error("Error en Admin:", err); }
 }
 
         function actualizarSelectores() {
