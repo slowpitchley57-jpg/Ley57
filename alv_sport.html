@@ -212,7 +212,7 @@
     document.addEventListener('DOMContentLoaded', cargarTodo);
 
     async function cargarTodo() {
-        console.log("Sincronizando datos de AVL Sport...");
+        console.log("Sincronizando datos de AVL Sport Varonil...");
         await Promise.all([
             cargarTablasYEstadisticas(),
             cargarEncuentros(),
@@ -220,6 +220,7 @@
         ]);
     }
 
+    // FUNCIÓN QUE CALCULA PUNTOS EN VIVO Y RENDERIZA TABLAS
     async function cargarTablasYEstadisticas() {
         try {
             const [resEq, resGames] = await Promise.all([
@@ -230,6 +231,7 @@
             const equiposRaw = await resEq.json();
             const juegos = await resGames.json();
 
+            // RE-CALCULAR EN VIVO (Evita que la tabla salga en ceros)
             const equipos = equiposRaw.map(eq => {
                 let g = 0, p = 0, ca = 0, ce = 0;
                 juegos.forEach(j => {
@@ -246,12 +248,10 @@
                 return { ...eq, g, p, ca, ce };
             });
 
+            // Ordenar por Ganados y luego por Diferencia
             equipos.sort((a, b) => {
                 if (b.g !== a.g) return b.g - a.g;
-                const difA = a.ca - a.ce;
-                const difB = b.ca - b.ce;
-                if (difB !== difA) return difB - difA;
-                return b.ca - a.ca;
+                return (b.ca - b.ce) - (a.ca - a.ce);
             });
 
             const tInt = document.getElementById('tablaIntermedia');
@@ -263,7 +263,7 @@
                 const fila = `
                     <tr class="hover:bg-zinc-800 border-b border-zinc-900 transition-colors cursor-pointer text-center" onclick="verDetalleRoster('${e.nombre}')">
                         <td class="p-4 uppercase italic font-black text-white text-left">${e.nombre}</td>
-                        <td class="font-bold text-zinc-500">${e.g + e.p}</td>
+                        <td class="font-bold text-zinc-500 bg-white/5">${e.g + e.p}</td>
                         <td class="text-red-500">${e.g}</td>
                         <td>${e.p}</td>
                         <td class="text-zinc-400">${e.ca}</td>
@@ -273,24 +273,49 @@
                 if (e.categoria === "Intermedia") tInt.innerHTML += fila; else tRel.innerHTML += fila;
             });
 
+            // Actualizar Nombres de Líderes en tarjetas
             const lInt = equipos.filter(e => e.categoria === "Intermedia")[0];
             const lRel = equipos.filter(e => e.categoria === "Relax")[0];
             if(lInt) document.getElementById('txtLiderInt').innerText = lInt.nombre;
             if(lRel) document.getElementById('txtLiderRel').innerText = lRel.nombre;
 
+            // Historial derecha
             document.getElementById('resultadosJornada').innerHTML = juegos.slice().reverse().map(j => `
                 <div class="tarjeta-resultado bg-zinc-900 p-4 rounded-2xl border border-zinc-800 flex flex-col gap-2">
                     <div class="flex justify-between text-[8px] font-black text-zinc-500 uppercase">
-                        <span>${j.fecha}</span><span class="text-red-500 font-bold text-[7px]">FINALIZADO</span>
+                        <span>${j.fecha}</span><span class="text-red-500 font-bold">FINALIZADO</span>
                     </div>
                     <div class="flex justify-between items-center text-center">
                         <div class="flex-1 text-[9px] font-black text-white uppercase">${j.local}</div>
-                        <div class="mx-2 bg-red-600 text-white px-3 py-1 rounded-lg font-black text-xs italic shadow-lg">${j.resultado}</div>
+                        <div class="mx-2 bg-red-600 text-white px-3 py-1 rounded-lg font-black text-sm italic shadow-lg">${j.resultado}</div>
                         <div class="flex-1 text-[9px] font-black text-white uppercase">${j.visita}</div>
                     </div>
                 </div>`).join('');
+        } catch (e) { console.error("Error Tablas:", e); }
+    }
 
-        } catch (e) { console.error("Error:", e); }
+    // CARGAR LÍDERES INDIVIDUALES (ESTA ES LA QUE TE FALTABA COMPLETA)
+    async function cargarLideresIndividuales() {
+        try {
+            const res = await fetch(`${API}/players?liga=varonil`);
+            const players = await res.json();
+            
+            // TOP 5 AVG
+            const topAVG = [...players].sort((a,b) => (b.avg || 0) - (a.avg || 0)).slice(0, 5);
+            document.getElementById('topBateo').innerHTML = topAVG.map((p, i) => `
+                <div class="flex justify-between items-center border-b border-zinc-800 pb-1 text-[11px]">
+                    <span class="font-bold uppercase text-zinc-300"><span class="text-red-600 mr-2">#${i+1}</span> ${p.nombre}</span>
+                    <span class="font-black text-red-500 italic">${(p.avg || 0).toFixed(3)}</span>
+                </div>`).join('');
+
+            // TOP 5 HOME RUNS
+            const topHR = [...players].sort((a,b) => (b.hr || 0) - (a.hr || 0)).slice(0, 5);
+            document.getElementById('topHR').innerHTML = topHR.map((p, i) => `
+                <div class="flex justify-between items-center border-b border-zinc-800 pb-1 text-[11px]">
+                    <span class="font-bold uppercase text-zinc-300"><span class="text-orange-600 mr-2">#${i+1}</span> ${p.nombre}</span>
+                    <span class="font-black text-orange-500 italic">${p.hr || 0} HR</span>
+                </div>`).join('');
+        } catch(e) { console.error("Error Líderes:", e); }
     }
 
     async function verDetalleRoster(nombreEquipo) {
@@ -301,7 +326,7 @@
         
         const container = document.getElementById('bodyDetalleJugadoras');
         if(players.length === 0) {
-            container.innerHTML = `<tr><td colspan="6" class="p-10 text-center text-slate-400 italic text-[10px] uppercase">No hay jugadores registrados.</td></tr>`;
+            container.innerHTML = `<tr><td colspan="6" class="p-10 text-center text-slate-400 italic uppercase text-[10px]">No hay jugadores registrados.</td></tr>`;
         } else {
             container.innerHTML = players.map(p => `
                 <tr class="hover:bg-zinc-800 border-b border-zinc-900 transition-colors text-center">
@@ -341,23 +366,6 @@
                     </div>
                 </div>`).join('');
         } catch (error) { console.error(error); }
-    }
-
-    async function cargarLideresIndividuales() {
-        const res = await fetch(`${API}/players?liga=varonil`);
-        const players = await res.json();
-        const topAVG = [...players].sort((a,b) => (b.avg || 0) - (a.avg || 0)).slice(0, 5);
-        document.getElementById('topBateo').innerHTML = topAVG.map((p, i) => `
-            <div class="flex justify-between items-center border-b border-zinc-800 pb-1 text-[11px]">
-                <span class="font-bold uppercase text-zinc-300"><span class="text-red-600 mr-2">#${i+1}</span> ${p.nombre}</span>
-                <span class="font-black text-red-500 italic">${(p.avg || 0).toFixed(3)}</span>
-            </div>`).join('');
-        const topHR = [...players].sort((a,b) => (b.hr || 0) - (a.hr || 0)).slice(0, 5);
-        document.getElementById('topHR').innerHTML = topHR.map((p, i) => `
-            <div class="flex justify-between items-center border-b border-zinc-800 pb-1 text-[11px]">
-                <span class="font-bold uppercase text-zinc-300"><span class="text-orange-600 mr-2">#${i+1}</span> ${p.nombre}</span>
-                <span class="font-black text-orange-500 italic">${p.hr || 0} HR</span>
-            </div>`).join('');
     }
 
     function filtrarJuegos() {

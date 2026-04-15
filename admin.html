@@ -297,6 +297,7 @@ const fila = `
                     <th class="p-1 text-center">3B</th>
                     <th class="p-1 text-center">HR</th>
                     <th class="p-1 text-center">K</th>
+                    <th class="p-1 text-center"RBI</th>
                     <th class="p-1 text-center">AVG</th>
                     <th class="p-1 text-center">Acción</th>
                 </tr>
@@ -312,6 +313,7 @@ const fila = `
                         <td><input type="number" value="${p.triples || 0}" onchange="updPlayer('${p._id}','triples',this.value)" class="w-10 border rounded text-center p-1"></td>
                         <td><input type="number" value="${p.hr || 0}" onchange="updPlayer('${p._id}','hr',this.value)" class="w-10 border rounded text-center p-1 font-bold text-red-600"></td>
                         <td><input type="number" value="${p.k || 0}" onchange="updPlayer('${p._id}','k',this.value)" class="w-10 border rounded text-center p-1"></td>
+                        <td><input type="number" value="${p.rbi || 0}" onchange="updPlayer('${p._id}','rbi',this.value)" class="w-10 border-2 border-red-200 rounded text-center p-1 font-black text-red-600"></td>
                         <td class="text-center font-black italic text-slate-400">${(p.avg || 0).toFixed(3)}</td>
                         <td class="text-center">
                             <button onclick="eliminarPlayer('${p._id}')" class="text-red-400 hover:text-red-600"><i class="fa fa-trash"></i></button>

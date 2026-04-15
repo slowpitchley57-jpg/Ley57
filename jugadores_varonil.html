@@ -66,24 +66,41 @@
     <script>
         const API = "https://ley57.onrender.com/api";
         async function cargar() {
-            const res = await fetch(`${API}/players?liga=varonil`);
-            const players = await res.json();
-            players.sort((a,b) => (b.avg || 0) - (a.avg || 0));
-            document.getElementById('tablaGlobal').innerHTML = players.map(p => `
-                <tr class="fila-jugador hover:bg-white/5 transition-all">
-                    <td class="p-5">
+    try {
+        // Traemos equipos y jugadores al mismo tiempo (ajusta 'varonil' o 'femenil' según la página)
+        const [resP, resE] = await Promise.all([
+            fetch(`${API}/players?liga=varonil`), 
+            fetch(`${API}/equipos?liga=varonil`)
+        ]);
+        
+        const players = await resP.json();
+        const equipos = await resE.json();
+
+        const tabla = document.getElementById('tablaGlobal');
+        
+        // Ordenar por AVG (o podrías ordenar por RBI si prefieres)
+        players.sort((a,b) => (b.avg || 0) - (a.avg || 0));
+
+        tabla.innerHTML = players.map(p => {
+            // BUSCAMOS LA CATEGORÍA: Buscamos el equipo del jugador en la lista de equipos
+            const datosEquipo = equipos.find(e => e.nombre === p.equipo);
+            const categoria = datosEquipo ? datosEquipo.categoria : "S/N";
+
+            return `
+                <tr class="fila-jugador hover:bg-white/5 transition-all text-center border-b border-zinc-900">
+                    <td class="p-4 text-left">
                         <div class="font-black text-white uppercase italic tracking-tighter">${p.nombre}</div>
                         <div class="text-[9px] text-red-600 font-black uppercase">${p.equipo}</div>
                     </td>
-                    <td class="text-center font-bold text-zinc-500 bg-white/5">${p.jj || 0}</td>
-                    <td class="text-center">${p.vb || 0}</td>
-                    <td class="text-center text-white font-bold">${p.h || 0}</td>
-                    <td class="text-center">${p.dobles || 0}</td>
-                    <td class="text-center">${p.triples || 0}</td>
-                    <td class="text-center font-black text-red-600">${p.hr || 0}</td>
-                    <td class="text-center font-black text-sm text-fire italic">${(p.avg || 0).toFixed(3)}</td>
-                </tr>`).join('');
-        }
+                    <td class="text-zinc-500 font-bold italic">${categoria}</td> <td class="font-bold text-zinc-500 bg-white/5">${p.jj || 0}</td>
+                    <td>${p.vb || 0}</td>
+                    <td class="text-white font-bold">${p.h || 0}</td>
+                    <td class="text-red-500 font-black">${p.rbi || 0}</td> <td class="text-orange-500 font-black">${p.hr || 0}</td>
+                    <td class="font-black text-sm text-fire italic">${(p.avg || 0).toFixed(3)}</td>
+                </tr>`;
+        }).join('');
+    } catch (e) { console.error(e); }
+}
         function filtrarTabla() {
             const bus = document.getElementById('buscadorHombres').value.toUpperCase();
             const filas = document.getElementsByClassName('fila-jugador');

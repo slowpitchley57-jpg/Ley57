@@ -175,152 +175,164 @@
     </div>
 
     <script>
-        const API = "https://ley57.onrender.com/api";
+    const API = "https://ley57.onrender.com/api";
 
-        document.addEventListener('DOMContentLoaded', cargarTodo);
+    document.addEventListener('DOMContentLoaded', cargarTodo);
 
-        async function cargarTodo() {
-            await Promise.all([
-                cargarTablas(),
-                cargarEncuentros(),
-                cargarLideresIndividuales(),
-                cargarHistorialResultados()
+    async function cargarTodo() {
+        console.log("Sincronizando datos de AVL Sport Femenil...");
+        await Promise.all([
+            cargarTablasYEstadisticas(),
+            cargarEncuentros(),
+            cargarLideresIndividuales()
+        ]);
+    }
+
+    // ESTA ES LA FUNCIÓN QUE RECALCULA TODO PARA QUE NO SALGA EN CEROS
+    async function cargarTablasYEstadisticas() {
+        try {
+            const [resEq, resGames] = await Promise.all([
+                fetch(`${API}/equipos?liga=femenil`),
+                fetch(`${API}/games?liga=femenil&status=finalizado`)
             ]);
-        }
-
-        async function cargarTablas() {
-            try {
-                const [resEq, resGames] = await Promise.all([
-                    fetch(`${API}/equipos?liga=femenil`),
-                    fetch(`${API}/games?liga=femenil&status=finalizado`)
-                ]);
-                const equiposRaw = await resEq.json();
-                const juegos = await resGames.json();
-
-                const equipos = equiposRaw.map(eq => {
-                    let g = 0, p = 0, ca = 0, ce = 0;
-                    juegos.forEach(j => {
-                        const s = j.resultado.split('-').map(Number);
-                        if (j.local === eq.nombre) {
-                            ca += s[0]; ce += s[1];
-                            if (s[0] > s[1]) g++; else if (s[0] < s[1]) p++;
-                        } else if (j.visita === eq.nombre) {
-                            ca += s[1]; ce += s[0];
-                            if (s[1] > s[0]) g++; else if (s[1] < s[0]) p++;
-                        }
-                    });
-                    return { ...eq, g, p, ca, ce };
-                });
-
-                equipos.sort((a, b) => {
-                    if (b.g !== a.g) return b.g - a.g;
-                    return (b.ca - b.ce) - (a.ca - a.ce);
-                });
-
-                const tInt = document.getElementById('tablaIntermedia');
-                const tRel = document.getElementById('tablaRelax');
-                tInt.innerHTML = ""; tRel.innerHTML = "";
-
-                equipos.forEach(e => {
-                    const dif = e.ca - e.ce;
-                    const fila = `
-                        <tr class="hover:bg-pink-50 cursor-pointer border-b transition-colors text-center" onclick="verDetalleRoster('${e.nombre}')">
-                            <td class="p-4 uppercase italic font-black text-blue-900 text-left">${e.nombre}</td>
-                            <td class="font-bold text-slate-500 bg-slate-50/30">${e.g + e.p}</td>
-                            <td class="text-blue-600">${e.g}</td>
-                            <td>${e.p}</td>
-                            <td>${e.ca}</td>
-                            <td>${e.ce}</td>
-                            <td class="font-black ${dif >= 0 ? 'text-blue-600' : 'text-orange-500'}">${dif > 0 ? '+' + dif : dif}</td>
-                        </tr>`;
-                    if (e.categoria === "Intermedia") tInt.innerHTML += fila; else tRel.innerHTML += fila;
-                });
-
-                const lInt = equipos.filter(e => e.categoria === "Intermedia")[0];
-                const lRel = equipos.filter(e => e.categoria === "Relax")[0];
-                if(lInt) document.getElementById('txtLiderInt').innerText = lInt.nombre;
-                if(lRel) document.getElementById('txtLiderRel').innerText = lRel.nombre;
-            } catch (e) { console.error(e); }
-        }
-
-        async function verDetalleRoster(nombreEquipo) {
-            document.getElementById('detNombreEquipo').innerText = nombreEquipo;
-            const res = await fetch(`${API}/players?liga=femenil`);
-            const allPlayers = await res.json();
-            const players = allPlayers.filter(p => p.equipo.trim().toUpperCase() === nombreEquipo.trim().toUpperCase());
-            const container = document.getElementById('bodyDetalleJugadoras');
             
-            container.innerHTML = players.length === 0 ? `<tr><td colspan="6" class="p-10 text-center italic text-slate-400">Sin jugadoras registradas.</td></tr>` : 
-                players.map(p => `
-                <tr class="hover:bg-slate-50 border-b text-center">
-                    <td class="p-3 font-bold uppercase text-blue-900 text-left">${p.nombre}</td>
-                    <td>${p.jj || 0}</td><td>${p.vb || 0}</td>
-                    <td class="text-emerald-600 font-black">${p.h || 0}</td>
-                    <td class="text-pink-600 font-black">${p.hr || 0}</td>
-                    <td class="text-blue-600 font-black">${(p.avg || 0).toFixed(3)}</td>
-                </tr>`).join('');
-            document.getElementById('modalDetalleEquipo').classList.remove('hidden');
-        }
+            const equiposRaw = await resEq.json();
+            const juegos = await resGames.json();
 
-        function cerrarDetalle() { document.getElementById('modalDetalleEquipo').classList.add('hidden'); }
+            // RE-CALCULAR EN VIVO (Para que el Admin y la Tabla no salgan en 0)
+            const equipos = equiposRaw.map(eq => {
+                let g = 0, p = 0, ca = 0, ce = 0;
+                juegos.forEach(j => {
+                    if(!j.resultado) return;
+                    const scores = j.resultado.split('-').map(Number);
+                    if (j.local === eq.nombre) {
+                        ca += scores[0]; ce += scores[1];
+                        if (scores[0] > scores[1]) g++; else if (scores[0] < scores[1]) p++;
+                    } else if (j.visita === eq.nombre) {
+                        ca += scores[1]; ce += scores[0];
+                        if (scores[1] > scores[0]) g++; else if (scores[1] < scores[0]) p++;
+                    }
+                });
+                return { ...eq, g, p, ca, ce };
+            });
 
-        async function cargarEncuentros() {
-            const res = await fetch(`${API}/games?liga=femenil&status=pendiente`);
-            const games = await res.json();
-            const cont = document.getElementById('listaEncuentros');
-            cont.innerHTML = games.length === 0 ? `<p class="text-center py-10 opacity-30 italic text-xs">Sin juegos pendientes</p>` :
-                games.map(g => `
-                <div class="bg-white p-4 rounded-2xl border-2 border-slate-100 shadow-sm">
-                    <div class="flex justify-between text-[8px] font-bold text-slate-400 uppercase mb-2">
-                        <span>${g.fecha}</span><span>${g.hora}</span>
-                    </div>
-                    <div class="flex justify-between items-center gap-2">
-                        <span class="text-[10px] font-black uppercase text-blue-900 truncate flex-1">${g.local}</span>
-                        <span class="text-[8px] font-black text-pink-600 italic px-2 bg-pink-50 rounded-full">VS</span>
-                        <span class="text-[10px] font-black uppercase text-blue-900 truncate flex-1 text-right">${g.visita}</span>
-                    </div>
-                </div>`).join('');
-        }
+            // ORDENAMIENTO POR GANADOS Y DIFERENCIA
+            equipos.sort((a, b) => {
+                if (b.g !== a.g) return b.g - a.g;
+                return (b.ca - b.ce) - (a.ca - a.ce);
+            });
 
-        async function cargarHistorialResultados() {
-            const res = await fetch(`${API}/games?liga=femenil&status=finalizado`);
-            const games = await res.json();
-            const cont = document.getElementById('resultadosJornada');
-            cont.innerHTML = games.reverse().map(g => `
+            const tInt = document.getElementById('tablaIntermedia');
+            const tRel = document.getElementById('tablaRelax');
+            tInt.innerHTML = ""; tRel.innerHTML = "";
+
+            equipos.forEach(e => {
+                const dif = e.ca - e.ce;
+                const fila = `
+                    <tr class="hover:bg-pink-50 cursor-pointer border-b transition-colors text-center" onclick="verDetalleRoster('${e.nombre}')">
+                        <td class="p-4 uppercase italic font-black text-blue-900 text-left">${e.nombre}</td>
+                        <td class="font-bold text-slate-500 bg-slate-50/30">${e.g + e.p}</td>
+                        <td class="text-blue-600">${e.g}</td>
+                        <td>${e.p}</td>
+                        <td>${e.ca}</td>
+                        <td>${e.ce}</td>
+                        <td class="font-black ${dif >= 0 ? 'text-blue-600' : 'text-orange-500'}">${dif > 0 ? '+' + dif : dif}</td>
+                    </tr>`;
+                if (e.categoria === "Intermedia") tInt.innerHTML += fila; else tRel.innerHTML += fila;
+            });
+
+            // Actualizar Líderes de tarjetas arriba
+            const lInt = equipos.filter(e => e.categoria === "Intermedia")[0];
+            const lRel = equipos.filter(e => e.categoria === "Relax")[0];
+            if(lInt) document.getElementById('txtLiderInt').innerText = lInt.nombre;
+            if(lRel) document.getElementById('txtLiderRel').innerText = lRel.nombre;
+
+            // Historial (Resumen Jornada)
+            document.getElementById('resultadosJornada').innerHTML = juegos.slice().reverse().map(j => `
                 <div class="tarjeta-resultado bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col gap-2">
                     <div class="flex justify-between text-[8px] font-black text-slate-400 uppercase">
-                        <span>${g.fecha}</span><span class="text-pink-600">FINALIZADO</span>
+                        <span>${j.fecha}</span><span class="text-pink-600 font-bold">FINALIZADO</span>
                     </div>
                     <div class="flex justify-between items-center text-center">
-                        <div class="flex-1 text-[10px] font-black text-blue-900 uppercase">${g.local}</div>
-                        <div class="mx-3 bg-blue-900 text-white px-3 py-1 rounded-lg font-black text-sm italic">${g.resultado}</div>
-                        <div class="flex-1 text-[10px] font-black text-blue-900 uppercase">${g.visita}</div>
+                        <div class="flex-1 text-[10px] font-black text-blue-900 uppercase">${j.local}</div>
+                        <div class="mx-2 bg-blue-900 text-white px-3 py-1 rounded-lg font-black text-sm italic shadow-md">${j.resultado}</div>
+                        <div class="flex-1 text-[10px] font-black text-blue-900 uppercase">${j.visita}</div>
                     </div>
                 </div>`).join('');
-        }
+        } catch (e) { console.error(e); }
+    }
 
-        async function cargarLideresIndividuales() {
-            const res = await fetch(`${API}/players?liga=femenil`);
-            const players = await res.json();
-            const topAVG = [...players].sort((a,b) => (b.avg || 0) - (a.avg || 0)).slice(0, 5);
-            document.getElementById('topBateo').innerHTML = topAVG.map((p, i) => `
-                <div class="flex justify-between items-center border-b border-slate-700 pb-1 text-[11px]">
-                    <span class="font-bold uppercase"><span class="text-pink-500 mr-2">#${i+1}</span> ${p.nombre}</span>
-                    <span class="font-black text-pink-400 italic">${(p.avg || 0).toFixed(3)}</span>
-                </div>`).join('');
-        }
+    async function verDetalleRoster(nombreEquipo) {
+        document.getElementById('detNombreEquipo').innerText = nombreEquipo;
+        const res = await fetch(`${API}/players?liga=femenil`);
+        const allPlayers = await res.json();
+        const players = allPlayers.filter(p => p.equipo.trim().toUpperCase() === nombreEquipo.trim().toUpperCase());
+        
+        const container = document.getElementById('bodyDetalleJugadoras');
+        container.innerHTML = players.length === 0 ? `<tr><td colspan="6" class="p-10 text-center italic text-slate-400">Sin jugadoras registradas.</td></tr>` : 
+            players.map(p => `
+            <tr class="hover:bg-slate-50 border-b text-center">
+                <td class="p-3 font-bold uppercase text-blue-900 text-left">${p.nombre}</td>
+                <td>${p.jj || 0}</td><td>${p.vb || 0}</td>
+                <td class="text-emerald-600 font-black">${p.h || 0}</td>
+                <td class="text-pink-600 font-black">${p.hr || 0}</td>
+                <td class="text-blue-600 font-black">${(p.avg || 0).toFixed(3)}</td>
+            </tr>`).join('');
+        document.getElementById('modalDetalleEquipo').classList.remove('hidden');
+    }
 
-        function filtrarJuegos() {
-            const bus = document.getElementById('inputBusquedaJuegos').value.toUpperCase();
-            const t = document.getElementsByClassName('tarjeta-resultado');
-            const cont = document.getElementById('contadorResultados');
-            let n = 0;
-            for(let i=0; i<t.length; i++) {
-                if(t[i].innerText.toUpperCase().includes(bus)) { t[i].style.display = ""; n++; }
-                else t[i].style.display = "none";
-            }
-            cont.innerText = bus === "" ? "" : `${n} resultados encontrados`;
+    function cerrarDetalle() { document.getElementById('modalDetalleEquipo').classList.add('hidden'); }
+
+    async function cargarEncuentros() {
+        const res = await fetch(`${API}/games?liga=femenil&status=pendiente`);
+        const games = await res.json();
+        const cont = document.getElementById('listaEncuentros');
+        cont.innerHTML = games.length === 0 ? `<p class="text-center py-10 opacity-30 italic text-xs">Sin juegos pendientes</p>` :
+            games.map(g => `
+            <div class="bg-white p-4 rounded-2xl border-2 border-slate-100 shadow-sm">
+                <div class="flex justify-between text-[8px] font-bold text-slate-400 uppercase mb-2">
+                    <span>${g.fecha}</span><span>${g.hora}</span>
+                </div>
+                <div class="flex justify-between items-center gap-2">
+                    <span class="text-[10px] font-black uppercase text-blue-900 truncate flex-1">${g.local}</span>
+                    <span class="text-[8px] font-black text-pink-600 italic px-2 bg-pink-50 rounded-full">VS</span>
+                    <span class="text-[10px] font-black uppercase text-blue-900 truncate flex-1 text-right">${g.visita}</span>
+                </div>
+            </div>`).join('');
+    }
+
+    async function cargarLideresIndividuales() {
+        const res = await fetch(`${API}/players?liga=femenil`);
+        const players = await res.json();
+        
+        // TOP AVG
+        const topAVG = [...players].sort((a,b) => (b.avg || 0) - (a.avg || 0)).slice(0, 5);
+        document.getElementById('topBateo').innerHTML = topAVG.map((p, i) => `
+            <div class="flex justify-between items-center border-b border-slate-700 pb-1 text-[11px]">
+                <span class="font-bold uppercase"><span class="text-pink-500 mr-2">#${i+1}</span> ${p.nombre}</span>
+                <span class="font-black text-pink-400 italic">${(p.avg || 0).toFixed(3)}</span>
+            </div>`).join('');
+
+        // TOP HOME RUNS (Esta es la que faltaba)
+        const topHR = [...players].sort((a,b) => (b.hr || 0) - (a.hr || 0)).slice(0, 5);
+        document.getElementById('topHR').innerHTML = topHR.map((p, i) => `
+            <div class="flex justify-between items-center border-b border-slate-700 pb-1 text-[11px]">
+                <span class="font-bold uppercase"><span class="text-blue-500 mr-2">#${i+1}</span> ${p.nombre}</span>
+                <span class="font-black text-blue-400 italic">${p.hr || 0} HR</span>
+            </div>`).join('');
+    }
+
+    function filtrarJuegos() {
+        const bus = document.getElementById('inputBusquedaJuegos').value.toUpperCase();
+        const t = document.getElementsByClassName('tarjeta-resultado');
+        const cont = document.getElementById('contadorResultados');
+        let n = 0;
+        for(let i=0; i<t.length; i++) {
+            if(t[i].innerText.toUpperCase().includes(bus)) { t[i].style.display = ""; n++; }
+            else t[i].style.display = "none";
         }
-    </script>
+        cont.innerText = bus === "" ? "" : `${n} resultados encontrados`;
+    }
+</script>
 </body>
 </html>
