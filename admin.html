@@ -400,6 +400,72 @@
         const val = document.getElementById('masterSwitch').checked;
         await fetch(`${API}/config`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ permitirAltas: val }) });
     }
+    async function ejecutarIA() {
+    const liga = document.getElementById('ligaIA').value;
+    toggleModal('modalIA');
+    
+    try {
+        const res = await fetch(`${API}/equipos?liga=${liga}`);
+        const equipos = await res.json();
+        
+        // Separamos por categoría para que jueguen entre ellos
+        const intermedia = equipos.filter(e => e.categoria === "Intermedia");
+        const relax = equipos.filter(e => e.categoria === "Relax");
+
+        if (equipos.length < 2) return alert("No hay suficientes equipos para generar un rol.");
+
+        const emparejar = async (lista) => {
+            // Mezcla aleatoria (Fisher-Yates)
+            const shuffled = lista.sort(() => 0.5 - Math.random());
+            
+            for (let i = 0; i < shuffled.length; i += 2) {
+                if (shuffled[i] && shuffled[i+1]) {
+                    const nuevoJuego = {
+                        local: shuffled[i].nombre,
+                        visita: shuffled[i+1].nombre,
+                        fecha: "2026-04-19", // Fecha tentativa próxima jornada
+                        hora: "19:00",
+                        liga: liga,
+                        status: "pendiente"
+                    };
+
+                    await fetch(`${API}/games`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(nuevoJuego)
+                    });
+                }
+            }
+        };
+
+        if (confirm(`¿Generar rol aleatorio para la liga ${liga.toUpperCase()}?`)) {
+            await emparejar(intermedia);
+            await emparejar(relax);
+            alert("¡Rol generado exitosamente!");
+            cargarResultados(); // Refresca la lista de pendientes
+        }
+    } catch (error) {
+        console.error("Error al generar rol:", error);
+        alert("Hubo un error al conectar con el servidor.");
+    }
+}
+async function limpiarHistorialSemanal() {
+    if(!confirm("¿Estás seguro de limpiar los juegos pendientes? Esta acción no se puede deshacer.")) return;
+    
+    try {
+        const res = await fetch(`${API}/games?status=pendiente`);
+        const games = await res.json();
+        
+        for(let g of games) {
+            await fetch(`${API}/games/${g._id}`, { method: 'DELETE' });
+        }
+        
+        alert("Semana limpiada.");
+        cargarResultados();
+    } catch (error) {
+        console.error("Error al limpiar:", error);
+    }
+}
 
     document.addEventListener('DOMContentLoaded', cargarTodo);
 </script>

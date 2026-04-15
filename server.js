@@ -7,6 +7,16 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+app.use(cors({
+    origin: [
+        'https://slowpitchley57-jpg.github.io', // Tu dominio de la captura
+        'http://localhost:5500',               // Para que puedas probar local
+        'http://127.0.0.1:5500'
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
+}));
+
 
 // SOLUCIÓN DE EMERGENCIA: Conexión directa
 mongoose.connect('mongodb+srv://rosasvillah_db_user:GhnkehSpQQGFwU3K@ley57.y2bgblz.mongodb.net/LEY57?retryWrites=true&w=majority')
