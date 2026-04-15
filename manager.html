@@ -141,189 +141,229 @@
     </div>
 
     <script>
-        if(!localStorage.getItem('userLogueado')) window.location.href = 'index.html';
-        const API = "https://ley57.onrender.com/api";
-        let equipoSeleccionado = "";
-        let correoUsuario = "";
+    const API = "https://ley57.onrender.com/api";
+    let equipoSeleccionado = "";
+    let correoUsuario = "";
 
-        function toggleMobileMenu() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            sidebar.classList.toggle('-translate-x-full');
-            overlay.classList.toggle('hidden');
-        }
-
-       function revisarSesion() {
-    // Buscamos la sesión
-    const sesion = localStorage.getItem('userLogueado') || localStorage.getItem('managerLogueado');
-    
-    // Si NO hay sesión, mándalo al index
-    if (!sesion) { 
-        window.location.href = 'index.html'; 
-        return; 
-    }
-
-    const datos = JSON.parse(sesion);
-    
-    // Mostramos el nombre del equipo arriba
-    const txtEquipo = document.getElementById('nombreEquipoCabecera');
-    if (txtEquipo) {
-        txtEquipo.innerText = datos.equipo; 
-    }
-
-    // CONFIGURACIÓN DEL BOTÓN DE SALIDA (Para que no te saque solo)
-    const btnStats = document.getElementById('btnLinkEstadisticas');
-    if (btnStats) {
-        // IMPORTANTE: Quitamos el href para que no redireccione al cargar
-        btnStats.removeAttribute('href'); 
-        btnStats.style.cursor = 'pointer';
+    // 1. REVISAR SESIÓN (Se ejecuta de inmediato)
+    function revisarSesion() {
+        const sesion = localStorage.getItem('userLogueado') || localStorage.getItem('managerLogueado');
         
-        btnStats.onclick = (e) => {
-            e.preventDefault(); // Evita cualquier salto automático
-            if(confirm("¿Deseas cerrar sesión y ver estadísticas?")) {
-                localStorage.clear();
-                window.location.href = 'index.html';
-            }
-        };
+        if (!sesion) { 
+            window.location.href = 'index.html'; 
+            return; 
+        }
+
+        const datos = JSON.parse(sesion);
+        
+        // ASIGNACIÓN DE DATOS A VARIABLES GLOBALES (Esto era lo que faltaba)
+        equipoSeleccionado = datos.equipo;
+        correoUsuario = datos.correo || datos.email || "";
+
+        // Poner nombre en la cabecera
+        const txtEquipo = document.getElementById('nombreEquipoCabecera');
+        if (txtEquipo) {
+            txtEquipo.innerText = equipoSeleccionado; 
+        }
+
+        // Configurar botón de estadísticas para que no saque al usuario por error
+        const btnStats = document.getElementById('btnLinkEstadisticas');
+        if (btnStats) {
+            btnStats.removeAttribute('href'); 
+            btnStats.style.cursor = 'pointer';
+            btnStats.onclick = (e) => {
+                e.preventDefault();
+                if(confirm("¿Deseas cerrar sesión para ir a las estadísticas generales?")) {
+                    cerrarSesion();
+                }
+            };
+        }
+
+        // Iniciar carga de datos
+        iniciarSincronizacionRealTime();
     }
-}
 
-        async function verificarPermisos() {
-            try {
-                const res = await fetch(`${API}/config`);
-                const config = await res.json();
-                const badge = document.getElementById('statusBadge');
-                const seccionAltas = document.getElementById('seccionAltas');
-                const msgBloqueado = document.getElementById('msgBloqueado');
+    // 2. CONTROL DE INTERFAZ
+    function toggleMobileMenu() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        sidebar.classList.toggle('-translate-x-full');
+        overlay.classList.toggle('hidden');
+    }
 
-                if(!config.permitirAltas) {
-                    seccionAltas.classList.add('hidden');
-                    msgBloqueado.classList.remove('hidden');
-                    badge.innerText = "REGISTRO CERRADO";
-                    badge.className = "text-[8px] md:text-[9px] font-black px-3 py-1 rounded-full bg-red-100 text-red-600 italic";
-                } else {
-                    seccionAltas.classList.remove('hidden');
-                    msgBloqueado.classList.add('hidden');
-                    badge.innerText = "REGISTRO ABIERTO";
-                    badge.className = "text-[8px] md:text-[9px] font-black px-3 py-1 rounded-full bg-emerald-100 text-emerald-600 italic";
-                }
-            } catch(e) { console.error("Error config:", e); }
-        }
+    function toggleModalPassword() { 
+        document.getElementById('modalPassword').classList.toggle('hidden'); 
+    }
 
-        // --- RESTO DE FUNCIONES (Sincronización, Roster, Password) ---
-        function iniciarSincronizacionRealTime() {
-            cargarMiRoster(); cargarResultados(); cargarProximoJuego(); verificarPermisos();
-            setInterval(() => { if (equipoSeleccionado) { cargarResultados(); cargarProximoJuego(); verificarPermisos(); } }, 5000); 
-        }
+    // 3. SINCRONIZACIÓN Y CARGA
+    function iniciarSincronizacionRealTime() {
+        // Carga inmediata
+        cargarMiRoster(); 
+        cargarResultados(); 
+        cargarProximoJuego(); 
+        verificarPermisos();
 
-        async function cargarMiRoster() {
-            try {
-                const res = await fetch(`${API}/players?equipo=${encodeURIComponent(equipoSeleccionado)}`);
-                const data = await res.json();
-                const cont = document.getElementById('miRosterLista');
-                document.getElementById('contadorRoster').innerText = data.length;
-                cont.innerHTML = data.length ? "" : "<p class='text-center py-10 text-slate-300 italic'>Roster vacío.</p>";
-                data.forEach(p => {
-                    cont.innerHTML += `
-                        <div class="flex justify-between items-center p-3 bg-slate-50 border rounded-xl border-slate-100 animate-fade-in">
-                            <div class="flex flex-col">
-                                <span class="text-[10px] font-black uppercase text-blue-900 italic">${p.nombre}</span>
-                                <span class="text-[8px] text-slate-400 font-bold uppercase tracking-widest">Jugadora</span>
-                            </div>
-                            <span class="text-[9px] text-slate-500 font-mono bg-white px-2 py-1 rounded border border-slate-100 italic">
-                                ${p.fechaNacimiento}
-                            </span>
-                        </div>`;
-                });
-            } catch (error) { console.error(error); }
-        }
+        // Refresco automático cada 10 segundos para no saturar el servidor
+        setInterval(() => { 
+            if (equipoSeleccionado) { 
+                cargarResultados(); 
+                cargarProximoJuego(); 
+                verificarPermisos(); 
+            } 
+        }, 10000); 
+    }
 
-        async function cargarProximoJuego() {
-            const cont = document.getElementById('proximoJuego');
-            try {
-                const res = await fetch(`${API}/games`);
-                const games = await res.json();
-                const miEq = equipoSeleccionado.trim().toUpperCase();
-                const miJuego = games.find(g => g.status === 'pendiente' && (g.local.trim().toUpperCase() === miEq || g.visita.trim().toUpperCase() === miEq));
-                if(!miJuego) {
-                    cont.innerHTML = `<p class="text-[10px] text-slate-300 uppercase font-bold italic">Sin juegos programados</p>`;
-                    return;
-                }
-                cont.innerHTML = `<div class="w-full text-center space-y-3 animate-fade-in">
-                    <span class="text-[9px] bg-orange-100 text-orange-600 px-3 py-1 rounded-full font-black uppercase italic">${miJuego.fecha} - ${miJuego.hora}</span>
-                    <div class="flex justify-between items-center bg-white p-3 rounded-2xl border border-slate-100 shadow-sm">
-                        <span class="text-[10px] font-black uppercase flex-1 truncate">${miJuego.local}</span>
-                        <span class="mx-2 text-blue-900 font-black italic text-xs">VS</span>
-                        <span class="text-[10px] font-black uppercase flex-1 truncate">${miJuego.visita}</span>
-                    </div>
-                </div>`;
-            } catch (e) { console.error(e); }
-        }
+    async function verificarPermisos() {
+        try {
+            const res = await fetch(`${API}/config`);
+            const config = await res.json();
+            const badge = document.getElementById('statusBadge');
+            const seccionAltas = document.getElementById('seccionAltas');
+            const msgBloqueado = document.getElementById('msgBloqueado');
 
-        async function cargarResultados() {
-            try {
-                const res = await fetch(`${API}/games`);
-                const games = await res.json();
-                const cont = document.getElementById('resultadosJornada');
-                cont.innerHTML = "";
-                games.filter(g => g.status === 'finalizado').reverse().slice(0,5).forEach(g => {
-                    cont.innerHTML += `<div class="bg-white p-2 rounded-xl border border-slate-100 flex justify-between items-center gap-2 shadow-sm">
-                        <span class="text-[9px] font-black uppercase flex-1 truncate italic">${g.local}</span>
-                        <span class="bg-red-600 text-white px-2 py-0.5 rounded font-bold text-[10px] italic">${g.resultado}</span>
-                        <span class="text-[9px] font-black uppercase flex-1 text-right truncate italic">${g.visita}</span>
-                    </div>`;
-                });
-            } catch(e) {}
-        }
-
-        async function procesarRoster() {
-            const rawText = document.getElementById('rawRoster').value;
-            if(!rawText.trim() || !confirm("¿Guardar este roster masivo?")) return;
-            const lineas = rawText.split('\n');
-            for(let linea of lineas) {
-                if(linea.trim() === "") continue;
-                const regexFecha = /(\d{2}\/\d{2}\/\d{4})/;
-                const matchFecha = linea.match(regexFecha);
-                const fechaDetectada = matchFecha ? matchFecha[0] : "Sin Fecha";
-                let nombreLimpio = linea.replace(/^\d+[\.\s-]*/g, '').replace(fechaDetectada, '').replace(/[–\-\|]/g, '').trim();                
-                if(nombreLimpio.length > 2) {
-                    await fetch(`${API}/players`, {
-                        method: 'POST',
-                        headers: {'Content-Type':'application/json'},
-                        body: JSON.stringify({ nombre: nombreLimpio.toUpperCase(), equipo: equipoSeleccionado, fechaNacimiento: fechaDetectada, categoria: "bateo" })
-                    });
-                }
+            if(!config.permitirAltas) {
+                seccionAltas.classList.add('hidden');
+                msgBloqueado.classList.remove('hidden');
+                badge.innerText = "REGISTRO CERRADO";
+                badge.className = "text-[8px] md:text-[9px] font-black px-3 py-1 rounded-full bg-red-100 text-red-600 italic";
+            } else {
+                seccionAltas.classList.remove('hidden');
+                msgBloqueado.classList.add('hidden');
+                badge.innerText = "REGISTRO ABIERTO";
+                badge.className = "text-[8px] md:text-[9px] font-black px-3 py-1 rounded-full bg-emerald-100 text-emerald-600 italic";
             }
-            alert("Roster guardado.");
-            document.getElementById('rawRoster').value = "";
-            cargarMiRoster();
-        }
+        } catch(e) { console.error("Error config:", e); }
+    }
 
-        async function guardarIndividual() {
-            const nombre = document.getElementById('soloNombre').value;
-            const fecha = document.getElementById('soloFecha').value;
-            if(!nombre || !fecha) return alert("Faltan datos.");
-            await fetch(`${API}/players`, {
-                method: 'POST',
-                headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({ nombre: nombre.toUpperCase(), equipo: equipoSeleccionado, fechaNacimiento: fecha, categoria: "bateo" })
+    async function cargarMiRoster() {
+        if (!equipoSeleccionado) return;
+        try {
+            const res = await fetch(`${API}/players?equipo=${encodeURIComponent(equipoSeleccionado)}`);
+            const data = await res.json();
+            const cont = document.getElementById('miRosterLista');
+            document.getElementById('contadorRoster').innerText = data.length;
+            
+            cont.innerHTML = data.length ? "" : "<p class='text-center py-10 text-slate-300 italic'>Roster vacío.</p>";
+            
+            data.forEach(p => {
+                cont.innerHTML += `
+                    <div class="flex justify-between items-center p-3 bg-slate-50 border rounded-xl border-slate-100 animate-fade-in">
+                        <div class="flex flex-col">
+                            <span class="text-[10px] font-black uppercase text-blue-900 italic">${p.nombre}</span>
+                            <span class="text-[8px] text-slate-400 font-bold uppercase tracking-widest">Jugadora</span>
+                        </div>
+                        <span class="text-[9px] text-slate-500 font-mono bg-white px-2 py-1 rounded border border-slate-100 italic">
+                            ${p.fechaNacimiento || 'S/F'}
+                        </span>
+                    </div>`;
             });
-            alert("Registrada.");
-            document.getElementById('soloNombre').value = ""; document.getElementById('soloFecha').value = "";
-            cargarMiRoster();
-        }
+        } catch (error) { console.error("Error cargando roster:", error); }
+    }
 
-        function toggleModalPassword() { document.getElementById('modalPassword').classList.toggle('hidden'); }
-        async function actualizarPassword() {
-            const p1 = document.getElementById('nuevaPass').value;
-            const p2 = document.getElementById('confirmPass').value;
-            if(p1 !== p2) return alert("No coinciden.");
-            await fetch(`${API}/users/update-password`, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ correo: correoUsuario, nuevaPass: p1 }) });
-            alert("Listo."); toggleModalPassword();
-        }
+    async function cargarProximoJuego() {
+        const cont = document.getElementById('proximoJuego');
+        try {
+            const res = await fetch(`${API}/games`);
+            const games = await res.json();
+            const miEq = equipoSeleccionado.trim().toUpperCase();
+            const miJuego = games.find(g => g.status === 'pendiente' && (g.local.trim().toUpperCase() === miEq || g.visita.trim().toUpperCase() === miEq));
+            
+            if(!miJuego) {
+                cont.innerHTML = `<p class="text-[10px] text-slate-300 uppercase font-bold italic">Sin juegos programados</p>`;
+                return;
+            }
+            cont.innerHTML = `<div class="w-full text-center space-y-3 animate-fade-in">
+                <span class="text-[9px] bg-orange-100 text-orange-600 px-3 py-1 rounded-full font-black uppercase italic">${miJuego.fecha} - ${miJuego.hora}</span>
+                <div class="flex justify-between items-center bg-white p-3 rounded-2xl border border-slate-100 shadow-sm">
+                    <span class="text-[10px] font-black uppercase flex-1 truncate">${miJuego.local}</span>
+                    <span class="mx-2 text-blue-900 font-black italic text-xs">VS</span>
+                    <span class="text-[10px] font-black uppercase flex-1 truncate">${miJuego.visita}</span>
+                </div>
+            </div>`;
+        } catch (e) { console.error(e); }
+    }
 
-        function cerrarSesion() { localStorage.clear(); window.location.href = 'index.html'; }
-        revisarSesion();
-    </script>
+    async function cargarResultados() {
+        try {
+            const res = await fetch(`${API}/games`);
+            const games = await res.json();
+            const cont = document.getElementById('resultadosJornada');
+            cont.innerHTML = "";
+            games.filter(g => g.status === 'finalizado').reverse().slice(0,5).forEach(g => {
+                cont.innerHTML += `<div class="bg-white p-2 rounded-xl border border-slate-100 flex justify-between items-center gap-2 shadow-sm">
+                    <span class="text-[9px] font-black uppercase flex-1 truncate italic">${g.local}</span>
+                    <span class="bg-red-600 text-white px-2 py-0.5 rounded font-bold text-[10px] italic">${g.resultado}</span>
+                    <span class="text-[9px] font-black uppercase flex-1 text-right truncate italic">${g.visita}</span>
+                </div>`;
+            });
+        } catch(e) {}
+    }
+
+    // 4. ACCIONES DE MANAGER
+    async function procesarRoster() {
+        const rawText = document.getElementById('rawRoster').value;
+        if(!rawText.trim() || !confirm("¿Guardar este roster masivo?")) return;
+        const lineas = rawText.split('\n');
+        for(let linea of lineas) {
+            if(linea.trim() === "") continue;
+            const regexFecha = /(\d{2}\/\d{2}\/\d{4})/;
+            const matchFecha = linea.match(regexFecha);
+            const fechaDetectada = matchFecha ? matchFecha[0] : "Sin Fecha";
+            let nombreLimpio = linea.replace(/^\d+[\.\s-]*/g, '').replace(fechaDetectada, '').replace(/[–\-\|]/g, '').trim();                
+            if(nombreLimpio.length > 2) {
+                await fetch(`${API}/players`, {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({ nombre: nombreLimpio.toUpperCase(), equipo: equipoSeleccionado, fechaNacimiento: fechaDetectada, categoria: "bateo" })
+                });
+            }
+        }
+        alert("Roster guardado.");
+        document.getElementById('rawRoster').value = "";
+        cargarMiRoster();
+    }
+
+    async function guardarIndividual() {
+        const nombre = document.getElementById('soloNombre').value;
+        const fecha = document.getElementById('soloFecha').value;
+        if(!nombre || !fecha) return alert("Faltan datos.");
+        await fetch(`${API}/players`, {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ nombre: nombre.toUpperCase(), equipo: equipoSeleccionado, fechaNacimiento: fecha, categoria: "bateo" })
+        });
+        alert("Registrada.");
+        document.getElementById('soloNombre').value = ""; 
+        document.getElementById('soloFecha').value = "";
+        cargarMiRoster();
+    }
+
+    async function actualizarPassword() {
+        const p1 = document.getElementById('nuevaPass').value;
+        const p2 = document.getElementById('confirmPass').value;
+        if(!p1 || p1 !== p2) return alert("Las contraseñas no coinciden o están vacías.");
+        try {
+            const res = await fetch(`${API}/users/update-password`, { 
+                method: 'PUT', 
+                headers: {'Content-Type': 'application/json'}, 
+                body: JSON.stringify({ correo: correoUsuario, nuevaPass: p1 }) 
+            });
+            if(res.ok) {
+                alert("Contraseña actualizada con éxito."); 
+                toggleModalPassword();
+            } else {
+                alert("Error al actualizar.");
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    function cerrarSesion() { 
+        localStorage.clear(); 
+        window.location.href = 'index.html'; 
+    }
+
+    // INICIO ÚNICO
+    revisarSesion();
+</script>
 </body>
 </html>

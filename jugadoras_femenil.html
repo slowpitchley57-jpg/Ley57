@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Líderes Femenil - Amigos del EASY</title>
+    <title>Líderes Femenil - Slow Pitch</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .bg-femenil { background: linear-gradient(135deg, #4c0519 0%, #831843 100%); }
         .card-femenil { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(244, 114, 182, 0.2); }
-        .text-rose { color: #f472b6; }
+        /* Ajuste para que las columnas no se amontonen en móviles */
+        .tabla-stats th, .tabla-stats td { padding: 8px 4px; }
     </style>
 </head>
 <body class="bg-zinc-950 text-slate-200">
@@ -41,19 +42,22 @@
 
         <div class="card-femenil rounded-3xl overflow-hidden shadow-2xl">
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-[10px]">
-                   <thead>
-    <tr class="bg-zinc-900 text-zinc-500 uppercase font-black border-b border-zinc-800 text-center">
-        <th class="p-5 text-left text-white">Jugador / Equipo</th>
-        <th>Cat</th>
-        <th>JJ</th>
-        <th>AB</th>
-        <th>H</th>
-        <th class="text-red-600">RBI</th>
-        <th class="text-orange-600">HR</th>
-        <th class="text-fire">AVG</th>
-    </tr>
-</thead>
+                <table class="w-full text-left text-[9px] md:text-[11px] tabla-stats">
+                    <thead>
+                        <tr class="bg-zinc-900 text-zinc-500 uppercase font-black border-b border-zinc-800 text-center">
+                            <th class="p-4 text-left text-white sticky left-0 bg-zinc-900 z-10">Jugador / Equipo</th>
+                            <th class="px-2">Cat</th>
+                            <th class="px-2 text-white">JJ</th>
+                            <th class="px-2">VB</th>
+                            <th class="px-2 text-white">H</th>
+                            <th class="px-2">2B</th>
+                            <th class="px-2">3B</th>
+                            <th class="px-2 text-orange-600">HR</th>
+                            <th class="px-2 text-blue-400">K</th>
+                            <th class="px-2 text-red-600">RBI</th>
+                            <th class="px-2 bg-pink-600/20 text-white">AVG</th>
+                        </tr>
+                    </thead>
                     <tbody id="tablaGlobal" class="divide-y divide-pink-900/20"></tbody>
                 </table>
             </div>
@@ -62,67 +66,62 @@
 
     <script>
         const API = "https://ley57.onrender.com/api";
+        
         async function cargar() {
-    try {
-        const [resP, resE] = await Promise.all([
-            fetch(`${API}/players?liga=femenil`), 
-            fetch(`${API}/equipos?liga=femenil`)
-        ]);
-        
-        const players = await resP.json();
-        const equipos = await resE.json();
-        const tabla = document.getElementById('tablaGlobal');
-        
-        players.sort((a,b) => (b.avg || 0) - (a.avg || 0));
+            try {
+                const [resP, resE] = await Promise.all([
+                    fetch(`${API}/players?liga=femenil`), 
+                    fetch(`${API}/equipos?liga=femenil`)
+                ]);
+                
+                const players = await resP.json();
+                const equipos = await resE.json();
+                const tabla = document.getElementById('tablaGlobal');
+                
+                // Ordenar por promedio (AVG)
+                players.sort((a,b) => (b.avg || 0) - (a.avg || 0));
 
-        tabla.innerHTML = players.map(p => {
-            // BUSQUEDA BLINDADA: Limpiamos espacios y pasamos a mayúsculas
-            const datosEquipo = equipos.find(e => 
-                e.nombre.trim().toUpperCase() === p.equipo.trim().toUpperCase()
-            );
-            
-            const categoria = datosEquipo ? datosEquipo.categoria : "SIN CAT";
+                tabla.innerHTML = players.map(p => {
+                    const datosEquipo = equipos.find(e => 
+                        e.nombre.trim().toUpperCase() === p.equipo.trim().toUpperCase()
+                    );
+                    
+                    const categoria = datosEquipo ? datosEquipo.categoria : "---";
 
-            return `
-                <tr class="fila-jugador hover:bg-pink-50/10 transition-all text-center border-b border-zinc-900">
-                    <td class="p-4 text-left">
-                        <div class="font-black text-white uppercase italic tracking-tighter">${p.nombre}</div>
-                        <div class="text-[9px] text-pink-500 font-black uppercase">${p.equipo}</div>
-                    </td>
-                    <td class="text-zinc-400 font-bold italic text-[10px]">${categoria}</td>
-                    <td class="font-bold text-white bg-white/5">${p.jj || 0}</td>
-                    <td>${p.vb || 0}</td>
-                    <td class="text-white font-bold">${p.h || 0}</td>
-                    <td class="text-pink-500 font-black">${p.rbi || 0}</td>
-                    <td class="text-orange-500 font-black">${p.hr || 0}</td>
-                    <td class="text-white font-black text-sm italic">${(p.avg || 0).toFixed(3)}</td>
-                </tr>`;
-        }).join('');
-    } catch (e) { console.error("Error:", e); }
-}
-
+                    return `
+                        <tr class="fila-jugador hover:bg-pink-50/10 transition-all text-center border-b border-zinc-900">
+                            <td class="p-4 text-left sticky left-0 bg-zinc-950/80 backdrop-blur-sm z-10">
+                                <div class="font-black text-white uppercase italic tracking-tighter leading-none">${p.nombre}</div>
+                                <div class="text-[8px] text-pink-500 font-black uppercase mt-1">${p.equipo}</div>
+                            </td>
+                            <td class="text-zinc-400 font-bold italic">${categoria}</td>
+                            <td class="font-bold text-white bg-white/5">${p.jj || 0}</td>
+                            <td>${p.vb || 0}</td>
+                            <td class="text-white font-bold">${p.h || 0}</td>
+                            <td>${p.b2 || 0}</td>
+                            <td>${p.b3 || 0}</td>
+                            <td class="text-orange-500 font-black">${p.hr || 0}</td>
+                            <td class="text-blue-400">${p.k || 0}</td>
+                            <td class="text-pink-500 font-black">${p.rbi || 0}</td>
+                            <td class="text-white font-black bg-pink-600/10 italic">${(p.avg || 0).toFixed(3)}</td>
+                        </tr>`;
+                }).join('');
+            } catch (e) { 
+                console.error("Error:", e); 
+            }
+        }
 
         function filtrarTabla() {
-    // 1. Obtenemos el texto de búsqueda
-    const busqueda = document.getElementById('buscadorJugadoras').value.toUpperCase();
-    
-    // 2. IMPORTANTE: Verifica que en tu HTML cada <tr> de la tabla tenga class="fila-jugador"
-    const filas = document.getElementsByClassName('fila-jugador');
+            const busqueda = document.getElementById('buscadorJugadoras').value.toUpperCase();
+            const filas = document.getElementsByClassName('fila-jugador');
 
-    for (let i = 0; i < filas.length; i++) {
-        const fila = filas[i];
-        
-        // Obtenemos el contenido de texto de toda la fila
-        const contenidoTexto = fila.textContent || fila.innerText;
-        
-        // Comparamos
-        if (contenidoTexto.toUpperCase().indexOf(busqueda) > -1) {
-            fila.style.display = ""; // Se muestra si coincide
-        } else {
-            fila.style.display = "none"; // Se oculta si no
+            for (let i = 0; i < filas.length; i++) {
+                const fila = filas[i];
+                const contenidoTexto = fila.textContent || fila.innerText;
+                fila.style.display = contenidoTexto.toUpperCase().indexOf(busqueda) > -1 ? "" : "none";
+            }
         }
-    }
-}
+        
         cargar();
     </script>
 </body>
