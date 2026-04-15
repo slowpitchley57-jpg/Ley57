@@ -275,33 +275,72 @@ const fila = `
         }
 
         async function verRosterEquipo() {
-            const eq = document.getElementById('filterRoster').value, cont = document.getElementById('containerRoster');
-            if(!eq) return;
-            cont.innerHTML = "<p class='text-center py-4'>Cargando...</p>";
-            const res = await fetch(`${API}/players?equipo=${encodeURIComponent(eq)}`);
-            const players = await res.json();
-            cont.innerHTML = players.map(p => `
-                <div class="p-3 bg-slate-50 rounded-xl border flex flex-col gap-2 shadow-sm">
-                    <div class="grid grid-cols-2 gap-2">
-                        <input type="text" onchange="updPlFull('${p._id}','nombre',this.value)" value="${p.nombre}" class="w-full p-2 border rounded font-bold text-xs uppercase bg-white">
-                        <input type="text" value="${p.fechaNacimiento}" class="w-full p-2 border rounded text-xs bg-slate-100" readonly>
-                    </div>
-                    <div class="flex items-center gap-2 text-[10px] font-bold">
-                        JJ <input type="number" onchange="updPlFull('${p._id}','jj',this.value)" value="${p.jj||0}" class="input-inline">
-                        AB <input type="number" onchange="updPlFull('${p._id}','vb',this.value)" value="${p.vb||0}" class="input-inline">
-                        H <input type="number" onchange="updPlFull('${p._id}','h',this.value)" value="${p.h||0}" class="input-inline">
-                        HR <input type="number" onchange="updPlFull('${p._id}','hr',this.value)" value="${p.hr||0}" class="input-inline">
-                        <button onclick="eliminarJugadora('${p._id}')" class="ml-auto text-red-500 hover:text-red-700 transition"><i class="fa fa-trash"></i></button>
-                    </div>
-                </div>`).join('');
-        }
+    const eq = document.getElementById('filterRoster').value;
+    const liga = document.getElementById('ligaRoster').value;
+    const cont = document.getElementById('containerRoster');
+    
+    if(!eq) return cont.innerHTML = "";
+
+    const res = await fetch(`${API}/players?equipo=${encodeURIComponent(eq)}&liga=${liga}`);
+    const players = await res.json();
+
+    // Estructura de tabla para que quepan todos los campos
+    cont.innerHTML = `
+        <table class="w-full text-[10px] text-left border-collapse">
+            <thead>
+                <tr class="bg-slate-100 text-slate-600 uppercase font-black border-b">
+                    <th class="p-2">Jugador</th>
+                    <th class="p-1 text-center">JJ</th>
+                    <th class="p-1 text-center">VB</th>
+                    <th class="p-1 text-center">H</th>
+                    <th class="p-1 text-center">2B</th>
+                    <th class="p-1 text-center">3B</th>
+                    <th class="p-1 text-center">HR</th>
+                    <th class="p-1 text-center">K</th>
+                    <th class="p-1 text-center">AVG</th>
+                    <th class="p-1 text-center">Acción</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y">
+                ${players.map(p => `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-2 font-bold uppercase text-slate-700">${p.nombre}</td>
+                        <td><input type="number" value="${p.jj || 0}" onchange="updPlayer('${p._id}','jj',this.value)" class="w-10 border rounded text-center p-1"></td>
+                        <td><input type="number" value="${p.vb || 0}" onchange="updPlayer('${p._id}','vb',this.value)" class="w-10 border rounded text-center p-1"></td>
+                        <td><input type="number" value="${p.h || 0}" onchange="updPlayer('${p._id}','h',this.value)" class="w-10 border rounded text-center p-1 font-bold text-blue-600"></td>
+                        <td><input type="number" value="${p.dobles || 0}" onchange="updPlayer('${p._id}','dobles',this.value)" class="w-10 border rounded text-center p-1"></td>
+                        <td><input type="number" value="${p.triples || 0}" onchange="updPlayer('${p._id}','triples',this.value)" class="w-10 border rounded text-center p-1"></td>
+                        <td><input type="number" value="${p.hr || 0}" onchange="updPlayer('${p._id}','hr',this.value)" class="w-10 border rounded text-center p-1 font-bold text-red-600"></td>
+                        <td><input type="number" value="${p.k || 0}" onchange="updPlayer('${p._id}','k',this.value)" class="w-10 border rounded text-center p-1"></td>
+                        <td class="text-center font-black italic text-slate-400">${(p.avg || 0).toFixed(3)}</td>
+                        <td class="text-center">
+                            <button onclick="eliminarPlayer('${p._id}')" class="text-red-400 hover:text-red-600"><i class="fa fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+}
 
         // --- FUNCIONES DE APOYO RESTANTES ---
-        async function updEq(id, campo, val) {
-            let d = {}; d[campo] = Number(val);
-            await fetch(`${API}/equipos/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(d) });
-            cargarEquipos();
-        }
+       async function updPlayer(id, campo, valor) {
+    try {
+        const res = await fetch(`${API}/players/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ [campo]: Number(valor) })
+        });
+        
+        if (!res.ok) throw new Error("Error al actualizar");
+        
+        // Opcional: Mostrar un pequeño aviso de "Guardado" en consola
+        console.log(`Jugador ${id}: ${campo} actualizado a ${valor}`);
+    } catch (err) {
+        console.error(err);
+        alert("No se pudo guardar el cambio");
+    }
+}
 
         async function cargarResultados() {
             const res = await fetch(`${API}/games`);

@@ -40,6 +40,14 @@
                 <span class="h-1 w-12 bg-red-600 rounded-full"></span>
             </div>
         </div>
+        <div class="max-w-7xl mx-auto px-4 mb-6">
+    <div class="bg-red-600/10 border-l-4 border-red-600 p-4 rounded-r-xl flex items-center gap-4">
+        <i class="fa fa-exclamation-triangle text-red-600 animate-bounce"></i>
+        <p class="text-[10px] md:text-xs font-black uppercase tracking-widest text-red-600 italic">
+            Importante: Todo jugador(a) requiere un mínimo de <span class="underline">5 juegos jugados</span> para participar en la fase de Play-offs.
+        </p>
+    </div>
+</div>
     </header>
 
     <main class="max-w-7xl mx-auto p-4 md:p-8 -mt-10 space-y-8">
@@ -279,6 +287,51 @@
 
         } catch (e) { console.error("Error:", e); }
     }
+    async function verDetalleRoster(nombreEquipo) {
+    // 1. Mostramos el nombre en el título tal cual viene
+    document.getElementById('detNombreEquipo').innerText = nombreEquipo;
+    
+    // 2. Traemos a TODOS los jugadores de la liga varonil primero
+    // Esto es más seguro que filtrar por nombre en la URL si hay dudas con las mayúsculas
+    const res = await fetch(`${API}/players?liga=varonil`);
+    const allPlayers = await res.json();
+    
+    // 3. FILTRO DINÁMICO: 
+    // Comparamos el nombre del equipo ignorando mayúsculas/minúsculas y espacios
+    const players = allPlayers.filter(p => 
+        p.equipo.trim().toUpperCase() === nombreEquipo.trim().toUpperCase()
+    );
+    
+    const container = document.getElementById('bodyDetalleJugadoras');
+
+    if(players.length === 0) {
+        container.innerHTML = `
+            <tr><td colspan="6" class="p-10 text-center text-slate-400 italic">No hay jugadoras registradas para ${nombreEquipo}.</td></tr>`;
+    } else {
+        container.innerHTML = players.map(p => `
+            <tr class="hover:bg-slate-50 border-b transition-colors">
+                <td class="p-3 font-bold uppercase text-blue-900">${p.nombre}</td>
+                <td class="text-center font-semibold text-slate-500">${p.jj || 0}</td>
+                <td class="text-center font-semibold text-slate-500">${p.vb || 0}</td>
+                <td class="text-center text-emerald-600 font-black">${p.h || 0}</td>
+                <td class="text-center text-red-500 font-black">${p.hr || 0}</td>
+                <td class="text-center text-blue-600 font-black bg-blue-50/30">${(p.avg || 0).toFixed(3)}</td>
+            </tr>`).join('');
+    }
+    // Agrega esto justo antes de cerrar el modal en tu código JS
+const footerModal = `
+    <div class="p-4 bg-zinc-950 border-t border-zinc-800 flex justify-center">
+        <a href="jugadores_varonil.html" class="flex items-center gap-2 bg-red-600 hover:bg-white hover:text-red-600 text-white text-[10px] font-black uppercase px-6 py-3 rounded-full transition-all shadow-lg shadow-red-900/20">
+            <i class="fa fa-chart-line"></i> Ver Ranking Completo Varonil
+        </a>
+    </div>
+`;
+
+// Insertamos el footer al final del contenedor del modal
+document.getElementById('modalDetalleEquipo').querySelector('.bg-zinc-900').insertAdjacentHTML('beforeend', footerModal);
+
+   // document.getElementById('modalDetalleEquipo').classList.remove('hidden');
+}
 
     async function cargarEncuentros() {
     try {
