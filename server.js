@@ -228,12 +228,24 @@ app.get('/api/games', async (req, res) => {
 app.post('/api/games', async (req, res) => {
     const g = new Game(req.body); await g.save(); res.json(g);
 });
+// En tu servidor (Node.js)
 app.post('/api/games/resultado', async (req, res) => {
-    const { id, sL, sV, ganador, perdedor } = req.body;
-    await Game.findByIdAndUpdate(id, { resultado: `${sL}-${sV}`, status: 'finalizado' });
-    await Team.findOneAndUpdate({ nombre: ganador }, { $inc: { g: 1, ca: sL, ce: sV } });
-    await Team.findOneAndUpdate({ nombre: perdedor }, { $inc: { p: 1, ca: sV, ce: sL } });
-    res.json({ ok: true });
+    try {
+        const { id, sL, sV, ganador, perdedor } = req.body;
+        
+        // ACTUALIZAMOS EL RESULTADO Y EL STATUS
+        const juegoActualizado = await Game.findByIdAndUpdate(id, {
+            resultado: `${sL}-${sV}`,
+            ganador,
+            perdedor,
+            status: "finalizado" // <--- ESTO ES LO QUE TE FALTA
+        }, { new: true });
+
+        res.json({ message: "Juego finalizado con éxito", juegoActualizado });
+    } catch (error) {
+        console.error("Error al finalizar juego:", error);
+        res.status(500).json({ error: "Error interno del servidor" });
+    }
 });
 // Ruta para cambiar contraseña desde el Manager
 app.put('/api/users/update-password', async (req, res) => {

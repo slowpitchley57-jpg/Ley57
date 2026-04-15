@@ -295,26 +295,30 @@
 
     function cerrarDetalle() { document.getElementById('modalDetalleEquipo').classList.add('hidden'); }
 
-    async function cargarEncuentros() {
-        const res = await fetch(`${API}/games?liga=femenil&status=pendiente`);
-        const games = await res.json();
-        const cont = document.getElementById('listaEncuentros');
-        if(games.length === 0) {
-            cont.innerHTML = `<p class="text-center py-10 opacity-30 italic text-xs">Sin juegos pendientes</p>`;
-        } else {
-            cont.innerHTML = games.map(g => `
-                <div class="bg-white p-4 rounded-2xl border-2 border-slate-100 shadow-sm mb-4">
-                    <div class="flex justify-between text-[8px] font-bold text-slate-400 uppercase mb-2">
-                        <span>${g.fecha}</span><span>${g.hora}</span>
-                    </div>
-                    <div class="flex justify-between items-center gap-2">
-                        <span class="text-[10px] font-black uppercase text-blue-900 truncate flex-1">${g.local}</span>
-                        <span class="text-[8px] font-black text-pink-600 italic px-2 bg-pink-50 rounded-full">VS</span>
-                        <span class="text-[10px] font-black uppercase text-blue-900 truncate flex-1 text-right">${g.visita}</span>
-                    </div>
-                </div>`).join('');
-        }
+   async function cargarEncuentros() {
+    const res = await fetch(`${API}/games?liga=femenil`); // Traemos todos los de la liga
+    const games = await res.json();
+    const cont = document.getElementById('listaEncuentros');
+
+    // FILTRAR AQUÍ MISMO POR STATUS 'PENDIENTE'
+    const pendientes = games.filter(g => g.status === 'pendiente');
+
+    if(pendientes.length === 0) {
+        cont.innerHTML = `<p class="text-center py-10 opacity-30 italic text-xs uppercase">Sin juegos pendientes</p>`;
+    } else {
+        cont.innerHTML = pendientes.map(g => `
+            <div class="bg-white p-4 rounded-2xl border-2 border-slate-100 shadow-sm mb-4">
+                <div class="flex justify-between text-[8px] font-bold text-slate-400 uppercase mb-2">
+                    <span>${g.fecha}</span><span>${g.hora}</span>
+                </div>
+                <div class="flex justify-between items-center gap-2">
+                    <span class="text-[10px] font-black uppercase text-blue-900 truncate flex-1">${g.local}</span>
+                    <span class="text-[8px] font-black text-pink-600 italic px-2 bg-pink-50 rounded-full">VS</span>
+                    <span class="text-[10px] font-black uppercase text-blue-900 truncate flex-1 text-right">${g.visita}</span>
+                </div>
+            </div>`).join('');
     }
+}
 
     async function cargarLideresIndividuales() {
         const res = await fetch(`${API}/players?liga=femenil`);
