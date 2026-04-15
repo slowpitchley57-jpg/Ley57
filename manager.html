@@ -36,9 +36,7 @@
             <a href="#" class="sidebar-link block p-3 rounded-xl transition flex items-center gap-3 bg-blue-800 border-l-4 border-red-500">
                 <i class="fa fa-user-tie"></i> Mi Equipo
             </a>
-                <a href="#" id="btnLinkEstadisticas" class="flex items-center gap-2">
-                    <i class="fa fa-chart-bar"></i> Ver Estadísticas
-                </a>
+                <a id="btnLinkEstadisticas" href="#" class="btn-clase">Ver Estadísticas / Salir</a>
             
             <p class="text-[9px] font-black text-blue-400 uppercase tracking-widest ml-2 mt-8">Configuración</p>
             <button onclick="toggleModalPassword()" class="w-full text-left sidebar-link block p-3 rounded-xl transition flex items-center gap-3">
@@ -156,10 +154,8 @@
         }
 
        function revisarSesion() {
-    // 1. Intentamos obtener la sesión (ajusta a 'userLogueado' si así lo guardas)
     const sesionManager = localStorage.getItem('userLogueado') || localStorage.getItem('managerLogueado');
     
-    // Si no hay nada, al index de inmediato
     if (!sesionManager) { 
         window.location.href = 'index.html'; 
         return; 
@@ -167,26 +163,21 @@
 
     const datos = JSON.parse(sesionManager);
     
-    // 2. MANTENER EL NOMBRE DEL EQUIPO ARRIBA
-    // Asegúrate de que el ID en tu HTML sea 'nombreEquipoCabecera'
+    // Mostramos el nombre del equipo correctamente
     const txtEquipo = document.getElementById('nombreEquipoCabecera');
     if (txtEquipo) {
         txtEquipo.innerText = datos.equipo; 
     }
 
-    // 3. FORZAR QUE EL BOTÓN MANDE AL INDEX SIEMPRE
+    // El botón ahora siempre manda al index y limpia la sesión para evitar confusiones
     const btnStats = document.getElementById('btnLinkEstadisticas');
     if (btnStats) {
         btnStats.href = 'index.html';
-        
-        // Opcional: Si quieres que al picarle limpie la sesión (Logout)
-        btnStats.onclick = () => localStorage.clear();
+        btnStats.onclick = () => {
+            localStorage.clear(); // Limpia todo para que al volver a entrar pida login
+        };
     }
-
-    // Continuar con la sincronización normal
-    iniciarSincronizacionRealTime();
 }
-
 
         async function verificarPermisos() {
             try {

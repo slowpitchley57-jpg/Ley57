@@ -245,19 +245,36 @@
         });
     }
 
-    async function updEq(id, campo, valor) {
-        try {
-            await fetch(`${API}/equipos/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ [campo]: Number(valor) })
-            });
-            // En lugar de recargar todo, solo actualizamos el dato en memoria y redibujamos
-            const eq = todosLosEquipos.find(e => e._id === id);
-            if(eq) eq[campo] = Number(valor);
-            renderizarTablas(); 
-        } catch (e) { alert("Error al actualizar"); }
+   async function updEq(id, campo, valor) {
+    try {
+        // 1. Actualizamos LOCALMENTE primero para que el cambio sea instantáneo
+        const eq = todosLosEquipos.find(e => e._id === id);
+        if (eq) {
+            eq[campo] = Number(valor);
+        }
+
+        // 2. Mandamos al servidor
+        const response = await fetch(`${API}/equipos/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ [campo]: Number(valor) })
+        });
+
+        if (!response.ok) {
+            throw new Error("Error en servidor");
+        }
+
+        // 3. Volvemos a renderizar con el dato ya actualizado en memoria
+        console.log("Sincronizado con éxito");
+        renderizarTablas(); 
+
+    } catch (e) {
+        console.error(e);
+        alert("No se pudo guardar el cambio. Revisa el servidor.");
+        // Si falló, lo ideal sería recargar para mostrar el dato real
+        sincronizarDatosBase(); 
     }
+}
 
     function actualizarSelectores() {
         const ligaSeleccionada = document.getElementById('filtroLigaGlobal').value;
@@ -466,6 +483,7 @@ async function limpiarHistorialSemanal() {
         console.error("Error al limpiar:", error);
     }
 }
+
 
     document.addEventListener('DOMContentLoaded', cargarTodo);
 </script>
