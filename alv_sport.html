@@ -16,6 +16,13 @@
         }
         .stats-card { background: linear-gradient(145deg, #1f1f1f, #111111); border: 1px solid #333; }
         .text-fire { color: #ff4d4d; text-shadow: 0 0 8px rgba(255, 77, 77, 0.4); }
+        
+        /* Animación extra para la nota */
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(220, 38, 38, 0.2); }
+            50% { box-shadow: 0 0 20px rgba(220, 38, 38, 0.6); }
+        }
+        .nota-animada { animation: glow 2s infinite; }
     </style>
 </head>
 <body class="bg-zinc-950 text-slate-200 font-sans">
@@ -40,18 +47,20 @@
                 <span class="h-1 w-12 bg-red-600 rounded-full"></span>
             </div>
         </div>
-        <div class="max-w-7xl mx-auto px-4 mb-6">
-    <div class="bg-red-600/10 border-l-4 border-red-600 p-4 rounded-r-xl flex items-center gap-4">
-        <i class="fa fa-exclamation-triangle text-red-600 animate-bounce"></i>
-        <p class="text-[10px] md:text-xs font-black uppercase tracking-widest text-red-600 italic">
-            Importante: Todo jugador(a) requiere un mínimo de <span class="underline">5 juegos jugados</span> para participar en la fase de Play-offs.
-        </p>
-    </div>
-</div>
     </header>
 
-    <main class="max-w-7xl mx-auto p-4 md:p-8 -mt-10 space-y-8">
-        
+    <div class="max-w-7xl mx-auto px-4 mt-8 mb-4">
+        <div class="nota-animada bg-red-600/20 border-2 border-red-600 p-5 rounded-2xl flex items-center gap-5 backdrop-blur-sm">
+            <div class="bg-red-600 p-3 rounded-full animate-pulse">
+                <i class="fa fa-exclamation-triangle text-white text-xl"></i>
+            </div>
+            <p class="text-xs md:text-sm font-black uppercase tracking-widest text-white italic leading-tight">
+                Aviso de Liga: <span class="text-red-500">Todo jugador requiere un mínimo de 5 juegos</span> para participar en la fase de Play-offs. ¡Sin excepciones!
+            </p>
+        </div>
+    </div>
+
+    <main class="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="stats-card p-6 rounded-3xl shadow-2xl border-l-8 border-red-600 flex items-center justify-between">
                 <div>
@@ -78,14 +87,14 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs">
                             <thead>
-                                <tr class="bg-zinc-800 text-zinc-400 font-black uppercase border-b border-zinc-700">
-                                    <th class="p-4">Equipo</th>
-                                    <th class="text-center text-red-500">JJ</th>
-                                    <th class="text-center">JG</th>
-                                    <th class="text-center">JP</th>
-                                    <th class="text-center">CA</th>
-                                    <th class="text-center">CR</th>
-                                    <th class="text-center text-red-500">DIF</th>
+                                <tr class="bg-zinc-800 text-zinc-400 font-black uppercase border-b border-zinc-700 text-center">
+                                    <th class="p-4 text-left">Equipo</th>
+                                    <th class="text-red-500">JJ</th>
+                                    <th>JG</th>
+                                    <th>JP</th>
+                                    <th>CA</th>
+                                    <th>CR</th>
+                                    <th class="text-red-500">DIF</th>
                                 </tr>
                             </thead>
                             <tbody id="tablaIntermedia" class="divide-y divide-zinc-800 font-bold"></tbody>
@@ -100,14 +109,14 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs">
                             <thead>
-                                <tr class="bg-zinc-800 text-zinc-400 font-black uppercase border-b border-zinc-700">
-                                    <th class="p-4">Equipo</th>
-                                    <th class="text-center text-red-500">JJ</th>
-                                    <th class="text-center">JG</th>
-                                    <th class="text-center">JP</th>
-                                    <th class="text-center">CA</th>
-                                    <th class="text-center">CR</th>
-                                    <th class="text-center text-red-500">DIF</th>
+                                <tr class="bg-zinc-800 text-zinc-400 font-black uppercase border-b border-zinc-700 text-center">
+                                    <th class="p-4 text-left">Equipo</th>
+                                    <th class="text-red-500">JJ</th>
+                                    <th>JG</th>
+                                    <th>JP</th>
+                                    <th>CA</th>
+                                    <th>CR</th>
+                                    <th class="text-red-500">DIF</th>
                                 </tr>
                             </thead>
                             <tbody id="tablaRelax" class="divide-y divide-zinc-800 font-bold"></tbody>
@@ -142,29 +151,25 @@
                     </div>
                 </section>
 
-              <section class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-slate-100 relative overflow-hidden">
-    <div class="absolute top-0 left-0 w-2 h-full bg-red-600"></div>
-    
-    <div class="flex flex-col mb-6 gap-4">
-        <h3 class="text-blue-900 font-black flex items-center gap-3 uppercase text-xs italic tracking-widest">
-            <i class="fa fa-history text-red-600 animate-pulse"></i> 
-            Resumen Jornada
-        </h3>
-        
-        <div class="relative">
-    <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
-    <input type="text" id="inputBusquedaJuegos" onkeyup="filtrarJuegos()" placeholder="Buscar equipo o fecha..." 
-        class="w-full pl-9 pr-4 py-2 bg-slate-100 border-none rounded-xl text-[10px] font-bold uppercase tracking-wider focus:ring-2 focus:ring-red-500 outline-none transition-all text-slate-900">
-</div>
-<div class="mt-2 px-2">
-    <span id="contadorResultados" class="text-[9px] font-black uppercase tracking-widest text-red-600 italic"></span>
-</div>
-    </div>
-
-    <div id="resultadosJornada" class="space-y-4 max-h-[500px] overflow-y-auto custom-scroll pr-2">
-        <p class="text-center text-slate-300 italic py-10">Cargando resultados oficiales...</p>
-    </div>
-</section>
+                <section class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-slate-100 relative overflow-hidden text-slate-900">
+                    <div class="absolute top-0 left-0 w-2 h-full bg-red-600"></div>
+                    <div class="flex flex-col mb-6 gap-4">
+                        <h3 class="text-blue-900 font-black flex items-center gap-3 uppercase text-xs italic tracking-widest">
+                            <i class="fa fa-history text-red-600 animate-pulse"></i> Resumen Jornada
+                        </h3>
+                        <div class="relative">
+                            <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
+                            <input type="text" id="inputBusquedaJuegos" onkeyup="filtrarJuegos()" placeholder="Buscar equipo o fecha..." 
+                                class="w-full pl-9 pr-4 py-2 bg-slate-100 border-none rounded-xl text-[10px] font-bold uppercase tracking-wider focus:ring-2 focus:ring-red-500 outline-none transition-all text-slate-900">
+                        </div>
+                        <div class="mt-1 px-2">
+                            <span id="contadorResultados" class="text-[9px] font-black uppercase tracking-widest text-red-600 italic"></span>
+                        </div>
+                    </div>
+                    <div id="resultadosJornada" class="space-y-4 max-h-[500px] overflow-y-auto custom-scroll pr-2">
+                        <p class="text-center text-slate-300 italic py-10">Cargando resultados oficiales...</p>
+                    </div>
+                </section>
             </div>
         </div>
     </main>
@@ -178,18 +183,25 @@
                 </div>
                 <button onclick="cerrarDetalle()" class="text-3xl text-zinc-500 hover:text-white transition-colors">&times;</button>
             </div>
-            <div class="overflow-y-auto p-4 custom-scroll bg-zinc-950">
+            <div class="overflow-y-auto p-4 custom-scroll bg-zinc-950 flex-1">
                 <table class="w-full text-left text-xs">
                     <thead>
-                        <tr class="text-zinc-500 uppercase font-black text-[10px] border-b border-zinc-800">
-                            <th class="p-3">Jugador</th>
-                            <th class="text-center">JJ</th><th class="text-center">TB(AB)</th>
-                            <th class="text-center text-red-500">H</th><th class="text-center text-orange-500">HR</th>
-                            <th class="text-center text-red-600">AVG</th>
+                        <tr class="text-zinc-500 uppercase font-black text-[10px] border-b border-zinc-800 text-center">
+                            <th class="p-3 text-left">Jugador</th>
+                            <th>JJ</th>
+                            <th>AB</th>
+                            <th class="text-red-500">H</th>
+                            <th class="text-orange-500">HR</th>
+                            <th class="text-red-600">AVG</th>
                         </tr>
                     </thead>
                     <tbody id="bodyDetalleJugadoras" class="divide-y divide-zinc-900"></tbody>
                 </table>
+            </div>
+            <div class="p-4 bg-black border-t border-zinc-800 flex justify-center">
+                <a href="jugadores_varonil.html" class="flex items-center gap-3 bg-red-600 hover:bg-white hover:text-red-600 text-white text-[10px] font-black uppercase px-8 py-4 rounded-full transition-all shadow-lg">
+                    <i class="fa fa-chart-line"></i> Ver Ranking Completo Varonil
+                </a>
             </div>
         </div>
     </div>
@@ -210,7 +222,6 @@
 
     async function cargarTablasYEstadisticas() {
         try {
-            // Pedimos equipos y juegos
             const [resEq, resGames] = await Promise.all([
                 fetch(`${API}/equipos?liga=varonil`),
                 fetch(`${API}/games?liga=varonil&status=finalizado`)
@@ -219,11 +230,10 @@
             const equiposRaw = await resEq.json();
             const juegos = await resGames.json();
 
-            // --- TRUCO MAESTRO: RE-CALCULAR EN VIVO POR SI LA DB FALLA ---
             const equipos = equiposRaw.map(eq => {
                 let g = 0, p = 0, ca = 0, ce = 0;
-                
                 juegos.forEach(j => {
+                    if(!j.resultado) return;
                     const scores = j.resultado.split('-').map(Number);
                     if (j.local === eq.nombre) {
                         ca += scores[0]; ce += scores[1];
@@ -233,11 +243,9 @@
                         if (scores[1] > scores[0]) g++; else if (scores[1] < scores[0]) p++;
                     }
                 });
-
                 return { ...eq, g, p, ca, ce };
             });
 
-            // --- ORDENAMIENTO PRO ---
             equipos.sort((a, b) => {
                 if (b.g !== a.g) return b.g - a.g;
                 const difA = a.ca - a.ce;
@@ -246,7 +254,6 @@
                 return b.ca - a.ca;
             });
 
-            // RENDERIZAR TABLAS
             const tInt = document.getElementById('tablaIntermedia');
             const tRel = document.getElementById('tablaRelax');
             tInt.innerHTML = ""; tRel.innerHTML = "";
@@ -254,25 +261,23 @@
             equipos.forEach(e => {
                 const dif = e.ca - e.ce;
                 const fila = `
-                    <tr class="hover:bg-zinc-800 border-b border-zinc-900 transition-colors">
-                        <td class="p-4 uppercase italic font-black text-white">${e.nombre}</td>
-                        <td class="text-center font-bold text-zinc-500">${e.g + e.p}</td>
-                        <td class="text-center text-red-500">${e.g}</td>
-                        <td class="text-center">${e.p}</td>
-                        <td class="text-center text-zinc-400">${e.ca}</td>
-                        <td class="text-center text-zinc-400">${e.ce}</td>
-                        <td class="text-center font-black ${dif >= 0 ? 'text-blue-500' : 'text-orange-500'}">${dif > 0 ? '+' + dif : dif}</td>
+                    <tr class="hover:bg-zinc-800 border-b border-zinc-900 transition-colors cursor-pointer text-center" onclick="verDetalleRoster('${e.nombre}')">
+                        <td class="p-4 uppercase italic font-black text-white text-left">${e.nombre}</td>
+                        <td class="font-bold text-zinc-500">${e.g + e.p}</td>
+                        <td class="text-red-500">${e.g}</td>
+                        <td>${e.p}</td>
+                        <td class="text-zinc-400">${e.ca}</td>
+                        <td class="text-zinc-400">${e.ce}</td>
+                        <td class="font-black ${dif >= 0 ? 'text-blue-500' : 'text-orange-500'}">${dif > 0 ? '+' + dif : dif}</td>
                     </tr>`;
                 if (e.categoria === "Intermedia") tInt.innerHTML += fila; else tRel.innerHTML += fila;
             });
 
-            // Actualizar Líderes visuales
             const lInt = equipos.filter(e => e.categoria === "Intermedia")[0];
             const lRel = equipos.filter(e => e.categoria === "Relax")[0];
             if(lInt) document.getElementById('txtLiderInt').innerText = lInt.nombre;
             if(lRel) document.getElementById('txtLiderRel').innerText = lRel.nombre;
 
-            // Renderizar el historial (derecha)
             document.getElementById('resultadosJornada').innerHTML = juegos.slice().reverse().map(j => `
                 <div class="tarjeta-resultado bg-zinc-900 p-4 rounded-2xl border border-zinc-800 flex flex-col gap-2">
                     <div class="flex justify-between text-[8px] font-black text-zinc-500 uppercase">
@@ -287,84 +292,56 @@
 
         } catch (e) { console.error("Error:", e); }
     }
+
     async function verDetalleRoster(nombreEquipo) {
-    // 1. Mostramos el nombre en el título tal cual viene
-    document.getElementById('detNombreEquipo').innerText = nombreEquipo;
-    
-    // 2. Traemos a TODOS los jugadores de la liga varonil primero
-    // Esto es más seguro que filtrar por nombre en la URL si hay dudas con las mayúsculas
-    const res = await fetch(`${API}/players?liga=varonil`);
-    const allPlayers = await res.json();
-    
-    // 3. FILTRO DINÁMICO: 
-    // Comparamos el nombre del equipo ignorando mayúsculas/minúsculas y espacios
-    const players = allPlayers.filter(p => 
-        p.equipo.trim().toUpperCase() === nombreEquipo.trim().toUpperCase()
-    );
-    
-    const container = document.getElementById('bodyDetalleJugadoras');
-
-    if(players.length === 0) {
-        container.innerHTML = `
-            <tr><td colspan="6" class="p-10 text-center text-slate-400 italic">No hay jugadoras registradas para ${nombreEquipo}.</td></tr>`;
-    } else {
-        container.innerHTML = players.map(p => `
-            <tr class="hover:bg-slate-50 border-b transition-colors">
-                <td class="p-3 font-bold uppercase text-blue-900">${p.nombre}</td>
-                <td class="text-center font-semibold text-slate-500">${p.jj || 0}</td>
-                <td class="text-center font-semibold text-slate-500">${p.vb || 0}</td>
-                <td class="text-center text-emerald-600 font-black">${p.h || 0}</td>
-                <td class="text-center text-red-500 font-black">${p.hr || 0}</td>
-                <td class="text-center text-blue-600 font-black bg-blue-50/30">${(p.avg || 0).toFixed(3)}</td>
-            </tr>`).join('');
+        document.getElementById('detNombreEquipo').innerText = nombreEquipo;
+        const res = await fetch(`${API}/players?liga=varonil`);
+        const allPlayers = await res.json();
+        const players = allPlayers.filter(p => p.equipo.trim().toUpperCase() === nombreEquipo.trim().toUpperCase());
+        
+        const container = document.getElementById('bodyDetalleJugadoras');
+        if(players.length === 0) {
+            container.innerHTML = `<tr><td colspan="6" class="p-10 text-center text-slate-400 italic text-[10px] uppercase">No hay jugadores registrados.</td></tr>`;
+        } else {
+            container.innerHTML = players.map(p => `
+                <tr class="hover:bg-zinc-800 border-b border-zinc-900 transition-colors text-center">
+                    <td class="p-3 font-bold uppercase text-white text-left">${p.nombre}</td>
+                    <td class="text-zinc-400">${p.jj || 0}</td>
+                    <td class="text-zinc-400">${p.vb || 0}</td>
+                    <td class="text-red-500 font-black">${p.h || 0}</td>
+                    <td class="text-orange-500 font-black">${p.hr || 0}</td>
+                    <td class="text-red-600 font-black">${(p.avg || 0).toFixed(3)}</td>
+                </tr>`).join('');
+        }
+        document.getElementById('modalDetalleEquipo').classList.remove('hidden');
     }
-    // Agrega esto justo antes de cerrar el modal en tu código JS
-const footerModal = `
-    <div class="p-4 bg-zinc-950 border-t border-zinc-800 flex justify-center">
-        <a href="jugadores_varonil.html" class="flex items-center gap-2 bg-red-600 hover:bg-white hover:text-red-600 text-white text-[10px] font-black uppercase px-6 py-3 rounded-full transition-all shadow-lg shadow-red-900/20">
-            <i class="fa fa-chart-line"></i> Ver Ranking Completo Varonil
-        </a>
-    </div>
-`;
 
-
-
-    document.getElementById('modalDetalleEquipo').classList.remove('hidden');
-}
+    function cerrarDetalle() { document.getElementById('modalDetalleEquipo').classList.add('hidden'); }
 
     async function cargarEncuentros() {
-    try {
-        // 1. Pedimos los juegos de la liga varonil
-        const res = await fetch(`${API}/games?liga=varonil&status=pendiente`);
-        const games = await res.json();
-        const cont = document.getElementById('listaEncuentros');
-        
-        // 2. Filtramos localmente por 'pendiente' para estar 100% seguros
-        const pendientes = games.filter(g => g.status === 'pendiente');
-
-        // 3. Validamos sobre la lista de PENDIENTES, no sobre todos los games
-        if (pendientes.length === 0) { 
-            cont.innerHTML = "<p class='text-center py-10 text-zinc-600 italic text-[10px] uppercase'>Sin juegos programados</p>"; 
-            return; 
-        }
-
-        // 4. Mapeamos solo los pendientes
-        cont.innerHTML = pendientes.map(g => `
-            <div class="bg-zinc-900 p-4 rounded-2xl border border-zinc-800 mb-4">
-                <div class="flex justify-between text-[8px] font-bold text-zinc-500 uppercase mb-2">
-                    <span><i class="fa fa-calendar-alt"></i> ${g.fecha}</span>
-                    <span><i class="fa fa-clock"></i> ${g.hora}</span>
-                </div>
-                <div class="flex justify-between items-center gap-2">
-                    <span class="text-[10px] font-black uppercase text-white truncate flex-1">${g.local}</span>
-                    <span class="text-[8px] font-black text-red-600 italic px-2 bg-red-600/10 rounded-full">VS</span>
-                    <span class="text-[10px] font-black uppercase text-white truncate flex-1 text-right">${g.visita}</span>
-                </div>
-            </div>`).join('');
-    } catch (error) {
-        console.error("Error cargando encuentros:", error);
+        try {
+            const res = await fetch(`${API}/games?liga=varonil&status=pendiente`);
+            const games = await res.json();
+            const cont = document.getElementById('listaEncuentros');
+            const pendientes = games.filter(g => g.status === 'pendiente');
+            if (pendientes.length === 0) { 
+                cont.innerHTML = "<p class='text-center py-10 text-zinc-600 italic text-[10px] uppercase'>Sin juegos programados</p>"; 
+                return; 
+            }
+            cont.innerHTML = pendientes.map(g => `
+                <div class="bg-zinc-900 p-4 rounded-2xl border border-zinc-800 mb-4">
+                    <div class="flex justify-between text-[8px] font-bold text-zinc-500 uppercase mb-2">
+                        <span><i class="fa fa-calendar-alt"></i> ${g.fecha}</span>
+                        <span><i class="fa fa-clock"></i> ${g.hora}</span>
+                    </div>
+                    <div class="flex justify-between items-center gap-2">
+                        <span class="text-[10px] font-black uppercase text-white truncate flex-1">${g.local}</span>
+                        <span class="text-[8px] font-black text-red-600 italic px-2 bg-red-600/10 rounded-full">VS</span>
+                        <span class="text-[10px] font-black uppercase text-white truncate flex-1 text-right">${g.visita}</span>
+                    </div>
+                </div>`).join('');
+        } catch (error) { console.error(error); }
     }
-}
 
     async function cargarLideresIndividuales() {
         const res = await fetch(`${API}/players?liga=varonil`);
@@ -375,36 +352,28 @@ const footerModal = `
                 <span class="font-bold uppercase text-zinc-300"><span class="text-red-600 mr-2">#${i+1}</span> ${p.nombre}</span>
                 <span class="font-black text-red-500 italic">${(p.avg || 0).toFixed(3)}</span>
             </div>`).join('');
+        const topHR = [...players].sort((a,b) => (b.hr || 0) - (a.hr || 0)).slice(0, 5);
+        document.getElementById('topHR').innerHTML = topHR.map((p, i) => `
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-1 text-[11px]">
+                <span class="font-bold uppercase text-zinc-300"><span class="text-orange-600 mr-2">#${i+1}</span> ${p.nombre}</span>
+                <span class="font-black text-orange-500 italic">${p.hr || 0} HR</span>
+            </div>`).join('');
     }
-    // FUNCIÓN PARA BUSCAR EN EL HISTORIAL (RESUMEN JORNADA)
-function filtrarJuegos() {
-    const busqueda = document.getElementById('inputBusquedaJuegos').value.toUpperCase();
-    const contenedor = document.getElementById('resultadosJornada');
-    const tarjetas = contenedor.getElementsByClassName('tarjeta-resultado');
-    const contador = document.getElementById('contadorResultados');
-    
-    let encontrados = 0;
 
-    for (let i = 0; i < tarjetas.length; i++) {
-        const textoTarjeta = tarjetas[i].textContent || tarjetas[i].innerText;
-        
-        if (textoTarjeta.toUpperCase().indexOf(busqueda) > -1) {
-            tarjetas[i].style.display = ""; // Muestra
-            encontrados++;
-        } else {
-            tarjetas[i].style.display = "none"; // Oculta
+    function filtrarJuegos() {
+        const busqueda = document.getElementById('inputBusquedaJuegos').value.toUpperCase();
+        const tarjetas = document.getElementsByClassName('tarjeta-resultado');
+        const contador = document.getElementById('contadorResultados');
+        let encontrados = 0;
+        for (let i = 0; i < tarjetas.length; i++) {
+            if (tarjetas[i].innerText.toUpperCase().indexOf(busqueda) > -1) {
+                tarjetas[i].style.display = ""; encontrados++;
+            } else {
+                tarjetas[i].style.display = "none";
+            }
         }
+        contador.innerText = busqueda === "" ? "" : `${encontrados} resultados encontrados`;
     }
-
-    // Actualizar el texto del contador
-    if (busqueda === "") {
-        contador.innerText = ""; // Si no hay búsqueda, ocultamos el contador
-    } else {
-        contador.innerText = `${encontrados} resultados encontrados`;
-    }
-}
 </script>
-
-   
 </body>
 </html>
