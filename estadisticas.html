@@ -191,68 +191,55 @@
 
     async function cargarTablasYEstadisticas() {
     try {
-        // 1. Traemos equipos y juegos finalizados
+        console.log("Iniciando recalculo forzado de Standing Femenil...");
+        
+        // 1. Traemos los datos frescos
         const [resEq, resGames] = await Promise.all([
             fetch(`${API}/equipos?liga=femenil`),
             fetch(`${API}/games?liga=femenil&status=finalizado`)
         ]);
         
         const equiposRaw = await resEq.json();
-        const todosLosJuegos = await resGames.json();
+        const juegosFinalizados = await resGames.json();
 
-        // 2. PROCESAMIENTO: Calcular estadísticas en tiempo real
+        console.log(`Equipos encontrados: ${equiposRaw.length}`);
+        console.log(`Juegos finalizados detectados: ${juegosFinalizados.length}`);
+
+        // 2. RE-CÁLCULO TOTAL (Esto ignora los ceros de la DB y usa los juegos del Admin)
         const equipos = equiposRaw.map(eq => {
             let g = 0, p = 0, ca = 0, ce = 0;
-            const nombreNormalizado = eq.nombre.trim().toUpperCase();
+            // Limpiamos el nombre del equipo para que coincida perfectamente
+            const nombreEq = eq.nombre.trim().toUpperCase();
 
-            todosLosJuegos.forEach(j => {
+            juegosFinalizados.forEach(j => {
                 if(!j.resultado || !j.resultado.includes('-')) return;
+                
                 const scores = j.resultado.split('-').map(Number);
                 const local = j.local.trim().toUpperCase();
                 const visita = j.visita.trim().toUpperCase();
 
-                if (local === nombreNormalizado) {
+                if (local === nombreEq) {
                     ca += scores[0]; ce += scores[1];
                     if (scores[0] > scores[1]) g++; else if (scores[0] < scores[1]) p++;
-                } else if (visita === nombreNormalizado) {
+                } else if (visita === nombreEq) {
                     ca += scores[1]; ce += scores[0];
                     if (scores[1] > scores[0]) g++; else if (scores[1] < scores[0]) p++;
                 }
             });
+
             return { ...eq, g, p, ca, ce };
         });
 
-        // 3. LÓGICA DE DESEMPATE (El corazón del Standing)
+        // 3. LÓGICA DE DESEMPATE (Igual que en Varonil)
         equipos.sort((a, b) => {
-            // A. Juegos Ganados (JG)
             if (b.g !== a.g) return b.g - a.g;
-
-            // B. Diferencia de Carreras (DIF)
             const difA = a.ca - a.ce;
             const difB = b.ca - b.ce;
             if (difB !== difA) return difB - difA;
-
-            // C. Enfrentamiento Directo (Dominio)
-            const juegoEntreEllos = todosLosJuegos.find(j => 
-                ((j.local.trim().toUpperCase() === a.nombre.trim().toUpperCase() && j.visita.trim().toUpperCase() === b.nombre.trim().toUpperCase()) || 
-                 (j.local.trim().toUpperCase() === b.nombre.trim().toUpperCase() && j.visita.trim().toUpperCase() === a.nombre.trim().toUpperCase()))
-            );
-
-            if (juegoEntreEllos) {
-                const [scL, scV] = juegoEntreEllos.resultado.split('-').map(Number);
-                let ganador = "";
-                if (scL > scV) ganador = juegoEntreEllos.local.trim().toUpperCase();
-                else if (scV > scL) ganador = juegoEntreEllos.visita.trim().toUpperCase();
-
-                if (ganador === a.nombre.trim().toUpperCase()) return -1;
-                if (ganador === b.nombre.trim().toUpperCase()) return 1;
-            }
-
-            // D. Carreras Anotadas (CA)
             return b.ca - a.ca;
         });
 
-        // 4. RENDERIZADO EN TABLAS
+        // 4. DIBUJAR TABLAS
         const tInt = document.getElementById('tablaIntermedia');
         const tRel = document.getElementById('tablaRelax');
         tInt.innerHTML = ""; tRel.innerHTML = "";
@@ -262,31 +249,27 @@
             const dif = e.ca - e.ce;
             const fila = `
                 <tr class="hover:bg-pink-50 cursor-pointer border-b transition-colors text-center" onclick="verDetalleRoster('${e.nombre}')">
-                    <td class="p-4 uppercase italic font-black text-blue-900 text-left">
-                        ${e.nombre}
-                    </td>
+                    <td class="p-4 uppercase italic font-black text-blue-900 text-left">${e.nombre}</td>
                     <td class="font-bold text-slate-500 bg-slate-50/30">${jj}</td>
                     <td class="text-blue-600 font-bold">${e.g}</td>
                     <td class="text-slate-600">${e.p}</td>
                     <td class="text-slate-500">${e.ca}</td>
                     <td class="text-slate-500">${e.ce}</td>
-                    <td class="font-black ${dif >= 0 ? 'text-blue-600' : 'text-orange-500'}">
-                        ${dif > 0 ? '+' + dif : dif}
-                    </td>
+                    <td class="font-black ${dif >= 0 ? 'text-blue-600' : 'text-orange-500'}">${dif > 0 ? '+' + dif : dif}</td>
                 </tr>`;
 
             if (e.categoria === "Intermedia") tInt.innerHTML += fila; 
             else tRel.innerHTML += fila;
         });
 
-        // 5. Actualizar Nombres de Líderes arriba
+        // 5. Actualizar Tarjetas Superiores
         const lInt = equipos.filter(e => e.categoria === "Intermedia")[0];
         const lRel = equipos.filter(e => e.categoria === "Relax")[0];
         if(lInt) document.getElementById('txtLiderInt').innerText = lInt.nombre;
         if(lRel) document.getElementById('txtLiderRel').innerText = lRel.nombre;
 
-    } catch (error) {
-        console.error("Error cargando tablas:", error);
+    } catch (err) {
+        console.error("CRÍTICO: No se pudieron cargar las tablas:", err);
     }
 }
 
@@ -350,6 +333,7 @@
                 <span class="font-black text-blue-400 italic">${p.hr || 0} HR</span>
             </div>`).join('');
     }
+    
     async function cargarHistorialResultados() {
     const cont = document.getElementById('resultadosJornada');
     try {
@@ -368,13 +352,12 @@
                 </div>
                 <div class="flex justify-between items-center text-center">
                     <div class="flex-1 text-[10px] font-black text-blue-900 uppercase">${g.local}</div>
-                    <div class="mx-3 bg-blue-900 text-white px-3 py-1 rounded-lg font-black text-sm italic shadow-md">${g.resultado}</div>
+                    <div class="mx-2 bg-blue-900 text-white px-3 py-1 rounded-lg font-black text-sm italic shadow-md">${g.resultado}</div>
                     <div class="flex-1 text-[10px] font-black text-blue-900 uppercase">${g.visita}</div>
                 </div>
             </div>`).join('');
     } catch (error) { 
-        console.error("Error en historial:", error); 
-        cont.innerHTML = "<p class='text-center py-10 text-red-500 text-xs uppercase font-black'>Error al cargar resultados</p>";
+        console.error("Error:", error); 
     }
 }
 

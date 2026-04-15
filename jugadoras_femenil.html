@@ -103,10 +103,26 @@
 
 
         function filtrarTabla() {
-            const bus = document.getElementById('buscadorJugadoras').value.toUpperCase();
-            const filas = document.getElementsByClassName('fila-jugadora');
-            for (let f of filas) f.style.display = f.innerText.toUpperCase().includes(bus) ? "" : "none";
+    // 1. Obtenemos el texto de búsqueda
+    const busqueda = document.getElementById('buscadorJugadoras').value.toUpperCase();
+    
+    // 2. IMPORTANTE: Verifica que en tu HTML cada <tr> de la tabla tenga class="fila-jugador"
+    const filas = document.getElementsByClassName('fila-jugador');
+
+    for (let i = 0; i < filas.length; i++) {
+        const fila = filas[i];
+        
+        // Obtenemos el contenido de texto de toda la fila
+        const contenidoTexto = fila.textContent || fila.innerText;
+        
+        // Comparamos
+        if (contenidoTexto.toUpperCase().indexOf(busqueda) > -1) {
+            fila.style.display = ""; // Se muestra si coincide
+        } else {
+            fila.style.display = "none"; // Se oculta si no
         }
+    }
+}
         cargar();
     </script>
 </body>
