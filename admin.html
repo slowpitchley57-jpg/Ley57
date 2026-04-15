@@ -245,33 +245,44 @@
         });
     }
 
-   async function updEq(id, campo, valor) {
-    try {
-        // 1. Actualizamos LOCALMENTE primero para que el cambio sea instantáneo
-        const eq = todosLosEquipos.find(e => e._id === id);
-        if (eq) {
-            eq[campo] = Number(valor);
-        }
+  async function updEq(id, campo, valor) {
+    // 1. Convertimos a número de inmediato
+    const nuevoValor = Number(valor);
 
-        // 2. Mandamos al servidor
+    // 2. ACTUALIZACIÓN LOCAL INSTANTÁNEA
+    // Buscamos el equipo en el array que ya tienes cargado en memoria (ej. todosLosEquipos)
+    // Esto evita que al renderizar se use el dato viejo.
+    const index = todosLosEquipos.findIndex(e => e._id === id);
+    if (index !== -1) {
+        todosLosEquipos[index][campo] = nuevoValor;
+    }
+
+    try {
+        // 3. Mandar al servidor (Render)
         const response = await fetch(`${API}/equipos/${id}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ [campo]: Number(valor) })
+            headers: { 
+                'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify({ [campo]: nuevoValor })
         });
 
         if (!response.ok) {
-            throw new Error("Error en servidor");
+            throw new Error("Error en el servidor");
         }
 
-        // 3. Volvemos a renderizar con el dato ya actualizado en memoria
-        console.log("Sincronizado con éxito");
+        console.log("Guardado correctamente en la DB");
+        
+        // NO llames a sincronizarDatosBase() aquí porque volverá a traer 
+        // los datos viejos si el servidor de Render aún no termina de escribir.
+        // Solo refrescamos el dibujo visual:
         renderizarTablas(); 
 
-    } catch (e) {
-        console.error(e);
-        alert("No se pudo guardar el cambio. Revisa el servidor.");
-        // Si falló, lo ideal sería recargar para mostrar el dato real
+    } catch (error) {
+        console.error("Fallo al editar:", error);
+        alert("No se pudo guardar. Revisa que el servidor en Render esté activo.");
+        
+        // Si falló, regresamos al valor original para no mentirle al usuario
         sincronizarDatosBase(); 
     }
 }
