@@ -62,47 +62,46 @@
 
     <script>
         const API = "https://ley57.onrender.com/api";
-      async function cargar() {
+        async function cargar() {
     try {
-        // Ajusta 'varonil' o 'femenil' según el archivo en el que estés
-        const ligaActual = "femenil"; // o "femenil"
-        
         const [resP, resE] = await Promise.all([
-            fetch(`${API}/players?liga=${ligaActual}`), 
-            fetch(`${API}/equipos?liga=${ligaActual}`)
+            fetch(`${API}/players?liga=femenil`), 
+            fetch(`${API}/equipos?liga=femenil`)
         ]);
         
         const players = await resP.json();
         const equipos = await resE.json();
         const tabla = document.getElementById('tablaGlobal');
         
-        // Ordenar por AVG de mayor a menor
         players.sort((a,b) => (b.avg || 0) - (a.avg || 0));
 
         tabla.innerHTML = players.map(p => {
-            // Buscamos la categoría cruzando con el equipo
-            const datosEquipo = equipos.find(e => e.nombre === p.equipo);
-            const categoria = datosEquipo ? datosEquipo.categoria : "---";
-            const avg = (p.avg || 0).toFixed(3);
+            // BUSQUEDA BLINDADA: Limpiamos espacios y pasamos a mayúsculas
+            const datosEquipo = equipos.find(e => 
+                e.nombre.trim().toUpperCase() === p.equipo.trim().toUpperCase()
+            );
+            
+            const categoria = datosEquipo ? datosEquipo.categoria : "SIN CAT";
 
             return `
-                <tr class="fila-jugador hover:bg-white/5 transition-all text-center border-b border-zinc-900">
+                <tr class="fila-jugador hover:bg-pink-50/10 transition-all text-center border-b border-zinc-900">
                     <td class="p-4 text-left">
                         <div class="font-black text-white uppercase italic tracking-tighter">${p.nombre}</div>
-                        <div class="text-[9px] text-red-600 font-black uppercase">${p.equipo}</div>
+                        <div class="text-[9px] text-pink-500 font-black uppercase">${p.equipo}</div>
                     </td>
-                    <td class="text-zinc-500 font-bold italic text-[10px]">${categoria}</td>
-                    
+                    <td class="text-zinc-400 font-bold italic text-[10px]">${categoria}</td>
                     <td class="font-bold text-white bg-white/5">${p.jj || 0}</td>
                     <td>${p.vb || 0}</td>
                     <td class="text-white font-bold">${p.h || 0}</td>
-                    <td class="text-red-500 font-black">${p.rbi || 0}</td>
+                    <td class="text-pink-500 font-black">${p.rbi || 0}</td>
                     <td class="text-orange-500 font-black">${p.hr || 0}</td>
-                    <td class="text-fire font-black text-sm italic">${avg}</td>
+                    <td class="text-white font-black text-sm italic">${(p.avg || 0).toFixed(3)}</td>
                 </tr>`;
         }).join('');
-    } catch (e) { console.error("Error cargando lista global:", e); }
+    } catch (e) { console.error("Error:", e); }
 }
+
+
         function filtrarTabla() {
             const bus = document.getElementById('buscadorJugadoras').value.toUpperCase();
             const filas = document.getElementsByClassName('fila-jugadora');
