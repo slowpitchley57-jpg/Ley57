@@ -325,22 +325,36 @@ const fila = `
         // --- FUNCIONES DE APOYO RESTANTES ---
        async function updPlayer(id, campo, valor) {
     try {
-        const res = await fetch(`${API}/players/${id}`, {
+        // 1. Mandamos el valor que cambiaste (H, VB, HR, etc.)
+        await fetch(`${API}/players/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ [campo]: Number(valor) })
         });
-        
-        if (!res.ok) throw new Error("Error al actualizar");
-        
-        // Esto confirma visualmente que se guardó
-        console.log(`✅ ${campo} actualizado`);
-        
-        // Opcional: Si quieres que el AVG se refresque en pantalla inmediatamente:
-        // verRosterEquipo(); 
+
+        // 2. Lógica de Auto-AVG: Si cambiaste H o VB, recalculamos
+        if (campo === 'h' || campo === 'vb') {
+            const fila = document.querySelector(`input[onchange*="${id}"]`).closest('tr');
+            const h = Number(fila.querySelector('input[onchange*="\'h\'"]').value);
+            const vb = Number(fila.querySelector('input[onchange*="\'vb\'"]').value);
+            
+            let nuevoAvg = 0;
+            if (vb > 0) nuevoAvg = h / vb;
+
+            // Actualizamos visualmente el AVG en la tabla del admin
+            fila.querySelector('.font-black.italic.text-slate-400').innerText = nuevoAvg.toFixed(3);
+
+            // Guardamos el nuevo AVG en la base de datos automáticamente
+            await fetch(`${API}/players/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ avg: nuevoAvg })
+            });
+        }
+        console.log(`✅ ${campo} y AVG sincronizados`);
     } catch (err) {
         console.error(err);
-        alert("No se pudo guardar el cambio. Revisa tu conexión.");
+        alert("Error al guardar. Revisa conexión.");
     }
 }
 
@@ -365,11 +379,31 @@ const fila = `
         }
 
         async function finalizarJuego(id, loc, vis) {
-            const sL = parseInt(document.getElementById(`sc-${id}-L`).value), sV = parseInt(document.getElementById(`sc-${id}-V`).value);
-            if(isNaN(sL) || isNaN(sV)) return alert("Pon marcador");
-            await fetch(`${API}/games/resultado`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id, sL, sV, ganador: sL > sV ? loc : vis, perdedor: sL > sV ? vis : loc, loc, vis }) });
-            cargarEquipos(); cargarResultados();
-        }
+    const sL = parseInt(document.getElementById(`sc-${id}-L`).value);
+    const sV = parseInt(document.getElementById(`sc-${id}-V`).value);
+    
+    if(isNaN(sL) || isNaN(sV)) return alert("Pon marcador antes de finalizar");
+
+    // Enviamos el resultado Y el cambio de estatus a 'finalizado'
+    const respuesta = await fetch(`${API}/games/resultado`, { 
+        method: 'POST', 
+        headers: {'Content-Type': 'application/json'}, 
+        body: JSON.stringify({ 
+            id, 
+            sL, 
+            sV, 
+            ganador: sL > sV ? loc : vis, 
+            perdedor: sL > sV ? vis : loc, 
+            status: "finalizado" // <-- Esto es CLAVE para que desaparezca de próximos
+        }) 
+    });
+
+    if(respuesta.ok) {
+        alert("¡Juego Finalizado y Tabla Actualizada!");
+        cargarEquipos(); 
+        cargarResultados(); // Esto limpia la lista de pendientes en el Admin
+    }
+}
 
         async function ejecutarIA() {
             const liga = document.getElementById('ligaIA').value;
