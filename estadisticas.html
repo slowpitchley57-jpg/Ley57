@@ -338,18 +338,27 @@
             </div>`).join('');
     }
     
-    async function cargarHistorialResultados() {
+   async function cargarHistorialResultados() {
     const cont = document.getElementById('resultadosJornada');
     try {
+        // 1. Traemos los juegos finalizados
         const res = await fetch(`${API}/games?liga=femenil&status=finalizado`);
         const games = await res.json();
         
-        if (games.length === 0) {
+        // 2. FILTRO EXTRA: Solo juegos que tengan un resultado válido y que NO sea 0-0
+        const resultadosReales = games.filter(g => 
+            g.resultado && 
+            g.resultado !== "0-0" && 
+            g.resultado.includes("-")
+        );
+
+        if (resultadosReales.length === 0) {
             cont.innerHTML = "<p class='text-center py-10 text-slate-400 italic text-xs uppercase tracking-widest opacity-50'>No hay resultados registrados.</p>";
             return;
         }
 
-        cont.innerHTML = games.reverse().map(g => `
+        // 3. Renderizamos solo los que pasaron el filtro
+        cont.innerHTML = resultadosReales.reverse().map(g => `
             <div class="tarjeta-resultado bg-slate-50 p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-2 mb-3">
                 <div class="flex justify-between text-[8px] font-black text-slate-400 uppercase">
                     <span>${g.fecha}</span><span class="text-pink-600 font-bold text-[7px]">FINALIZADO</span>
@@ -361,7 +370,7 @@
                 </div>
             </div>`).join('');
     } catch (error) { 
-        console.error("Error:", error); 
+        console.error("Error al cargar historial:", error); 
     }
 }
 
