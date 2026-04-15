@@ -154,24 +154,40 @@
             overlay.classList.toggle('hidden');
         }
 
-        function revisarSesion() {
-    const sesionManager = localStorage.getItem('managerLogueado');
-    if (!sesionManager) { window.location.href = 'index.html'; return; }
+       function revisarSesion() {
+    const sesionManager = localStorage.getItem('managerLogueado'); // Ojo: verifica si usas 'userLogueado' o 'managerLogueado'
+    
+    // 1. Protección total: si no hay sesión, al index
+    if (!sesionManager) { 
+        window.location.href = 'index.html'; 
+        return; 
+    }
 
     const datos = JSON.parse(sesionManager);
     equipoSeleccionado = datos.equipo;
-    
-    // CORRECCIÓN: Si el manager es varonil, mandarlo a alv_sport, si no a estadisticas
+    const ligaActual = datos.liga; // 'varonil' o 'femenil'
+
+    // 2. Configurar el botón de estadísticas según la liga
     const btnStats = document.getElementById('btnLinkEstadisticas');
-    if(datos.liga === 'varonil') {
-        btnStats.href = 'alv_sport.html';
-    } else {
-        btnStats.href = 'estadisticas.html';
+    if (btnStats) {
+        if (ligaActual === 'varonil') {
+            btnStats.href = 'alv_sport.html';
+            // Opcional: Cambiar color a rojo si es varonil para que combine
+            btnStats.classList.add('text-red-600'); 
+        } else {
+            btnStats.href = 'estadisticas.html';
+            btnStats.classList.add('text-pink-600');
+        }
     }
-    
-    document.getElementById('nombreEquipoCabecera').innerText = equipoSeleccionado;
+
+    // 3. Mostrar nombre del equipo y arrancar
+    const txtEquipo = document.getElementById('nombreEquipoCabecera');
+    if (txtEquipo) txtEquipo.innerText = equipoSeleccionado;
+
+    console.log(`Sesión iniciada: ${equipoSeleccionado} (${ligaActual})`);
     iniciarSincronizacionRealTime();
 }
+
 
         async function verificarPermisos() {
             try {
