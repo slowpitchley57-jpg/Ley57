@@ -340,37 +340,49 @@
     
    async function cargarHistorialResultados() {
     const cont = document.getElementById('resultadosJornada');
+    if (!cont) return;
+
     try {
-        // 1. Traemos los juegos finalizados
         const res = await fetch(`${API}/games?liga=femenil&status=finalizado`);
         const games = await res.json();
         
-        // 2. FILTRO EXTRA: Solo juegos que tengan un resultado válido y que NO sea 0-0
-        const resultadosReales = games.filter(g => 
-            g.resultado && 
-            g.resultado !== "0-0" && 
-            g.resultado.includes("-")
-        );
+        console.log("Juegos recibidos del servidor:", games); // <-- REVISA ESTO EN F12
+
+        // FILTRO MEJORADO:
+        const resultadosReales = games.filter(g => {
+            // Validamos que exista el resultado y no sea solo espacios
+            if (!g.resultado || g.resultado.trim() === "") return false;
+            
+            // Quitamos espacios por si acaso guardaste " 10 - 5 "
+            const resLimpio = g.resultado.replace(/\s+/g, ''); 
+            
+            // Aceptamos si tiene un guion y NO es 0-0
+            return resLimpio.includes('-') && resLimpio !== "0-0" && resLimpio !== "00-00";
+        });
 
         if (resultadosReales.length === 0) {
-            cont.innerHTML = "<p class='text-center py-10 text-slate-400 italic text-xs uppercase tracking-widest opacity-50'>No hay resultados registrados.</p>";
+            cont.innerHTML = "<p class='text-center py-10 text-slate-400 italic text-xs uppercase opacity-50'>No hay resultados válidos aún.</p>";
             return;
         }
 
-        // 3. Renderizamos solo los que pasaron el filtro
-        cont.innerHTML = resultadosReales.reverse().map(g => `
-            <div class="tarjeta-resultado bg-slate-50 p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-2 mb-3">
+        // Ordenamos: Los más nuevos primero (basado en fecha)
+        resultadosReales.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+        cont.innerHTML = resultadosReales.map(g => `
+            <div class="tarjeta-resultado bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-2 mb-3">
                 <div class="flex justify-between text-[8px] font-black text-slate-400 uppercase">
-                    <span>${g.fecha}</span><span class="text-pink-600 font-bold text-[7px]">FINALIZADO</span>
+                    <span>${g.fecha}</span>
+                    <span class="text-emerald-600 font-bold text-[7px] bg-emerald-50 px-2 rounded-full">FINALIZADO</span>
                 </div>
                 <div class="flex justify-between items-center text-center">
-                    <div class="flex-1 text-[10px] font-black text-blue-900 uppercase">${g.local}</div>
-                    <div class="mx-2 bg-blue-900 text-white px-3 py-1 rounded-lg font-black text-sm italic shadow-md">${g.resultado}</div>
-                    <div class="flex-1 text-[10px] font-black text-blue-900 uppercase">${g.visita}</div>
+                    <div class="flex-1 text-[10px] font-black text-blue-900 uppercase truncate">${g.local}</div>
+                    <div class="mx-3 bg-blue-900 text-white px-3 py-1 rounded-lg font-black text-sm italic shadow-md min-w-[50px]">${g.resultado}</div>
+                    <div class="flex-1 text-[10px] font-black text-blue-900 uppercase truncate text-right">${g.visita}</div>
                 </div>
             </div>`).join('');
+
     } catch (error) { 
-        console.error("Error al cargar historial:", error); 
+        console.error("Error crítico en historial:", error); 
     }
 }
 
