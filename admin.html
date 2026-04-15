@@ -284,28 +284,26 @@ const fila = `
     const res = await fetch(`${API}/players?equipo=${encodeURIComponent(eq)}&liga=${liga}`);
     const players = await res.json();
 
-    // Estructura de tabla para que quepan todos los campos
     cont.innerHTML = `
         <table class="w-full text-[10px] text-left border-collapse">
             <thead>
-                <tr class="bg-slate-100 text-slate-600 uppercase font-black border-b">
-                    <th class="p-2">Jugador</th>
-                    <th class="p-1 text-center">JJ</th>
-                    <th class="p-1 text-center">VB</th>
-                    <th class="p-1 text-center">H</th>
-                    <th class="p-1 text-center">2B</th>
-                    <th class="p-1 text-center">3B</th>
-                    <th class="p-1 text-center">HR</th>
-                    <th class="p-1 text-center">K</th>
-                    <th class="p-1 text-center"RBI</th>
-                    <th class="p-1 text-center">AVG</th>
-                    <th class="p-1 text-center">Acción</th>
+                <tr class="bg-slate-100 text-slate-600 uppercase font-black border-b text-center">
+                    <th class="p-2 text-left">Jugador</th>
+                    <th class="p-1">JJ</th>
+                    <th class="p-1">VB</th>
+                    <th class="p-1">H</th>
+                    <th class="p-1">2B</th>
+                    <th class="p-1">3B</th>
+                    <th class="p-1">HR</th>
+                    <th class="p-1">K</th>
+                    <th class="p-1 text-red-600">RBI</th> <th class="p-1">AVG</th>
+                    <th class="p-1">Acción</th>
                 </tr>
             </thead>
             <tbody class="divide-y">
                 ${players.map(p => `
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-2 font-bold uppercase text-slate-700">${p.nombre}</td>
+                    <tr class="hover:bg-slate-50 text-center">
+                        <td class="p-2 font-bold uppercase text-slate-700 text-left">${p.nombre}</td>
                         <td><input type="number" value="${p.jj || 0}" onchange="updPlayer('${p._id}','jj',this.value)" class="w-10 border rounded text-center p-1"></td>
                         <td><input type="number" value="${p.vb || 0}" onchange="updPlayer('${p._id}','vb',this.value)" class="w-10 border rounded text-center p-1"></td>
                         <td><input type="number" value="${p.h || 0}" onchange="updPlayer('${p._id}','h',this.value)" class="w-10 border rounded text-center p-1 font-bold text-blue-600"></td>
@@ -314,9 +312,9 @@ const fila = `
                         <td><input type="number" value="${p.hr || 0}" onchange="updPlayer('${p._id}','hr',this.value)" class="w-10 border rounded text-center p-1 font-bold text-red-600"></td>
                         <td><input type="number" value="${p.k || 0}" onchange="updPlayer('${p._id}','k',this.value)" class="w-10 border rounded text-center p-1"></td>
                         <td><input type="number" value="${p.rbi || 0}" onchange="updPlayer('${p._id}','rbi',this.value)" class="w-10 border-2 border-red-200 rounded text-center p-1 font-black text-red-600"></td>
-                        <td class="text-center font-black italic text-slate-400">${(p.avg || 0).toFixed(3)}</td>
-                        <td class="text-center">
-                            <button onclick="eliminarPlayer('${p._id}')" class="text-red-400 hover:text-red-600"><i class="fa fa-trash"></i></button>
+                        <td class="font-black italic text-slate-400">${(p.avg || 0).toFixed(3)}</td>
+                        <td>
+                            <button onclick="eliminarJugadora('${p._id}')" class="text-red-400 hover:text-red-600"><i class="fa fa-trash"></i></button>
                         </td>
                     </tr>
                 `).join('')}
@@ -324,7 +322,6 @@ const fila = `
         </table>
     `;
 }
-
         // --- FUNCIONES DE APOYO RESTANTES ---
        async function updPlayer(id, campo, valor) {
     try {
@@ -336,11 +333,14 @@ const fila = `
         
         if (!res.ok) throw new Error("Error al actualizar");
         
-        // Opcional: Mostrar un pequeño aviso de "Guardado" en consola
-        console.log(`Jugador ${id}: ${campo} actualizado a ${valor}`);
+        // Esto confirma visualmente que se guardó
+        console.log(`✅ ${campo} actualizado`);
+        
+        // Opcional: Si quieres que el AVG se refresque en pantalla inmediatamente:
+        // verRosterEquipo(); 
     } catch (err) {
         console.error(err);
-        alert("No se pudo guardar el cambio");
+        alert("No se pudo guardar el cambio. Revisa tu conexión.");
     }
 }
 
