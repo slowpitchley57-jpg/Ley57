@@ -146,50 +146,67 @@
     </div>
 
     <script>
-        const API = "https://ley57.onrender.com/api";
-        let todosLosEquipos = []; // Guardamos todos para filtrar rápido en memoria
+    const API = "https://ley57.onrender.com/api";
+    let todosLosEquipos = []; 
+    let juegosFinalizados = []; // Cache para cálculos rápidos
 
-        async function cargarTodo() {
-            gestionarSesion();
-            cargarConfig();
-            await cargarEquipos();
-            cargarResultados();
-        }
+    async function cargarTodo() {
+        gestionarSesion();
+        cargarConfig();
+        // Cargamos datos base una sola vez
+        await sincronizarDatosBase();
+        cargarResultados();
+    }
 
-        async function cargarEquipos() {
-            const res = await fetch(`${API}/equipos`);
-            todosLosEquipos = await res.json();
+    // Nueva función para traer todo de un golpe y no saturar
+    async function sincronizarDatosBase() {
+        try {
+            console.log("Sincronizando datos...");
+            const [resEq, resGames] = await Promise.all([
+                fetch(`${API}/equipos`),
+                fetch(`${API}/games?status=finalizado`)
+            ]);
+            todosLosEquipos = await resEq.json();
+            juegosFinalizados = await resGames.json();
+            
             renderizarTablas();
             actualizarSelectores();
+        } catch (err) {
+            console.error("Error en sincronización:", err);
         }
+    }
 
-       async function renderizarTablas() {
-    try {
-        const tIntFem = document.getElementById('tablaIntermedia');
-        const tRelFem = document.getElementById('tablaRelax');
-        const tIntVar = document.getElementById('tablaIntermediaVar');
-        const tRelVar = document.getElementById('tablaRelaxVar');
-        
-        tIntFem.innerHTML = ""; tRelFem.innerHTML = ""; tIntVar.innerHTML = ""; tRelVar.innerHTML = "";
+    async function cargarEquipos() {
+        // Esta función ahora es más ligera, usa lo que ya tenemos o refresca
+        await sincronizarDatosBase();
+    }
 
-        // Traemos equipos y juegos para calcular en tiempo real
-        const [resEq, resGames] = await Promise.all([
-            fetch(`${API}/equipos`),
-            fetch(`${API}/games?status=finalizado`)
-        ]);
-        const equiposRaw = await resEq.json();
-        const juegos = await resGames.json();
+    function renderizarTablas() {
+        const tablas = {
+            'Intermediafemenil': document.getElementById('tablaIntermedia'),
+            'Relaxfemenil': document.getElementById('tablaRelax'),
+            'Intermediavaronil': document.getElementById('tablaIntermediaVar'),
+            'Relaxvaronil': document.getElementById('tablaRelaxVar')
+        };
 
-        // Calculamos estadísticas basadas en los juegos finalizados
-        const todosLosEquipos = equiposRaw.map(eq => {
+        // Limpiar todas las tablas
+        Object.values(tablas).forEach(t => t.innerHTML = "");
+
+        // Mapeo de estadísticas (Optimizado: un solo recorrido)
+        const equiposConStats = todosLosEquipos.map(eq => {
             let g = 0, p = 0, ca = 0, ce = 0;
-            juegos.forEach(j => {
-                if (!j.resultado) return;
+            const nombreEq = eq.nombre.trim().toUpperCase();
+
+            juegosFinalizados.forEach(j => {
+                if (!j.resultado || !j.resultado.includes('-')) return;
                 const s = j.resultado.split('-').map(Number);
-                if (j.local === eq.nombre) {
+                const loc = j.local.trim().toUpperCase();
+                const vis = j.visita.trim().toUpperCase();
+
+                if (loc === nombreEq) {
                     ca += s[0]; ce += s[1];
                     if (s[0] > s[1]) g++; else if (s[0] < s[1]) p++;
-                } else if (j.visita === eq.nombre) {
+                } else if (vis === nombreEq) {
                     ca += s[1]; ce += s[0];
                     if (s[1] > s[0]) g++; else if (s[1] < s[0]) p++;
                 }
@@ -197,111 +214,90 @@
             return { ...eq, g, p, ca, ce };
         });
 
-        // Ordenamos por Ganados y Diferencial
-        todosLosEquipos.sort((a, b) => {
-            if (b.g !== a.g) return b.g - a.g;
-            return (b.ca - b.ce) - (a.ca - a.ce);
-        });
+        // Ordenar
+        equiposConStats.sort((a, b) => (b.g !== a.g) ? b.g - a.g : (b.ca - b.ce) - (a.ca - a.ce));
 
-        todosLosEquipos.forEach(e => {
+        // Dibujar
+        equiposConStats.forEach(e => {
             const jj = e.g + e.p;
             const dif = e.ca - e.ce;
-            // Busca esta parte en tu renderizarTablas y cámbiala por esta:
-const fila = `
-    <tr class="hover:bg-slate-50 border-b text-center">
-        <td class="p-4 text-left uppercase italic font-black ${e.liga === 'varonil' ? 'text-red-600' : 'text-blue-900'}">
-            ${e.nombre}
-            <p class="text-[8px] text-slate-400 font-normal">${e.categoria}</p>
-        </td>
-        <td class="font-bold text-slate-500 bg-slate-50/50">${jj}</td>
-        <td><input type="number" onchange="updEq('${e._id}','g',this.value)" value="${e.g}" class="input-inline"></td>
-        <td><input type="number" onchange="updEq('${e._id}','p',this.value)" value="${e.p}" class="input-inline"></td>
-        <td><input type="number" onchange="updEq('${e._id}','ca',this.value)" value="${e.ca}" class="input-inline"></td>
-        <td><input type="number" onchange="updEq('${e._id}','ce',this.value)" value="${e.ce}" class="input-inline"></td>
-        <td class="font-black ${dif>=0 ? 'text-blue-600' : 'text-orange-500'}">${dif>0?'+'+dif:dif}</td>
-        <td class="flex gap-2 justify-center p-4">
-            <button onclick="cambiarCategoria('${e._id}', '${e.categoria}')" class="text-blue-500 hover:text-blue-700" title="Cambiar Categoría">
-                <i class="fa fa-exchange-alt"></i>
-            </button>
-            <button onclick="eliminarEquipo('${e._id}')" class="text-slate-300 hover:text-red-500">
-                <i class="fa fa-trash"></i>
-            </button>
-        </td>
-    </tr>`;
+            const key = e.categoria + e.liga;
             
-            if(e.liga === 'varonil') {
-                if(e.categoria === "Intermedia") tIntVar.innerHTML += fila; else tRelVar.innerHTML += fila;
-            } else {
-                if(e.categoria === "Intermedia") tIntFem.innerHTML += fila; else tRelFem.innerHTML += fila;
+            if (tablas[key]) {
+                tablas[key].innerHTML += `
+                <tr class="hover:bg-slate-50 border-b text-center">
+                    <td class="p-4 text-left uppercase italic font-black ${e.liga === 'varonil' ? 'text-red-600' : 'text-blue-900'}">
+                        ${e.nombre}
+                        <p class="text-[8px] text-slate-400 font-normal">${e.categoria}</p>
+                    </td>
+                    <td class="font-bold text-slate-500 bg-slate-50/50">${jj}</td>
+                    <td><input type="number" onchange="updEq('${e._id}','g',this.value)" value="${e.g}" class="input-inline"></td>
+                    <td><input type="number" onchange="updEq('${e._id}','p',this.value)" value="${e.p}" class="input-inline"></td>
+                    <td><input type="number" onchange="updEq('${e._id}','ca',this.value)" value="${e.ca}" class="input-inline"></td>
+                    <td><input type="number" onchange="updEq('${e._id}','ce',this.value)" value="${e.ce}" class="input-inline"></td>
+                    <td class="font-black ${dif>=0 ? 'text-blue-600' : 'text-orange-500'}">${dif>0?'+'+dif:dif}</td>
+                    <td class="flex gap-2 justify-center p-4">
+                        <button onclick="cambiarCategoria('${e._id}', '${e.categoria}')" class="text-blue-500 hover:text-blue-700"><i class="fa fa-exchange-alt"></i></button>
+                        <button onclick="eliminarEquipo('${e._id}')" class="text-slate-300 hover:text-red-500"><i class="fa fa-trash"></i></button>
+                    </td>
+                </tr>`;
             }
         });
-    } catch (err) { console.error("Error en Admin:", err); }
-}
+    }
 
-        function actualizarSelectores() {
-            const ligaSeleccionada = document.getElementById('filtroLigaGlobal').value;
-            const sLoc = document.getElementById('selLoc');
-            const sVis = document.getElementById('selVis');
-            
-            const filtrados = todosLosEquipos.filter(e => e.liga === ligaSeleccionada);
-            
-            let options = '<option value="">-- EQUIPO --</option>';
-            filtrados.forEach(e => options += `<option value="${e.nombre}">${e.nombre}</option>`);
-            
-            sLoc.innerHTML = options;
-            sVis.innerHTML = options;
-            actualizarSelectRoster();
-        }
+    async function updEq(id, campo, valor) {
+        try {
+            await fetch(`${API}/equipos/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ [campo]: Number(valor) })
+            });
+            // En lugar de recargar todo, solo actualizamos el dato en memoria y redibujamos
+            const eq = todosLosEquipos.find(e => e._id === id);
+            if(eq) eq[campo] = Number(valor);
+            renderizarTablas(); 
+        } catch (e) { alert("Error al actualizar"); }
+    }
 
-        function actualizarSelectRoster() {
-            const liga = document.getElementById('ligaRoster').value;
-            const filter = document.getElementById('filterRoster');
-            const filtrados = todosLosEquipos.filter(e => e.liga === liga);
-            
-            let options = '<option value="">-- SELECCIONAR --</option>';
-            filtrados.forEach(e => options += `<option value="${e.nombre}">${e.nombre}</option>`);
-            filter.innerHTML = options;
-        }
+    function actualizarSelectores() {
+        const ligaSeleccionada = document.getElementById('filtroLigaGlobal').value;
+        const sLoc = document.getElementById('selLoc');
+        const sVis = document.getElementById('selVis');
+        const filtrados = todosLosEquipos.filter(e => e.liga === ligaSeleccionada);
+        let options = '<option value="">-- EQUIPO --</option>';
+        filtrados.forEach(e => options += `<option value="${e.nombre}">${e.nombre}</option>`);
+        sLoc.innerHTML = options; sVis.innerHTML = options;
+        actualizarSelectRoster();
+    }
 
-        async function guardarJuego() {
-            const local = document.getElementById('selLoc').value;
-            const visita = document.getElementById('selVis').value;
-            const liga = document.getElementById('filtroLigaGlobal').value;
-            const fecha = document.getElementById('fec').value;
-            const hora = document.getElementById('hor').value;
-            if(!local || !visita || !fecha || !hora) return alert("Faltan datos");
-            await fetch(`${API}/games`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ local, visita, fecha, hora, liga, status: "pendiente" }) });
-            cargarResultados();
-        }
+    function actualizarSelectRoster() {
+        const liga = document.getElementById('ligaRoster').value;
+        const filter = document.getElementById('filterRoster');
+        const filtrados = todosLosEquipos.filter(e => e.liga === liga);
+        let options = '<option value="">-- SELECCIONAR --</option>';
+        filtrados.forEach(e => options += `<option value="${e.nombre}">${e.nombre}</option>`);
+        filter.innerHTML = options;
+    }
 
-        async function verRosterEquipo() {
-    const eq = document.getElementById('filterRoster').value;
-    const liga = document.getElementById('ligaRoster').value;
-    const cont = document.getElementById('containerRoster');
-    
-    if(!eq) return cont.innerHTML = "";
-
-    const res = await fetch(`${API}/players?equipo=${encodeURIComponent(eq)}&liga=${liga}`);
-    const players = await res.json();
-
-    cont.innerHTML = `
-        <table class="w-full text-[10px] text-left border-collapse">
-            <thead>
-                <tr class="bg-slate-100 text-slate-600 uppercase font-black border-b text-center">
-                    <th class="p-2 text-left">Jugador</th>
-                    <th class="p-1">JJ</th>
-                    <th class="p-1">VB</th>
-                    <th class="p-1">H</th>
-                    <th class="p-1">2B</th>
-                    <th class="p-1">3B</th>
-                    <th class="p-1">HR</th>
-                    <th class="p-1">K</th>
-                    <th class="p-1 text-red-600">RBI</th> <th class="p-1">AVG</th>
-                    <th class="p-1">Acción</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y">
-                ${players.map(p => `
+    async function verRosterEquipo() {
+        const eq = document.getElementById('filterRoster').value;
+        const liga = document.getElementById('ligaRoster').value;
+        const cont = document.getElementById('containerRoster');
+        if(!eq) return cont.innerHTML = "";
+        const res = await fetch(`${API}/players?equipo=${encodeURIComponent(eq)}&liga=${liga}`);
+        const players = await res.json();
+        cont.innerHTML = `
+            <table class="w-full text-[10px] text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-100 text-slate-600 uppercase font-black border-b text-center">
+                        <th class="p-2 text-left">Jugador</th>
+                        <th class="p-1">JJ</th><th class="p-1">VB</th><th class="p-1">H</th>
+                        <th class="p-1">2B</th><th class="p-1">3B</th><th class="p-1">HR</th>
+                        <th class="p-1">K</th><th class="p-1 text-red-600">RBI</th><th class="p-1">AVG</th>
+                        <th class="p-1">Acción</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y">${players.map(p => `
                     <tr class="hover:bg-slate-50 text-center">
                         <td class="p-2 font-bold uppercase text-slate-700 text-left">${p.nombre}</td>
                         <td><input type="number" value="${p.jj || 0}" onchange="updPlayer('${p._id}','jj',this.value)" class="w-10 border rounded text-center p-1"></td>
@@ -313,178 +309,99 @@ const fila = `
                         <td><input type="number" value="${p.k || 0}" onchange="updPlayer('${p._id}','k',this.value)" class="w-10 border rounded text-center p-1"></td>
                         <td><input type="number" value="${p.rbi || 0}" onchange="updPlayer('${p._id}','rbi',this.value)" class="w-10 border-2 border-red-200 rounded text-center p-1 font-black text-red-600"></td>
                         <td class="font-black italic text-slate-400">${(p.avg || 0).toFixed(3)}</td>
-                        <td>
-                            <button onclick="eliminarJugadora('${p._id}')" class="text-red-400 hover:text-red-600"><i class="fa fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    `;
-}
-        // --- FUNCIONES DE APOYO RESTANTES ---
-       async function updPlayer(id, campo, valor) {
-    try {
-        // 1. Mandamos el valor que cambiaste (H, VB, HR, etc.)
-        await fetch(`${API}/players/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ [campo]: Number(valor) })
-        });
+                        <td><button onclick="eliminarJugadora('${p._id}')" class="text-red-400 hover:text-red-600"><i class="fa fa-trash"></i></button></td>
+                    </tr>`).join('')}
+                </tbody>
+            </table>`;
+    }
 
-        // 2. Lógica de Auto-AVG: Si cambiaste H o VB, recalculamos
-        if (campo === 'h' || campo === 'vb') {
-            const fila = document.querySelector(`input[onchange*="${id}"]`).closest('tr');
-            const h = Number(fila.querySelector('input[onchange*="\'h\'"]').value);
-            const vb = Number(fila.querySelector('input[onchange*="\'vb\'"]').value);
-            
-            let nuevoAvg = 0;
-            if (vb > 0) nuevoAvg = h / vb;
-
-            // Actualizamos visualmente el AVG en la tabla del admin
-            fila.querySelector('.font-black.italic.text-slate-400').innerText = nuevoAvg.toFixed(3);
-
-            // Guardamos el nuevo AVG en la base de datos automáticamente
+    async function updPlayer(id, campo, valor) {
+        try {
             await fetch(`${API}/players/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ avg: nuevoAvg })
+                body: JSON.stringify({ [campo]: Number(valor) })
             });
-        }
-        console.log(`✅ ${campo} y AVG sincronizados`);
-    } catch (err) {
-        console.error(err);
-        alert("Error al guardar. Revisa conexión.");
-    }
-}
-
-        async function cargarResultados() {
-            const res = await fetch(`${API}/games`);
-            const games = await res.json();
-            const cont = document.getElementById('listaResultados');
-            cont.innerHTML = "";
-            games.filter(g => g.status === 'pendiente').forEach(g => {
-                cont.innerHTML += `
-                <div class="bg-white p-4 rounded-3xl border shadow-sm relative border-l-4 ${g.liga === 'varonil' ? 'border-red-600':'border-blue-600'}">
-                    <button onclick="eliminarJuego('${g._id}')" class="absolute -top-2 -right-2 bg-red-600 text-white w-6 h-6 rounded-full text-[8px] shadow-xl"><i class="fa fa-times"></i></button>
-                    <div class="flex justify-between text-[8px] font-black text-slate-400 uppercase"><span>${g.fecha}</span><span>${g.hora}</span></div>
-                    <div class="flex justify-between items-center py-3">
-                        <span class="text-[9px] font-black uppercase flex-1 truncate">${g.local}</span>
-                        <div class="flex gap-1 mx-1"><input id="sc-${g._id}-L" type="number" class="w-8 p-1 border rounded text-center font-bold" placeholder="L"><input id="sc-${g._id}-V" type="number" class="w-8 p-1 border rounded text-center font-bold" placeholder="V"></div>
-                        <span class="text-[9px] font-black uppercase flex-1 text-right truncate">${g.visita}</span>
-                    </div>
-                    <button onclick="finalizarJuego('${g._id}','${g.local}','${g.visita}')" class="w-full bg-slate-800 text-white text-[8px] font-black py-2 rounded-xl uppercase">Finalizar</button>
-                </div>`;
-            });
-        }
-
-        async function finalizarJuego(id, loc, vis) {
-    const sL = parseInt(document.getElementById(`sc-${id}-L`).value);
-    const sV = parseInt(document.getElementById(`sc-${id}-V`).value);
-    
-    if(isNaN(sL) || isNaN(sV)) return alert("Pon marcador antes de finalizar");
-
-    // Enviamos el resultado Y el cambio de estatus a 'finalizado'
-    const respuesta = await fetch(`${API}/games/resultado`, { 
-        method: 'POST', 
-        headers: {'Content-Type': 'application/json'}, 
-        body: JSON.stringify({ 
-            id, 
-            sL, 
-            sV, 
-            ganador: sL > sV ? loc : vis, 
-            perdedor: sL > sV ? vis : loc, 
-            status: "finalizado" // <-- Esto es CLAVE para que desaparezca de próximos
-        }) 
-    });
-
-    if(respuesta.ok) {
-        alert("¡Juego Finalizado y Tabla Actualizada!");
-        cargarEquipos(); 
-        cargarResultados(); // Esto limpia la lista de pendientes en el Admin
-    }
-}
-
-        async function ejecutarIA() {
-            const liga = document.getElementById('ligaIA').value;
-            toggleModal('modalIA');
-            const res = await fetch(`${API}/equipos?liga=${liga}`);
-            const equipos = await res.json();
-            const intermedia = equipos.filter(e => e.categoria === "Intermedia"), relax = equipos.filter(e => e.categoria === "Relax");
-            if (equipos.length < 2) return alert("No hay suficientes equipos");
-            const emparejar = async (lista) => {
-                const shuffled = lista.sort(() => 0.5 - Math.random());
-                for (let i = 0; i < shuffled.length; i += 2) {
-                    if (shuffled[i] && shuffled[i+1]) {
-                        await fetch(`${API}/games`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ local: shuffled[i].nombre, visita: shuffled[i+1].nombre, fecha: "2026-04-12", hora: "19:00", liga, status: "pendiente" }) });
-                    }
-                }
-            };
-            if (confirm(`¿Generar rol para ${liga.toUpperCase()}?`)) {
-                await emparejar(intermedia); await emparejar(relax);
-                alert("Rol generado"); cargarResultados();
+            if (campo === 'h' || campo === 'vb') {
+                const fila = document.querySelector(`input[onchange*="${id}"]`).closest('tr');
+                const h = Number(fila.querySelector('input[onchange*="\'h\'"]').value);
+                const vb = Number(fila.querySelector('input[onchange*="\'vb\'"]').value);
+                let nuevoAvg = vb > 0 ? h / vb : 0;
+                fila.querySelector('.font-black.italic.text-slate-400').innerText = nuevoAvg.toFixed(3);
+                await fetch(`${API}/players/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ avg: nuevoAvg }) });
             }
-        }
-
-        async function guardarEquipo() {
-            const n = document.getElementById('teamName').value, c = document.getElementById('teamCat').value, l = document.getElementById('teamLiga').value;
-            if(!n) return alert("Escribe nombre");
-            await fetch(`${API}/equipos`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ nombre: n.toUpperCase(), categoria: c, liga: l }) });
-            toggleModal('modalEquipo'); cargarEquipos();
-        }
-
-        async function updPlFull(id, campo, val) {
-            let d = {}; d[campo] = (campo === 'nombre') ? val : Number(val);
-            await fetch(`${API}/players/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(d) });
-        }
-
-        async function toggleModal(id) { document.getElementById(id).classList.toggle('active'); }
-        function gestionarSesion() {
-            const sesion = localStorage.getItem('userLogueado');
-            if (sesion) {
-                const user = JSON.parse(sesion);
-                document.getElementById('nombreUsuarioActivo').innerText = user.correo.split('@')[0].toUpperCase();
-            } else { window.location.href = 'index.html'; }
-        }
-        async function cargarConfig() {
-            const res = await fetch(`${API}/config`);
-            const conf = await res.json();
-            document.getElementById('masterSwitch').checked = conf.permitirAltas;
-        }
-        async function toggleAltas() {
-            const val = document.getElementById('masterSwitch').checked;
-            await fetch(`${API}/config`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ permitirAltas: val }) });
-        }
-        async function eliminarJugadora(id) { if(confirm("¿Borrar?")) { await fetch(`${API}/players/${id}`, { method: 'DELETE' }); verRosterEquipo(); } }
-        async function eliminarEquipo(id) { if(confirm("¿Borrar?")) { await fetch(`${API}/equipos/${id}`, { method: 'DELETE' }); cargarEquipos(); } }
-        async function eliminarJuego(id) { if(confirm("¿Borrar?")) { await fetch(`${API}/games/${id}`, { method: 'DELETE' }); cargarResultados(); } }
-        function cerrarSesion() { if(confirm("¿Cerrar?")) { localStorage.clear(); window.location.href = 'index.html'; } }
-        async function escanearHoja() { const img = document.getElementById('imageInput').files[0]; if(!img) return alert("Sube foto"); Tesseract.recognize(img, 'spa').then(({ data: { text } }) => { document.getElementById('resultadoIA').value = text; }); }
-
-        async function cambiarCategoria(id, catActual) {
-    const nuevaCat = catActual === "Intermedia" ? "Relax" : "Intermedia";
-    
-    if(!confirm(`¿Deseas mover este equipo a la categoría ${nuevaCat}? Las estadísticas se mantendrán iguales.`)) return;
-
-    try {
-        const res = await fetch(`${API}/equipos/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ categoria: nuevaCat })
-        });
-
-        if(res.ok) {
-            alert("Categoría actualizada correctamente");
-            renderizarTablas(); // Recargamos para que se mueva de tabla visualmente
-        } else {
-            alert("Error al cambiar de categoría");
-        }
-    } catch (error) {
-        console.error("Error:", error);
-        alert("Error de conexión");
+        } catch (err) { console.error(err); }
     }
-}
-        document.addEventListener('DOMContentLoaded', cargarTodo);
-    </script>
+
+    async function cargarResultados() {
+        const res = await fetch(`${API}/games`);
+        const games = await res.json();
+        const cont = document.getElementById('listaResultados');
+        cont.innerHTML = games.filter(g => g.status === 'pendiente').map(g => `
+            <div class="bg-white p-4 rounded-3xl border shadow-sm relative border-l-4 ${g.liga === 'varonil' ? 'border-red-600':'border-blue-600'}">
+                <button onclick="eliminarJuego('${g._id}')" class="absolute -top-2 -right-2 bg-red-600 text-white w-6 h-6 rounded-full text-[8px] shadow-xl"><i class="fa fa-times"></i></button>
+                <div class="flex justify-between text-[8px] font-black text-slate-400 uppercase"><span>${g.fecha}</span><span>${g.hora}</span></div>
+                <div class="flex justify-between items-center py-3">
+                    <span class="text-[9px] font-black uppercase flex-1 truncate">${g.local}</span>
+                    <div class="flex gap-1 mx-1"><input id="sc-${g._id}-L" type="number" class="w-8 p-1 border rounded text-center font-bold" placeholder="L"><input id="sc-${g._id}-V" type="number" class="w-8 p-1 border rounded text-center font-bold" placeholder="V"></div>
+                    <span class="text-[9px] font-black uppercase flex-1 text-right truncate">${g.visita}</span>
+                </div>
+                <button onclick="finalizarJuego('${g._id}','${g.local}','${g.visita}')" class="w-full bg-slate-800 text-white text-[8px] font-black py-2 rounded-xl uppercase">Finalizar</button>
+            </div>`).join('');
+    }
+
+    async function finalizarJuego(id, loc, vis) {
+        const sL = parseInt(document.getElementById(`sc-${id}-L`).value), sV = parseInt(document.getElementById(`sc-${id}-V`).value);
+        if(isNaN(sL) || isNaN(sV)) return alert("Pon marcador");
+        await fetch(`${API}/games/resultado`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id, sL, sV, ganador: sL > sV ? loc : vis, perdedor: sL > sV ? vis : loc, status: "finalizado" }) });
+        sincronizarDatosBase(); cargarResultados();
+    }
+
+    async function guardarJuego() {
+        const local = document.getElementById('selLoc').value, visita = document.getElementById('selVis').value, liga = document.getElementById('filtroLigaGlobal').value, fecha = document.getElementById('fec').value, hora = document.getElementById('hor').value;
+        if(!local || !visita || !fecha || !hora) return alert("Faltan datos");
+        await fetch(`${API}/games`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ local, visita, fecha, hora, liga, status: "pendiente" }) });
+        cargarResultados();
+    }
+
+    async function guardarEquipo() {
+        const n = document.getElementById('teamName').value, c = document.getElementById('teamCat').value, l = document.getElementById('teamLiga').value;
+        if(!n) return alert("Escribe nombre");
+        await fetch(`${API}/equipos`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ nombre: n.toUpperCase(), categoria: c, liga: l }) });
+        toggleModal('modalEquipo'); sincronizarDatosBase();
+    }
+
+    async function eliminarEquipo(id) { if(confirm("¿Borrar?")) { await fetch(`${API}/equipos/${id}`, { method: 'DELETE' }); sincronizarDatosBase(); } }
+    async function eliminarJuego(id) { if(confirm("¿Borrar?")) { await fetch(`${API}/games/${id}`, { method: 'DELETE' }); cargarResultados(); } }
+    async function eliminarJugadora(id) { if(confirm("¿Borrar?")) { await fetch(`${API}/players/${id}`, { method: 'DELETE' }); verRosterEquipo(); } }
+    
+    async function cambiarCategoria(id, catActual) {
+        const nuevaCat = catActual === "Intermedia" ? "Relax" : "Intermedia";
+        if(!confirm(`Mover a ${nuevaCat}?`)) return;
+        await fetch(`${API}/equipos/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ categoria: nuevaCat }) });
+        sincronizarDatosBase();
+    }
+
+    // Funciones de utilidad sin cambios
+    async function toggleModal(id) { document.getElementById(id).classList.toggle('active'); }
+    function gestionarSesion() {
+        const sesion = localStorage.getItem('userLogueado');
+        if (sesion) {
+            const user = JSON.parse(sesion);
+            document.getElementById('nombreUsuarioActivo').innerText = user.correo.split('@')[0].toUpperCase();
+        } else { window.location.href = 'index.html'; }
+    }
+    async function cargarConfig() {
+        const res = await fetch(`${API}/config`);
+        const conf = await res.json();
+        document.getElementById('masterSwitch').checked = conf.permitirAltas;
+    }
+    async function toggleAltas() {
+        const val = document.getElementById('masterSwitch').checked;
+        await fetch(`${API}/config`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ permitirAltas: val }) });
+    }
+
+    document.addEventListener('DOMContentLoaded', cargarTodo);
+</script>
 </body>
 </html>

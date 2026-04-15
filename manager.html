@@ -156,36 +156,34 @@
         }
 
        function revisarSesion() {
-    const sesionManager = localStorage.getItem('managerLogueado'); // Ojo: verifica si usas 'userLogueado' o 'managerLogueado'
+    // 1. Intentamos obtener la sesión (ajusta a 'userLogueado' si así lo guardas)
+    const sesionManager = localStorage.getItem('userLogueado') || localStorage.getItem('managerLogueado');
     
-    // 1. Protección total: si no hay sesión, al index
+    // Si no hay nada, al index de inmediato
     if (!sesionManager) { 
         window.location.href = 'index.html'; 
         return; 
     }
 
     const datos = JSON.parse(sesionManager);
-    equipoSeleccionado = datos.equipo;
-    const ligaActual = datos.liga; // 'varonil' o 'femenil'
-
-    // 2. Configurar el botón de estadísticas según la liga
-    const btnStats = document.getElementById('btnLinkEstadisticas');
-    if (btnStats) {
-        if (ligaActual === 'varonil') {
-            btnStats.href = 'alv_sport.html';
-            // Opcional: Cambiar color a rojo si es varonil para que combine
-            btnStats.classList.add('text-red-600'); 
-        } else {
-            btnStats.href = 'estadisticas.html';
-            btnStats.classList.add('text-pink-600');
-        }
+    
+    // 2. MANTENER EL NOMBRE DEL EQUIPO ARRIBA
+    // Asegúrate de que el ID en tu HTML sea 'nombreEquipoCabecera'
+    const txtEquipo = document.getElementById('nombreEquipoCabecera');
+    if (txtEquipo) {
+        txtEquipo.innerText = datos.equipo; 
     }
 
-    // 3. Mostrar nombre del equipo y arrancar
-    const txtEquipo = document.getElementById('nombreEquipoCabecera');
-    if (txtEquipo) txtEquipo.innerText = equipoSeleccionado;
+    // 3. FORZAR QUE EL BOTÓN MANDE AL INDEX SIEMPRE
+    const btnStats = document.getElementById('btnLinkEstadisticas');
+    if (btnStats) {
+        btnStats.href = 'index.html';
+        
+        // Opcional: Si quieres que al picarle limpie la sesión (Logout)
+        btnStats.onclick = () => localStorage.clear();
+    }
 
-    console.log(`Sesión iniciada: ${equipoSeleccionado} (${ligaActual})`);
+    // Continuar con la sincronización normal
     iniciarSincronizacionRealTime();
 }
 
