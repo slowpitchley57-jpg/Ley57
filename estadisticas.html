@@ -174,13 +174,13 @@
         </div>
     </div>
 
-    <script>
+   <script>
     const API = "https://ley57.onrender.com/api";
 
     document.addEventListener('DOMContentLoaded', cargarTodo);
 
     async function cargarTodo() {
-        console.log("Sincronizando datos de AVL Sport Femenil...");
+        console.log("Sincronizando datos de Femenil...");
         await Promise.all([
             cargarTablasYEstadisticas(),
             cargarEncuentros(),
@@ -188,7 +188,7 @@
         ]);
     }
 
-    // ESTA ES LA FUNCIÓN QUE RECALCULA TODO PARA QUE NO SALGA EN CEROS
+    // ESTA FUNCIÓN ES LA QUE HACE LA MAGIA PARA QUE NO SALGA EN CEROS
     async function cargarTablasYEstadisticas() {
         try {
             const [resEq, resGames] = await Promise.all([
@@ -199,7 +199,7 @@
             const equiposRaw = await resEq.json();
             const juegos = await resGames.json();
 
-            // RE-CALCULAR EN VIVO (Para que el Admin y la Tabla no salgan en 0)
+            // RE-CALCULAR EN VIVO (Cruza los juegos finalizados con los equipos)
             const equipos = equiposRaw.map(eq => {
                 let g = 0, p = 0, ca = 0, ce = 0;
                 juegos.forEach(j => {
@@ -216,7 +216,7 @@
                 return { ...eq, g, p, ca, ce };
             });
 
-            // ORDENAMIENTO POR GANADOS Y DIFERENCIA
+            // Ordenar: 1. Ganados, 2. Diferencia
             equipos.sort((a, b) => {
                 if (b.g !== a.g) return b.g - a.g;
                 return (b.ca - b.ce) - (a.ca - a.ce);
@@ -227,11 +227,12 @@
             tInt.innerHTML = ""; tRel.innerHTML = "";
 
             equipos.forEach(e => {
+                const jj = e.g + e.p;
                 const dif = e.ca - e.ce;
                 const fila = `
                     <tr class="hover:bg-pink-50 cursor-pointer border-b transition-colors text-center" onclick="verDetalleRoster('${e.nombre}')">
                         <td class="p-4 uppercase italic font-black text-blue-900 text-left">${e.nombre}</td>
-                        <td class="font-bold text-slate-500 bg-slate-50/30">${e.g + e.p}</td>
+                        <td class="font-bold text-slate-500 bg-slate-50/30">${jj}</td>
                         <td class="text-blue-600">${e.g}</td>
                         <td>${e.p}</td>
                         <td>${e.ca}</td>
@@ -241,7 +242,7 @@
                 if (e.categoria === "Intermedia") tInt.innerHTML += fila; else tRel.innerHTML += fila;
             });
 
-            // Actualizar Líderes de tarjetas arriba
+            // Actualizar Líderes arriba
             const lInt = equipos.filter(e => e.categoria === "Intermedia")[0];
             const lRel = equipos.filter(e => e.categoria === "Relax")[0];
             if(lInt) document.getElementById('txtLiderInt').innerText = lInt.nombre;
@@ -259,16 +260,17 @@
                         <div class="flex-1 text-[10px] font-black text-blue-900 uppercase">${j.visita}</div>
                     </div>
                 </div>`).join('');
-        } catch (e) { console.error(e); }
+        } catch (e) { console.error("Error Femenil:", e); }
     }
 
+    // Función para el Roster
     async function verDetalleRoster(nombreEquipo) {
         document.getElementById('detNombreEquipo').innerText = nombreEquipo;
         const res = await fetch(`${API}/players?liga=femenil`);
         const allPlayers = await res.json();
         const players = allPlayers.filter(p => p.equipo.trim().toUpperCase() === nombreEquipo.trim().toUpperCase());
-        
         const container = document.getElementById('bodyDetalleJugadoras');
+        
         container.innerHTML = players.length === 0 ? `<tr><td colspan="6" class="p-10 text-center italic text-slate-400">Sin jugadoras registradas.</td></tr>` : 
             players.map(p => `
             <tr class="hover:bg-slate-50 border-b text-center">
@@ -287,36 +289,36 @@
         const res = await fetch(`${API}/games?liga=femenil&status=pendiente`);
         const games = await res.json();
         const cont = document.getElementById('listaEncuentros');
-        cont.innerHTML = games.length === 0 ? `<p class="text-center py-10 opacity-30 italic text-xs">Sin juegos pendientes</p>` :
-            games.map(g => `
-            <div class="bg-white p-4 rounded-2xl border-2 border-slate-100 shadow-sm">
-                <div class="flex justify-between text-[8px] font-bold text-slate-400 uppercase mb-2">
-                    <span>${g.fecha}</span><span>${g.hora}</span>
-                </div>
-                <div class="flex justify-between items-center gap-2">
-                    <span class="text-[10px] font-black uppercase text-blue-900 truncate flex-1">${g.local}</span>
-                    <span class="text-[8px] font-black text-pink-600 italic px-2 bg-pink-50 rounded-full">VS</span>
-                    <span class="text-[10px] font-black uppercase text-blue-900 truncate flex-1 text-right">${g.visita}</span>
-                </div>
-            </div>`).join('');
+        if(games.length === 0) {
+            cont.innerHTML = `<p class="text-center py-10 opacity-30 italic text-xs">Sin juegos pendientes</p>`;
+        } else {
+            cont.innerHTML = games.map(g => `
+                <div class="bg-white p-4 rounded-2xl border-2 border-slate-100 shadow-sm mb-4">
+                    <div class="flex justify-between text-[8px] font-bold text-slate-400 uppercase mb-2">
+                        <span>${g.fecha}</span><span>${g.hora}</span>
+                    </div>
+                    <div class="flex justify-between items-center gap-2">
+                        <span class="text-[10px] font-black uppercase text-blue-900 truncate flex-1">${g.local}</span>
+                        <span class="text-[8px] font-black text-pink-600 italic px-2 bg-pink-50 rounded-full">VS</span>
+                        <span class="text-[10px] font-black uppercase text-blue-900 truncate flex-1 text-right">${g.visita}</span>
+                    </div>
+                </div>`).join('');
+        }
     }
 
     async function cargarLideresIndividuales() {
         const res = await fetch(`${API}/players?liga=femenil`);
         const players = await res.json();
-        
-        // TOP AVG
         const topAVG = [...players].sort((a,b) => (b.avg || 0) - (a.avg || 0)).slice(0, 5);
         document.getElementById('topBateo').innerHTML = topAVG.map((p, i) => `
-            <div class="flex justify-between items-center border-b border-slate-700 pb-1 text-[11px]">
+            <div class="flex justify-between items-center border-b border-slate-200 pb-1 text-[11px]">
                 <span class="font-bold uppercase"><span class="text-pink-500 mr-2">#${i+1}</span> ${p.nombre}</span>
                 <span class="font-black text-pink-400 italic">${(p.avg || 0).toFixed(3)}</span>
             </div>`).join('');
-
-        // TOP HOME RUNS (Esta es la que faltaba)
+        
         const topHR = [...players].sort((a,b) => (b.hr || 0) - (a.hr || 0)).slice(0, 5);
         document.getElementById('topHR').innerHTML = topHR.map((p, i) => `
-            <div class="flex justify-between items-center border-b border-slate-700 pb-1 text-[11px]">
+            <div class="flex justify-between items-center border-b border-slate-200 pb-1 text-[11px]">
                 <span class="font-bold uppercase"><span class="text-blue-500 mr-2">#${i+1}</span> ${p.nombre}</span>
                 <span class="font-black text-blue-400 italic">${p.hr || 0} HR</span>
             </div>`).join('');
