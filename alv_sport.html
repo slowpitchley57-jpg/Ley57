@@ -344,6 +344,32 @@
     function cerrarDetalle() { document.getElementById('modalDetalleEquipo').classList.add('hidden'); }
 
     async function cargarEncuentros() {
+    const res = await fetch(`${API}/games?liga=varonil`); // Traemos todos los de la liga
+    const games = await res.json();
+    const cont = document.getElementById('listaEncuentros');
+
+    // FILTRAR AQUÍ MISMO POR STATUS 'PENDIENTE'
+    const pendientes = games.filter(g => g.status === 'pendiente');
+
+    if(pendientes.length === 0) {
+        cont.innerHTML = `<p class="text-center py-10 opacity-30 italic text-xs uppercase">Sin juegos pendientes</p>`;
+    } else {
+        cont.innerHTML = pendientes.map(g => `
+            <div class="bg-white p-4 rounded-2xl border-2 border-slate-100 shadow-sm mb-4">
+                <div class="flex justify-between text-[8px] font-bold text-slate-400 uppercase mb-2">
+                    <span>${g.fecha}</span><span>${g.hora}</span>
+                </div>
+                <div class="flex justify-between items-center gap-2">
+                    <span class="text-[10px] font-black uppercase text-blue-900 truncate flex-1">${g.local}</span>
+                    <span class="text-[8px] font-black text-pink-600 italic px-2 bg-pink-50 rounded-full">VS</span>
+                    <span class="text-[10px] font-black uppercase text-blue-900 truncate flex-1 text-right">${g.visita}</span>
+                </div>
+            </div>`).join('');
+    }
+}
+
+
+    /*async function cargarEncuentros() {
         try {
             const res = await fetch(`${API}/games?liga=varonil&status=pendiente`);
             const games = await res.json();
@@ -366,7 +392,7 @@
                     </div>
                 </div>`).join('');
         } catch (error) { console.error(error); }
-    }
+    }*/
 
     function filtrarJuegos() {
         const busqueda = document.getElementById('inputBusquedaJuegos').value.toUpperCase();
@@ -382,6 +408,53 @@
         }
         contador.innerText = busqueda === "" ? "" : `${encontrados} resultados encontrados`;
     }
+    async function cargarHistorialResultados() {
+    const cont = document.getElementById('resultadosJornada');
+    if (!cont) return;
+
+    try {
+        const res = await fetch(`${API}/games?liga=varonil&status=finalizado`);
+        const games = await res.json();
+        
+        console.log("Juegos recibidos del servidor:", games); // <-- REVISA ESTO EN F12
+
+        // FILTRO MEJORADO:
+        const resultadosReales = games.filter(g => {
+            // Validamos que exista el resultado y no sea solo espacios
+            if (!g.resultado || g.resultado.trim() === "") return false;
+            
+            // Quitamos espacios por si acaso guardaste " 10 - 5 "
+            const resLimpio = g.resultado.replace(/\s+/g, ''); 
+            
+            // Aceptamos si tiene un guion y NO es 0-0
+            return resLimpio.includes('-') && resLimpio !== "0-0" && resLimpio !== "00-00";
+        });
+
+        if (resultadosReales.length === 0) {
+            cont.innerHTML = "<p class='text-center py-10 text-slate-400 italic text-xs uppercase opacity-50'>No hay resultados válidos aún.</p>";
+            return;
+        }
+
+        // Ordenamos: Los más nuevos primero (basado en fecha)
+        resultadosReales.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+        cont.innerHTML = resultadosReales.map(g => `
+            <div class="tarjeta-resultado bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-2 mb-3">
+                <div class="flex justify-between text-[8px] font-black text-slate-400 uppercase">
+                    <span>${g.fecha}</span>
+                    <span class="text-emerald-600 font-bold text-[7px] bg-emerald-50 px-2 rounded-full">FINALIZADO</span>
+                </div>
+                <div class="flex justify-between items-center text-center">
+                    <div class="flex-1 text-[10px] font-black text-blue-900 uppercase truncate">${g.local}</div>
+                    <div class="mx-3 bg-blue-900 text-white px-3 py-1 rounded-lg font-black text-sm italic shadow-md min-w-[50px]">${g.resultado}</div>
+                    <div class="flex-1 text-[10px] font-black text-blue-900 uppercase truncate text-right">${g.visita}</div>
+                </div>
+            </div>`).join('');
+
+    } catch (error) { 
+        console.error("Error crítico en historial:", error); 
+    }
+}
 </script>
 </body>
 </html>
