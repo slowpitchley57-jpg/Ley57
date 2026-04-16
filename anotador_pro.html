@@ -2,277 +2,323 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Hoja de Anotación K-21 Profesional</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scorecard K-21 Pro - Ley 57</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Estilo de Hoja de Papel */
-        .score-paper { background-color: #fff; border: 2px solid #333; box-shadow: 10px 10px 0px #cbd5e1; }
-        .cell { width: 45px; height: 45px; border: 0.5px solid #94a3b8; position: relative; font-size: 10px; font-weight: 900; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .cell:hover { background-color: #f1f5f9; }
-        .diamond-cell { width: 18px; height: 18px; border: 1px solid #ddd; transform: rotate(45deg); position: absolute; }
-        .diamond-cell.active { background: #ef4444; border-color: #b91c1c; }
+        .paper-bg { background-color: #fff; background-image: radial-gradient(#e2e8f0 1px, transparent 1px); background-size: 20px 20px; }
+        .cell-score { width: 50px; height: 50px; border: 0.5px solid #cbd5e1; position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 12px; }
+        .cell-score:hover { background: #f8fafc; }
+        .diamond-inner { width: 20px; height: 20px; border: 1px solid #94a3b8; transform: rotate(45deg); position: absolute; pointer-events: none; }
+        .diamond-inner.run { background: #ef4444; border-color: #b91c1c; }
         
-        /* Diamante de Seguimiento Superior */
-        .field-box { position: relative; width: 120px; height: 120px; background: #166534; transform: rotate(45deg); margin: 20px auto; border: 3px solid #052e16; }
-        .b-spot { position: absolute; width: 15px; height: 15px; background: #fff; border: 2px solid #333; transform: rotate(-45deg); }
-        .b-spot.occupied { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
-        .h-spot { bottom: -8px; right: -8px; border-radius: 0 0 50% 0; }
-        .b1-spot { top: -8px; right: -8px; }
-        .b2-spot { top: -8px; left: -8px; }
-        .b3-spot { bottom: -8px; left: -8px; }
+        /* Diamante de Seguimiento Principal */
+        .stadium { position: relative; width: 180px; height: 180px; background: #15803d; border: 6px solid #064e3b; transform: rotate(45deg); margin: 30px auto; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
+        .base-spot { position: absolute; width: 26px; height: 26px; background: #fff; border: 3px solid #333; transform: rotate(-45deg); transition: 0.3s; }
+        .base-spot.on { background: #ef4444; box-shadow: 0 0 15px #ef4444; border-color: #fff; }
+        .b-1 { top: -13px; right: -13px; }
+        .b-2 { top: -13px; left: -13px; }
+        .b-3 { bottom: -13px; left: -13px; }
+        .b-h { bottom: -13px; right: -13px; clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
 
         .hidden { display: none; }
-        .text-red { color: #ef4444; }
+        .animate-pop { animation: pop 0.2s ease-out; }
+        @keyframes pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     </style>
 </head>
-<body class="bg-slate-200 p-2 md:p-6 font-mono">
+<body class="bg-slate-100 text-slate-900 min-h-screen">
 
-    <div id="setup" class="max-w-md mx-auto bg-white p-8 rounded-3xl shadow-2xl border-t-8 border-blue-900">
-        <h2 class="font-black italic text-xl uppercase mb-6 text-center">Configurar Scorecard</h2>
-        <div class="space-y-4">
-            <select id="liga" onchange="getGames()" class="w-full p-4 bg-slate-100 rounded-2xl font-bold uppercase">
-                <option value="">-- LIGA --</option>
-                <option value="femenil">FEMENIL</option>
-                <option value="varonil">VARONIL</option>
-            </select>
-            <select id="juego" class="w-full p-4 bg-slate-100 rounded-2xl font-bold uppercase">
-                <option value="">-- JUEGO --</option>
-            </select>
-            <button onclick="loadRosters()" class="w-full bg-blue-900 text-white p-4 rounded-2xl font-black uppercase italic">Seleccionar Jugadoras</button>
+    <div id="fase1" class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md border-t-8 border-blue-900">
+            <h1 class="font-black italic uppercase text-2xl text-center mb-6">Anotador Oficial</h1>
+            <div class="space-y-4">
+                <select id="selLiga" onchange="fetchGames()" class="w-full p-4 bg-slate-50 border rounded-2xl font-bold uppercase outline-none focus:border-blue-900">
+                    <option value="">-- SELECCIONAR LIGA --</option>
+                    <option value="femenil">LEY 57 (FEMENIL)</option>
+                    <option value="varonil">ALV SPORT (VARONIL)</option>
+                </select>
+                <select id="selJuego" class="w-full p-4 bg-slate-50 border rounded-2xl font-bold uppercase outline-none focus:border-blue-900">
+                    <option value="">-- ESPERANDO LIGA --</option>
+                </select>
+                <button onclick="startSetup()" class="w-full bg-blue-900 text-white p-4 rounded-2xl font-black uppercase italic shadow-lg hover:bg-black transition-all">Siguiente</button>
+            </div>
         </div>
     </div>
 
-    <div id="lineupPicker" class="hidden max-w-4xl mx-auto bg-white p-8 rounded-3xl shadow-2xl">
-        <h2 class="font-black text-center uppercase italic border-b pb-4 mb-4">Seleccionar Lineup para: <span id="teamNamePicker" class="text-blue-900">--</span></h2>
-        <div id="playerChecklist" class="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-96 overflow-y-auto p-2"></div>
-        <div class="mt-6 flex gap-4">
-            <button onclick="confirmLineup()" class="flex-1 bg-emerald-600 text-white p-4 rounded-2xl font-black uppercase">Confirmar y Abrir Hoja</button>
+    <div id="fase2" class="hidden max-w-5xl mx-auto p-4 md:p-8">
+        <div class="bg-white p-8 rounded-[3rem] shadow-2xl border-t-8 border-red-600">
+            <div class="text-center mb-8">
+                <h2 class="font-black uppercase text-xl italic text-blue-900">Configurar Lineup Oficial</h2>
+                <p id="txtTeamSetup" class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">EQUIPO</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-slate-50 p-4 rounded-2xl border">
+                    <h3 class="text-[10px] font-black uppercase mb-4 text-slate-400">Roster Disponible</h3>
+                    <div id="poolPlayers" class="space-y-2 max-h-96 overflow-y-auto pr-2"></div>
+                </div>
+                <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
+                    <h3 class="text-[10px] font-black uppercase mb-4 text-blue-900">Orden al Bat & Posiciones</h3>
+                    <div id="confirmedLineup" class="space-y-2"></div>
+                    <button onclick="confirmTeamLineup()" class="w-full mt-6 bg-blue-900 text-white p-4 rounded-xl font-black uppercase shadow-lg">Confirmar Lineup</button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div id="scoreSheet" class="hidden flex flex-col gap-4 animate-fade-in">
-        
-        <header class="bg-slate-900 text-white p-4 rounded-2xl flex justify-between items-center shadow-lg">
+    <div id="fase3" class="hidden flex flex-col gap-4 p-2 md:p-6 animate-pop">
+        <header class="bg-blue-900 text-white p-4 rounded-[2rem] shadow-xl flex flex-wrap justify-between items-center gap-4">
             <div class="flex items-center gap-4">
-                <div class="field-box">
-                    <div id="f1" class="b-spot b1-spot"></div>
-                    <div id="f2" class="b-spot b2-spot"></div>
-                    <div id="f3" class="b-spot b3-spot"></div>
-                    <div id="fh" class="b-spot h-spot"></div>
+                <div class="stadium">
+                    <div id="f1" class="base-spot b-1"></div>
+                    <div id="f2" class="base-spot b-2"></div>
+                    <div id="f3" class="base-spot b-3"></div>
+                    <div id="fh" class="base-spot b-h"></div>
                 </div>
                 <div>
-                    <h1 id="headerTeams" class="font-black text-sm md:text-xl italic uppercase">-- VS --</h1>
+                    <h2 id="headerVs" class="font-black italic text-xl uppercase leading-none">--- VS ---</h2>
                     <div class="flex gap-4 mt-2">
-                        <span class="text-[10px] bg-red-600 px-2 py-0.5 rounded">OUTS: <span id="outText">0</span></span>
-                        <span class="text-[10px] bg-blue-600 px-2 py-0.5 rounded">SCORE: <span id="scoreText">0 - 0</span></span>
+                        <span class="text-[10px] bg-red-600 px-3 py-1 rounded-full font-black uppercase italic">OUTS: <span id="outCount">0</span></span>
+                        <span class="text-[10px] bg-white text-blue-900 px-3 py-1 rounded-full font-black uppercase italic">SCORE: <span id="txtScore">0 - 0</span></span>
                     </div>
                 </div>
             </div>
             <div class="flex flex-col gap-2">
-                <select id="switchBando" onchange="renderPaper()" class="bg-white text-black text-[10px] font-bold p-2 rounded-lg">
+                <select id="switchView" onchange="renderSheet()" class="bg-white/10 text-white text-[10px] font-black p-2 rounded-xl border border-white/20 outline-none">
                     <option value="local">VER LOCAL</option>
-                    <option value="visita">VER VISITA</option>
+                    <option value="visita">VER VISITANTE</option>
                 </select>
-                <button onclick="saveGame()" class="bg-emerald-500 text-white text-[10px] font-black p-2 rounded-lg">FINALIZAR JUEGO</button>
+                <button onclick="finalizarPartido()" class="bg-emerald-500 text-white text-[10px] font-black p-2 rounded-xl shadow-lg uppercase">Finalizar Juego</button>
             </div>
         </header>
 
-        <div class="score-paper overflow-x-auto p-4 rounded-xl">
-            <table class="w-full border-collapse">
-                <thead>
-                    <tr class="text-[10px] bg-slate-100 uppercase font-black">
-                        <th class="border border-slate-300 p-2 w-8">#</th>
-                        <th class="border border-slate-300 p-2 text-left w-40">NOMBRE JUGADOR</th>
-                        ${Array.from({length: 7}, (_, i) => `<th class="border border-slate-300 p-2 w-12">${i+1}</th>`).join('')}
-                        <th class="border border-slate-300 p-2 w-10 bg-blue-50">VB</th>
-                        <th class="border border-slate-300 p-2 w-10 bg-red-50">H</th>
-                    </tr>
-                </thead>
-                <tbody id="paperBody"></tbody>
-            </table>
+        <div class="bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-slate-200">
+            <div class="overflow-x-auto paper-bg">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 text-[10px] font-black uppercase text-slate-500 border-b">
+                            <th class="p-3 border-r w-10">ORD</th>
+                            <th class="p-3 border-r text-left w-52">JUGADOR / LINE UP</th>
+                            <th class="p-3 border-r w-12">POS</th>
+                            ${Array.from({length: 10}, (_, i) => `<th class="p-3 border-r w-12">${i+1}</th>`).join('')}
+                            <th class="p-3 bg-blue-50 w-12">VB</th>
+                            <th class="p-3 bg-red-50 w-12">H</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sheetBody" class="divide-y"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <div id="actionModal" class="hidden fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
-        <div class="bg-white p-6 rounded-3xl w-full max-w-sm text-center">
-            <h3 class="font-black uppercase italic text-sm mb-6">Anotar Jugada para: <span id="batterName" class="text-red-600">--</span></h3>
+    <div id="actionModal" class="hidden fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white p-8 rounded-[3rem] w-full max-w-sm shadow-2xl animate-pop border-t-[12px] border-blue-900">
+            <p id="batterTarget" class="text-center font-black uppercase italic text-blue-900 mb-6 text-lg">---</p>
             <div class="grid grid-cols-3 gap-3">
-                <button onclick="record('H')" class="bg-blue-600 text-white p-3 rounded-xl font-bold">H</button>
-                <button onclick="record('2B')" class="bg-blue-600 text-white p-3 rounded-xl font-bold">2B</button>
-                <button onclick="record('3B')" class="bg-blue-600 text-white p-3 rounded-xl font-bold">3B</button>
-                <button onclick="record('HR')" class="bg-red-600 text-white p-3 rounded-xl font-bold">HR</button>
-                <button onclick="record('BB')" class="bg-slate-700 text-white p-3 rounded-xl font-bold">BB</button>
-                <button onclick="record('K')" class="bg-black text-white p-3 rounded-xl font-bold">K</button>
-                <button onclick="record('OUT')" class="bg-slate-400 text-white p-3 rounded-xl font-bold">OUT</button>
-                <button onclick="record('E')" class="bg-orange-500 text-white p-3 rounded-xl font-bold">E</button>
-                <button onclick="record('FC')" class="bg-amber-600 text-white p-3 rounded-xl font-bold">FC</button>
+                <button onclick="record('H')" class="bg-blue-600 text-white p-4 rounded-2xl font-black text-xs">H</button>
+                <button onclick="record('2B')" class="bg-blue-700 text-white p-4 rounded-2xl font-black text-xs">2B</button>
+                <button onclick="record('3B')" class="bg-blue-800 text-white p-4 rounded-2xl font-black text-xs">3B</button>
+                <button onclick="record('HR')" class="bg-red-600 text-white p-4 rounded-2xl font-black text-xs col-span-1 shadow-lg shadow-red-200">HR</button>
+                <button onclick="record('BB')" class="bg-slate-700 text-white p-4 rounded-2xl font-black text-xs">BB</button>
+                <button onclick="record('K')" class="bg-black text-white p-4 rounded-2xl font-black text-xs">K</button>
+                <button onclick="record('OUT')" class="bg-slate-400 text-white p-4 rounded-2xl font-black text-xs">OUT</button>
+                <button onclick="record('E')" class="bg-orange-500 text-white p-4 rounded-2xl font-black text-xs">E</button>
+                <button onclick="record('FC')" class="bg-amber-600 text-white p-4 rounded-2xl font-black text-xs">FC</button>
             </div>
-            <button onclick="record('C')" class="w-full mt-4 bg-red-100 text-red-600 p-4 rounded-2xl font-black border-2 border-red-200">ANOTAR CARRERA (C)</button>
-            <button onclick="closeModal()" class="mt-4 text-[10px] font-bold text-slate-400 uppercase">Cancelar</button>
+            <button onclick="record('C')" class="w-full mt-4 bg-red-100 text-red-600 p-4 rounded-2xl font-black border-2 border-red-200">CARRERA (C)</button>
+            <button onclick="closeModal()" class="w-full mt-4 text-[10px] font-bold text-slate-300 uppercase italic">Cancelar</button>
         </div>
     </div>
 
     <script>
         const API = "https://ley57.onrender.com/api";
-        let activeMatch = null;
+        let match = null;
         let rosters = { local: [], visita: [] };
-        let sessionStats = {}; 
-        let currentBases = [false, false, false];
+        let lineups = { local: [], visita: [] };
+        let stats = {}; 
+        let bases = [false, false, false];
         let score = { L: 0, V: 0 };
         let outs = 0;
-        let selectedTarget = null; // {playerId, inning}
+        let selectedAction = null;
 
         // FASE 1
-        async function getGames() {
-            const liga = document.getElementById('liga').value;
+        async function fetchGames() {
+            const liga = document.getElementById('selLiga').value;
+            if(!liga) return;
             const res = await fetch(`${API}/games?liga=${liga}&status=pendiente`);
             const data = await res.json();
-            document.getElementById('juego').innerHTML = data.map(g => `<option value="${g._id}" data-loc="${g.local}" data-vis="${g.visita}">${g.local} VS ${g.visita}</option>`).join('');
+            document.getElementById('selJuego').innerHTML = data.map(g => `<option value="${g._id}" data-loc="${g.local}" data-vis="${g.visita}">${g.local} VS ${g.visita}</option>`).join('');
         }
 
-        async function loadRosters() {
-            const sel = document.getElementById('juego');
+        async function startSetup() {
+            const sel = document.getElementById('selJuego');
+            if(!sel.value) return;
             const opt = sel.options[sel.selectedIndex];
-            activeMatch = { id: sel.value, local: opt.getAttribute('data-loc'), visita: opt.getAttribute('data-vis') };
+            match = { id: sel.value, local: opt.getAttribute('data-loc'), visita: opt.getAttribute('data-vis') };
 
             const [rL, rV] = await Promise.all([
-                fetch(`${API}/players?equipo=${encodeURIComponent(activeMatch.local)}`),
-                fetch(`${API}/players?equipo=${encodeURIComponent(activeMatch.visita)}`)
+                fetch(`${API}/players?equipo=${encodeURIComponent(match.local)}`),
+                fetch(`${API}/players?equipo=${encodeURIComponent(match.visita)}`)
             ]);
-            rosters.local = await rL.json();
-            rosters.visita = await rV.json();
+            rosters.local = await rL.json(); rosters.visita = await rV.json();
 
-            // Abrir selector de lineup
-            document.getElementById('setup').classList.add('hidden');
-            document.getElementById('lineupPicker').classList.remove('hidden');
-            showChecklist('local');
+            document.getElementById('fase1').classList.add('hidden');
+            document.getElementById('fase2').classList.remove('hidden');
+            setupTeamLineup('local');
         }
 
-        function showChecklist(team) {
-            document.getElementById('teamNamePicker').innerText = activeMatch[team].toUpperCase();
-            const cont = document.getElementById('playerChecklist');
-            cont.innerHTML = rosters[team].map(p => `
-                <label class="flex items-center gap-2 p-3 bg-slate-50 rounded-xl cursor-pointer">
-                    <input type="checkbox" value="${p._id}" class="w-5 h-5 p-check" checked>
-                    <span class="text-[10px] font-bold uppercase">${p.nombre}</span>
-                </label>
+        // FASE 2
+        let currentSetupTeam = 'local';
+        let tempLineup = [];
+
+        function setupTeamLineup(team) {
+            currentSetupTeam = team;
+            tempLineup = [];
+            document.getElementById('txtTeamSetup').innerText = match[team].toUpperCase();
+            document.getElementById('poolPlayers').innerHTML = rosters[team].map(p => `
+                <button onclick="addToLineup('${p._id}', '${p.nombre}')" class="w-full text-left p-2 bg-white border rounded-xl font-bold uppercase text-[10px] hover:bg-blue-50 transition">+ ${p.nombre}</button>
+            `).join('');
+            updateSetupView();
+        }
+
+        function addToLineup(id, nombre) {
+            if(tempLineup.find(p => p._id === id)) return;
+            tempLineup.push({ _id: id, nombre, pos: '' });
+            updateSetupView();
+        }
+
+        function updateSetupView() {
+            document.getElementById('confirmedLineup').innerHTML = tempLineup.map((p, i) => `
+                <div class="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm border-l-4 border-blue-900">
+                    <span class="font-black text-blue-900 text-xs w-4">${i+1}</span>
+                    <span class="text-[10px] font-black uppercase flex-1">${p.nombre}</span>
+                    <input type="text" placeholder="POS" onchange="setPos('${p._id}', this.value)" class="w-10 border rounded text-[10px] text-center font-black" value="${p.pos}">
+                    <button onclick="removeFromLineup('${p._id}')" class="text-red-500 px-2">×</button>
+                </div>
             `).join('');
         }
 
-        let lineupLocal = []; let lineupVisita = [];
-        function confirmLineup() {
-            const checked = Array.from(document.querySelectorAll('.p-check:checked')).map(i => i.value);
-            const team = document.getElementById('teamNamePicker').innerText.toLowerCase() === activeMatch.local.toLowerCase() ? 'local' : 'visita';
-            
-            if(team === 'local') {
-                lineupLocal = rosters.local.filter(p => checked.includes(p._id));
-                showChecklist('visita');
-            } else {
-                lineupVisita = rosters.visita.filter(p => checked.includes(p._id));
-                [...lineupLocal, ...lineupVisita].forEach(p => sessionStats[p._id] = { ab: 0, h: 0, cels: Array(7).fill('') });
-                document.getElementById('lineupPicker').classList.add('hidden');
-                document.getElementById('scoreSheet').classList.remove('hidden');
-                document.getElementById('headerTeams').innerText = `${activeMatch.local} VS ${activeMatch.visita}`;
-                renderPaper();
+        function setPos(id, val) { const p = tempLineup.find(x => x._id === id); if(p) p.pos = val; }
+        function removeFromLineup(id) { tempLineup = tempLineup.filter(p => p._id !== id); updateSetupView(); }
+
+        function confirmTeamLineup() {
+            lineups[currentSetupTeam] = [...tempLineup];
+            if(currentSetupTeam === 'local') { setupTeamLineup('visita'); }
+            else {
+                [...lineups.local, ...lineups.visita].forEach(p => stats[p._id] = { ab: 0, h: 0, hr: 0, cels: Array(10).fill('') });
+                document.getElementById('fase2').classList.add('hidden');
+                document.getElementById('fase3').classList.remove('hidden');
+                document.getElementById('headerVs').innerText = `${match.local} VS ${match.visita}`;
+                renderSheet();
             }
         }
 
-        // FASE 3: DIBUJAR HOJA
-        function renderPaper() {
-            const bando = document.getElementById('switchBando').value;
-            const players = bando === 'local' ? lineupLocal : lineupVisita;
-            const body = document.getElementById('paperBody');
-
-            body.innerHTML = players.map((p, i) => `
-                <tr class="border-b">
-                    <td class="border border-slate-300 p-2 text-center text-slate-400 font-bold">${i+1}</td>
-                    <td class="border border-slate-300 p-2 font-black uppercase text-blue-900 text-[10px]">${p.nombre}</td>
-                    ${sessionStats[p._id].cels.map((content, inn) => `
-                        <td class="border border-slate-300 cell" onclick="openAction('${p._id}', ${inn}, '${p.nombre}')">
-                            <div class="diamond-cell ${content.includes('C') ? 'active' : ''}"></div>
+        // FASE 3
+        function renderSheet() {
+            const team = document.getElementById('switchView').value;
+            const players = lineups[team];
+            document.getElementById('sheetBody').innerHTML = players.map((p, i) => `
+                <tr class="text-[10px] border-b">
+                    <td class="p-3 border-r text-center font-black text-slate-400">${i+1}</td>
+                    <td class="p-3 border-r font-black uppercase text-blue-900 italic">${p.nombre}</td>
+                    <td class="p-3 border-r text-center font-black text-red-600">${p.pos || '--'}</td>
+                    ${stats[p._id].cels.map((content, inn) => `
+                        <td class="border-r cell-score" onclick="openAction('${p._id}', ${inn}, '${p.nombre}')">
+                            <div class="diamond-inner ${content.includes('C') ? 'run' : ''}"></div>
                             <span class="z-10 ${content.includes('C') ? 'text-white' : ''}">${content.replace('/C', '')}</span>
                         </td>
                     `).join('')}
-                    <td class="border border-slate-300 p-2 text-center bg-blue-50 font-black">${sessionStats[p._id].ab}</td>
-                    <td class="border border-slate-300 p-2 text-center bg-red-50 font-black">${sessionStats[p._id].h}</td>
+                    <td class="p-3 bg-blue-50 font-black text-center">${stats[p._id].ab}</td>
+                    <td class="p-3 bg-red-50 font-black text-center">${stats[p._id].h}</td>
                 </tr>
             `).join('');
         }
 
-        function openAction(pid, inn, name) {
-            selectedTarget = { pid, inn };
-            document.getElementById('batterName').innerText = name;
+        function openAction(pid, inn, nombre) {
+            selectedAction = { pid, inn };
+            document.getElementById('batterTarget').innerText = nombre;
             document.getElementById('actionModal').classList.remove('hidden');
         }
 
         function closeModal() { document.getElementById('actionModal').classList.add('hidden'); }
 
         function record(tipo) {
-            const { pid, inn } = selectedTarget;
-            
+            const { pid, inn } = selectedAction;
             if(tipo === 'C') {
-                sessionStats[pid].cels[inn] = sessionStats[pid].cels[inn] ? sessionStats[pid].cels[inn] + '/C' : 'C';
-                const bando = document.getElementById('switchBando').value;
-                if(bando === 'local') score.L++; else score.V++;
+                stats[pid].cels[inn] = stats[pid].cels[inn] ? stats[pid].cels[inn] + '/C' : 'C';
+                const team = document.getElementById('switchView').value;
+                if(team === 'local') score.L++; else score.V++;
             } else {
-                sessionStats[pid].cels[inn] = tipo;
+                stats[pid].cels[inn] = tipo;
                 if(['H','2B','3B','HR'].includes(tipo)) {
-                    sessionStats[pid].ab++; sessionStats[pid].h++;
-                    advance(tipo);
-                } else if (['OUT','K'].includes(tipo)) {
-                    sessionStats[pid].ab++; outs++;
-                } else {
-                    advance('H');
-                }
+                    stats[pid].ab++; stats[pid].h++;
+                    if(tipo === 'HR') stats[pid].hr++;
+                    moverBases(tipo);
+                } else if(['OUT','K'].includes(tipo)) {
+                    stats[pid].ab++; outs++;
+                } else { moverBases('H'); }
             }
 
-            if(outs >= 3) { alert("¡Cambio de Inning!"); outs = 0; currentBases = [false,false,false]; }
-            
-            updateUI();
-            closeModal();
-            renderPaper();
+            if(outs >= 3) { alert("¡Cambio de Inning!"); outs = 0; bases = [false, false, false]; }
+            updateUI(); closeModal(); renderSheet();
         }
 
-        function advance(tipo) {
+        function moverBases(tipo) {
             if(tipo === 'H') {
-                if(currentBases[2]) currentBases[2] = false;
-                if(currentBases[1]) { currentBases[2] = true; currentBases[1] = false; }
-                if(currentBases[0]) currentBases[1] = true;
-                currentBases[0] = true;
+                if(bases[2]) runScored();
+                if(bases[1]) bases[2] = true;
+                if(bases[0]) bases[1] = true;
+                bases[0] = true;
+            } else if (tipo === '2B') {
+                if(bases[2]) runScored();
+                if(bases[1]) runScored();
+                bases[2] = bases[0]; bases[1] = true; bases[0] = false;
+            } else if (tipo === '3B') {
+                bases.forEach(b => { if(b) runScored(); });
+                bases = [false, false, true];
             } else if (tipo === 'HR') {
-                currentBases = [false,false,false];
+                let r = 1; bases.forEach(b => { if(b) r++; });
+                for(let i=0; i<r; i++) runScored();
+                bases = [false, false, false];
             }
             updateUI();
+        }
+
+        function runScored() {
+            const team = document.getElementById('switchView').value;
+            if(team === 'local') score.L++; else score.V++;
+            document.getElementById('fh').classList.add('bg-yellow-400');
+            setTimeout(() => document.getElementById('fh').classList.remove('bg-yellow-400'), 500);
         }
 
         function updateUI() {
-            document.getElementById('outText').innerText = outs;
-            document.getElementById('scoreText').innerText = `${score.L} - ${score.V}`;
+            document.getElementById('outCount').innerText = outs;
+            document.getElementById('txtScore').innerText = `${score.L} - ${score.V}`;
             for(let i=0; i<3; i++) {
-                document.getElementById(`f${i+1}`).className = currentBases[i] ? `b-spot b${i+1}-spot occupied` : `b-spot b${i+1}-spot`;
+                document.getElementById(`f${i+1}`).className = bases[i] ? `base-spot b-${i+1} on` : `base-spot b-${i+1}`;
             }
         }
 
-        async function saveGame() {
-            if(!confirm("¿Guardar estadísticas finales?")) return;
-            for(let pid in sessionStats) {
-                const s = sessionStats[pid];
+        async function finalizarPartido() {
+            if(!confirm("¿Deseas cerrar el encuentro y actualizar estadísticas?")) return;
+            for(let id in stats) {
+                const s = stats[id];
                 if(s.ab > 0) {
-                    const p = await (await fetch(`${API}/players/${pid}`)).json();
-                    await fetch(`${API}/players/${pid}`, {
+                    const p = await (await fetch(`${API}/players/${id}`)).json();
+                    const newVB = (p.vb || 0) + s.ab, newH = (p.h || 0) + s.h;
+                    await fetch(`${API}/players/${id}`, {
                         method: 'PUT',
                         headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ jj: (p.jj || 0)+1, vb: (p.vb || 0)+s.ab, h: (p.h || 0)+s.h, avg: (p.h+s.h)/(p.vb+s.ab) || 0 })
+                        body: JSON.stringify({ jj: (p.jj || 0)+1, vb: newVB, h: newH, hr: (p.hr || 0)+s.hr, avg: newVB > 0 ? newH/newVB : 0 })
                     });
                 }
             }
             await fetch(`${API}/games/resultado`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ id: activeMatch.id, sL: score.L, sV: score.V, ganador: score.L>score.V?activeMatch.local:activeMatch.visita, perdedor: score.L>score.V?activeMatch.visita:activeMatch.local, status: "finalizado" })
+                body: JSON.stringify({ id: match.id, sL: score.L, sV: score.V, ganador: score.L>score.V?match.local:match.visita, perdedor: score.L>score.V?match.visita:match.local, status: "finalizado" })
             });
-            alert("Juego Guardado."); location.reload();
+            alert("Juego Guardado Correctamente."); location.reload();
         }
     </script>
 </body>
