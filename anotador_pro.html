@@ -2,388 +2,277 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Anotador Profesional K-21 - Ley 57</title>
+    <title>Hoja de Anotación K-21 Profesional</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .score-cell { width: 50px; height: 50px; border: 1px solid #cbd5e1; position: relative; font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center; }
-        .text-negro { color: #000; }
-        .text-rojo { color: #ef4444; }
-        .diamond-mini { width: 22px; height: 22px; border: 1px solid #e2e8f0; transform: rotate(45deg); position: absolute; z-index: 0; }
-        .field { position: relative; width: 200px; height: 200px; background: #15803d; border: 4px solid #064e3b; transform: rotate(45deg); margin: 40px auto; border-radius: 8px; }
-        .base { position: absolute; width: 24px; height: 24px; background: #fff; border: 2px solid #333; transform: rotate(-45deg); transition: 0.3s; z-index: 10; }
-        .base.on { background: #ef4444; box-shadow: 0 0 12px #ef4444; }
-        .b-home { bottom: -12px; right: -12px; clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
-        .b-1 { top: -12px; right: -12px; }
-        .b-2 { top: -12px; left: -12px; }
-        .b-3 { bottom: -12px; left: -12px; }
-        .bg-scorecard { background-color: #f8fafc; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 20px 20px; }
+        /* Estilo de Hoja de Papel */
+        .score-paper { background-color: #fff; border: 2px solid #333; box-shadow: 10px 10px 0px #cbd5e1; }
+        .cell { width: 45px; height: 45px; border: 0.5px solid #94a3b8; position: relative; font-size: 10px; font-weight: 900; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .cell:hover { background-color: #f1f5f9; }
+        .diamond-cell { width: 18px; height: 18px; border: 1px solid #ddd; transform: rotate(45deg); position: absolute; }
+        .diamond-cell.active { background: #ef4444; border-color: #b91c1c; }
+        
+        /* Diamante de Seguimiento Superior */
+        .field-box { position: relative; width: 120px; height: 120px; background: #166534; transform: rotate(45deg); margin: 20px auto; border: 3px solid #052e16; }
+        .b-spot { position: absolute; width: 15px; height: 15px; background: #fff; border: 2px solid #333; transform: rotate(-45deg); }
+        .b-spot.occupied { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+        .h-spot { bottom: -8px; right: -8px; border-radius: 0 0 50% 0; }
+        .b1-spot { top: -8px; right: -8px; }
+        .b2-spot { top: -8px; left: -8px; }
+        .b3-spot { bottom: -8px; left: -8px; }
+
+        .hidden { display: none; }
+        .text-red { color: #ef4444; }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-900 font-sans min-h-screen">
+<body class="bg-slate-200 p-2 md:p-6 font-mono">
 
-    <div id="faseSetup" class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-lg border-t-[12px] border-blue-900">
-            <div class="text-center mb-8">
-                <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fa fa-baseball-ball text-3xl text-blue-900"></i>
-                </div>
-                <h1 class="font-black italic uppercase text-2xl tracking-tighter">Sistema de Anotación</h1>
-                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">Configuración de Encuentro</p>
-            </div>
-
-            <div class="space-y-5">
-                <div>
-                    <label class="block text-[11px] font-black uppercase mb-2 ml-1 text-slate-600">Seleccionar Liga</label>
-                    <select id="setupLiga" onchange="cargarJuegosPorLiga()" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold outline-none focus:border-blue-900 transition-all">
-                        <option value="">-- ELIGE UNA LIGA --</option>
-                        <option value="femenil">LEY 57 (FEMENIL)</option>
-                        <option value="varonil">ALV SPORT (VARONIL)</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-[11px] font-black uppercase mb-2 ml-1 text-slate-600">Juego Programado</label>
-                    <select id="setupJuego" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold outline-none focus:border-blue-900 transition-all">
-                        <option value="">Esperando liga...</option>
-                    </select>
-                </div>
-                <button onclick="comenzarJuego()" class="w-full bg-blue-900 text-white font-black py-5 rounded-2xl uppercase italic tracking-widest shadow-xl hover:bg-red-600 transition-all transform hover:-translate-y-1">
-                    Abrir Hoja de Anotación Digital
-                </button>
-            </div>
+    <div id="setup" class="max-w-md mx-auto bg-white p-8 rounded-3xl shadow-2xl border-t-8 border-blue-900">
+        <h2 class="font-black italic text-xl uppercase mb-6 text-center">Configurar Scorecard</h2>
+        <div class="space-y-4">
+            <select id="liga" onchange="getGames()" class="w-full p-4 bg-slate-100 rounded-2xl font-bold uppercase">
+                <option value="">-- LIGA --</option>
+                <option value="femenil">FEMENIL</option>
+                <option value="varonil">VARONIL</option>
+            </select>
+            <select id="juego" class="w-full p-4 bg-slate-100 rounded-2xl font-bold uppercase">
+                <option value="">-- JUEGO --</option>
+            </select>
+            <button onclick="loadRosters()" class="w-full bg-blue-900 text-white p-4 rounded-2xl font-black uppercase italic">Seleccionar Jugadoras</button>
         </div>
     </div>
 
-    <div id="faseAnotacion" class="hidden animate-fade-in pb-10">
-        <header class="bg-blue-900 text-white p-4 sticky top-0 z-50 shadow-2xl flex flex-wrap justify-between items-center gap-4 border-b-4 border-red-600">
-            <div class="flex items-center gap-5">
-                <button onclick="location.reload()" class="bg-white/10 p-3 rounded-xl hover:bg-red-600 transition-colors"><i class="fa fa-home"></i></button>
-                <div>
-                    <h2 id="txtVersus" class="font-black italic uppercase text-xl leading-none tracking-tight text-white">--- VS ---</h2>
-                    <p id="txtMeta" class="text-[10px] font-bold text-blue-300 uppercase mt-1 tracking-widest italic"></p>
-                </div>
-            </div>
+    <div id="lineupPicker" class="hidden max-w-4xl mx-auto bg-white p-8 rounded-3xl shadow-2xl">
+        <h2 class="font-black text-center uppercase italic border-b pb-4 mb-4">Seleccionar Lineup para: <span id="teamNamePicker" class="text-blue-900">--</span></h2>
+        <div id="playerChecklist" class="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-96 overflow-y-auto p-2"></div>
+        <div class="mt-6 flex gap-4">
+            <button onclick="confirmLineup()" class="flex-1 bg-emerald-600 text-white p-4 rounded-2xl font-black uppercase">Confirmar y Abrir Hoja</button>
+        </div>
+    </div>
 
-            <div class="flex gap-6 items-center bg-black/30 p-3 rounded-2xl border border-white/10 shadow-inner">
-                <div class="text-center px-2">
-                    <p class="text-[9px] font-black text-slate-400 mb-1">OUTS</p>
-                    <div id="ctrlOuts" class="flex gap-2">
-                        <div class="w-4 h-4 rounded-full bg-slate-700 border border-white/10"></div>
-                        <div class="w-4 h-4 rounded-full bg-slate-700 border border-white/10"></div>
+    <div id="scoreSheet" class="hidden flex flex-col gap-4 animate-fade-in">
+        
+        <header class="bg-slate-900 text-white p-4 rounded-2xl flex justify-between items-center shadow-lg">
+            <div class="flex items-center gap-4">
+                <div class="field-box">
+                    <div id="f1" class="b-spot b1-spot"></div>
+                    <div id="f2" class="b-spot b2-spot"></div>
+                    <div id="f3" class="b-spot b3-spot"></div>
+                    <div id="fh" class="b-spot h-spot"></div>
+                </div>
+                <div>
+                    <h1 id="headerTeams" class="font-black text-sm md:text-xl italic uppercase">-- VS --</h1>
+                    <div class="flex gap-4 mt-2">
+                        <span class="text-[10px] bg-red-600 px-2 py-0.5 rounded">OUTS: <span id="outText">0</span></span>
+                        <span class="text-[10px] bg-blue-600 px-2 py-0.5 rounded">SCORE: <span id="scoreText">0 - 0</span></span>
                     </div>
                 </div>
-                <div class="text-center border-l border-white/20 pl-6">
-                    <p class="text-[9px] font-black text-slate-400 mb-1 uppercase tracking-tighter">Puntaje</p>
-                    <p id="txtScore" class="font-black text-3xl italic text-white leading-none">0 - 0</p>
-                </div>
+            </div>
+            <div class="flex flex-col gap-2">
+                <select id="switchBando" onchange="renderPaper()" class="bg-white text-black text-[10px] font-bold p-2 rounded-lg">
+                    <option value="local">VER LOCAL</option>
+                    <option value="visita">VER VISITA</option>
+                </select>
+                <button onclick="saveGame()" class="bg-emerald-500 text-white text-[10px] font-black p-2 rounded-lg">FINALIZAR JUEGO</button>
             </div>
         </header>
 
-        <div class="max-w-[1600px] mx-auto p-4 grid grid-cols-1 xl:grid-cols-12 gap-6 mt-4">
-            
-            <aside class="xl:col-span-3 space-y-4">
-                <div class="bg-white rounded-[2.5rem] p-6 shadow-lg border border-slate-200">
-                    <div class="field">
-                        <div id="field-1" class="base b-1" title="1ra Base"></div>
-                        <div id="field-2" class="base b-2" title="2da Base"></div>
-                        <div id="field-3" class="base b-3" title="3ra Base"></div>
-                        <div id="field-h" class="base b-home" title="Home"></div>
-                    </div>
-                    <div class="text-center mt-6 p-4 bg-slate-50 rounded-2xl border-2 border-dashed">
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Al Bat:</p>
-                        <p id="nombreAlBat" class="text-lg font-black text-blue-900 uppercase italic">-- SELECCIONE --</p>
-                    </div>
-                </div>
+        <div class="score-paper overflow-x-auto p-4 rounded-xl">
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr class="text-[10px] bg-slate-100 uppercase font-black">
+                        <th class="border border-slate-300 p-2 w-8">#</th>
+                        <th class="border border-slate-300 p-2 text-left w-40">NOMBRE JUGADOR</th>
+                        ${Array.from({length: 7}, (_, i) => `<th class="border border-slate-300 p-2 w-12">${i+1}</th>`).join('')}
+                        <th class="border border-slate-300 p-2 w-10 bg-blue-50">VB</th>
+                        <th class="border border-slate-300 p-2 w-10 bg-red-50">H</th>
+                    </tr>
+                </thead>
+                <tbody id="paperBody"></tbody>
+            </table>
+        </div>
+    </div>
 
-                <div class="bg-white rounded-[2.5rem] p-5 shadow-lg border border-slate-200">
-                    <h4 class="text-[10px] font-black text-slate-400 uppercase mb-4 text-center tracking-widest">Registrar Acción</h4>
-                    <div class="grid grid-cols-3 gap-2">
-                        <button onclick="anotarAccion('H', 'negro', true)" class="bg-blue-600 text-white p-3 rounded-xl font-black text-[10px] hover:scale-105 transition shadow-sm">H (HIT)</button>
-                        <button onclick="anotarAccion('2B', 'negro', true)" class="bg-blue-700 text-white p-3 rounded-xl font-black text-[10px] hover:scale-105 transition shadow-sm">2B</button>
-                        <button onclick="anotarAccion('3B', 'negro', true)" class="bg-blue-800 text-white p-3 rounded-xl font-black text-[10px] hover:scale-105 transition shadow-sm">3B</button>
-                        <button onclick="anotarAccion('HR', 'negro', true)" class="bg-red-600 text-white p-3 rounded-xl font-black text-[10px] hover:scale-105 transition shadow-sm col-span-1">HR</button>
-                        
-                        <button onclick="anotarAccion('E', 'negro', false)" class="bg-orange-500 text-white p-3 rounded-xl font-black text-[10px] hover:scale-105 transition shadow-sm">E (ERROR)</button>
-                        <button onclick="anotarAccion('K', 'negro', false, true)" class="bg-black text-white p-3 rounded-xl font-black text-[10px] hover:scale-105 transition shadow-sm">K (PUNCHE)</button>
-                        <button onclick="anotarAccion('BR', 'negro', false)" class="bg-slate-700 text-white p-3 rounded-xl font-black text-[10px] hover:scale-105 transition shadow-sm">BR (ROBO)</button>
-                        <button onclick="anotarAccion('SH', 'negro', false)" class="bg-emerald-600 text-white p-3 rounded-xl font-black text-[10px] hover:scale-105 transition shadow-sm">SH (SAC)</button>
-                        <button onclick="anotarAccion('SF', 'negro', false)" class="bg-emerald-700 text-white p-3 rounded-xl font-black text-[10px] hover:scale-105 transition shadow-sm">SF (FLY)</button>
-                        <button onclick="anotarAccion('WP', 'negro', false)" class="bg-amber-600 text-white p-3 rounded-xl font-black text-[10px] hover:scale-105 transition shadow-sm">WP (WILD)</button>
-                        <button onclick="anotarAccion('FC', 'negro', false)" class="bg-slate-500 text-white p-3 rounded-xl font-black text-[10px] hover:scale-105 transition shadow-sm">FC (Ocup)</button>
-                        
-                        <button onclick="anotarAccion('OUT', 'negro', false, true)" class="col-span-2 bg-slate-300 text-slate-700 p-3 rounded-xl font-black text-[10px] uppercase italic hover:bg-slate-400">Out de Campo</button>
-                    </div>
-                    
-                    <button onclick="anotarCarreraManual()" class="w-full mt-4 bg-red-100 text-red-600 p-4 rounded-2xl font-black text-xs uppercase border-2 border-red-200 flex items-center justify-center gap-2 hover:bg-red-600 hover:text-white transition-all">
-                        <i class="fa fa-plus-circle"></i> ANOTAR CARRERA (C)
-                    </button>
-                </div>
-            </aside>
-
-            <div class="xl:col-span-9 space-y-4">
-                <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-200 overflow-hidden">
-                    <div class="p-5 bg-slate-900 text-white flex justify-between items-center">
-                        <div class="flex items-center gap-3">
-                            <i class="fa fa-file-signature text-blue-400"></i>
-                            <h3 class="text-[11px] font-black uppercase tracking-[0.2em] italic">Softball Scorecard Digital K-21</h3>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <span class="text-[9px] font-bold text-slate-400 uppercase">Viendo Roster:</span>
-                            <select id="switchTeam" onchange="actualizarTablaUI()" class="bg-white/10 text-white text-[10px] font-black p-2 rounded-xl border border-white/20 outline-none">
-                                <option value="local">EQUIPO LOCAL</option>
-                                <option value="visita">EQUIPO VISITANTE</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="overflow-x-auto bg-scorecard p-4">
-                        <table class="w-full border-collapse bg-white shadow-sm rounded-xl overflow-hidden">
-                            <thead>
-                                <tr class="bg-slate-100 text-slate-500 text-[10px] font-black uppercase border-b">
-                                    <th class="p-3 border-r w-10">ORD</th>
-                                    <th class="p-3 border-r text-left w-60">JUGADOR (LINE UP)</th>
-                                    <th class="p-3 border-r w-12">POS</th>
-                                    ${Array.from({length: 7}, (_, i) => `<th class="p-3 border-r w-12">${i+1}</th>`).join('')}
-                                    <th class="p-3 bg-blue-50 w-12">VB</th>
-                                    <th class="p-3 bg-red-50 w-12">H</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tablaCuerpo">
-                                </tbody>
-                        </table>
-                    </div>
-
-                    <div class="p-6 bg-slate-50 border-t flex flex-wrap gap-4 items-center justify-between">
-                        <div class="text-[10px] font-bold text-slate-400 max-w-xs">
-                            <i class="fa fa-info-circle mr-1"></i> Al finalizar, las estadísticas se sumarán automáticamente a los perfiles de los jugadores en la liga correspondiente.
-                        </div>
-                        <button onclick="finalizarPartido()" class="bg-blue-900 text-white px-10 py-5 rounded-2xl font-black uppercase italic tracking-widest shadow-2xl hover:bg-black transition-all">
-                            Finalizar Juego y Guardar Datos
-                        </button>
-                    </div>
-                </div>
+    <div id="actionModal" class="hidden fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
+        <div class="bg-white p-6 rounded-3xl w-full max-w-sm text-center">
+            <h3 class="font-black uppercase italic text-sm mb-6">Anotar Jugada para: <span id="batterName" class="text-red-600">--</span></h3>
+            <div class="grid grid-cols-3 gap-3">
+                <button onclick="record('H')" class="bg-blue-600 text-white p-3 rounded-xl font-bold">H</button>
+                <button onclick="record('2B')" class="bg-blue-600 text-white p-3 rounded-xl font-bold">2B</button>
+                <button onclick="record('3B')" class="bg-blue-600 text-white p-3 rounded-xl font-bold">3B</button>
+                <button onclick="record('HR')" class="bg-red-600 text-white p-3 rounded-xl font-bold">HR</button>
+                <button onclick="record('BB')" class="bg-slate-700 text-white p-3 rounded-xl font-bold">BB</button>
+                <button onclick="record('K')" class="bg-black text-white p-3 rounded-xl font-bold">K</button>
+                <button onclick="record('OUT')" class="bg-slate-400 text-white p-3 rounded-xl font-bold">OUT</button>
+                <button onclick="record('E')" class="bg-orange-500 text-white p-3 rounded-xl font-bold">E</button>
+                <button onclick="record('FC')" class="bg-amber-600 text-white p-3 rounded-xl font-bold">FC</button>
             </div>
+            <button onclick="record('C')" class="w-full mt-4 bg-red-100 text-red-600 p-4 rounded-2xl font-black border-2 border-red-200">ANOTAR CARRERA (C)</button>
+            <button onclick="closeModal()" class="mt-4 text-[10px] font-bold text-slate-400 uppercase">Cancelar</button>
         </div>
     </div>
 
     <script>
-        const API_URL = "https://ley57.onrender.com/api";
-        let matchData = null;
+        const API = "https://ley57.onrender.com/api";
+        let activeMatch = null;
         let rosters = { local: [], visita: [] };
-        let currentStats = {}; // { playerId: { ab, h, hr, runs, cels: [] } }
-        let currentInning = 1;
-        let outsCount = 0;
-        let scoreBoard = { L: 0, V: 0 };
-        let activeBases = [false, false, false];
-        let selectedPlayerId = null;
+        let sessionStats = {}; 
+        let currentBases = [false, false, false];
+        let score = { L: 0, V: 0 };
+        let outs = 0;
+        let selectedTarget = null; // {playerId, inning}
 
-        // --- INICIO Y FILTROS ---
-        async function cargarJuegosPorLiga() {
-            const liga = document.getElementById('setupLiga').value;
-            const sel = document.getElementById('setupJuego');
-            if(!liga) return;
-            
-            sel.innerHTML = '<option>Cargando encuentros...</option>';
-            try {
-                const res = await fetch(`${API_URL}/games?liga=${liga}&status=pendiente`);
-                const games = await res.json();
-                sel.innerHTML = games.map(g => `<option value="${g._id}" data-loc="${g.local}" data-vis="${g.visita}">${g.local} VS ${g.visita} (${g.fecha || 'Sin fecha'})</option>`).join('');
-            } catch (e) { alert("Error conectando al servidor"); }
+        // FASE 1
+        async function getGames() {
+            const liga = document.getElementById('liga').value;
+            const res = await fetch(`${API}/games?liga=${liga}&status=pendiente`);
+            const data = await res.json();
+            document.getElementById('juego').innerHTML = data.map(g => `<option value="${g._id}" data-loc="${g.local}" data-vis="${g.visita}">${g.local} VS ${g.visita}</option>`).join('');
         }
 
-        async function comenzarJuego() {
-            const sel = document.getElementById('setupJuego');
-            if(!sel.value) return alert("Selecciona un juego programado");
-
+        async function loadRosters() {
+            const sel = document.getElementById('juego');
             const opt = sel.options[sel.selectedIndex];
-            matchData = {
-                id: sel.value,
-                local: opt.getAttribute('data-loc'),
-                visita: opt.getAttribute('data-vis'),
-                liga: document.getElementById('setupLiga').value
-            };
+            activeMatch = { id: sel.value, local: opt.getAttribute('data-loc'), visita: opt.getAttribute('data-vis') };
 
-            // Cargar rosters
             const [rL, rV] = await Promise.all([
-                fetch(`${API_URL}/players?equipo=${encodeURIComponent(matchData.local)}`),
-                fetch(`${API_URL}/players?equipo=${encodeURIComponent(matchData.visita)}`)
+                fetch(`${API}/players?equipo=${encodeURIComponent(activeMatch.local)}`),
+                fetch(`${API}/players?equipo=${encodeURIComponent(activeMatch.visita)}`)
             ]);
-
             rosters.local = await rL.json();
             rosters.visita = await rV.json();
 
-            // Inicializar stats de sesión
-            [...rosters.local, ...rosters.visita].forEach(p => {
-                currentStats[p._id] = { ab: 0, h: 0, hr: 0, r: 0, cels: Array(7).fill('') };
-            });
-
-            // Configurar UI
-            document.getElementById('txtVersus').innerText = `${matchData.local} vs ${matchData.visita}`;
-            document.getElementById('txtMeta').innerText = `LIGA: ${matchData.liga.toUpperCase()} | ANOTADOR OFICIAL K-21`;
-            document.getElementById('faseSetup').classList.add('hidden');
-            document.getElementById('faseAnotacion').classList.remove('hidden');
-
-            actualizarTablaUI();
+            // Abrir selector de lineup
+            document.getElementById('setup').classList.add('hidden');
+            document.getElementById('lineupPicker').classList.remove('hidden');
+            showChecklist('local');
         }
 
-        // --- LÓGICA DE TABLA ---
-        function actualizarTablaUI() {
-            const team = document.getElementById('switchTeam').value;
-            const list = rosters[team];
-            const tbody = document.getElementById('tablaCuerpo');
+        function showChecklist(team) {
+            document.getElementById('teamNamePicker').innerText = activeMatch[team].toUpperCase();
+            const cont = document.getElementById('playerChecklist');
+            cont.innerHTML = rosters[team].map(p => `
+                <label class="flex items-center gap-2 p-3 bg-slate-50 rounded-xl cursor-pointer">
+                    <input type="checkbox" value="${p._id}" class="w-5 h-5 p-check" checked>
+                    <span class="text-[10px] font-bold uppercase">${p.nombre}</span>
+                </label>
+            `).join('');
+        }
 
-            tbody.innerHTML = list.map((p, index) => `
-                <tr class="border-b hover:bg-blue-50 cursor-pointer transition-colors" onclick="selectPlayer('${p._id}', '${p.nombre}')">
-                    <td class="p-3 border-r text-center font-black text-slate-400 text-xs">${index + 1}</td>
-                    <td class="p-3 border-r font-black uppercase text-blue-900 text-xs">${p.nombre}</td>
-                    <td class="p-3 border-r text-center"><input class="w-8 text-center text-[10px] font-bold border-b outline-none bg-transparent" value="--"></td>
-                    ${currentStats[p._id].cels.map((content, i) => `
-                        <td class="border-r score-cell p-0">
-                            <div class="diamond-mini"></div>
-                            <span class="${content.includes('C') ? 'text-rojo' : 'text-negro'} z-10">${content}</span>
+        let lineupLocal = []; let lineupVisita = [];
+        function confirmLineup() {
+            const checked = Array.from(document.querySelectorAll('.p-check:checked')).map(i => i.value);
+            const team = document.getElementById('teamNamePicker').innerText.toLowerCase() === activeMatch.local.toLowerCase() ? 'local' : 'visita';
+            
+            if(team === 'local') {
+                lineupLocal = rosters.local.filter(p => checked.includes(p._id));
+                showChecklist('visita');
+            } else {
+                lineupVisita = rosters.visita.filter(p => checked.includes(p._id));
+                [...lineupLocal, ...lineupVisita].forEach(p => sessionStats[p._id] = { ab: 0, h: 0, cels: Array(7).fill('') });
+                document.getElementById('lineupPicker').classList.add('hidden');
+                document.getElementById('scoreSheet').classList.remove('hidden');
+                document.getElementById('headerTeams').innerText = `${activeMatch.local} VS ${activeMatch.visita}`;
+                renderPaper();
+            }
+        }
+
+        // FASE 3: DIBUJAR HOJA
+        function renderPaper() {
+            const bando = document.getElementById('switchBando').value;
+            const players = bando === 'local' ? lineupLocal : lineupVisita;
+            const body = document.getElementById('paperBody');
+
+            body.innerHTML = players.map((p, i) => `
+                <tr class="border-b">
+                    <td class="border border-slate-300 p-2 text-center text-slate-400 font-bold">${i+1}</td>
+                    <td class="border border-slate-300 p-2 font-black uppercase text-blue-900 text-[10px]">${p.nombre}</td>
+                    ${sessionStats[p._id].cels.map((content, inn) => `
+                        <td class="border border-slate-300 cell" onclick="openAction('${p._id}', ${inn}, '${p.nombre}')">
+                            <div class="diamond-cell ${content.includes('C') ? 'active' : ''}"></div>
+                            <span class="z-10 ${content.includes('C') ? 'text-white' : ''}">${content.replace('/C', '')}</span>
                         </td>
                     `).join('')}
-                    <td class="p-3 bg-blue-50 font-black text-center text-xs">${currentStats[p._id].ab}</td>
-                    <td class="p-3 bg-red-50 font-black text-center text-xs">${currentStats[p._id].h}</td>
+                    <td class="border border-slate-300 p-2 text-center bg-blue-50 font-black">${sessionStats[p._id].ab}</td>
+                    <td class="border border-slate-300 p-2 text-center bg-red-50 font-black">${sessionStats[p._id].h}</td>
                 </tr>
             `).join('');
         }
 
-        function selectPlayer(id, nombre) {
-            selectedPlayerId = id;
-            document.getElementById('nombreAlBat').innerText = nombre;
-            // Resaltar visualmente podría ir aquí
+        function openAction(pid, inn, name) {
+            selectedTarget = { pid, inn };
+            document.getElementById('batterName').innerText = name;
+            document.getElementById('actionModal').classList.remove('hidden');
         }
 
-        // --- REGISTRO DE ACCIONES ---
-        function anotarAccion(sigla, color, esHit, esOut = false) {
-            if(!selectedPlayerId) return alert("Primero haz clic en un jugador de la tabla.");
+        function closeModal() { document.getElementById('actionModal').classList.add('hidden'); }
 
-            // 1. Guardar en la celda del inning actual
-            const currentCels = currentStats[selectedPlayerId].cels;
-            currentCels[currentInning - 1] = sigla;
-
-            // 2. Lógica de estadísticas
-            if(esHit || esOut || ['E','FC','SF','SH'].includes(sigla)) {
-                currentStats[selectedPlayerId].ab++;
-            }
-            if(esHit) {
-                currentStats[selectedPlayerId].h++;
-                moverBases(sigla);
-                if(sigla === 'HR') {
-                    currentStats[selectedPlayerId].hr++;
-                    anotarCarrera('C'); 
-                }
-            }
-            if(esOut) {
-                outsCount++;
-                if(outsCount >= 3) {
-                    alert("¡3 OUTS! Cambio de Inning.");
-                    outsCount = 0;
-                    activeBases = [false, false, false];
-                    currentInning = Math.min(currentInning + 1, 7);
+        function record(tipo) {
+            const { pid, inn } = selectedTarget;
+            
+            if(tipo === 'C') {
+                sessionStats[pid].cels[inn] = sessionStats[pid].cels[inn] ? sessionStats[pid].cels[inn] + '/C' : 'C';
+                const bando = document.getElementById('switchBando').value;
+                if(bando === 'local') score.L++; else score.V++;
+            } else {
+                sessionStats[pid].cels[inn] = tipo;
+                if(['H','2B','3B','HR'].includes(tipo)) {
+                    sessionStats[pid].ab++; sessionStats[pid].h++;
+                    advance(tipo);
+                } else if (['OUT','K'].includes(tipo)) {
+                    sessionStats[pid].ab++; outs++;
+                } else {
+                    advance('H');
                 }
             }
 
-            actualizarUIStats();
+            if(outs >= 3) { alert("¡Cambio de Inning!"); outs = 0; currentBases = [false,false,false]; }
+            
+            updateUI();
+            closeModal();
+            renderPaper();
         }
 
-        function anotarCarreraManual() {
-            if(!selectedPlayerId) return;
-            const current = currentStats[selectedPlayerId].cels[currentInning-1];
-            currentStats[selectedPlayerId].cels[currentInning-1] = current ? `${current}/C` : 'C';
-            anotarCarrera();
-            actualizarUIStats();
-        }
-
-        function moverBases(tipo) {
-            if(tipo === 'H' || tipo === '1B') {
-                if(activeBases[2]) { anotarCarrera(); activeBases[2] = false; }
-                if(activeBases[1]) { activeBases[2] = true; activeBases[1] = false; }
-                if(activeBases[0]) { activeBases[1] = true; }
-                activeBases[0] = true;
-            } else if (tipo === '2B') {
-                if(activeBases[2]) { anotarCarrera(); activeBases[2] = false; }
-                if(activeBases[1]) { anotarCarrera(); activeBases[1] = false; }
-                if(activeBases[0]) { activeBases[2] = true; activeBases[0] = false; }
-                activeBases[1] = true;
-            } else if (tipo === '3B') {
-                activeBases.forEach(b => { if(b) anotarCarrera(); });
-                activeBases = [false, false, true];
+        function advance(tipo) {
+            if(tipo === 'H') {
+                if(currentBases[2]) currentBases[2] = false;
+                if(currentBases[1]) { currentBases[2] = true; currentBases[1] = false; }
+                if(currentBases[0]) currentBases[1] = true;
+                currentBases[0] = true;
             } else if (tipo === 'HR') {
-                let runs = 1;
-                activeBases.forEach(b => { if(b) runs++; });
-                for(let i=0; i<runs; i++) anotarCarrera();
-                activeBases = [false, false, false];
+                currentBases = [false,false,false];
             }
-            actualizarDiamante();
+            updateUI();
         }
 
-        function anotarCarrera() {
-            const team = document.getElementById('switchTeam').value;
-            if(team === 'local') scoreBoard.L++; else scoreBoard.V++;
-            document.getElementById('txtScore').innerText = `${scoreBoard.L} - ${scoreBoard.V}`;
-        }
-
-        function actualizarUIStats() {
-            actualizarTablaUI();
-            const circles = document.getElementById('ctrlOuts').children;
-            for(let i=0; i<2; i++) {
-                circles[i].className = i < outsCount ? "w-4 h-4 rounded-full bg-red-500 shadow-lg border border-red-300" : "w-4 h-4 rounded-full bg-slate-700 border border-white/10";
-            }
-        }
-
-        function actualizarDiamante() {
+        function updateUI() {
+            document.getElementById('outText').innerText = outs;
+            document.getElementById('scoreText').innerText = `${score.L} - ${score.V}`;
             for(let i=0; i<3; i++) {
-                document.getElementById(`field-${i+1}`).className = activeBases[i] ? "base b-"+(i+1)+" on" : "base b-"+(i+1);
+                document.getElementById(`f${i+1}`).className = currentBases[i] ? `b-spot b${i+1}-spot occupied` : `b-spot b${i+1}-spot`;
             }
         }
 
-        // --- GUARDADO FINAL ---
-        async function finalizarPartido() {
-            if(!confirm("¿Deseas cerrar el encuentro y procesar todas las estadísticas?")) return;
-
-            try {
-                // 1. Procesar cada jugador que tuvo acción
-                for(const id in currentStats) {
-                    const s = currentStats[id];
-                    if(s.ab > 0) {
-                        const pRes = await fetch(`${API_URL}/players/${id}`);
-                        const p = await pRes.json();
-                        
-                        const newVB = (p.vb || 0) + s.ab;
-                        const newH = (p.h || 0) + s.h;
-
-                        await fetch(`${API_URL}/players/${id}`, {
-                            method: 'PUT',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify({
-                                jj: (p.jj || 0) + 1,
-                                vb: newVB,
-                                h: newH,
-                                hr: (p.hr || 0) + s.hr,
-                                avg: newVB > 0 ? (newH / newVB) : 0
-                            })
-                        });
-                    }
+        async function saveGame() {
+            if(!confirm("¿Guardar estadísticas finales?")) return;
+            for(let pid in sessionStats) {
+                const s = sessionStats[pid];
+                if(s.ab > 0) {
+                    const p = await (await fetch(`${API}/players/${pid}`)).json();
+                    await fetch(`${API}/players/${pid}`, {
+                        method: 'PUT',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ jj: (p.jj || 0)+1, vb: (p.vb || 0)+s.ab, h: (p.h || 0)+s.h, avg: (p.h+s.h)/(p.vb+s.ab) || 0 })
+                    });
                 }
-
-                // 2. Guardar resultado del juego
-                await fetch(`${API_URL}/games/resultado`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        id: matchData.id,
-                        sL: scoreBoard.L, sV: scoreBoard.V,
-                        ganador: scoreBoard.L > scoreBoard.V ? matchData.local : matchData.visita,
-                        perdedor: scoreBoard.L > scoreBoard.V ? matchData.visita : matchData.local,
-                        status: "finalizado"
-                    })
-                });
-
-                alert("¡Proceso completado! La liga ha sido actualizada.");
-                location.reload();
-            } catch (e) { alert("Error al guardar. Revisa tu conexión."); }
+            }
+            await fetch(`${API}/games/resultado`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ id: activeMatch.id, sL: score.L, sV: score.V, ganador: score.L>score.V?activeMatch.local:activeMatch.visita, perdedor: score.L>score.V?activeMatch.visita:activeMatch.local, status: "finalizado" })
+            });
+            alert("Juego Guardado."); location.reload();
         }
     </script>
 </body>
