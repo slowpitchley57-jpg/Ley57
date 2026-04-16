@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Pro Scoreboard - Liga Ley 57</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .diamond { position: relative; width: 160px; height: 160px; transform: rotate(45deg); margin: 40px auto; border: 2px solid #fff; }
+        .base { position: absolute; width: 20px; height: 20px; background: #fff; border: 2px solid #333; transform: rotate(-45deg); transition: background 0.3s; }
+        .base.occupied { background: #ef4444; box-shadow: 0 0 10px #ef4444; }
+        .home { bottom: -10px; right: -10px; }
+        .first { top: -10px; right: -10px; }
+        .second { top: -10px; left: -10px; }
+        .third { bottom: -10px; left: -10px; }
+        .scorecard-cell { width: 35px; height: 35px; border: 1px solid #ddd; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; }
+        @keyframes run { from { transform: scale(1); } to { transform: scale(1.2); } }
+        .active-bat { animation: run 0.5s infinite alternate; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
+
+    <header class="bg-blue-900 p-4 shadow-xl border-b-4 border-red-600 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center gap-4">
+                <a href="admin.html" class="text-white hover:text-red-500"><i class="fa fa-arrow-left text-xl"></i></a>
+                <div>
+                    <h1 id="matchTitle" class="font-black italic uppercase text-lg leading-none">Cargando Juego...</h1>
+                    <span id="gameInfo" class="text-[9px] text-blue-300 uppercase tracking-widest">Anotador Pro v2.0</span>
+                </div>
+            </div>
+
+            <div class="bg-black/40 p-2 rounded-xl flex items-center gap-6 border border-white/10">
+                <div class="text-center">
+                    <p class="text-[8px] font-black text-slate-400">OUTS</p>
+                    <div id="outsCount" class="flex gap-1 justify-center">
+                        <div class="w-3 h-3 rounded-full bg-slate-700"></div>
+                        <div class="w-3 h-3 rounded-full bg-slate-700"></div>
+                    </div>
+                </div>
+                <div class="text-center border-l border-white/10 pl-6">
+                    <div class="flex gap-8 items-center">
+                        <div class="text-center">
+                            <p id="localName" class="text-[10px] font-black italic">LOC</p>
+                            <p id="scoreL" class="text-2xl font-black text-red-500">0</p>
+                        </div>
+                        <div class="text-xl font-black text-white italic">VS</div>
+                        <div class="text-center">
+                            <p id="visitaName" class="text-[10px] font-black italic">VIS</p>
+                            <p id="scoreV" class="text-2xl font-black text-blue-500">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <div class="lg:col-span-4 space-y-6">
+            <div class="bg-emerald-800 rounded-3xl p-6 shadow-inner border-4 border-emerald-900 relative overflow-hidden">
+                <div class="diamond">
+                    <div id="base2" class="base second"></div>
+                    <div id="base1" class="base first"></div>
+                    <div id="base3" class="base third"></div>
+                    <div id="baseHome" class="base home"></div>
+                </div>
+                <div class="text-center mt-4 bg-black/30 py-2 rounded-lg">
+                    <p class="text-[10px] font-bold text-emerald-200">BATEANDO: <span id="currentBatter" class="text-white italic">Seleccione Lineup</span></p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-3xl p-4 grid grid-cols-3 gap-2 shadow-xl">
+                <button onclick="registrarAccion('H')" class="bg-blue-600 p-3 rounded-xl font-black text-[10px] uppercase hover:bg-blue-700 transition">Hit</button>
+                <button onclick="registrarAccion('2B')" class="bg-blue-800 p-3 rounded-xl font-black text-[10px] uppercase hover:bg-blue-900 transition">2B</button>
+                <button onclick="registrarAccion('3B')" class="bg-blue-950 p-3 rounded-xl font-black text-[10px] uppercase hover:bg-black transition">3B</button>
+                <button onclick="registrarAccion('HR')" class="bg-red-600 p-3 rounded-xl font-black text-[10px] uppercase hover:bg-red-700 transition col-span-1">HR</button>
+                <button onclick="registrarAccion('BB')" class="bg-slate-700 p-3 rounded-xl font-black text-[10px] uppercase hover:bg-slate-800 transition">BB</button>
+                <button onclick="registrarAccion('K')" class="bg-slate-900 p-3 rounded-xl font-black text-[10px] uppercase hover:bg-black transition">K</button>
+                <button onclick="registrarAccion('FC')" class="bg-orange-500 p-3 rounded-xl font-black text-[10px] uppercase hover:bg-orange-600 transition" title="Fielder's Choice">F. Choice</button>
+                <button onclick="registrarAccion('E')" class="bg-amber-500 p-3 rounded-xl font-black text-[10px] uppercase hover:bg-amber-600 transition">Error</button>
+                <button onclick="registrarAccion('OUT')" class="bg-slate-400 p-3 rounded-xl font-black text-[10px] uppercase hover:bg-slate-500 transition">Out</button>
+                <button onclick="anotarCarrera()" class="bg-emerald-600 p-3 rounded-xl font-black text-[10px] uppercase hover:bg-emerald-700 transition col-span-3 mt-2"><i class="fa fa-plus mr-2"></i> Anotar Carrera</button>
+            </div>
+        </div>
+
+        <div class="lg:col-span-8 space-y-6">
+            <div class="bg-white text-slate-900 rounded-3xl p-6 shadow-2xl overflow-hidden">
+                <div class="flex justify-between items-center mb-4 border-b pb-2">
+                    <h3 class="font-black italic text-sm uppercase">Hoja de Anotación Digital (K-21 Style)</h3>
+                    <div class="flex gap-2">
+                        <select id="selectTeam" onchange="switchLineup()" class="bg-slate-100 p-2 rounded-lg font-bold text-[10px] uppercase outline-none">
+                            <option value="local">Lineup Local</option>
+                            <option value="visita">Lineup Visita</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto custom-scroll">
+                    <table class="w-full border-collapse border border-slate-200">
+                        <thead class="bg-slate-50">
+                            <tr class="text-[9px] font-black uppercase">
+                                <th class="border p-2 w-8">#</th>
+                                <th class="border p-2 text-left">LINE UP</th>
+                                <th class="border p-2">POS</th>
+                                <th class="border p-2" colspan="7">INNINGS</th>
+                                <th class="border p-2 bg-slate-200">AB</th>
+                                <th class="border p-2 bg-blue-100">H</th>
+                                <th class="border p-2 bg-red-100">HR</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scoreBody">
+                            </tbody>
+                    </table>
+                </div>
+                
+                <div class="mt-6 flex gap-4">
+                    <button onclick="location.reload()" class="flex-1 bg-slate-100 p-3 rounded-xl font-black text-[10px] uppercase text-slate-500 hover:bg-slate-200">Reiniciar</button>
+                    <button onclick="finalizarJuegoCompleto()" class="flex-1 bg-blue-900 p-3 rounded-xl text-white font-black text-[10px] uppercase shadow-lg hover:bg-red-600 transition-all">Finalizar y Guardar en DB</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const API = "https://ley57.onrender.com/api";
+        let juegoActual = null;
+        let lineup = { local: [], visita: [] };
+        let currentInning = 1;
+        let outs = 0;
+        let bases = [false, false, false]; // 1ra, 2da, 3ra
+        let statsLive = {}; 
+
+        async function init() {
+            const res = await fetch(`${API}/games?status=pendiente`);
+            const games = await res.json();
+            if(games.length > 0) {
+                juegoActual = games[0]; // Tomamos el primero pendiente
+                document.getElementById('matchTitle').innerText = `${juegoActual.local} vs ${juegoActual.visita}`;
+                document.getElementById('localName').innerText = juegoActual.local;
+                document.getElementById('visitaName').innerText = juegoActual.visita;
+                await cargarLineups();
+            }
+        }
+
+        async function cargarLineups() {
+            const [resL, resV] = await Promise.all([
+                fetch(`${API}/players?equipo=${encodeURIComponent(juegoActual.local)}`),
+                fetch(`${API}/players?equipo=${encodeURIComponent(juegoActual.visita)}`)
+            ]);
+            lineup.local = await resL.json();
+            lineup.visita = await resV.json();
+            
+            // Inicializar stats temporales
+            [...lineup.local, ...lineup.visita].forEach(p => {
+                statsLive[p._id] = { ab: 0, h: 0, hr: 0, rbi: 0 };
+            });
+            
+            renderScorecard('local');
+        }
+
+        function renderScorecard(teamKey) {
+            const players = lineup[teamKey];
+            const body = document.getElementById('scoreBody');
+            body.innerHTML = players.map((p, i) => `
+                <tr class="text-[10px] hover:bg-slate-50 cursor-pointer" onclick="setAtBat('${p._id}', '${p.nombre}')">
+                    <td class="border p-2 text-center font-bold text-slate-400">${i+1}</td>
+                    <td class="border p-2 font-black uppercase text-blue-900">${p.nombre}</td>
+                    <td class="border p-2 text-center">--</td>
+                    <td class="border scorecard-cell" id="p-${p._id}-i1"></td>
+                    <td class="border scorecard-cell"></td>
+                    <td class="border scorecard-cell"></td>
+                    <td class="border scorecard-cell"></td>
+                    <td class="border scorecard-cell"></td>
+                    <td class="border scorecard-cell"></td>
+                    <td class="border scorecard-cell"></td>
+                    <td class="border p-2 text-center bg-slate-50" id="ab-${p._id}">0</td>
+                    <td class="border p-2 text-center bg-blue-50 font-black" id="h-${p._id}">0</td>
+                    <td class="border p-2 text-center bg-red-50 font-black" id="hr-${p._id}">0</td>
+                </tr>
+            `).join('');
+        }
+
+        let batterId = null;
+        function setAtBat(id, nombre) {
+            batterId = id;
+            document.getElementById('currentBatter').innerText = nombre;
+        }
+
+        function registrarAccion(tipo) {
+            if(!batterId) return alert("Selecciona una jugadora del Lineup primero");
+
+            const cell = document.getElementById(`p-${batterId}-i1`);
+            cell.innerText = tipo;
+            
+            // Lógica de Bases y Outs
+            if(tipo === 'OUT' || tipo === 'K') {
+                outs++;
+                actualizarOuts();
+                statsLive[batterId].ab++;
+            } else if (tipo === 'H' || tipo === '2B' || tipo === '3B' || tipo === 'HR') {
+                statsLive[batterId].ab++;
+                statsLive[batterId].h++;
+                moverBases(tipo);
+                if(tipo === 'HR') statsLive[batterId].hr++;
+            } else if (tipo === 'BB' || tipo === 'FC' || tipo === 'E') {
+                moverBases('H'); // Tratamos como avance a primera
+            }
+
+            actualizarVistaStats(batterId);
+            if(outs >= 3) {
+                alert("3 OUTS - Cambio de Inning o Equipo");
+                outs = 0;
+                bases = [false, false, false];
+                actualizarOuts();
+                actualizarDiamante();
+            }
+        }
+
+        function moverBases(tipo) {
+            if(tipo === 'H') {
+                if(bases[2]) { anotarCarrera(); bases[2] = false; }
+                if(bases[1]) { bases[2] = true; bases[1] = false; }
+                if(bases[0]) { bases[1] = true; }
+                bases[0] = true;
+            } else if (tipo === 'HR') {
+                let runs = 1;
+                bases.forEach(b => { if(b) runs++; });
+                for(let i=0; i<runs; i++) anotarCarrera();
+                bases = [false, false, false];
+            }
+            actualizarDiamante();
+        }
+
+        function anotarCarrera() {
+            const team = document.getElementById('selectTeam').value;
+            const scoreEl = team === 'local' ? document.getElementById('scoreL') : document.getElementById('scoreV');
+            scoreEl.innerText = parseInt(scoreEl.innerText) + 1;
+            
+            // Animación home base
+            const hb = document.getElementById('baseHome');
+            hb.classList.add('bg-yellow-400');
+            setTimeout(() => hb.classList.remove('bg-yellow-400'), 500);
+        }
+
+        function actualizarOuts() {
+            const circles = document.getElementById('outsCount').children;
+            for(let i=0; i<2; i++) {
+                circles[i].className = i < outs ? 'w-3 h-3 rounded-full bg-red-500 shadow-lg' : 'w-3 h-3 rounded-full bg-slate-700';
+            }
+        }
+
+        function actualizarDiamante() {
+            for(let i=0; i<3; i++) {
+                const b = document.getElementById(`base${i+1}`);
+                if(bases[i]) b.classList.add('occupied');
+                else b.classList.remove('occupied');
+            }
+        }
+
+        function actualizarVistaStats(id) {
+            document.getElementById(`ab-${id}`).innerText = statsLive[id].ab;
+            document.getElementById(`h-${id}`).innerText = statsLive[id].h;
+            document.getElementById(`hr-${id}`).innerText = statsLive[id].hr;
+        }
+
+        async function finalizarJuegoCompleto() {
+            if(!confirm("¿Finalizar encuentro y actualizar estadísticas globales?")) return;
+
+            // 1. Guardar cada jugadora en la DB
+            for(let id in statsLive) {
+                const s = statsLive[id];
+                if(s.ab > 0) {
+                    const pRes = await fetch(`${API}/players/${id}`);
+                    const p = await pRes.json();
+                    
+                    const update = {
+                        jj: (p.jj || 0) + 1,
+                        vb: (p.vb || 0) + s.ab,
+                        h: (p.h || 0) + s.h,
+                        hr: (p.hr || 0) + s.hr
+                    };
+                    update.avg = update.vb > 0 ? (update.h / update.vb) : 0;
+
+                    await fetch(`${API}/players/${id}`, {
+                        method: 'PUT',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(update)
+                    });
+                }
+            }
+
+            // 2. Guardar Resultado Final del Juego
+            const sL = parseInt(document.getElementById('scoreL').innerText);
+            const sV = parseInt(document.getElementById('scoreV').innerText);
+
+            await fetch(`${API}/games/resultado`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    id: juegoActual._id,
+                    sL, sV,
+                    ganador: sL > sV ? juegoActual.local : juegoActual.visita,
+                    perdedor: sL > sV ? juegoActual.visita : juegoActual.local,
+                    status: "finalizado"
+                })
+            });
+
+            alert("Juego Guardado y Estadísticas Actualizadas.");
+            window.location.href = "admin.html";
+        }
+
+        function switchLineup() {
+            const team = document.getElementById('selectTeam').value;
+            renderScorecard(team);
+        }
+
+        init();
+    </script>
+</body>
+</html>
