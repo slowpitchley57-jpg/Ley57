@@ -154,29 +154,31 @@ app.post('/api/players', async (req, res) => {
 app.put('/api/players/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        // Obtenemos los valores actuales de la base de datos por si el admin solo editó uno
         const jugadoraPrevia = await Player.findById(id);
-        
         if (!jugadoraPrevia) return res.status(404).json({ error: "No existe" });
 
-        // Combinamos lo que ya había con lo nuevo que manda el Admin
-        // Usamos Number() para asegurar que no se guarden como texto
         const nuevosDatos = {
+            // Agregamos el nombre por si el Admin lo edita
+            nombre: req.body.nombre !== undefined ? req.body.nombre.toUpperCase() : jugadoraPrevia.nombre,
+            equipo: req.body.equipo !== undefined ? req.body.equipo : jugadoraPrevia.equipo,
+            
+            // Stats numéricas
             jj: req.body.jj !== undefined ? Number(req.body.jj) : jugadoraPrevia.jj,
             vb: req.body.vb !== undefined ? Number(req.body.vb) : jugadoraPrevia.vb,
             h: req.body.h !== undefined ? Number(req.body.h) : jugadoraPrevia.h,
-            hr: req.body.hr !== undefined ? Number(req.body.hr) : jugadoraPrevia.hr
+            dobles: req.body.dobles !== undefined ? Number(req.body.dobles) : jugadoraPrevia.dobles,
+            triples: req.body.triples !== undefined ? Number(req.body.triples) : jugadoraPrevia.triples,
+            hr: req.body.hr !== undefined ? Number(req.body.hr) : jugadoraPrevia.hr,
+            rbi: req.body.rbi !== undefined ? Number(req.body.rbi) : jugadoraPrevia.rbi,
+            k: req.body.k !== undefined ? Number(req.body.k) : jugadoraPrevia.k
         };
 
-        // RE-CALCULAR EL AVG (H / VB)
+        // Recalcular AVG siempre
         nuevosDatos.avg = nuevosDatos.vb > 0 ? (nuevosDatos.h / nuevosDatos.vb) : 0;
 
         const actualizado = await Player.findByIdAndUpdate(id, nuevosDatos, { new: true });
-        
-        console.log(`✅ Stats actualizadas para: ${actualizado.nombre} - AVG: ${actualizado.avg}`);
         res.json({ ok: true, data: actualizado });
     } catch (error) {
-        console.error("Error al actualizar:", error);
         res.status(500).json({ error: "Error interno" });
     }
 });

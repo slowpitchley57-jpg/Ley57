@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Alta Maestra de Jugadores - Ley 57</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen">
+
+    <nav class="bg-blue-900 text-white p-4 shadow-lg flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <a href="admin.html" class="hover:text-red-400 transition"><i class="fa fa-arrow-left text-xl"></i></a>
+            <h1 class="font-black italic uppercase tracking-tighter text-xl">Alta Maestra <span class="text-red-500 text-xs block font-sans">Jugadores</span></h1>
+        </div>
+        <div id="nombreAdmin" class="text-[10px] font-bold bg-blue-950 px-4 py-2 rounded-full border border-blue-700">---</div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto p-6 space-y-6">
+        
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-6 rounded-3xl shadow-sm border">
+            <div>
+                <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">1. Seleccionar Liga</label>
+                <select id="selLiga" onchange="cargarEquiposPorLiga()" class="w-full p-3 border rounded-xl font-bold bg-slate-50 text-blue-900 outline-none">
+                    <option value="femenil">LEY 57 (FEMENIL)</option>
+                    <option value="varonil">ALV SPORT (VARONIL)</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">2. Seleccionar Equipo</label>
+                <select id="selEquipo" class="w-full p-3 border rounded-xl font-bold bg-slate-50 text-blue-900 outline-none">
+                    <option value="">-- ELIGE EQUIPO --</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">3. Buscador de Jugador</label>
+                <div class="relative">
+                    <i class="fa fa-search absolute left-4 top-4 text-slate-300"></i>
+                    <input type="text" id="buscador" onkeyup="filtrarJugadores()" placeholder="BUSCAR POR NOMBRE..." class="w-full p-3 pl-10 border rounded-xl font-bold uppercase bg-slate-50 outline-none focus:border-blue-500">
+                </div>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-l-8 border-l-emerald-500">
+                <h3 class="font-black italic uppercase text-xs mb-4">Registro Individual</h3>
+                <div class="flex gap-2">
+                    <input type="text" id="nombreJugador" placeholder="NOMBRE COMPLETO" class="flex-1 p-3 border rounded-xl font-bold uppercase bg-slate-50 outline-none">
+                    <button onclick="guardarIndividual()" class="bg-emerald-600 text-white px-6 rounded-xl font-black text-[10px] uppercase hover:bg-emerald-700">Agregar</button>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-l-8 border-l-purple-500">
+                <h3 class="font-black italic uppercase text-xs mb-4">Registro Masivo (Lista de nombres)</h3>
+                <div class="flex flex-col gap-2">
+                    <textarea id="listaMasiva" placeholder="Pega los nombres aquí, uno por línea..." class="w-full p-3 border rounded-xl font-bold uppercase bg-slate-50 h-20 outline-none text-xs"></textarea>
+                    <button onclick="guardarMasivo()" class="bg-purple-600 text-white p-2 rounded-xl font-black text-[10px] uppercase hover:bg-purple-700">Cargar Roster Completo</button>
+                </div>
+            </div>
+        </div>
+
+        <section class="bg-white rounded-3xl shadow-xl border overflow-hidden">
+            <div class="bg-slate-800 p-4 text-white flex justify-between items-center">
+                <h3 class="font-black italic uppercase text-xs tracking-widest">Base de Datos de Jugadores</h3>
+                <span id="contador" class="text-[10px] font-bold bg-white/20 px-3 py-1 rounded-full">0 Jugadores</span>
+            </div>
+            <div class="overflow-x-auto max-h-[500px] overflow-y-auto">
+                <table class="w-full text-center">
+                    <thead class="bg-slate-100 border-b sticky top-0 z-10">
+                        <tr class="text-[10px] font-black text-slate-500 uppercase">
+                            <th class="p-4 text-left">Jugador</th>
+                            <th>Equipo</th>
+                            <th>Liga</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaMaestra" class="divide-y font-bold text-xs uppercase">
+                        </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const API = "https://ley57.onrender.com/api";
+        let todosLosEquipos = [];
+        let todosLosJugadores = [];
+
+        async function cargarTodo() {
+            gestionarSesion();
+            await cargarEquipos();
+            await cargarTodosLosJugadores();
+        }
+
+        function gestionarSesion() {
+            const sesion = localStorage.getItem('userLogueado');
+            if (!sesion) { window.location.href = 'index.html'; return; }
+            const user = JSON.parse(sesion);
+            document.getElementById('nombreAdmin').innerText = `ADMIN: ${user.correo.toUpperCase()}`;
+        }
+
+        async function cargarEquipos() {
+            const res = await fetch(`${API}/equipos`);
+            todosLosEquipos = await res.json();
+            cargarEquiposPorLiga();
+        }
+
+        function cargarEquiposPorLiga() {
+            const liga = document.getElementById('selLiga').value;
+            const sel = document.getElementById('selEquipo');
+            const filtrados = todosLosEquipos.filter(e => e.liga === liga);
+            
+            sel.innerHTML = '<option value="">-- ELIGE EQUIPO --</option>' + 
+                filtrados.map(e => `<option value="${e.nombre}">${e.nombre}</option>`).join('');
+            
+            renderizarTabla();
+        }
+
+        async function cargarTodosLosJugadores() {
+            const res = await fetch(`${API}/players`); // Asumiendo que esta ruta trae todos
+            todosLosJugadores = await res.json();
+            renderizarTabla();
+        }
+
+        function renderizarTabla() {
+            const liga = document.getElementById('selLiga').value;
+            const busqueda = document.getElementById('buscador').value.toUpperCase();
+            const cont = document.getElementById('tablaMaestra');
+            
+            // Filtramos por liga y por buscador
+            const filtrados = todosLosJugadores.filter(p => 
+                p.liga === liga && 
+                p.nombre.toUpperCase().includes(busqueda)
+            );
+
+            document.getElementById('contador').innerText = `${filtrados.length} Jugadores`;
+
+            cont.innerHTML = filtrados.map(p => `
+                <tr class="hover:bg-blue-50 transition border-b">
+                    <td class="p-4 text-left font-black text-blue-900">${p.nombre}</td>
+                    <td class="text-slate-500 italic">${p.equipo}</td>
+                    <td><span class="px-2 py-1 rounded-full text-[8px] ${p.liga === 'varonil' ? 'bg-red-100 text-red-600' : 'bg-pink-100 text-pink-600'}">${p.liga}</span></td>
+                    <td class="p-4 flex gap-3 justify-center">
+                        <button onclick="editarJugador('${p._id}', '${p.nombre}')" class="text-blue-500 hover:scale-110 transition"><i class="fa fa-edit"></i></button>
+                        <button onclick="eliminarJugador('${p._id}')" class="text-red-400 hover:text-red-600 transition"><i class="fa fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function filtrarJugadores() { renderizarTabla(); }
+
+        async function guardarIndividual() {
+            const nombre = document.getElementById('nombreJugador').value.trim();
+            const equipo = document.getElementById('selEquipo').value;
+            const liga = document.getElementById('selLiga').value;
+
+            if (!nombre || !equipo) return alert("Nombre y Equipo son obligatorios");
+
+            const nuevo = { nombre: nombre.toUpperCase(), equipo, liga, jj:0, vb:0, h:0, dobles:0, triples:0, hr:0, rbi:0, k:0, avg:0 };
+            
+            await fetch(`${API}/players`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(nuevo)
+            });
+
+            document.getElementById('nombreJugador').value = "";
+            await cargarTodosLosJugadores();
+        }
+
+        async function guardarMasivo() {
+            const lista = document.getElementById('listaMasiva').value.split('\n');
+            const equipo = document.getElementById('selEquipo').value;
+            const liga = document.getElementById('selLiga').value;
+
+            if (!equipo || lista.length === 0) return alert("Selecciona equipo y pega nombres");
+
+            for (let nombre of lista) {
+                if (nombre.trim() === "") continue;
+                await fetch(`${API}/players`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ nombre: nombre.trim().toUpperCase(), equipo, liga, jj:0, vb:0, h:0, dobles:0, triples:0, hr:0, rbi:0, k:0, avg:0 })
+                });
+            }
+
+            document.getElementById('listaMasiva').value = "";
+            alert("Roster cargado");
+            await cargarTodosLosJugadores();
+        }
+
+        async function eliminarJugador(id) {
+            if (!confirm("¿Borrar jugador permanentemente?")) return;
+            await fetch(`${API}/players/${id}`, { method: 'DELETE' });
+            await cargarTodosLosJugadores();
+        }
+
+        async function editarJugador(id, nombreActual) {
+            const nuevoNombre = prompt("Editar nombre del jugador:", nombreActual);
+            if (nuevoNombre && nuevoNombre !== nombreActual) {
+                await fetch(`${API}/players/${id}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ nombre: nuevoNombre.toUpperCase() })
+                });
+                await cargarTodosLosJugadores();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', cargarTodo);
+    </script>
+</body>
+</html>
