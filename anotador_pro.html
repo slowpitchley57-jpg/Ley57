@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anotador Pro Elite v4 - Ley 57</title>
+    <title>Anotador Pro Elite v5 - Ley 57</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -11,7 +11,6 @@
         .cell-score { min-width: 50px; height: 50px; border: 0.5px solid #cbd5e1; position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 11px; transition: 0.2s; }
         .cell-score:hover { background: #f1f5f9; }
         
-        /* DIAMANTE SEPARADO */
         .stadium-container { position: relative; width: 220px; height: 220px; background: #15803d; border: 6px solid #064e3b; transform: rotate(45deg); border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); margin: 20px auto; flex-shrink: 0; }
         .base-spot { position: absolute; width: 26px; height: 26px; background: #fff; border: 3px solid #333; transform: rotate(-45deg); transition: 0.3s; z-index: 20; }
         .base-spot.on { background: #ef4444; border-color: #fff; box-shadow: 0 0 15px #ef4444; }
@@ -35,7 +34,7 @@
 
     <div id="fase1" class="flex items-center justify-center min-h-screen p-4">
         <div class="bg-white p-8 rounded-[3rem] shadow-2xl w-full max-w-md border-t-[12px] border-blue-900">
-            <h1 class="font-black italic uppercase text-2xl text-center mb-6 text-blue-900 tracking-tighter">Anotador Oficial Pro</h1>
+            <h1 class="font-black italic uppercase text-2xl text-center mb-6 text-blue-900">Anotador Oficial Pro</h1>
             <div class="space-y-4">
                 <select id="selLiga" onchange="fetchGames()" class="w-full p-4 bg-slate-50 border rounded-2xl font-bold uppercase outline-none focus:border-blue-900 transition-all">
                     <option value="">-- SELECCIONAR LIGA --</option>
@@ -45,21 +44,24 @@
                 <select id="selJuego" class="w-full p-4 bg-slate-50 border rounded-2xl font-bold uppercase outline-none">
                     <option value="">-- ESPERANDO LIGA --</option>
                 </select>
-                <button onclick="startSetup()" class="w-full bg-blue-900 text-white p-5 rounded-2xl font-black uppercase italic shadow-lg hover:bg-black transition-all">Configurar Rosters</button>
+                <button onclick="startSetup()" class="w-full bg-blue-900 text-white p-5 rounded-2xl font-black uppercase italic shadow-lg hover:bg-black transition-all">Siguiente</button>
+                <button onclick="window.location.href='admin.html'" class="w-full text-slate-400 font-bold uppercase text-[10px] tracking-widest mt-2 hover:text-red-600">Volver al Panel Admin</button>
             </div>
         </div>
     </div>
 
     <div id="fase2" class="hidden max-w-5xl mx-auto p-4 md:p-8">
-        <div class="bg-white p-8 rounded-[3rem] shadow-2xl border-t-[12px] border-red-600">
-            <h2 class="font-black uppercase text-xl italic text-blue-900 text-center mb-6">Acomodar Lineup: <span id="txtTeamSetup" class="text-red-600">--</span></h2>
+        <div class="bg-white p-8 rounded-[3rem] shadow-2xl border-t-[12px] border-red-600 relative">
+            <button onclick="regresarAFase1()" class="absolute top-6 left-6 text-slate-400 hover:text-red-600 font-black text-xs uppercase"><i class="fa fa-arrow-left mr-1"></i> Cambiar Juego</button>
+            
+            <h2 class="font-black uppercase text-xl italic text-blue-900 text-center mb-6 mt-4">Lineup: <span id="txtTeamSetup" class="text-red-600">--</span></h2>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div class="bg-slate-50 p-5 rounded-3xl border">
-                    <h3 class="text-[10px] font-black uppercase mb-4 text-slate-400">Jugadoras Disponibles</h3>
+                    <h3 class="text-[10px] font-black uppercase mb-4 text-slate-400 italic">Jugadoras Disponibles</h3>
                     <div id="poolPlayers" class="space-y-2 max-h-96 overflow-y-auto pr-2"></div>
                 </div>
                 <div class="bg-blue-50 p-5 rounded-3xl border border-blue-100 shadow-inner">
-                    <h3 class="text-[10px] font-black uppercase mb-4 text-blue-900">Orden al Bat Oficial</h3>
+                    <h3 class="text-[10px] font-black uppercase mb-4 text-blue-900 italic">Orden al Bat (Confirmado)</h3>
                     <div id="confirmedLineup" class="space-y-2"></div>
                     <button onclick="confirmTeamLineup()" class="w-full mt-6 bg-blue-900 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Confirmar Bando</button>
                 </div>
@@ -100,12 +102,13 @@
                     </div>
                 </div>
                 
-                <div class="flex gap-3 mt-6">
+                <div class="flex flex-wrap gap-3 mt-6">
                     <select id="switchView" onchange="renderSheet()" class="bg-white text-blue-900 text-xs font-black p-4 rounded-2xl shadow-xl outline-none">
                         <option value="local">LINEUP LOCAL</option>
                         <option value="visita">LINEUP VISITANTE</option>
                     </select>
-                    <button onclick="finalizarPartido()" class="bg-emerald-500 text-white text-xs font-black px-8 rounded-2xl shadow-xl uppercase hover:bg-black transition-all">Finalizar Juego</button>
+                    <button onclick="finalizarPartido()" class="bg-emerald-500 text-white text-xs font-black px-8 py-4 rounded-2xl shadow-xl uppercase hover:bg-black transition-all">Finalizar Juego</button>
+                    <button onclick="cancelarJuego()" class="bg-red-600 text-white text-xs font-black px-8 py-4 rounded-2xl shadow-xl uppercase hover:bg-slate-900 transition-all">Cancelar y Salir</button>
                 </div>
             </div>
         </header>
@@ -114,8 +117,7 @@
             <div class="overflow-x-auto paper-bg p-6 scroll-smooth">
                 <table class="w-full border-collapse">
                     <thead>
-                        <tr id="tableHeader" class="bg-slate-100 text-[10px] font-black uppercase text-slate-500 border-b">
-                            </tr>
+                        <tr id="tableHeader" class="bg-slate-100 text-[10px] font-black uppercase text-slate-500 border-b"></tr>
                     </thead>
                     <tbody id="sheetBody"></tbody>
                 </table>
@@ -127,7 +129,7 @@
         <div class="bg-white p-8 rounded-[3.5rem] w-full max-w-sm shadow-2xl border-t-[14px] border-blue-900 text-center">
             <p id="batterTarget" class="font-black uppercase italic text-blue-900 mb-6 text-xl">---</p>
             <div class="grid grid-cols-3 gap-3">
-                <button onclick="record('H')" class="bg-blue-600 text-white p-4 rounded-2xl font-black text-xs">H</button>
+                <button onclick="record('H')" class="bg-blue-600 text-white p-4 rounded-2xl font-black text-xs hover:bg-blue-700 transition">H</button>
                 <button onclick="record('2B')" class="bg-blue-700 text-white p-4 rounded-2xl font-black text-xs">2B</button>
                 <button onclick="record('3B')" class="bg-blue-800 text-white p-4 rounded-2xl font-black text-xs">3B</button>
                 <button onclick="record('HR')" class="bg-red-600 text-white p-4 rounded-2xl font-black text-xs col-span-1 shadow-lg">HR</button>
@@ -155,27 +157,47 @@
         let outs = 0; let inning = 1; let totalInnings = 10;
         let selectedAction = null;
 
+        // FASE 1
         async function fetchGames() {
             const liga = document.getElementById('selLiga').value;
             const res = await fetch(`${API}/games?liga=${liga}&status=pendiente`);
             const data = await res.json();
-            document.getElementById('selJuego').innerHTML = data.map(g => `<option value="${g._id}" data-loc="${g.local}" data-vis="${g.visita}">${g.local} VS ${g.visita}</option>`).join('');
+            // CORRECCIÓN: Mostrar fecha y hora para identificar bien el juego
+            document.getElementById('selJuego').innerHTML = data.map(g => `<option value="${g._id}" data-loc="${g.local}" data-vis="${g.visita}">${g.local} VS ${g.visita} (${g.fecha || ''} ${g.hora || ''})</option>`).join('');
         }
 
         async function startSetup() {
             const sel = document.getElementById('selJuego');
+            if(!sel.value) return alert("Selecciona un juego");
             const opt = sel.options[sel.selectedIndex];
             match = { id: sel.value, local: opt.getAttribute('data-loc'), visita: opt.getAttribute('data-vis'), liga: document.getElementById('selLiga').value };
+            
             const [rL, rV] = await Promise.all([
                 fetch(`${API}/players?equipo=${encodeURIComponent(match.local)}`),
                 fetch(`${API}/players?equipo=${encodeURIComponent(match.visita)}`)
             ]);
             rosters.local = await rL.json(); rosters.visita = await rV.json();
+            
             document.getElementById('fase1').classList.add('hidden');
             document.getElementById('fase2').classList.remove('hidden');
             setupTeamLineup('local');
         }
 
+        // --- FUNCIONES DE NAVEGACIÓN ---
+        function regresarAFase1() {
+            if(confirm("¿Seguro que quieres cambiar de juego? Se perderá el lineup actual.")) {
+                document.getElementById('fase2').classList.add('hidden');
+                document.getElementById('fase1').classList.remove('hidden');
+            }
+        }
+
+        function cancelarJuego() {
+            if(confirm("¿Estás seguro de cancelar la anotación? Todo el progreso se perderá y volverás al inicio.")) {
+                location.reload();
+            }
+        }
+
+        // FASE 2
         let currentSetup = 'local'; let tempLineup = [];
         function setupTeamLineup(team) {
             currentSetup = team; tempLineup = [];
@@ -205,8 +227,9 @@
 
         function confirmTeamLineup() {
             lineups[currentSetup] = [...tempLineup];
-            if(currentSetup === 'local') setupTeamLineup('visita');
-            else {
+            if(currentSetup === 'local') {
+                setupTeamLineup('visita');
+            } else {
                 [...lineups.local, ...lineups.visita].forEach(p => sessionStats[p._id] = { ab: 0, h: 0, hr: 0, cels: Array(25).fill('') });
                 document.getElementById('fase2').classList.add('hidden');
                 document.getElementById('fase3').classList.remove('hidden');
@@ -215,6 +238,7 @@
             }
         }
 
+        // FASE 3
         function renderSheet() {
             const bando = document.getElementById('switchView').value;
             const players = lineups[bando];
@@ -249,11 +273,9 @@
 
         function realizarCambio(idAnterior, bando) {
             const banca = rosters[bando].filter(p => !lineups[bando].find(l => l._id === p._id));
-            if(banca.length === 0) return alert("No hay jugadoras en la banca para este equipo.");
-            
+            if(banca.length === 0) return alert("Banca vacía.");
             const lista = banca.map((p, i) => `${i+1}. ${p.nombre}`).join('\n');
-            const seleccion = prompt(`Sustitución para ${lineups[bando].find(p=>p._id===idAnterior).nombre}:\n\n${lista}\n\nEscriba el NÚMERO de la jugadora que entra:`);
-            
+            const seleccion = prompt(`Cambio para ${lineups[bando].find(p=>p._id===idAnterior).nombre}:\n\n${lista}\n\nNúmero de jugadora que entra:`);
             if(seleccion) {
                 const idx = parseInt(seleccion) - 1;
                 if(banca[idx]) {
@@ -262,7 +284,6 @@
                     lineups[bando][lineupIdx] = { _id: nueva._id, nombre: nueva.nombre, pos: lineups[bando][lineupIdx].pos };
                     if(!sessionStats[nueva._id]) sessionStats[nueva._id] = { ab: 0, h: 0, hr: 0, cels: Array(25).fill('') };
                     renderSheet();
-                    alert(`Cambio realizado: Sale ${rosters[bando].find(p=>p._id===idAnterior).nombre}, entra ${nueva.nombre}`);
                 }
             }
         }
@@ -289,7 +310,7 @@
                     moverBases(tipo, nombre);
                 } else if(['OUT','K'].includes(tipo)) {
                     sessionStats[pid].ab++; outs++;
-                    if(outs >= 3) { alert("¡3 OUTS! CAMBIO DE INNING"); outs = 0; bases = [null,null,null]; inning++; }
+                    if(outs >= 3) { alert("CAMBIO DE INNING"); outs = 0; bases = [null,null,null]; inning++; }
                 } else { moverBases('H', nombre); }
             }
             updateUI(); closeModal(); renderSheet();
