@@ -161,12 +161,11 @@ app.put('/api/players/:id', async (req, res) => {
         const jugadoraPrevia = await Player.findById(id);
         if (!jugadoraPrevia) return res.status(404).json({ error: "No existe" });
 
+        // Recibimos los datos del cuerpo de la petición (req.body)
+        // Si un dato viene en el body, lo usamos; si no, dejamos el que ya tenía la jugadora
         const nuevosDatos = {
-            // Agregamos el nombre por si el Admin lo edita
             nombre: req.body.nombre !== undefined ? req.body.nombre.toUpperCase() : jugadoraPrevia.nombre,
             equipo: req.body.equipo !== undefined ? req.body.equipo : jugadoraPrevia.equipo,
-            
-            // Stats numéricas
             jj: req.body.jj !== undefined ? Number(req.body.jj) : jugadoraPrevia.jj,
             vb: req.body.vb !== undefined ? Number(req.body.vb) : jugadoraPrevia.vb,
             h: req.body.h !== undefined ? Number(req.body.h) : jugadoraPrevia.h,
@@ -174,15 +173,17 @@ app.put('/api/players/:id', async (req, res) => {
             triples: req.body.triples !== undefined ? Number(req.body.triples) : jugadoraPrevia.triples,
             hr: req.body.hr !== undefined ? Number(req.body.hr) : jugadoraPrevia.hr,
             rbi: req.body.rbi !== undefined ? Number(req.body.rbi) : jugadoraPrevia.rbi,
-            k: req.body.k !== undefined ? Number(req.body.k) : jugadoraPrevia.k
+            k: req.body.k !== undefined ? Number(req.body.k) : jugadoraPrevia.k,
+            
+            // EL CAMBIO CLAVE:
+            // Jalar el avg directamente del Admin. No lo calculamos aquí.
+            avg: req.body.avg !== undefined ? Number(req.body.avg) : jugadoraPrevia.avg
         };
-
-        // Recalcular AVG siempre
-        nuevosDatos.avg = nuevosDatos.vb > 0 ? (nuevosDatos.h / nuevosDatos.vb) : 0;
 
         const actualizado = await Player.findByIdAndUpdate(id, nuevosDatos, { new: true });
         res.json({ ok: true, data: actualizado });
     } catch (error) {
+        console.error("Error en PUT player:", error);
         res.status(500).json({ error: "Error interno" });
     }
 });
@@ -294,11 +295,15 @@ app.get('/api/dev/usuarios', async (req, res) => {
 // Actualización total de jugadora (Admin)
 app.put('/api/players/:id', async (req, res) => {
     try {
-        // Recibimos todo el objeto (nombre, equipo, fecha, stats)
-        const actualizada = await Player.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        res.json(actualizada);
-    } catch (error) {
-        res.status(500).json({ error: "Error al actualizar jugadora" });
+        // Esto guarda TODO lo que mandes desde el Admin, incluyendo tu AVG especial
+        const playerActualizado = await Player.findByIdAndUpdate(
+            req.params.id, 
+            { $set: req.body }, // <--- Esto es lo importante
+            { new: true }
+        );
+        res.json(playerActualizado);
+    } catch (err) {
+        res.status(500).json(err);
     }
 });
 
@@ -310,3 +315,4 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor activo en puerto ${PORT}`);
     console.log(`📡 Esperando peticiones de la Liga Ley 57...`);
 });
+
