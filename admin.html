@@ -353,53 +353,41 @@
             </table>`;
     }
 
-        async function updPlayer(id, campo, valor) {
+       async function updPlayer(id, campo, valor) {
     try {
         const nuevoValor = Number(valor) || 0;
-
-        // 1. MANDAR EL CAMPO QUE CAMBIÓ (H, 2B, etc.) AL SERVIDOR PRIMERO
-        await fetch(`${API}/players/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ [campo]: nuevoValor })
-        });
-
-        // 2. RECALCULAR EL AVG USANDO LOS VALORES ACTUALES DE LA FILA
-        // Buscamos la fila específica de esta jugadora
         const fila = document.querySelector(`input[onchange*="${id}"]`).closest('tr');
-        
-        // Extraemos todos los valores de los inputs de la fila
-        // IMPORTANTE: Usamos los nombres de campo exactos que pusiste en el HTML
+
+        // 1. Obtenemos TODOS los valores de la fila antes de mandar nada
         const h = Number(fila.querySelector('input[onchange*="\'h\'"]').value) || 0;
         const d2 = Number(fila.querySelector('input[onchange*="\'dobles\'"]').value) || 0;
         const t3 = Number(fila.querySelector('input[onchange*="\'triples\'"]').value) || 0;
         const hr = Number(fila.querySelector('input[onchange*="\'hr\'"]').value) || 0;
         const vb = Number(fila.querySelector('input[onchange*="\'vb\'"]').value) || 0;
 
-        // FÓRMULA SOLICITADA: (H + 2B + 3B + HR) / VB
-        let nuevoAvg = 0;
-        if (vb > 0) {
-            nuevoAvg = (h + d2 + t3 + hr) / vb;
-        }
+        // 2. Calculamos el AVG aquí mismo con la fórmula del dueño
+        let nuevoAvg = vb > 0 ? (h + d2 + t3 + hr) / vb : 0;
 
-        // 3. ACTUALIZACIÓN VISUAL INMEDIATA EN EL PANEL ADMIN
-        const celdaAvg = fila.querySelector('.font-black.italic.text-slate-400');
-        if (celdaAvg) {
-            celdaAvg.innerText = nuevoAvg.toFixed(3);
-        }
+        // 3. Actualizamos la vista del Admin de inmediato
+        fila.querySelector('.font-black.italic.text-slate-400').innerText = nuevoAvg.toFixed(3);
 
-        // 4. GUARDAR EL AVG CALCULADO EN LA BASE DE DATOS
-        // Esto es vital para que la página de estadísticas solo tenga que "jalarlo"
-        await fetch(`${API}/players/${id}`, { 
-            method: 'PUT', 
-            headers: { 'Content-Type': 'application/json' }, 
-            body: JSON.stringify({ avg: nuevoAvg }) 
+        // 4. ÚNICA PETICIÓN: Mandamos el campo que cambió Y el nuevo AVG juntos
+        // Esto garantiza que la base de datos siempre esté perfecta
+        const datosAActualizar = { 
+            [campo]: nuevoValor,
+            avg: nuevoAvg 
+        };
+
+        await fetch(`${API}/players/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(datosAActualizar)
         });
 
-        console.log(`Sincronización completa para ${id}. Nuevo AVG: ${nuevoAvg}`);
+        console.log(`Sincronización total para ${id}:`, datosAActualizar);
 
     } catch (err) {
-        console.error("Error crítico en actualización de jugadora:", err);
+        console.error("Error al actualizar:", err);
     }
 }
 
