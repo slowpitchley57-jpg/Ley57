@@ -302,23 +302,22 @@
                 container.innerHTML = `<tr><td colspan="10" class="p-10 text-center italic text-slate-400 uppercase text-[10px]">Sin jugadoras registradas.</td></tr>`;
             } else {
                 // 2. RENDERIZADO: Aquí NO hay fórmulas matemáticas, solo mostramos lo que viene de la DB
-                container.innerHTML = players.map(p => `
-                    <tr class="hover:bg-pink-50 border-b text-center text-[10px] transition-colors">
-                        <td class="p-3 font-bold uppercase text-blue-900 text-left">${p.nombre}</td>
-                        <td class="text-slate-500">${p.jj || 0}</td>
-                        <td class="text-slate-500">${p.vb || 0}</td>
-                        <td class="text-emerald-600 font-bold">${p.h || 0}</td>
-                        <td class="text-slate-500">${p.dobles || 0}</td>
-                        <td class="text-slate-500">${p.triples || 0}</td>
-                        <td class="text-pink-600 font-black">${p.hr || 0}</td>
-                        <td class="text-slate-400">${p.k || 0}</td>
-                        <td class="text-blue-500 font-bold">${p.rbi || 0}</td>
-                        
-                        <!-- ESTO JALA EL AVG GUARDADO EN EL ADMIN -->
-                        <td class="text-blue-900 font-black italic text-xs bg-slate-50/50">
-                            ${Number(p.avg || 0).toFixed(3)}
-                        </td>
-                    </tr>`).join('');
+                // Dentro de verDetalleRoster en estadisticas_femenil.html
+container.innerHTML = players.map(p => `
+    <tr class="hover:bg-slate-50 border-b text-center text-[10px]">
+        <td class="p-3 font-bold uppercase text-blue-900 text-left">${p.nombre}</td>
+        <td class="text-slate-500">${p.jj || 0}</td>
+        <td class="text-slate-500">${p.vb || 0}</td>
+        <td class="text-emerald-600 font-bold">${p.h || 0}</td>
+        <td class="text-slate-500">${p.dobles || 0}</td>
+        <td class="text-slate-500">${p.triples || 0}</td>
+        <td class="text-pink-600 font-black">${p.hr || 0}</td>
+        <td class="text-slate-400">${p.k || 0}</td>
+        <td class="text-blue-500 font-bold">${p.rbi || 0}</td>
+        <td class="text-blue-900 font-black italic text-xs bg-pink-50/30">
+            ${Number(p.avg || 0).toFixed(3)}
+        </td>
+    </tr>`).join('');
             }
             
             document.getElementById('modalDetalleEquipo').classList.remove('hidden');
