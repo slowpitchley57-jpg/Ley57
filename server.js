@@ -56,8 +56,12 @@ const Player = mongoose.model('Player', {
     jj: { type: Number, default: 0 }, 
     vb: { type: Number, default: 0 }, 
     h: { type: Number, default: 0 }, 
-    hr: { type: Number, default: 0 }, 
-    avg: { type: Number, default: 0 }
+    avg: { type: Number, default: 0 },
+    dobles: { type: Number, default: 0 }, // Agregar este
+    triples: { type: Number, default: 0 }, // Agregar este
+    hr: { type: Number, default: 0 },
+    k: { type: Number, default: 0 },      // Agregar este
+    rbi: { type: Number, default: 0 }
 });
 
 // Los modelos de Config y User se quedan igual, ya que el Admin es el mismo para ambas

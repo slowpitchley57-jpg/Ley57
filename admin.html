@@ -353,51 +353,38 @@
             </table>`;
     }
 
-    async function updPlayer(id, campo, valor) {
+   async function updPlayer(id, campo, valor) {
     try {
-        const nuevoValor = Number(valor);
+        const nuevoValor = Number(valor) || 0;
 
-        // 1. MANDAR LA ACTUALIZACIÓN DEL CAMPO ESPECÍFICO AL SERVIDOR
+        // Mandar al servidor
         await fetch(`${API}/players/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ [campo]: nuevoValor })
         });
 
-        // 2. RECALCULAR EL PROMEDIO (AVG) CON TU FÓRMULA PERSONALIZADA
-        // Buscamos la fila en la tabla para obtener los valores actuales de los inputs
+        // Recalcular AVG usando la fórmula: (H + 2B + 3B + HR) / VB
         const fila = document.querySelector(`input[onchange*="${id}"]`).closest('tr');
         
-        // Obtenemos todos los valores necesarios de la fila
-        const h = Number(fila.querySelector('input[onchange*="\'h\'"]').value);
-        const d2 = Number(fila.querySelector('input[onchange*="\'dobles\'"]').value);
-        const t3 = Number(fila.querySelector('input[onchange*="\'triples\'"]').value);
-        const hr = Number(fila.querySelector('input[onchange*="\'hr\'"]').value);
-        const vb = Number(fila.querySelector('input[onchange*="\'vb\'"]').value);
+        const h = Number(fila.querySelector('input[onchange*="\'h\'"]').value) || 0;
+        const d2 = Number(fila.querySelector('input[onchange*="\'dobles\'"]').value) || 0;
+        const t3 = Number(fila.querySelector('input[onchange*="\'triples\'"]').value) || 0;
+        const hr = Number(fila.querySelector('input[onchange*="\'hr\'"]').value) || 0;
+        const vb = Number(fila.querySelector('input[onchange*="\'vb\'"]').value) || 0;
 
-        // APLICAMOS TU FÓRMULA: (H + 2B + 3B + HR) / VB
-        let nuevoAvg = 0;
-        if (vb > 0) {
-            nuevoAvg = (h + d2 + t3 + hr) / vb;
-        }
+        let nuevoAvg = vb > 0 ? (h + d2 + t3 + hr) / vb : 0;
 
-        // 3. ACTUALIZAR VISUALMENTE EN LA TABLA
-        const celdaAvg = fila.querySelector('.font-black.italic.text-slate-400');
-        if (celdaAvg) {
-            celdaAvg.innerText = nuevoAvg.toFixed(3);
-        }
-
-        // 4. GUARDAR EL NUEVO PROMEDIO CALCULADO EN LA BASE DE DATOS
+        // Actualizar visualmente y en DB
+        fila.querySelector('.font-black.italic.text-slate-400').innerText = nuevoAvg.toFixed(3);
         await fetch(`${API}/players/${id}`, { 
             method: 'PUT', 
             headers: { 'Content-Type': 'application/json' }, 
             body: JSON.stringify({ avg: nuevoAvg }) 
         });
 
-        console.log(`Actualizado ${campo}. Nuevo AVG calculado: ${nuevoAvg.toFixed(3)}`);
-
-    } catch (err) { 
-        console.error("Error al actualizar:", err); 
+    } catch (err) {
+        console.error("Error:", err);
     }
 }
 
