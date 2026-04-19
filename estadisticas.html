@@ -291,17 +291,22 @@
     document.getElementById('detNombreEquipo').innerText = nombreEquipo;
     
     try {
-        // El t=... evita que el navegador te de datos viejos (F5 forzado internamente)
-        const res = await fetch(`${API}/players?liga=femenil&t=${new Date().getTime()}`);
+        // Agregamos el timestamp para evitar caché
+        const url = `${API}/players?liga=femenil&t=${new Date().getTime()}`;
+        const res = await fetch(url);
         const allPlayers = await res.json();
         
         const players = allPlayers.filter(p => p.equipo.trim().toUpperCase() === nombreEquipo.trim().toUpperCase());
         
         if (players.length === 0) {
-            container.innerHTML = `<tr><td colspan="10" class="p-10 text-center italic text-slate-400">Sin jugadoras registradas.</td></tr>`;
+            container.innerHTML = `<tr><td colspan="10" class="p-10 text-center italic text-slate-400 uppercase text-[10px]">Sin jugadoras registradas.</td></tr>`;
         } else {
-            // MAPEO DIRECTO: No hay fórmulas, solo imprimimos lo que dice la DB
-            container.innerHTML = players.map(p => `
+            // MAPEO DIRECTO
+            container.innerHTML = players.map(p => {
+                // SEGURO: Si el campo no existe en la DB, forzamos el 0 antes de fijar decimales
+                const promedioLimpio = p.avg !== undefined && p.avg !== null ? Number(p.avg) : 0;
+
+                return `
                 <tr class="hover:bg-slate-50 border-b text-center text-[10px]">
                     <td class="p-3 font-bold uppercase text-blue-900 text-left">${p.nombre}</td>
                     <td class="text-slate-500">${p.jj || 0}</td>
@@ -312,15 +317,15 @@
                     <td class="text-pink-600 font-black">${p.hr || 0}</td>
                     <td class="text-slate-400">${p.k || 0}</td>
                     <td class="text-blue-500 font-bold">${p.rbi || 0}</td>
-                    
-                    <!-- AQUÍ ESTÁ EL SECRETO: Imprime el AVG que guardó el Admin -->
                     <td class="text-blue-900 font-black italic text-xs bg-pink-50/50">
-                        ${Number(p.avg || 0).toFixed(3)}
+                        ${promedioLimpio.toFixed(3)}
                     </td>
-                </tr>`).join('');
+                </tr>`;
+            }).join('');
         }
         document.getElementById('modalDetalleEquipo').classList.remove('hidden');
     } catch (error) {
+        console.error("Error al cargar roster:", error);
         container.innerHTML = `<tr><td colspan="10" class="p-10 text-center text-red-500 font-black">ERROR DE SINCRONIZACIÓN</td></tr>`;
     }
 }

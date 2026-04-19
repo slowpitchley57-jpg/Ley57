@@ -353,41 +353,56 @@
             </table>`;
     }
 
-       async function updPlayer(id, campo, valor) {
+                async function updPlayer(id, campo, valor) {
     try {
         const nuevoValor = Number(valor) || 0;
+        
+        // 1. Buscamos la fila de la jugadora
         const fila = document.querySelector(`input[onchange*="${id}"]`).closest('tr');
+        if (!fila) return console.error("No se encontró la fila de la jugadora");
 
-        // 1. Obtenemos TODOS los valores de la fila antes de mandar nada
-        const h = Number(fila.querySelector('input[onchange*="\'h\'"]').value) || 0;
-        const d2 = Number(fila.querySelector('input[onchange*="\'dobles\'"]').value) || 0;
-        const t3 = Number(fila.querySelector('input[onchange*="\'triples\'"]').value) || 0;
-        const hr = Number(fila.querySelector('input[onchange*="\'hr\'"]').value) || 0;
-        const vb = Number(fila.querySelector('input[onchange*="\'vb\'"]').value) || 0;
+        // 2. Extraemos los valores con selectores más precisos
+        // Buscamos el input que en su onchange contenga el nombre del campo exacto
+        const getVal = (c) => {
+            const el = fila.querySelector(`input[onchange*="'${c}'"]`);
+            return el ? Number(el.value) : 0;
+        };
 
-        // 2. Calculamos el AVG aquí mismo con la fórmula del dueño
+        const h = getVal('h');
+        const d2 = getVal('dobles');
+        const t3 = getVal('triples');
+        const hr = getVal('hr');
+        const vb = getVal('vb');
+
+        // 3. Calculamos el AVG con tu fórmula: (H + 2B + 3B + HR) / VB
         let nuevoAvg = vb > 0 ? (h + d2 + t3 + hr) / vb : 0;
 
-        // 3. Actualizamos la vista del Admin de inmediato
-        fila.querySelector('.font-black.italic.text-slate-400').innerText = nuevoAvg.toFixed(3);
+        // 4. Actualizamos el texto visual en el Admin (la columna del final)
+        const celdaVisual = fila.querySelector('.font-black.italic.text-slate-400');
+        if (celdaVisual) celdaVisual.innerText = nuevoAvg.toFixed(3);
 
-        // 4. ÚNICA PETICIÓN: Mandamos el campo que cambió Y el nuevo AVG juntos
-        // Esto garantiza que la base de datos siempre esté perfecta
-        const datosAActualizar = { 
+        // 5. MANDAMOS TODO EN UN SOLO PAQUETE PARA FORZAR EL GUARDADO
+        const body = { 
             [campo]: nuevoValor,
             avg: nuevoAvg 
         };
 
-        await fetch(`${API}/players/${id}`, {
+        console.log("Enviando a DB:", body);
+
+        const response = await fetch(`${API}/players/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(datosAActualizar)
+            body: JSON.stringify(body)
         });
 
-        console.log(`Sincronización total para ${id}:`, datosAActualizar);
+        if(response.ok) {
+            console.log(`✅ Guardado con éxito para ${id}: AVG ${nuevoAvg.toFixed(3)}`);
+        } else {
+            console.error("❌ Error al guardar en el servidor");
+        }
 
     } catch (err) {
-        console.error("Error al actualizar:", err);
+        console.error("Error crítico en updPlayer:", err);
     }
 }
 
