@@ -282,44 +282,61 @@
 }
 
     // Función para el Roster
-            async function verDetalleRoster(nombreEquipo) {
+        async function verDetalleRoster(nombreEquipo) {
+    const container = document.getElementById('bodyDetalleJugadoras');
+    
+    // 1. LIMPIEZA TOTAL: Borramos lo que sea que estuviera antes (evita que el RBI se "quede")
+    container.innerHTML = `<tr><td colspan="10" class="p-10 text-center"><i class="fa fa-spinner fa-spin"></i> Cargando datos...</td></tr>`;
+    
     document.getElementById('detNombreEquipo').innerText = nombreEquipo;
     
     try {
-        const res = await fetch(`${API}/players?liga=femenil`);
+        // Añadimos un timestamp para evitar que el navegador use datos viejos (Caché)
+        const res = await fetch(`${API}/players?liga=femenil&t=${new Date().getTime()}`);
         const allPlayers = await res.json();
         
-        // Filtramos por equipo (asegurando limpieza de espacios y mayúsculas)
+        // Filtramos por equipo limpiando espacios
         const players = allPlayers.filter(p => p.equipo.trim().toUpperCase() === nombreEquipo.trim().toUpperCase());
-        
-        const container = document.getElementById('bodyDetalleJugadoras');
         
         if (players.length === 0) {
             container.innerHTML = `<tr><td colspan="10" class="p-10 text-center italic text-slate-400">Sin jugadoras registradas.</td></tr>`;
         } else {
-            // Generamos las 10 columnas en el orden exacto del THEAD
-            container.innerHTML = players.map(p => `
+            // 2. RECONSTRUCCIÓN: Pintamos la tabla desde cero
+            container.innerHTML = players.map(p => {
+                // Forzamos que sean números para evitar errores de visualización
+                const jj = Number(p.jj || 0);
+                const vb = Number(p.vb || 0);
+                const h = Number(p.h || 0);
+                const d2 = Number(p.dobles || 0);
+                const t3 = Number(p.triples || 0);
+                const hr = Number(p.hr || 0);
+                const k = Number(p.k || 0);
+                const rbi = Number(p.rbi || 0);
+                const avg = Number(p.avg || 0);
+
+                return `
                 <tr class="hover:bg-slate-50 border-b text-center text-[10px]">
                     <td class="p-3 font-bold uppercase text-blue-900 text-left">${p.nombre}</td>
-                    <td class="text-slate-500">${p.jj || 0}</td>
-                    <td class="text-slate-500">${p.vb || 0}</td>
-                    <td class="text-emerald-600 font-bold">${p.h || 0}</td>
-                    <td class="text-slate-500">${p.dobles || 0}</td>
-                    <td class="text-slate-500">${p.triples || 0}</td>
-                    <td class="text-pink-600 font-black">${p.hr || 0}</td>
-                    <td class="text-slate-400">${p.k || 0}</td>
-                    <td class="text-blue-500 font-bold">${p.rbi || 0}</td>
-                    
+                    <td class="text-slate-500">${jj}</td>
+                    <td class="text-slate-500">${vb}</td>
+                    <td class="text-emerald-600 font-bold">${h}</td>
+                    <td class="text-slate-500">${d2}</td>
+                    <td class="text-slate-500">${t3}</td>
+                    <td class="text-pink-600 font-black">${hr}</td>
+                    <td class="text-slate-400">${k}</td>
+                    <td class="text-blue-500 font-bold">${rbi}</td>
                     <td class="text-blue-900 font-black italic text-xs">
-                        ${Number(p.avg || 0).toFixed(3)}
+                        ${avg.toFixed(3)}
                     </td>
-                </tr>`).join('');
+                </tr>`;
+            }).join('');
         }
         
         document.getElementById('modalDetalleEquipo').classList.remove('hidden');
         
     } catch (error) {
-        console.error("Error al sincronizar estadísticas femeniles:", error);
+        console.error("Error al sincronizar:", error);
+        container.innerHTML = `<tr><td colspan="10" class="p-10 text-center text-red-500">Error al conectar con el servidor.</td></tr>`;
     }
 }
     function cerrarDetalle() { document.getElementById('modalDetalleEquipo').classList.add('hidden'); }
