@@ -319,27 +319,58 @@
     }
 
     async function verDetalleRoster(nombreEquipo) {
-        document.getElementById('detNombreEquipo').innerText = nombreEquipo;
+    // Colocamos el nombre del equipo en el título del modal
+    document.getElementById('detNombreEquipo').innerText = nombreEquipo;
+    
+    try {
+        // Traemos a todos los jugadores de la liga varonil
         const res = await fetch(`${API}/players?liga=varonil`);
         const allPlayers = await res.json();
+        
+        // Filtramos para mostrar solo los del equipo seleccionado
         const players = allPlayers.filter(p => p.equipo.trim().toUpperCase() === nombreEquipo.trim().toUpperCase());
         
         const container = document.getElementById('bodyDetalleJugadoras');
-        if(players.length === 0) {
-            container.innerHTML = `<tr><td colspan="6" class="p-10 text-center text-slate-400 italic uppercase text-[10px]">No hay jugadores registrados.</td></tr>`;
+        
+        if (players.length === 0) {
+            container.innerHTML = `<tr><td colspan="10" class="p-10 text-center text-slate-400 italic uppercase text-[10px]">No hay jugadores registrados en este equipo.</td></tr>`;
         } else {
-            container.innerHTML = players.map(p => `
-                <tr class="hover:bg-zinc-800 border-b border-zinc-900 transition-colors text-center">
+            // Mapeamos los jugadores siguiendo el orden del thead
+            container.innerHTML = players.map(p => {
+                // Variables para la fórmula personalizada del dueño
+                const h = Number(p.h || 0);
+                const d2 = Number(p.dobles || 0);
+                const t3 = Number(p.triples || 0);
+                const hr = Number(p.hr || 0);
+                const vb = Number(p.vb || 0);
+                
+                // Fórmula: (H + 2B + 3B + HR) / VB
+                let calculadoAvg = vb > 0 ? (h + d2 + t3 + hr) / vb : 0;
+
+                return `
+                <tr class="hover:bg-zinc-800 border-b border-zinc-900 transition-colors text-center text-[10px]">
                     <td class="p-3 font-bold uppercase text-white text-left">${p.nombre}</td>
                     <td class="text-zinc-400">${p.jj || 0}</td>
                     <td class="text-zinc-400">${p.vb || 0}</td>
-                    <td class="text-red-500 font-black">${p.h || 0}</td>
-                    <td class="text-orange-500 font-black">${p.hr || 0}</td>
-                    <td class="text-red-600 font-black">${(p.avg || 0).toFixed(3)}</td>
-                </tr>`).join('');
+                    <td class="text-white font-bold">${h}</td>
+                    <td class="text-zinc-400">${d2}</td>
+                    <td class="text-zinc-400">${t3}</td>
+                    <td class="text-orange-500 font-black">${hr}</td>
+                    <td class="text-zinc-500">${p.k || 0}</td>
+                    <td class="text-red-500 font-black">${p.rbi || 0}</td>
+                    <td class="text-red-600 font-black text-xs italic">${calculadoAvg.toFixed(3)}</td>
+                </tr>`;
+            }).join('');
         }
+        
+        // Abrimos el modal quitando la clase 'hidden'
         document.getElementById('modalDetalleEquipo').classList.remove('hidden');
+        
+    } catch (error) {
+        console.error("Error al cargar el roster detallado:", error);
+        alert("Hubo un problema al cargar los datos de los jugadores.");
     }
+}
 
     function cerrarDetalle() { document.getElementById('modalDetalleEquipo').classList.add('hidden'); }
 
