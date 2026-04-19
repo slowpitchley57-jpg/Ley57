@@ -160,7 +160,15 @@
                     <thead>
                         <tr class="text-slate-400 uppercase font-black text-[10px] border-b text-center">
                             <th class="p-3 text-left">Jugadora</th>
-                            <th>JJ</th><th>AB</th><th class="text-emerald-600">H</th><th class="text-red-500">HR</th><th class="text-blue-600">AVG</th>
+                            <th class="p-1">JJ</th>
+        <th class="p-1">VB</th>
+        <th class="p-1 text-emerald-600">H</th>
+        <th class="p-1">2B</th>
+        <th class="p-1">3B</th>
+        <th class="p-1 text-pink-600">HR</th>
+        <th class="p-1 text-slate-400">K</th>
+        <th class="p-1 text-blue-500">RBI</th>
+        <th class="p-1 text-blue-900">AVG</th>
                         </tr>
                     </thead>
                     <tbody id="bodyDetalleJugadoras" class="divide-y"></tbody>
@@ -274,24 +282,46 @@
 }
 
     // Función para el Roster
-    async function verDetalleRoster(nombreEquipo) {
-        document.getElementById('detNombreEquipo').innerText = nombreEquipo;
+   async function verDetalleRoster(nombreEquipo) {
+    document.getElementById('detNombreEquipo').innerText = nombreEquipo;
+    
+    try {
         const res = await fetch(`${API}/players?liga=femenil`);
         const allPlayers = await res.json();
+        
+        // Filtramos por equipo
         const players = allPlayers.filter(p => p.equipo.trim().toUpperCase() === nombreEquipo.trim().toUpperCase());
+        
         const container = document.getElementById('bodyDetalleJugadoras');
         
-        container.innerHTML = players.length === 0 ? `<tr><td colspan="6" class="p-10 text-center italic text-slate-400">Sin jugadoras registradas.</td></tr>` : 
-            players.map(p => `
-            <tr class="hover:bg-slate-50 border-b text-center">
-                <td class="p-3 font-bold uppercase text-blue-900 text-left">${p.nombre}</td>
-                <td>${p.jj || 0}</td><td>${p.vb || 0}</td>
-                <td class="text-emerald-600 font-black">${p.h || 0}</td>
-                <td class="text-pink-600 font-black">${p.hr || 0}</td>
-                <td class="text-blue-600 font-black">${(p.avg || 0).toFixed(3)}</td>
-            </tr>`).join('');
+        if (players.length === 0) {
+            // Ajustamos el colspan a 10 porque ahora hay 10 columnas
+            container.innerHTML = `<tr><td colspan="10" class="p-10 text-center italic text-slate-400">Sin jugadoras registradas.</td></tr>`;
+        } else {
+            container.innerHTML = players.map(p => `
+                <tr class="hover:bg-slate-50 border-b text-center text-[10px]">
+                    <td class="p-3 font-bold uppercase text-blue-900 text-left">${p.nombre}</td>
+                    <td class="text-slate-500">${p.jj || 0}</td>
+                    <td class="text-slate-500">${p.vb || 0}</td>
+                    <td class="text-emerald-600 font-bold">${p.h || 0}</td>
+                    <td class="text-slate-500">${p.dobles || 0}</td>
+                    <td class="text-slate-500">${p.triples || 0}</td>
+                    <td class="text-pink-600 font-black">${p.hr || 0}</td>
+                    <td class="text-slate-400">${p.k || 0}</td>
+                    <td class="text-blue-500 font-bold">${p.rbi || 0}</td>
+                    
+                    <td class="text-blue-900 font-black italic text-xs">
+                        ${Number(p.avg || 0).toFixed(3)}
+                    </td>
+                </tr>`).join('');
+        }
+        
         document.getElementById('modalDetalleEquipo').classList.remove('hidden');
+        
+    } catch (error) {
+        console.error("Error al cargar roster femenil:", error);
     }
+}
 
     function cerrarDetalle() { document.getElementById('modalDetalleEquipo').classList.add('hidden'); }
 
