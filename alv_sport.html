@@ -186,15 +186,19 @@
             <div class="overflow-y-auto p-4 custom-scroll bg-zinc-950 flex-1">
                 <table class="w-full text-left text-xs">
                     <thead>
-                        <tr class="text-zinc-500 uppercase font-black text-[10px] border-b border-zinc-800 text-center">
-                            <th class="p-3 text-left">Jugador</th>
-                            <th>JJ</th>
-                            <th>AB</th>
-                            <th class="text-red-500">H</th>
-                            <th class="text-orange-500">HR</th>
-                            <th class="text-red-600">AVG</th>
-                        </tr>
-                    </thead>
+    <tr class="bg-zinc-900 text-zinc-400 uppercase font-black border-b border-zinc-800 text-[9px] tracking-widest text-center">
+        <th class="p-3 text-left">Jugador</th>
+        <th class="p-1">JJ</th>
+        <th class="p-1">VB</th> <!-- Cambié AB por VB para ser consistentes -->
+        <th class="p-1 text-red-500">H</th>
+        <th class="p-1">2B</th>
+        <th class="p-1">3B</th>
+        <th class="p-1 text-orange-500">HR</th>
+        <th class="p-1 text-zinc-500">K</th>
+        <th class="p-1 text-red-500">RBI</th>
+        <th class="p-1 text-red-600">AVG</th>
+    </tr>
+</thead>
                     <tbody id="bodyDetalleJugadoras" class="divide-y divide-zinc-900"></tbody>
                 </table>
             </div>
@@ -319,56 +323,42 @@
     }
 
     async function verDetalleRoster(nombreEquipo) {
-    // Colocamos el nombre del equipo en el título del modal
     document.getElementById('detNombreEquipo').innerText = nombreEquipo;
     
     try {
-        // Traemos a todos los jugadores de la liga varonil
         const res = await fetch(`${API}/players?liga=varonil`);
         const allPlayers = await res.json();
         
-        // Filtramos para mostrar solo los del equipo seleccionado
+        // Filtramos por equipo
         const players = allPlayers.filter(p => p.equipo.trim().toUpperCase() === nombreEquipo.trim().toUpperCase());
         
         const container = document.getElementById('bodyDetalleJugadoras');
         
         if (players.length === 0) {
-            container.innerHTML = `<tr><td colspan="10" class="p-10 text-center text-slate-400 italic uppercase text-[10px]">No hay jugadores registrados en este equipo.</td></tr>`;
+            container.innerHTML = `<tr><td colspan="10" class="p-10 text-center text-slate-400 italic uppercase text-[10px]">No hay jugadores registrados.</td></tr>`;
         } else {
-            // Mapeamos los jugadores siguiendo el orden del thead
-            container.innerHTML = players.map(p => {
-                // Variables para la fórmula personalizada del dueño
-                const h = Number(p.h || 0);
-                const d2 = Number(p.dobles || 0);
-                const t3 = Number(p.triples || 0);
-                const hr = Number(p.hr || 0);
-                const vb = Number(p.vb || 0);
-                
-                // Fórmula: (H + 2B + 3B + HR) / VB
-                let calculadoAvg = vb > 0 ? (h + d2 + t3 + hr) / vb : 0;
-
-                return `
+            container.innerHTML = players.map(p => `
                 <tr class="hover:bg-zinc-800 border-b border-zinc-900 transition-colors text-center text-[10px]">
                     <td class="p-3 font-bold uppercase text-white text-left">${p.nombre}</td>
                     <td class="text-zinc-400">${p.jj || 0}</td>
                     <td class="text-zinc-400">${p.vb || 0}</td>
-                    <td class="text-white font-bold">${h}</td>
-                    <td class="text-zinc-400">${d2}</td>
-                    <td class="text-zinc-400">${t3}</td>
-                    <td class="text-orange-500 font-black">${hr}</td>
+                    <td class="text-white font-bold">${p.h || 0}</td>
+                    <td class="text-zinc-400">${p.dobles || 0}</td>
+                    <td class="text-zinc-400">${p.triples || 0}</td>
+                    <td class="text-orange-500 font-black">${p.hr || 0}</td>
                     <td class="text-zinc-500">${p.k || 0}</td>
                     <td class="text-red-500 font-black">${p.rbi || 0}</td>
-                    <td class="text-red-600 font-black text-xs italic">${calculadoAvg.toFixed(3)}</td>
-                </tr>`;
-            }).join('');
+                    
+                    <td class="text-red-600 font-black text-xs italic">
+                        ${Number(p.avg || 0).toFixed(3)}
+                    </td>
+                </tr>`).join('');
         }
         
-        // Abrimos el modal quitando la clase 'hidden'
         document.getElementById('modalDetalleEquipo').classList.remove('hidden');
         
     } catch (error) {
-        console.error("Error al cargar el roster detallado:", error);
-        alert("Hubo un problema al cargar los datos de los jugadores.");
+        console.error("Error:", error);
     }
 }
 
