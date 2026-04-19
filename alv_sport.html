@@ -322,7 +322,8 @@
         } catch(e) { console.error("Error Líderes:", e); }
     }
 
-    async function verDetalleRoster(nombreEquipo) {
+                        async function verDetalleRoster(nombreEquipo) {
+    // Ponemos el nombre del equipo en el título del modal
     document.getElementById('detNombreEquipo').innerText = nombreEquipo;
     
     try {
@@ -337,28 +338,29 @@
         if (players.length === 0) {
             container.innerHTML = `<tr><td colspan="10" class="p-10 text-center text-slate-400 italic uppercase text-[10px]">No hay jugadores registrados.</td></tr>`;
         } else {
+            // Mapeamos las 10 columnas EXACTAS en el orden del thead
             container.innerHTML = players.map(p => `
                 <tr class="hover:bg-zinc-800 border-b border-zinc-900 transition-colors text-center text-[10px]">
                     <td class="p-3 font-bold uppercase text-white text-left">${p.nombre}</td>
                     <td class="text-zinc-400">${p.jj || 0}</td>
                     <td class="text-zinc-400">${p.vb || 0}</td>
-                    <td class="text-white font-bold">${p.h || 0}</td>
+                    <td class="text-red-500 font-bold">${p.h || 0}</td>
                     <td class="text-zinc-400">${p.dobles || 0}</td>
                     <td class="text-zinc-400">${p.triples || 0}</td>
                     <td class="text-orange-500 font-black">${p.hr || 0}</td>
                     <td class="text-zinc-500">${p.k || 0}</td>
                     <td class="text-red-500 font-black">${p.rbi || 0}</td>
-                    
                     <td class="text-red-600 font-black text-xs italic">
                         ${Number(p.avg || 0).toFixed(3)}
                     </td>
                 </tr>`).join('');
         }
         
+        // Mostrar modal
         document.getElementById('modalDetalleEquipo').classList.remove('hidden');
         
     } catch (error) {
-        console.error("Error:", error);
+        console.error("Error al cargar detalle:", error);
     }
 }
 
