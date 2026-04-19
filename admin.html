@@ -353,30 +353,33 @@
             </table>`;
     }
 
-   async function updPlayer(id, campo, valor) {
+            async function updPlayer(id, campo, valor) {
     try {
         const nuevoValor = Number(valor) || 0;
 
-        // Mandar al servidor
+        // 1. Guardamos el valor que cambió (H, 2B, VB, etc.)
         await fetch(`${API}/players/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ [campo]: nuevoValor })
         });
 
-        // Recalcular AVG usando la fórmula: (H + 2B + 3B + HR) / VB
+        // 2. Obtenemos la fila para recalcular el AVG de inmediato
         const fila = document.querySelector(`input[onchange*="${id}"]`).closest('tr');
-        
         const h = Number(fila.querySelector('input[onchange*="\'h\'"]').value) || 0;
         const d2 = Number(fila.querySelector('input[onchange*="\'dobles\'"]').value) || 0;
         const t3 = Number(fila.querySelector('input[onchange*="\'triples\'"]').value) || 0;
         const hr = Number(fila.querySelector('input[onchange*="\'hr\'"]').value) || 0;
         const vb = Number(fila.querySelector('input[onchange*="\'vb\'"]').value) || 0;
 
+        // Fórmula del Dueño: (H + 2B + 3B + HR) / VB
         let nuevoAvg = vb > 0 ? (h + d2 + t3 + hr) / vb : 0;
 
-        // Actualizar visualmente y en DB
+        // 3. Actualizamos la vista del Admin
         fila.querySelector('.font-black.italic.text-slate-400').innerText = nuevoAvg.toFixed(3);
+
+        // 4. GUARDAMOS EL AVG EN LA BASE DE DATOS
+        // Esto es lo que "jalará" la página de estadísticas después
         await fetch(`${API}/players/${id}`, { 
             method: 'PUT', 
             headers: { 'Content-Type': 'application/json' }, 
@@ -384,7 +387,7 @@
         });
 
     } catch (err) {
-        console.error("Error:", err);
+        console.error("Error al sincronizar con DB:", err);
     }
 }
 
