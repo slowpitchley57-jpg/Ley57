@@ -189,7 +189,7 @@
     <tr class="bg-zinc-900 text-zinc-400 uppercase font-black border-b border-zinc-800 text-[9px] tracking-widest text-center">
         <th class="p-3 text-left">Jugador</th>
         <th class="p-1">JJ</th>
-        <th class="p-1">VB</th> <!-- Cambié AB por VB para ser consistentes -->
+        <th class="p-1">VB</th>
         <th class="p-1 text-red-500">H</th>
         <th class="p-1">2B</th>
         <th class="p-1">3B</th>
@@ -340,20 +340,20 @@
         } else {
             // Mapeamos las 10 columnas EXACTAS en el orden del thead
             container.innerHTML = players.map(p => `
-                <tr class="hover:bg-zinc-800 border-b border-zinc-900 transition-colors text-center text-[10px]">
-                    <td class="p-3 font-bold uppercase text-white text-left">${p.nombre}</td>
-                    <td class="text-zinc-400">${p.jj || 0}</td>
-                    <td class="text-zinc-400">${p.vb || 0}</td>
-                    <td class="text-red-500 font-bold">${p.h || 0}</td>
-                    <td class="text-zinc-400">${p.dobles || 0}</td>
-                    <td class="text-zinc-400">${p.triples || 0}</td>
-                    <td class="text-orange-500 font-black">${p.hr || 0}</td>
-                    <td class="text-zinc-500">${p.k || 0}</td>
-                    <td class="text-red-500 font-black">${p.rbi || 0}</td>
-                    <td class="text-red-600 font-black text-xs italic">
-                        ${Number(p.avg || 0).toFixed(3)}
-                    </td>
-                </tr>`).join('');
+            <tr class="hover:bg-zinc-800 border-b border-zinc-900 transition-colors text-center text-[10px]">
+    <td class="p-3 font-bold uppercase text-white text-left">${p.nombre}</td>
+    <td class="text-zinc-400">${p.jj || 0}</td>
+    <td class="text-zinc-400">${p.vb || 0}</td>
+    <td class="text-red-500 font-bold">${p.h || 0}</td>
+    <td class="text-zinc-400">${p.dobles || 0}</td>
+    <td class="text-zinc-400">${p.triples || 0}</td>
+    <td class="text-orange-500 font-black">${p.hr || 0}</td>
+    <td class="text-zinc-500">${p.k || 0}</td>
+    <td class="text-red-500 font-black">${p.rbi || 0}</td>
+    <td class="text-red-600 font-black text-xs italic">
+        ${Number(p.avg || 0).toFixed(3)}
+    </td>
+</tr>`).join('');
         }
         
         // Mostrar modal
