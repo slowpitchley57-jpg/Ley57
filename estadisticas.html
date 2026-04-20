@@ -126,22 +126,52 @@
                 </section>
 
                 <section class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-slate-100 relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-2 h-full bg-pink-600"></div>
-                    <div class="flex flex-col mb-6 gap-4">
-                        <h3 class="text-blue-900 font-black flex items-center gap-3 uppercase text-xs italic tracking-widest">
-                            <i class="fa fa-history text-pink-600 animate-pulse"></i> Resumen Jornada
-                        </h3>
-                        <div class="relative">
-                            <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
-                            <input type="text" id="inputBusquedaJuegos" onkeyup="filtrarJuegos()" placeholder="Buscar equipo o fecha..." 
-                                class="w-full pl-9 pr-4 py-2 bg-slate-100 border-none rounded-xl text-[10px] font-bold uppercase focus:ring-2 focus:ring-pink-500 outline-none text-slate-900">
-                        </div>
-                        <div class="mt-1 px-2">
-                            <span id="contadorResultados" class="text-[9px] font-black uppercase text-pink-600 italic"></span>
-                        </div>
-                    </div>
-                    <div id="resultadosJornada" class="space-y-4 max-h-[500px] overflow-y-auto custom-scroll pr-2"></div>
-                </section>
+    <div class="absolute top-0 left-0 w-2 h-full bg-pink-600"></div>
+    
+    <div class="flex flex-col mb-6 gap-4">
+        <h3 class="text-blue-900 font-black flex items-center gap-3 uppercase text-xs italic tracking-widest">
+            <i class="fa fa-history text-pink-600 animate-pulse"></i> Resumen Jornada
+        </h3>
+        <div class="relative">
+            <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
+            <input type="text" id="inputBusquedaJuegos" onkeyup="filtrarJuegos()" placeholder="Buscar equipo o fecha..." 
+                class="w-full pl-9 pr-4 py-2 bg-slate-100 border-none rounded-xl text-[10px] font-bold uppercase focus:ring-2 focus:ring-pink-500 outline-none text-slate-900">
+        </div>
+        <div class="mt-1 px-2">
+            <span id="contadorResultados" class="text-[9px] font-black uppercase text-pink-600 italic"></span>
+        </div>
+    </div>
+
+    <div id="resultadosJornada" class="space-y-4 max-h-[500px] overflow-y-auto custom-scroll pr-2 mb-6"></div>
+
+    <div class="mt-6 pt-6 border-t border-slate-100">
+        <div class="bg-slate-50 p-5 rounded-3xl border border-dashed border-slate-200">
+            <div class="text-center mb-4">
+                <p class="text-[10px] text-slate-500 font-black uppercase tracking-tighter mb-1">
+                    ¿Quieres ver el calendario completo?
+                </p>
+                <p class="text-[9px] text-slate-400 font-bold uppercase italic">
+                    Consulta todos los encuentros de esta liga
+                </p>
+            </div>
+            
+            <a href="juegos.html" class="flex items-center justify-center gap-3 bg-pink-600 hover:bg-blue-900 text-white w-full py-3 rounded-2xl transition-all duration-300 shadow-lg shadow-pink-200 hover:shadow-blue-200 group">
+                <i class="fa fa-calendar-alt text-xs group-hover:rotate-12 transition-transform"></i>
+                <span class="text-[10px] font-black uppercase tracking-widest">Ver todos los encuentros</span>
+            </a>
+
+            <div class="mt-4 flex items-center justify-center gap-2">
+                <span class="flex h-2 w-2 relative">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-pink-600"></span>
+                </span>
+                <span class="text-[8px] text-slate-500 font-black uppercase tracking-tighter">
+                    Sincronizado · Unidad Deportiva Ley 57
+                </span>
+            </div>
+        </div>
+    </div>
+</section>
             </div>
         </div>
     </main>
