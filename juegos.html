@@ -6,6 +6,7 @@
     <title>Calendario Oficial | LEY 57 & ALV SPORT</title>
     <link rel="icon" type="image/jpeg" href="logoalvnegro.jpeg">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
@@ -78,9 +79,14 @@
                 <span id="mSub" class="text-[8px] font-black uppercase tracking-[0.4em] text-red-500"></span>
                 <h3 id="mTeams" class="text-xl font-black italic uppercase text-white mt-1 leading-tight"></h3>
                 
-                <div class="my-6 p-4 bg-white/5 rounded-2xl border border-white/5 shadow-inner">
-                    <p id="mScore" class="text-4xl font-black tracking-tighter text-white"></p>
-                </div>
+                <div id="mScoreBox" class="my-6 py-4 bg-white/5 rounded-3xl border border-white/5 overflow-hidden relative">
+    <div id="vsAnimContainer" class="h-24 flex items-center justify-center">
+        <dotlottie-player src="https://lottie.host/8e23974c-4738-4e89-8012-6f9872e448b1/mXv49z8nQu.json" 
+            background="transparent" speed="1" style="width: 150px; height: 150px;" loop autoplay>
+        </dotlottie-player>
+    </div>
+    <p id="mScore" class="text-5xl font-black tracking-tighter text-white hidden"></p>
+</div>
 
                 <div class="space-y-4 text-left border-t border-white/5 pt-4">
                     <div class="flex items-center gap-3">
@@ -144,26 +150,19 @@
                 .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
             filtrados.forEach((j, index) => {
-                const esFinal = j.status === 'finalizado';
-                const card = `
-                    <div class="glass-card p-5 rounded-[1.5rem] flex items-center justify-between cursor-pointer hover:bg-white/5 transition-all reveal" 
-                         style="animation-delay: ${0.1 * (index % 5)}s"
-                         onclick='openModal(${JSON.stringify(j)})'>
-                        <div class="flex items-center gap-4">
-                            <div class="text-center min-w-[40px] border-r border-white/5 pr-3">
-                                <span class="block text-red-600 font-black text-lg italic leading-none">${extraerDia(j.fecha)}</span>
-                                <span class="text-[7px] uppercase font-bold text-slate-500">${extraerMes(j.fecha)}</span>
-                            </div>
-                            <div>
-                                <p class="text-xs md:text-sm font-black italic uppercase tracking-tighter">
-                                    ${j.local} <span class="text-red-600 mx-1">${esFinal ? j.resultado : 'VS'}</span> ${j.visita}
-                                </p>
-                                <span class="text-[7px] font-black uppercase text-slate-500">${j.liga === 'femenil' ? 'Ley 57' : 'ALV Sport'}</span>
-                            </div>
-                        </div>
-                        <i class="fa fa-chevron-right text-[8px] text-slate-700"></i>
-                    </div>
-                `;
+                // Dentro de filtrados.forEach((j, index) => { ...
+const esFem = j.liga === 'femenil';
+const borderColor = esFem ? 'border-pink-600/30' : 'border-blue-600/30';
+const hoverColor = esFem ? 'hover:border-pink-500' : 'hover:border-blue-500';
+const shadowColor = esFem ? 'hover:shadow-[0_0_15px_rgba(219,39,119,0.2)]' : 'hover:shadow-[0_0_15px_rgba(37,99,235,0.2)]';
+
+const card = `
+    <div class="glass-card p-5 rounded-[1.5rem] border-l-4 ${borderColor} ${hoverColor} ${shadowColor} flex items-center justify-between cursor-pointer transition-all reveal" 
+         style="animation-delay: ${0.1 * (index % 5)}s"
+         onclick='openModal(${JSON.stringify(j)})'>
+        ...
+    </div>
+`;;
                 if (esFinal) containerF.innerHTML += card; else containerP.innerHTML += card;
             });
         }
@@ -175,17 +174,44 @@
             return meses[mIdx] || "MES";
         }
 
-        function openModal(j) {
-            document.getElementById('mSub').innerText = j.liga === 'femenil' ? 'LEY 57 · FEMENIL' : 'ALV SPORT · VARONIL';
-            document.getElementById('mTeams').innerText = `${j.local} VS ${j.visita}`;
-            document.getElementById('mScore').innerText = j.status === 'finalizado' ? j.resultado : 'VS';
-            document.getElementById('mInfo').innerText = `${j.fecha} | ${j.hora} HRS`;
-            
-            // Lógica de Amayer solicitada
-            document.getElementById('mAmpayer').innerText = (j.liga === 'femenil') ? "Javier Yocupicio" : "Javier Yocupicio / Staff ALV";
-            
-            document.getElementById('modalDetails').style.display = 'flex';
-        }
+       function openModal(j) {
+    // 1. Referencias a los nuevos elementos de animación y marcador
+    const vsAnim = document.getElementById('vsAnimContainer');
+    const scoreTxt = document.getElementById('mScore');
+    
+    // 2. Título de la liga según el tipo (Femenil/Varonil)
+    document.getElementById('mSub').innerText = j.liga === 'femenil' ? 'LEY 57 · FEMENIL' : 'ALV SPORT · VARONIL';
+    
+    // 3. Nombres de los equipos en el encuentro
+    document.getElementById('mTeams').innerText = `${j.local} VS ${j.visita}`;
+    
+    // 4. Lógica de visualización: Animación vs Resultado Final
+    if (j.status === 'finalizado') {
+        // Si el juego terminó, ocultamos la animación y mostramos el marcador real
+        if (vsAnim) vsAnim.style.display = 'none';
+        scoreTxt.style.display = 'block';
+        scoreTxt.innerText = j.resultado; 
+    } else {
+        // Si está pendiente, mostramos la animación dinámica y ocultamos el texto del marcador
+        if (vsAnim) vsAnim.style.display = 'flex';
+        scoreTxt.style.display = 'none';
+        scoreTxt.innerText = "VS"; 
+    }
+    
+    // 5. Detalles de Fecha, Hora y Campo oficial
+    document.getElementById('mInfo').innerText = `${j.fecha} | ${j.hora} HRS`;
+    
+    // 6. Lógica de Ampayer dinámico solicitada
+    // Femenil: Javier Yocupicio | Varonil: Javier Yocupicio / Staff ALV
+    document.getElementById('mAmpayer').innerText = (j.liga === 'femenil') 
+        ? "Javier Yocupicio" 
+        : "Javier Yocupicio / Staff ALV";
+    
+    // 7. Mostrar el modal con la animación de entrada
+    const modal = document.getElementById('modalDetails');
+    modal.style.display = 'flex';
+    modal.classList.remove('opacity-0', 'pointer-events-none'); 
+}
 
         function closeModal() { document.getElementById('modalDetails').style.display = 'none'; }
     </script>
