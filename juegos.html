@@ -13,85 +13,96 @@
         .bg-carbon { background-image: radial-gradient(circle at top right, #1e293b, transparent), url('https://www.transparenttextures.com/patterns/carbon-fibre.png'); }
         .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
         .filter-btn.active { background-color: #dc2626; color: white; box-shadow: 0 0 20px rgba(220, 38, 38, 0.4); }
-        #modalDetails { display: none; backdrop-filter: blur(10px); z-index: 100; }
-        .animate-in { animation: fadeIn 0.3s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        /* Scrollbar personalizada para el toque profesional */
+        
+        /* Animaciones de Entrada */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .reveal { animation: fadeInUp 0.6s ease-out forwards; opacity: 0; }
+        
+        #modalDetails { display: none; backdrop-filter: blur(15px); z-index: 100; }
+        .modal-anim { animation: modalShow 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes modalShow { from { opacity: 0; scale: 0.9; } to { opacity: 1; scale: 1; } }
+
         .custom-scroll::-webkit-scrollbar { width: 5px; }
-        .custom-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
         .custom-scroll::-webkit-scrollbar-thumb { background: #dc2626; border-radius: 10px; }
     </style>
 </head>
 <body class="bg-carbon min-h-screen pb-20 custom-scroll">
 
-    <header class="p-6 flex justify-between items-center max-w-7xl mx-auto">
+    <header class="p-6 flex justify-between items-center max-w-7xl mx-auto reveal" style="animation-delay: 0.1s">
         <a href="index.html" class="text-white/50 hover:text-white transition-colors text-[10px] font-black uppercase tracking-widest">
             <i class="fa fa-arrow-left mr-2"></i> Portal Principal
         </a>
-        <img src="alv_sport_logo.png.jpeg" class="h-12 md:h-16 drop-shadow-lg" alt="ALV Sport">
+        <img src="alv_sport_logo.png.jpeg" class="h-12 md:h-14 drop-shadow-lg" alt="ALV Sport">
     </header>
 
-    <div class="max-w-5xl mx-auto px-6 mt-10">
-        <div class="text-center mb-12">
-            <h1 class="text-4xl md:text-5xl font-black italic uppercase tracking-tighter mb-4">
-                Calendario <span class="text-red-600">Sincronizado</span>
-            </h1>
-            <div class="flex items-center justify-center gap-3">
-                <span class="relative flex h-2 w-2">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                </span>
-                <p class="text-slate-400 text-[9px] font-black uppercase tracking-[0.3em]">Datos en tiempo real · Ley 57</p>
+    <div class="max-w-4xl mx-auto px-6 mt-10">
+        <div class="text-center mb-8 reveal" style="animation-delay: 0.2s">
+            <h1 class="text-4xl font-black italic uppercase tracking-tighter mb-2">Calendario <span class="text-red-600">Pro</span></h1>
+            <div class="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-full">
+                <i class="fa fa-mouse-pointer text-red-500 text-[10px]"></i>
+                <p class="text-slate-300 text-[9px] font-black uppercase tracking-widest italic">Haz clic en un juego para ver detalles</p>
             </div>
         </div>
 
-        <div class="flex justify-center flex-wrap gap-4 mb-12">
-            <button onclick="cambiarFiltro('all')" class="filter-btn active px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest glass-card">Todos</button>
-            <button onclick="cambiarFiltro('femenil')" class="filter-btn px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest glass-card">Femenil (Ley 57)</button>
-            <button onclick="cambiarFiltro('varonil')" class="filter-btn px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest glass-card">Varonil (ALV)</button>
+        <div class="flex justify-center gap-3 mb-10 reveal" style="animation-delay: 0.3s">
+            <button onclick="cambiarFiltro('all')" class="filter-btn active px-5 py-2 rounded-xl text-[9px] font-black uppercase glass-card transition-all">Todos</button>
+            <button onclick="cambiarFiltro('femenil')" class="filter-btn px-5 py-2 rounded-xl text-[9px] font-black uppercase glass-card transition-all">Femenil</button>
+            <button onclick="cambiarFiltro('varonil')" class="filter-btn px-5 py-2 rounded-xl text-[9px] font-black uppercase glass-card transition-all">Varonil</button>
         </div>
 
-        <section class="mb-16">
-            <div class="flex items-center gap-4 mb-8">
-                <h2 class="text-blue-500 font-black italic uppercase tracking-widest text-[11px]">Próximos Encuentros</h2>
-                <span class="h-[1px] flex-grow bg-blue-600/20"></span>
-            </div>
-            <div class="grid gap-4" id="containerPendientes">
-                </div>
+        <section class="mb-12 reveal" style="animation-delay: 0.4s">
+            <h2 class="text-blue-500 font-black italic uppercase tracking-widest text-[10px] mb-6 flex items-center gap-3">
+                <span class="w-8 h-[1px] bg-blue-500/30"></span> Próximos Encuentros
+            </h2>
+            <div class="grid gap-3" id="containerPendientes"></div>
         </section>
 
-        <section>
-            <div class="flex items-center gap-4 mb-8">
-                <h2 class="text-slate-500 font-black italic uppercase tracking-widest text-[11px]">Resultados de Temporada</h2>
-                <span class="h-[1px] flex-grow bg-slate-800"></span>
-            </div>
-            <div class="grid gap-4" id="containerFinalizados">
-                </div>
+        <section class="reveal" style="animation-delay: 0.5s">
+            <h2 class="text-slate-500 font-black italic uppercase tracking-widest text-[10px] mb-6 flex items-center gap-3">
+                <span class="w-8 h-[1px] bg-slate-800"></span> Resultados Recientes
+            </h2>
+            <div class="grid gap-3" id="containerFinalizados"></div>
         </section>
     </div>
 
-    <div id="modalDetails" class="fixed inset-0 flex items-center justify-center p-6 bg-black/90 opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="glass-card w-full max-w-md rounded-[2.5rem] p-8 border-red-600/30 relative">
-            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-600 to-transparent"></div>
-            <button onclick="closeModal()" class="absolute top-6 right-6 text-slate-500 hover:text-white transition-colors"><i class="fa fa-times"></i></button>
+    <div id="modalDetails" class="fixed inset-0 flex items-center justify-center p-6 bg-black/90">
+        <div class="glass-card w-full max-w-sm rounded-[2.5rem] p-8 border-red-600/30 relative modal-anim">
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-red-600 rounded-b-full shadow-[0_0_15px_#dc2626]"></div>
+            <button onclick="closeModal()" class="absolute top-6 right-6 text-slate-500 hover:text-white"><i class="fa fa-times"></i></button>
             
             <div class="text-center">
-                <img src="logoalvnegro.jpeg" class="h-16 mx-auto mb-6">
-                <span id="mSub" class="text-[9px] font-black uppercase tracking-[0.4em] text-red-500">CARGANDO...</span>
-                <h3 id="mTeams" class="text-2xl font-black italic uppercase text-white mt-2 leading-none"></h3>
+                <img src="logoalvnegro.jpeg" class="h-16 mx-auto mb-4">
+                <span id="mSub" class="text-[8px] font-black uppercase tracking-[0.4em] text-red-500"></span>
+                <h3 id="mTeams" class="text-xl font-black italic uppercase text-white mt-1 leading-tight"></h3>
                 
-                <div id="mScoreBox" class="my-6 py-4 bg-white/5 rounded-3xl border border-white/5">
-                    <p id="mScore" class="text-5xl font-black tracking-tighter text-white"></p>
+                <div class="my-6 p-4 bg-white/5 rounded-2xl border border-white/5 shadow-inner">
+                    <p id="mScore" class="text-4xl font-black tracking-tighter text-white"></p>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4 py-4 border-t border-white/5 text-left">
-                    <div>
-                        <span class="text-[8px] text-slate-500 uppercase font-bold tracking-widest">Programación</span>
-                        <p id="mInfo" class="text-[10px] font-black text-white mt-1"></p>
+                <div class="space-y-4 text-left border-t border-white/5 pt-4">
+                    <div class="flex items-center gap-3">
+                        <i class="fa fa-calendar-day text-red-600 text-xs"></i>
+                        <div>
+                            <span class="block text-[7px] text-slate-500 uppercase font-bold">Fecha y Hora</span>
+                            <p id="mInfo" class="text-[10px] font-black text-white uppercase"></p>
+                        </div>
                     </div>
-                    <div class="text-right">
-                        <span class="text-[8px] text-slate-500 uppercase font-bold tracking-widest">Sede Principal</span>
-                        <p class="text-[10px] font-black text-white mt-1 uppercase">Unidad Deportiva Ley 57</p>
+                    <div class="flex items-center gap-3">
+                        <i class="fa fa-location-dot text-red-600 text-xs"></i>
+                        <div>
+                            <span class="block text-[7px] text-slate-500 uppercase font-bold">Campo</span>
+                            <p class="text-[10px] font-black text-white uppercase tracking-tighter">Unidad Deportiva Ley 57</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <i class="fa fa-id-badge text-red-600 text-xs"></i>
+                        <div>
+                            <span class="block text-[7px] text-slate-500 uppercase font-bold">Ampayer Oficial</span>
+                            <p id="mAmpayer" class="text-[10px] font-black text-white uppercase tracking-tighter"></p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -103,31 +114,20 @@
         let juegosBase = [];
         let filtroLiga = 'all';
 
-        document.addEventListener('DOMContentLoaded', init);
-
-        async function init() {
+        document.addEventListener('DOMContentLoaded', async () => {
             await sincronizarJuegos();
-        }
+        });
 
         async function sincronizarJuegos() {
-            const containerP = document.getElementById('containerPendientes');
-            const containerF = document.getElementById('containerFinalizados');
-            
-            containerP.innerHTML = `<div class="py-10 text-center opacity-50"><i class="fa fa-sync fa-spin"></i> Sincronizando Base de Datos...</div>`;
-            containerF.innerHTML = ``;
-
             try {
-                // Jalamos todos los juegos sin filtro de liga primero para tener la base completa
                 const res = await fetch(`${API}/games`);
                 juegosBase = await res.json();
                 renderizarJuegos();
-            } catch (error) {
-                containerP.innerHTML = `<p class="text-center text-red-500 text-xs font-black">ERROR DE CONEXIÓN CON EL SERVIDOR</p>`;
-            }
+            } catch (e) { console.error("Error sincronizando"); }
         }
 
-        function cambiarFiltro(liga) {
-            filtroLiga = liga;
+        function cambiarFiltro(l) {
+            filtroLiga = l;
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             event.target.classList.add('active');
             renderizarJuegos();
@@ -136,54 +136,38 @@
         function renderizarJuegos() {
             const containerP = document.getElementById('containerPendientes');
             const containerF = document.getElementById('containerFinalizados');
-            containerP.innerHTML = '';
-            containerF.innerHTML = '';
+            containerP.innerHTML = ''; containerF.innerHTML = '';
 
-            // Filtrar por liga
-            let filtrados = juegosBase.filter(g => filtroLiga === 'all' || g.liga === filtroLiga);
-            
-            // Ordenar por fecha (más recientes arriba)
-            filtrados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            // 1. Filtrar por liga y 2. ORDENAR POR FECHA (Descendente)
+            let filtrados = juegosBase
+                .filter(g => filtroLiga === 'all' || g.liga === filtroLiga)
+                .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
-            filtrados.forEach(j => {
+            filtrados.forEach((j, index) => {
                 const esFinal = j.status === 'finalizado';
                 const card = `
-                    <div class="glass-card p-6 rounded-[2rem] flex items-center justify-between cursor-pointer hover:border-red-600/50 transition-all group" 
+                    <div class="glass-card p-5 rounded-[1.5rem] flex items-center justify-between cursor-pointer hover:bg-white/5 transition-all reveal" 
+                         style="animation-delay: ${0.1 * (index % 5)}s"
                          onclick='openModal(${JSON.stringify(j)})'>
-                        <div class="flex items-center gap-6">
-                            <div class="text-center min-w-[45px] border-r border-white/5 pr-4">
-                                <span class="block text-red-600 font-black text-xl italic leading-none">${extraerDia(j.fecha)}</span>
-                                <span class="text-[8px] uppercase font-bold text-slate-500">${extraerMes(j.fecha)}</span>
+                        <div class="flex items-center gap-4">
+                            <div class="text-center min-w-[40px] border-r border-white/5 pr-3">
+                                <span class="block text-red-600 font-black text-lg italic leading-none">${extraerDia(j.fecha)}</span>
+                                <span class="text-[7px] uppercase font-bold text-slate-500">${extraerMes(j.fecha)}</span>
                             </div>
                             <div>
-                                <p class="text-sm md:text-base font-black italic uppercase tracking-tighter">
+                                <p class="text-xs md:text-sm font-black italic uppercase tracking-tighter">
                                     ${j.local} <span class="text-red-600 mx-1">${esFinal ? j.resultado : 'VS'}</span> ${j.visita}
                                 </p>
-                                <div class="flex items-center gap-2 mt-1">
-                                    <span class="text-[7px] font-black uppercase px-2 py-0.5 rounded-full ${j.liga === 'femenil' ? 'bg-pink-600/20 text-pink-400' : 'bg-blue-600/20 text-blue-400'}">
-                                        ${j.liga === 'femenil' ? 'LEY 57 FEM' : 'ALV SPORT VAR'}
-                                    </span>
-                                </div>
+                                <span class="text-[7px] font-black uppercase text-slate-500">${j.liga === 'femenil' ? 'Ley 57' : 'ALV Sport'}</span>
                             </div>
                         </div>
-                        <div class="text-right">
-                            <p class="text-[10px] font-black text-white italic">${j.hora}</p>
-                            <span class="text-[8px] uppercase font-bold ${esFinal ? 'text-green-500' : 'text-blue-400'}">
-                                ${esFinal ? 'Finalizado' : 'Pendiente'}
-                            </span>
-                        </div>
+                        <i class="fa fa-chevron-right text-[8px] text-slate-700"></i>
                     </div>
                 `;
-
-                if (esFinal) containerF.innerHTML += card;
-                else containerP.innerHTML += card;
+                if (esFinal) containerF.innerHTML += card; else containerP.innerHTML += card;
             });
-
-            if (containerP.innerHTML === '') containerP.innerHTML = `<p class="text-center py-10 opacity-30 italic text-[10px] uppercase">No hay encuentros programados</p>`;
-            if (containerF.innerHTML === '') containerF.innerHTML = `<p class="text-center py-10 opacity-30 italic text-[10px] uppercase">No hay resultados registrados</p>`;
         }
 
-        // Helper para fechas estilo tu script
         function extraerDia(f) { return f.includes('-') ? f.split('-')[2] : f.split('/')[0]; }
         function extraerMes(f) { 
             const meses = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
@@ -192,20 +176,18 @@
         }
 
         function openModal(j) {
-            const modal = document.getElementById('modalDetails');
             document.getElementById('mSub').innerText = j.liga === 'femenil' ? 'LEY 57 · FEMENIL' : 'ALV SPORT · VARONIL';
             document.getElementById('mTeams').innerText = `${j.local} VS ${j.visita}`;
             document.getElementById('mScore').innerText = j.status === 'finalizado' ? j.resultado : 'VS';
             document.getElementById('mInfo').innerText = `${j.fecha} | ${j.hora} HRS`;
             
-            modal.classList.remove('opacity-0', 'pointer-events-none');
+            // Lógica de Amayer solicitada
+            document.getElementById('mAmpayer').innerText = (j.liga === 'femenil') ? "Javier Yocupicio" : "Javier Yocupicio / Staff ALV";
+            
+            document.getElementById('modalDetails').style.display = 'flex';
         }
 
-        function closeModal() {
-            document.getElementById('modalDetails').classList.add('opacity-0', 'pointer-events-none');
-        }
-
-        window.onclick = e => { if (e.target.id === 'modalDetails') closeModal(); }
+        function closeModal() { document.getElementById('modalDetails').style.display = 'none'; }
     </script>
 </body>
 </html>
