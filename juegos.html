@@ -3,44 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendario de Juegos | LEY 57 & ALV SPORT</title>
+    <title>Calendario Oficial | LEY 57 & ALV SPORT</title>
     <link rel="icon" type="image/jpeg" href="logoalvnegro.jpeg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #020617; color: white; }
-        
-        .bg-carbon {
-            background-image: radial-gradient(circle at top right, #1e293b, transparent),
-                              url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
-        }
-
-        .glass-card {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            transition: all 0.3s ease;
-        }
-
-        .glass-card:hover {
-            border-color: rgba(239, 68, 68, 0.5);
-            transform: translateY(-5px);
-        }
-
-        /* Filtro Animado */
-        .filter-btn.active {
-            background-color: #dc2626;
-            color: white;
-            box-shadow: 0 0 20px rgba(220, 38, 38, 0.4);
-        }
-
-        /* Modal Animation */
-        #modalDetails {
-            display: none;
-            backdrop-filter: blur(8px);
-        }
-        
+        .bg-carbon { background-image: radial-gradient(circle at top right, #1e293b, transparent), url('https://www.transparenttextures.com/patterns/carbon-fibre.png'); }
+        .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .filter-btn.active { background-color: #dc2626; color: white; box-shadow: 0 0 20px rgba(220, 38, 38, 0.4); }
+        #modalDetails { display: none; backdrop-filter: blur(8px); z-index: 100; }
         .animate-in { animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
     </style>
@@ -48,144 +21,150 @@
 <body class="bg-carbon min-h-screen pb-20">
 
     <header class="p-6 flex justify-between items-center max-w-7xl mx-auto">
-        <a href="index.html" class="text-white/50 hover:text-white transition-colors">
-            <i class="fa fa-arrow-left mr-2"></i> Volver
+        <a href="index.html" class="text-white/50 hover:text-white transition-colors text-xs font-black uppercase tracking-widest">
+            <i class="fa fa-arrow-left mr-2"></i> Volver al Portal
         </a>
         <img src="alv_sport_logo.png.jpeg" class="h-12 md:h-16 drop-shadow-lg" alt="ALV Sport">
     </header>
 
     <div class="max-w-5xl mx-auto px-6 mt-10">
         <div class="text-center mb-12">
-            <h1 class="text-4xl md:text-5xl font-black italic uppercase tracking-tighter mb-4">
-                Calendario <span class="text-red-600 text-gradient">Oficial</span>
+            <h1 class="text-4xl md:text-5xl font-black italic uppercase tracking-tighter mb-4 text-white">
+                Calendario <span class="text-red-600">En Vivo</span>
             </h1>
-            <p class="text-slate-400 text-xs font-bold uppercase tracking-[0.3em]">Unidad Deportiva Ley 57</p>
+            <div class="flex items-center justify-center gap-3">
+                <span class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+                <p class="text-slate-400 text-[10px] font-black uppercase tracking-[0.3em]">Unidad Deportiva Ley 57</p>
+            </div>
         </div>
 
         <div class="flex justify-center gap-4 mb-12">
-            <button onclick="filterLeague('all')" class="filter-btn active px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest glass-card">Todos</button>
-            <button onclick="filterLeague('varonil')" class="filter-btn px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest glass-card">Varonil</button>
-            <button onclick="filterLeague('femenil')" class="filter-btn px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest glass-card">Femenil</button>
+            <button onclick="setFilter('all')" class="filter-btn active px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest glass-card transition-all">Todas las Ligas</button>
+            <button onclick="setFilter('femenil')" class="filter-btn px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest glass-card transition-all">Ley 57 (Fem)</button>
+            <button onclick="setFilter('varonil')" class="filter-btn px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest glass-card transition-all">ALV Sport (Var)</button>
         </div>
 
         <section class="mb-16">
-            <div class="flex items-center gap-4 mb-8">
-                <span class="h-[1px] flex-grow bg-blue-600/30"></span>
-                <h2 class="text-blue-500 font-black italic uppercase tracking-widest text-sm">Próximos Encuentros</h2>
-                <span class="h-[1px] flex-grow bg-blue-600/30"></span>
-            </div>
-            
+            <h2 class="text-blue-500 font-black italic uppercase tracking-widest text-xs mb-8 flex items-center gap-4">
+                <span class="h-[1px] w-10 bg-blue-500"></span> Próximos Encuentros
+            </h2>
             <div class="grid gap-4" id="containerProximos">
-                <div class="game-card varonil glass-card p-6 rounded-3xl flex flex-wrap items-center justify-between cursor-pointer" 
-                     onclick="openModal('TIGRES', 'LEONES', '20 Abril', '19:00', 'Varonil', 'Programado', '-')">
-                    <div class="flex items-center gap-6">
-                        <div class="text-center">
-                            <span class="block text-red-600 font-black text-xl italic">20</span>
-                            <span class="text-[8px] uppercase font-bold text-slate-500">Abril</span>
-                        </div>
-                        <div>
-                            <p class="text-lg font-black italic uppercase">Tigres <span class="text-slate-600 mx-2">VS</span> Leones</p>
-                            <span class="text-[9px] bg-blue-600/20 text-blue-400 px-2 py-1 rounded-md font-bold uppercase tracking-tighter">Varonil</span>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-xs font-black italic uppercase">19:00 PM</p>
-                        <p class="text-[9px] text-slate-500 font-bold uppercase">Campo Ley 57</p>
-                    </div>
-                </div>
+                <p class="text-center text-slate-500 text-xs py-10">Cargando juegos programados...</p>
             </div>
         </section>
 
         <section>
-            <div class="flex items-center gap-4 mb-8">
-                <span class="h-[1px] flex-grow bg-slate-700"></span>
-                <h2 class="text-slate-500 font-black italic uppercase tracking-widest text-sm">Resultados Recientes</h2>
-                <span class="h-[1px] flex-grow bg-slate-700"></span>
-            </div>
-
+            <h2 class="text-slate-500 font-black italic uppercase tracking-widest text-xs mb-8 flex items-center gap-4">
+                <span class="h-[1px] w-10 bg-slate-700"></span> Resultados Recientes
+            </h2>
             <div class="grid gap-4" id="containerPasados">
-                <div class="game-card femenil glass-card p-6 rounded-3xl flex flex-wrap items-center justify-between cursor-pointer opacity-80 hover:opacity-100"
-                     onclick="openModal('DIABLAS', 'ÁGUILAS', '18 Abril', '18:00', 'Femenil', 'Finalizado', '12 - 5')">
-                    <div class="flex items-center gap-6">
-                        <div class="text-center">
-                            <span class="block text-slate-400 font-black text-xl italic">18</span>
-                            <span class="text-[8px] uppercase font-bold text-slate-500">Abril</span>
-                        </div>
-                        <div>
-                            <p class="text-lg font-black italic uppercase">Diablas <span class="text-red-600 mx-2">12 - 5</span> Águilas</p>
-                            <span class="text-[9px] bg-pink-600/20 text-pink-400 px-2 py-1 rounded-md font-bold uppercase tracking-tighter">Femenil</span>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-[9px] bg-green-600/20 text-green-500 px-3 py-1 rounded-full font-black uppercase">Finalizado</span>
-                    </div>
-                </div>
+                <p class="text-center text-slate-500 text-xs py-10">Cargando resultados...</p>
             </div>
         </section>
     </div>
 
-    <div id="modalDetails" class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/90">
-        <div class="glass-card w-full max-w-md rounded-[3rem] p-10 animate-in border-red-600/30 overflow-hidden relative">
+    <div id="modalDetails" class="fixed inset-0 flex items-center justify-center p-6 bg-black/95">
+        <div class="glass-card w-full max-w-md rounded-[3rem] p-10 animate-in border-red-600/30 relative">
             <div class="absolute top-0 left-0 w-full h-2 bg-red-600"></div>
-            
-            <button onclick="closeModal()" class="absolute top-6 right-6 text-slate-500 hover:text-white text-xl">
-                <i class="fa fa-times"></i>
-            </button>
-
+            <button onclick="closeModal()" class="absolute top-6 right-6 text-slate-500 hover:text-white text-xl"><i class="fa fa-times"></i></button>
             <div class="text-center space-y-6">
-                <img src="logoalvnegro.jpeg" class="h-20 mx-auto mb-4" alt="ALV">
-                
-                <div class="space-y-1">
-                    <span id="modalCategory" class="text-[9px] font-black uppercase tracking-[0.4em] text-red-500">Categoría</span>
-                    <h3 id="modalMatchup" class="text-3xl font-black italic uppercase leading-none text-white">EQUIPO A VS EQUIPO B</h3>
-                    <p id="modalResult" class="text-4xl font-black text-red-600 mt-2"></p>
+                <img src="logoalvnegro.jpeg" class="h-20 mx-auto mb-4">
+                <div>
+                    <span id="mLiga" class="text-[9px] font-black uppercase tracking-[0.4em] text-red-500">Categoría</span>
+                    <h3 id="mTeams" class="text-2xl font-black italic uppercase text-white mt-2"></h3>
+                    <p id="mScore" class="text-5xl font-black text-white my-4"></p>
                 </div>
-
                 <div class="grid grid-cols-2 gap-4 py-6 border-y border-white/5">
                     <div class="text-left">
-                        <span class="text-[8px] text-slate-500 uppercase font-bold">Fecha y Hora</span>
-                        <p id="modalDateTime" class="text-xs font-black uppercase text-white"></p>
+                        <span class="text-[8px] text-slate-500 uppercase font-bold">Fecha / Hora</span>
+                        <p id="mFecha" class="text-[11px] font-black text-white"></p>
                     </div>
                     <div class="text-right">
-                        <span class="text-[8px] text-slate-500 uppercase font-bold">Ubicación</span>
-                        <p class="text-xs font-black uppercase text-white">Unidad Deportiva Ley 57</p>
+                        <span class="text-[8px] text-slate-500 uppercase font-bold">Campo</span>
+                        <p class="text-[11px] font-black text-white uppercase">Ley 57</p>
                     </div>
                 </div>
-
                 <div class="bg-white/5 p-4 rounded-2xl flex items-center gap-4">
                     <i class="fa fa-info-circle text-blue-500"></i>
-                    <p id="modalStatus" class="text-[10px] text-slate-400 font-medium text-left">Este juego está actualmente programado para la fecha indicada.</p>
+                    <p id="mStatus" class="text-[10px] text-slate-400 font-medium text-left uppercase tracking-tighter"></p>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        function filterLeague(league) {
-            // Actualizar botones
-            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+         const API = "https://ley57.onrender.com/api";
+        let allGames = [];
+        let currentFilter = 'all';
 
-            // Filtrar tarjetas
-            const cards = document.querySelectorAll('.game-card');
-            cards.forEach(card => {
-                if (league === 'all' || card.classList.contains(league)) {
-                    card.style.display = 'flex';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
+        async function cargarJuegos() {
+            try {
+                const res = await fetch(API_URL);
+                allGames = await res.json();
+                renderGames();
+            } catch (error) {
+                console.error("Error cargando juegos:", error);
+            }
         }
 
-        function openModal(team1, team2, date, time, category, status, result) {
-            document.getElementById('modalMatchup').innerText = team1 + " VS " + team2;
-            document.getElementById('modalDateTime').innerText = date + " | " + time;
-            document.getElementById('modalCategory').innerText = category;
-            document.getElementById('modalResult').innerText = result !== '-' ? result : "VS";
-            document.getElementById('modalStatus').innerText = status === 'Finalizado' 
-                ? "El encuentro ha concluido satisfactoriamente." 
-                : "Se recomienda llegar 30 minutos antes del juego.";
+        function setFilter(liga) {
+            currentFilter = liga;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            renderGames();
+        }
+
+        function renderGames() {
+            const containerProx = document.getElementById('containerProximos');
+            const containerPas = document.getElementById('containerPasados');
             
+            containerProx.innerHTML = '';
+            containerPas.innerHTML = '';
+
+            const filtrados = allGames.filter(g => currentFilter === 'all' || g.liga === currentFilter);
+
+            filtrados.forEach(juego => {
+                const isFinal = juego.status === 'finalizado';
+                const card = `
+                    <div class="glass-card p-6 rounded-[2rem] flex items-center justify-between cursor-pointer hover:border-red-600/50 transition-all group" 
+                         onclick='openModal(${JSON.stringify(juego)})'>
+                        <div class="flex items-center gap-6">
+                            <div class="text-center min-w-[50px]">
+                                <span class="block text-red-600 font-black text-xl italic leading-none">${juego.fecha.split('-')[2] || juego.fecha.split('/')[0]}</span>
+                                <span class="text-[8px] uppercase font-bold text-slate-500">${juego.fecha.split('-')[1] || 'MES'}</span>
+                            </div>
+                            <div>
+                                <p class="text-sm md:text-lg font-black italic uppercase tracking-tighter">
+                                    ${juego.local} <span class="text-red-600 mx-2">${isFinal ? juego.resultado : 'VS'}</span> ${juego.visita}
+                                </p>
+                                <span class="text-[8px] bg-white/5 border border-white/10 text-slate-400 px-3 py-1 rounded-full font-black uppercase">
+                                    ${juego.liga === 'femenil' ? 'Ley 57 (Fem)' : 'ALV Sport (Var)'}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs font-black italic">${juego.hora}</p>
+                            <span class="text-[8px] uppercase font-bold ${isFinal ? 'text-green-500' : 'text-blue-400'}">
+                                ${isFinal ? 'Finalizado' : 'Pendiente'}
+                            </span>
+                        </div>
+                    </div>
+                `;
+
+                if (isFinal) containerPas.innerHTML += card;
+                else containerProx.innerHTML += card;
+            });
+
+            if (containerProx.innerHTML === '') containerProx.innerHTML = '<p class="text-center text-slate-600 text-xs">No hay juegos programados.</p>';
+            if (containerPas.innerHTML === '') containerPas.innerHTML = '<p class="text-center text-slate-600 text-xs">No hay resultados registrados.</p>';
+        }
+
+        function openModal(j) {
+            document.getElementById('mLiga').innerText = j.liga === 'femenil' ? 'LEY 57 - FEMENIL' : 'ALV SPORT - VARONIL';
+            document.getElementById('mTeams').innerText = `${j.local} VS ${j.visita}`;
+            document.getElementById('mScore').innerText = j.status === 'finalizado' ? j.resultado : 'VS';
+            document.getElementById('mFecha').innerText = `${j.fecha} | ${j.hora}`;
+            document.getElementById('mStatus').innerText = j.status === 'finalizado' ? 'Juego Concluido' : 'Juego en espera de inicio';
             document.getElementById('modalDetails').style.display = 'flex';
         }
 
@@ -193,12 +172,10 @@
             document.getElementById('modalDetails').style.display = 'none';
         }
 
-        // Cerrar modal al hacer clic fuera
-        window.onclick = function(event) {
-            if (event.target == document.getElementById('modalDetails')) {
-                closeModal();
-            }
-        }
+        window.onclick = e => { if (e.target.id === 'modalDetails') closeModal(); }
+
+        // Carga inicial
+        cargarJuegos();
     </script>
 </body>
 </html>
