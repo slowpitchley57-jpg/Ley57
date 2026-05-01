@@ -130,52 +130,55 @@
             } catch (e) { console.error("Error sincronizando"); }
         }
 
-        function cambiarFiltro(l) {
-            filtroLiga = l;
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-            renderizarJuegos();
-        }
+       // Actualiza esta parte en tu script de juegos.html
+function cambiarFiltro(l) {
+    filtroLiga = l;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    // Buscamos el botón por su atributo onclick o texto
+    event.target.classList.add('active');
+    renderizarJuegos();
+}
 
-        function renderizarJuegos() {
-            const containerP = document.getElementById('containerPendientes');
-            const containerF = document.getElementById('containerFinalizados');
-            containerP.innerHTML = ''; containerF.innerHTML = '';
+function renderizarJuegos() {
+    const containerP = document.getElementById('containerPendientes');
+    const containerF = document.getElementById('containerFinalizados');
+    containerP.innerHTML = ''; containerF.innerHTML = '';
 
-            let filtrados = juegosBase
-                .filter(g => filtroLiga === 'all' || g.liga === filtroLiga)
-                .sort((a, b) => new Date(b.fecha) - new Date(a.fecha)); 
+    const coloresLigas = {
+        'femenil': 'border-pink-600/50',
+        'varonil': 'border-blue-600/50',
+        'easy_femenil': 'border-emerald-500/50',
+        'slow_mixto': 'border-purple-500/50'
+    };
 
-            filtrados.forEach((j, index) => {
-                const esFinal = j.status === 'finalizado';
-                const esFem = j.liga === 'femenil';
-                
-                const borderColor = esFem ? 'border-pink-600/50' : 'border-blue-600/50'; 
-                const hoverColor = esFem ? 'hover:border-pink-400' : 'hover:border-blue-400';
-                const shadowColor = esFem ? 'hover:shadow-[0_0_15px_rgba(219,39,119,0.2)]' : 'hover:shadow-[0_0_15px_rgba(37,99,235,0.2)]';
+    let filtrados = juegosBase
+        .filter(g => filtroLiga === 'all' || g.liga === filtroLiga)
+        .sort((a, b) => new Date(b.fecha) - new Date(a.fecha)); 
 
-                const card = `
-                    <div class="glass-card p-5 rounded-[1.5rem] border-l-4 ${borderColor} ${hoverColor} ${shadowColor} flex items-center justify-between cursor-pointer transition-all reveal" 
-                         style="animation-delay: ${0.05 * index}s"
-                         onclick='openModal(${JSON.stringify(j)})'>
-                        <div class="flex items-center gap-4">
-                            <div class="text-center min-w-[40px] border-r border-white/5 pr-3">
-                                <span class="block text-red-600 font-black text-lg italic leading-none">${extraerDia(j.fecha)}</span>
-                                <span class="text-[7px] uppercase font-bold text-slate-500">${extraerMes(j.fecha)}</span>
-                            </div>
-                            <div>
-                                <p class="text-xs md:text-sm font-black italic uppercase tracking-tighter">
-                                    ${j.local} <span class="text-red-600 mx-1">${esFinal ? j.resultado : 'VS'}</span> ${j.visita}
-                                </p>
-                                <span class="text-[7px] font-black uppercase text-slate-500">${esFem ? 'Ley 57' : 'ALV Sport'}</span>
-                            </div>
-                        </div>
-                        <i class="fa fa-chevron-right text-[8px] text-slate-700"></i>
+    filtrados.forEach((j, index) => {
+        const esFinal = j.status === 'finalizado';
+        const borderColor = coloresLigas[j.liga] || 'border-slate-500/50';
+
+        const card = `
+            <div class="glass-card p-5 rounded-[1.5rem] border-l-4 ${borderColor} hover:scale-[1.02] flex items-center justify-between cursor-pointer transition-all reveal" 
+                 onclick='openModal(${JSON.stringify(j)})'>
+                <div class="flex items-center gap-4">
+                    <div class="text-center min-w-[40px] border-r border-white/5 pr-3">
+                        <span class="block text-red-600 font-black text-lg italic leading-none">${extraerDia(j.fecha)}</span>
+                        <span class="text-[7px] uppercase font-bold text-slate-500">${extraerMes(j.fecha)}</span>
                     </div>
-                `;
-                if (esFinal) containerF.innerHTML += card; else containerP.innerHTML += card;
-            });
-        }
+                    <div>
+                        <p class="text-xs md:text-sm font-black italic uppercase tracking-tighter">
+                            ${j.local} <span class="text-red-600 mx-1">${esFinal ? j.resultado : 'VS'}</span> ${j.visita}
+                        </p>
+                        <span class="text-[7px] font-black uppercase text-slate-500">${j.liga.replace('_', ' ')}</span>
+                    </div>
+                </div>
+                <i class="fa fa-chevron-right text-[8px] text-slate-700"></i>
+            </div>`;
+        if (esFinal) containerF.innerHTML += card; else containerP.innerHTML += card;
+    });
+}
 
         function extraerDia(f) { return f.includes('-') ? f.split('-')[2] : f.split('/')[0]; }
         function extraerMes(f) { 

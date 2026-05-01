@@ -159,15 +159,6 @@
         }, 15000); 
     }
 
-    async function cargarMiRoster() {
-        if (!equipoSeleccionado) return;
-        try {
-            const res = await fetch(`${API}/players?equipo=${encodeURIComponent(equipoSeleccionado)}`);
-            jugadoresEnMemoria = await res.json();
-            renderizarRoster(jugadoresEnMemoria);
-        } catch (error) { console.error("Error cargando roster:", error); }
-    }
-
     function renderizarRoster(lista) {
         const cont = document.getElementById('miRosterLista');
         document.getElementById('contadorRoster').innerText = lista.length;
@@ -227,21 +218,38 @@
                 </div>`;
         } catch (e) {}
     }
+    // Reemplaza esta parte en tu manager.html
+async function cargarMiRoster() {
+    if (!equipoSeleccionado) return;
+    try {
+        // Obtenemos todos los jugadores del equipo (sin importar la liga)
+        const res = await fetch(`${API}/players?equipo=${encodeURIComponent(equipoSeleccionado)}`);
+        jugadoresEnMemoria = await res.json();
+        
+        // Identificamos la liga del equipo desde el primer jugador para filtrar calendarios
+        if(jugadoresEnMemoria.length > 0) {
+            const ligaActual = jugadoresEnMemoria[0].liga;
+            cargarResultadosLiga(ligaActual);
+            cargarProximoJuegoLiga(ligaActual);
+        }
+        
+        renderizarRoster(jugadoresEnMemoria);
+    } catch (error) { console.error("Error cargando roster:", error); }
+}
 
-    async function cargarResultados() {
-        try {
-            const res = await fetch(`${API}/games`);
-            const games = await res.json();
-            const cont = document.getElementById('resultadosJornada');
-            cont.innerHTML = games.filter(g => g.status === 'finalizado').reverse().slice(0,4).map(g => `
-                <div class="flex justify-between items-center bg-slate-50 p-2 rounded-xl border border-slate-100">
-                    <span class="text-[8px] font-black uppercase flex-1 truncate italic text-slate-500">${g.local}</span>
-                    <span class="bg-blue-900 text-white px-2 py-0.5 rounded text-[10px] font-black italic shadow-sm">${g.resultado}</span>
-                    <span class="text-[8px] font-black uppercase flex-1 truncate text-right italic text-slate-500">${g.visita}</span>
-                </div>
-            `).join('');
-        } catch(e) {}
-    }
+async function cargarResultadosLiga(liga) {
+    try {
+        const res = await fetch(`${API}/games?liga=${liga}&status=finalizado`);
+        const games = await res.json();
+        const cont = document.getElementById('resultadosJornada');
+        cont.innerHTML = games.reverse().slice(0,4).map(g => `
+            <div class="flex justify-between items-center bg-slate-50 p-2 rounded-xl border border-slate-100">
+                <span class="text-[8px] font-black uppercase flex-1 truncate italic text-slate-500">${g.local}</span>
+                <span class="bg-blue-900 text-white px-2 py-0.5 rounded text-[10px] font-black italic shadow-sm">${g.resultado}</span>
+                <span class="text-[8px] font-black uppercase flex-1 truncate text-right italic text-slate-500">${g.visita}</span>
+            </div>`).join('');
+    } catch(e) {}
+}
 
     function toggleMobileMenu() {
         document.getElementById('sidebar').classList.toggle('-translate-x-full');
