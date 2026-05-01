@@ -90,9 +90,11 @@
             <div class="mb-4 bg-slate-100 p-3 rounded-xl flex items-center gap-4">
                 <span class="text-[10px] font-black uppercase text-slate-500">1. Filtrar Liga:</span>
                 <select id="filtroLigaGlobal" onchange="cargarEquipos()" class="p-2 border rounded-lg text-xs font-bold bg-white text-blue-900">
-                    <option value="femenil">LEY 57 (FEMENIL)</option>
-                    <option value="varonil">ALV SPORT (VARONIL)</option>
-                </select>
+    <option value="femenil">LEY 57 (FEMENIL)</option>
+    <option value="varonil">ALV SPORT (VARONIL)</option>
+    <option value="easy_femenil">EASY FEMENIL</option> <!-- Nueva -->
+    <option value="slow_mixto">SLOW MIXTO</option>     <!-- Nueva -->
+</select>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-5 gap-3 bg-slate-50 p-4 rounded-2xl border border-dashed"> 
@@ -106,6 +108,30 @@
             <h3 class="text-blue-900 font-black my-6 uppercase text-xs italic tracking-widest border-b pb-2">Resultados Pendientes</h3>
             <div id="listaResultados" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </section>
+        <!-- Sección: Ligas Nuevas (Easy y Mixto) -->
+<h2 class="text-emerald-700 font-black italic uppercase border-l-4 border-emerald-700 pl-3">Nuevas Ligas - Expansión 2026</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <!-- Tabla Easy Femenil -->
+    <div class="bg-white rounded-3xl shadow-sm border overflow-hidden border-emerald-100">
+        <div class="bg-emerald-600 p-3 text-white font-bold text-xs uppercase tracking-widest italic text-center">Easy Femenil (Libre)</div>
+        <table class="w-full text-xs text-center">
+            <thead class="bg-slate-100 border-b font-black text-slate-500 uppercase">
+                <tr><th class="p-4 text-left">Equipo</th><th>JJ</th><th>JG</th><th>JP</th><th>CA</th><th>CR</th><th>DIF</th><th>X</th></tr>
+            </thead>
+            <tbody id="tablaEasyFem" class="divide-y font-bold text-emerald-900"></tbody>
+        </table>
+    </div>
+    <!-- Tabla Slow Mixto -->
+    <div class="bg-white rounded-3xl shadow-sm border overflow-hidden border-purple-100">
+        <div class="bg-purple-600 p-3 text-white font-bold text-xs uppercase tracking-widest italic text-center">Slow Mixto (Libre)</div>
+        <table class="w-full text-xs text-center">
+            <thead class="bg-slate-100 border-b font-black text-slate-500 uppercase">
+                <tr><th class="p-4 text-left">Equipo</th><th>JJ</th><th>JG</th><th>JP</th><th>CA</th><th>CR</th><th>DIF</th><th>X</th></tr>
+            </thead>
+            <tbody id="tablaSlowMix" class="divide-y font-bold text-purple-900"></tbody>
+        </table>
+    </div>
+</div>
     </main>
 
     <div id="modalRosters" class="modal">
@@ -116,6 +142,8 @@
                    <select id="ligaRoster" onchange="actualizarSelectRoster()" class="p-3 border rounded-xl font-bold text-xs bg-slate-50">
                        <option value="femenil">Femenil</option>
                        <option value="varonil">Varonil</option>
+                       <option value="easy_femenil">Easy Femenil</option>
+                       <option value="slow_mixto">Slow Mixto</option>
                    </select>
                    <select id="filterRoster" onchange="verRosterEquipo()" class="p-3 border rounded-xl font-bold text-xs bg-slate-50"></select>
                 </div>
@@ -132,10 +160,13 @@
             <select id="teamCat" class="w-full p-3 border rounded-xl mb-4 font-bold text-xs uppercase bg-slate-50">
                 <option value="Intermedia">Intermedia</option>
                 <option value="Relax">Relax</option>
+                <option value="Libre">Libre (Easy/Mixto)</option>
             </select>
             <select id="teamLiga" class="w-full p-3 border rounded-xl mb-6 font-bold text-xs uppercase bg-slate-50">
                 <option value="femenil">Ley 57 (Femenil)</option>
                 <option value="varonil">ALV Sport (Varonil)</option>
+                <option value="easy_femenil">Easy Femenil</option> <!-- Nueva -->
+                <option value="slow_mixto">Slow Mixto</option>
             </select>
             <div class="flex gap-2">
                 <button onclick="toggleModal('modalEquipo')" class="flex-1 bg-slate-200 p-3 rounded-xl font-bold text-xs uppercase">Cerrar</button>
@@ -150,6 +181,8 @@
             <select id="ligaIA" class="w-full p-3 border rounded-xl mb-6 font-bold text-xs uppercase bg-slate-50">
                 <option value="femenil">Ley 57 (Femenil)</option>
                 <option value="varonil">ALV Sport (Varonil)</option>
+                <option value="easy_femenil">Easy Femenil</option>
+                 <option value="slow_mixto">Slow Mixto</option>
             </select>
             <div class="flex gap-2">
                 <button onclick="toggleModal('modalIA')" class="flex-1 bg-slate-200 p-3 rounded-xl font-bold text-xs uppercase">Cerrar</button>
@@ -199,7 +232,9 @@
             'Intermediafemenil': document.getElementById('tablaIntermedia'),
             'Relaxfemenil': document.getElementById('tablaRelax'),
             'Intermediavaronil': document.getElementById('tablaIntermediaVar'),
-            'Relaxvaronil': document.getElementById('tablaRelaxVar')
+            'Relaxvaronil': document.getElementById('tablaRelaxVar'),
+            'Libreeasy_femenil': document.getElementById('tablaEasyFem'), // Nueva
+            'Libreslow_mixto': document.getElementById('tablaSlowMix')
         };
 
         // Limpiar todas las tablas
@@ -410,21 +445,54 @@
 }
 
     async function cargarResultados() {
+    try {
         const res = await fetch(`${API}/games`);
         const games = await res.json();
         const cont = document.getElementById('listaResultados');
-        cont.innerHTML = games.filter(g => g.status === 'pendiente').map(g => `
-            <div class="bg-white p-4 rounded-3xl border shadow-sm relative border-l-4 ${g.liga === 'varonil' ? 'border-red-600':'border-blue-600'}">
-                <button onclick="eliminarJuego('${g._id}')" class="absolute -top-2 -right-2 bg-red-600 text-white w-6 h-6 rounded-full text-[8px] shadow-xl"><i class="fa fa-times"></i></button>
-                <div class="flex justify-between text-[8px] font-black text-slate-400 uppercase"><span>${g.fecha}</span><span>${g.hora}</span></div>
+
+        // 1. Definimos los colores para cada liga de forma organizada
+        const coloresLigas = {
+            'varonil': 'border-red-600',       // ALV Sport
+            'femenil': 'border-blue-600',      // Ley 57
+            'easy_femenil': 'border-emerald-600', // Nueva Liga Easy
+            'slow_mixto': 'border-purple-600'    // Nueva Liga Mixta
+        };
+
+        cont.innerHTML = games.filter(g => g.status === 'pendiente').map(g => {
+            // 2. Seleccionamos el color según la liga o un color gris por defecto
+            const bordeColor = coloresLigas[g.liga] || 'border-slate-300';
+
+            return `
+            <div class="bg-white p-4 rounded-3xl border shadow-sm relative border-l-4 ${bordeColor}">
+                <button onclick="eliminarJuego('${g._id}')" class="absolute -top-2 -right-2 bg-red-600 text-white w-6 h-6 rounded-full text-[8px] shadow-xl">
+                    <i class="fa fa-times"></i>
+                </button>
+                
+                <div class="flex justify-between text-[8px] font-black text-slate-400 uppercase">
+                    <span>${g.fecha}</span>
+                    <span class="bg-slate-100 px-2 py-0.5 rounded-full">${g.liga.replace('_', ' ')}</span>
+                    <span>${g.hora}</span>
+                </div>
+
                 <div class="flex justify-between items-center py-3">
                     <span class="text-[9px] font-black uppercase flex-1 truncate">${g.local}</span>
-                    <div class="flex gap-1 mx-1"><input id="sc-${g._id}-L" type="number" class="w-8 p-1 border rounded text-center font-bold" placeholder="L"><input id="sc-${g._id}-V" type="number" class="w-8 p-1 border rounded text-center font-bold" placeholder="V"></div>
+                    <div class="flex gap-1 mx-1">
+                        <input id="sc-${g._id}-L" type="number" class="w-8 p-1 border rounded text-center font-bold" placeholder="L">
+                        <input id="sc-${g._id}-V" type="number" class="w-8 p-1 border rounded text-center font-bold" placeholder="V">
+                    </div>
                     <span class="text-[9px] font-black uppercase flex-1 text-right truncate">${g.visita}</span>
                 </div>
-                <button onclick="finalizarJuego('${g._id}','${g.local}','${g.visita}')" class="w-full bg-slate-800 text-white text-[8px] font-black py-2 rounded-xl uppercase">Finalizar</button>
-            </div>`).join('');
+
+                <button onclick="finalizarJuego('${g._id}','${g.local}','${g.visita}')" class="w-full bg-slate-800 text-white text-[8px] font-black py-2 rounded-xl uppercase hover:bg-black transition-colors">
+                    Finalizar Juego
+                </button>
+            </div>`;
+        }).join('');
+
+    } catch (error) {
+        console.error("Error al cargar resultados pendientes:", error);
     }
+}
 
     async function finalizarJuego(id, loc, vis) {
         const sL = parseInt(document.getElementById(`sc-${id}-L`).value), sV = parseInt(document.getElementById(`sc-${id}-V`).value);
@@ -487,6 +555,7 @@
         // Separamos por categoría para que jueguen entre ellos
         const intermedia = equipos.filter(e => e.categoria === "Intermedia");
         const relax = equipos.filter(e => e.categoria === "Relax");
+        const libre = equipos.filter(e => e.categoria === "Libre");
 
         if (equipos.length < 2) return alert("No hay suficientes equipos para generar un rol.");
 
@@ -517,6 +586,7 @@
         if (confirm(`¿Generar rol aleatorio para la liga ${liga.toUpperCase()}?`)) {
             await emparejar(intermedia);
             await emparejar(relax);
+            await emparejar(libre);
             alert("¡Rol generado exitosamente!");
             cargarResultados(); // Refresca la lista de pendientes
         }

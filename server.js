@@ -28,7 +28,7 @@ mongoose.connect('mongodb+srv://rosasvillah_db_user:GhnkehSpQQGFwU3K@ley57.y2bgb
 const Team = mongoose.model('Team', { 
     nombre: String, 
     categoria: String, 
-    liga: { type: String, default: "femenil" }, // "femenil" (Ley 57) o "varonil" (ALV Sport)
+    liga: String, // Ahora recibirá: "femenil", "varonil", "easy_femenil" o "slow_mixto"
     g: { type: Number, default: 0 }, 
     p: { type: Number, default: 0 },
     ca: { type: Number, default: 0 }, 
@@ -41,7 +41,7 @@ const Game = mongoose.model('Game', {
     visita: String, 
     fecha: String, 
     hora: String, 
-    liga: { type: String, default: "femenil" }, // Identificador de liga
+    liga: String, // "femenil", "varonil", "easy_femenil" o "slow_mixto"
     resultado: { type: String, default: "0-0" }, 
     status: { type: String, default: "pendiente" } 
 });
@@ -52,7 +52,7 @@ const Player = mongoose.model('Player', {
     equipo: String, 
     fechaNacimiento: String, 
     categoria: String,
-    liga: { type: String, default: "femenil" }, // Identificador de liga
+    liga: String, // "femenil", "varonil", "easy_femenil" o "slow_mixto"
     jj: { type: Number, default: 0 }, 
     vb: { type: Number, default: 0 }, 
     h: { type: Number, default: 0 }, 
@@ -143,16 +143,23 @@ app.get('/api/players', async (req, res) => {
     res.json(players);
 });
 app.post('/api/players', async (req, res) => {
-    // Buscamos al equipo para saber su liga antes de guardar al jugador
-    const equipoInfo = await Team.findOne({ nombre: req.body.equipo });
-    const ligaDelEquipo = equipoInfo ? equipoInfo.liga : "femenil";
-    
-    const nuevoPlayer = new Player({
-        ...req.body,
-        liga: ligaDelEquipo // Así se guarda automáticamente en la liga correcta
-    });
-    await nuevoPlayer.save();
-    res.json(nuevoPlayer);
+    try {
+        // Buscamos la liga a la que pertenece el equipo seleccionado
+        const equipoInfo = await Team.findOne({ nombre: req.body.equipo });
+        
+        // Si el equipo existe, toma su liga; si no, por seguridad lo deja vacío para que tú lo asignes
+        const ligaDelEquipo = equipoInfo ? equipoInfo.liga : req.body.liga;
+        
+        const nuevoPlayer = new Player({
+            ...req.body,
+            liga: ligaDelEquipo 
+        });
+        
+        await nuevoPlayer.save();
+        res.json(nuevoPlayer);
+    } catch (error) {
+        res.status(500).json({ error: "Error al registrar jugador" });
+    }
 });
 // BUSCA ESTA RUTA EN TU SERVER.JS Y REEMPLÁZALA TODA
 app.put('/api/players/:id', async (req, res) => {
@@ -184,6 +191,21 @@ app.put('/api/players/:id', async (req, res) => {
         res.json({ ok: true, data: actualizado });
     } catch (error) {
         console.error("Error en PUT player:", error);
+        res.status(500).json({ error: "Error interno" });
+    }
+});
+// Actualización total de jugadora (Admin)
+app.put('/api/players/:id', async (req, res) => {
+    try {
+        // Esto guarda TODO lo que mandes desde el Admin (incluyendo dobles, triples, k, rbi y el AVG calculado)
+        const playerActualizado = await Player.findByIdAndUpdate(
+            req.params.id, 
+            { $set: req.body }, 
+            { new: true }
+        );
+        res.json({ ok: true, data: playerActualizado });
+    } catch (err) {
+        console.error("Error al actualizar jugador:", err);
         res.status(500).json({ error: "Error interno" });
     }
 });
@@ -290,20 +312,6 @@ app.get('/api/dev/usuarios', async (req, res) => {
         res.json(usuarios);
     } catch (error) {
         res.status(500).send("Error al obtener usuarios");
-    }
-});
-// Actualización total de jugadora (Admin)
-app.put('/api/players/:id', async (req, res) => {
-    try {
-        // Esto guarda TODO lo que mandes desde el Admin, incluyendo tu AVG especial
-        const playerActualizado = await Player.findByIdAndUpdate(
-            req.params.id, 
-            { $set: req.body }, // <--- Esto es lo importante
-            { new: true }
-        );
-        res.json(playerActualizado);
-    } catch (err) {
-        res.status(500).json(err);
     }
 });
 

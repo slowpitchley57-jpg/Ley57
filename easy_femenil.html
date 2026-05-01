@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estadísticas Oficiales - Easy Femenil</title>
+    <link rel="icon" type="image/png" href="logoley57icon.jpeg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .custom-scroll::-webkit-scrollbar { width: 5px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
+        .bg-gradient-easy { background: linear-gradient(135deg, #064e3b 0%, #059669 100%); }
+        
+        @keyframes glow-emerald {
+            0%, 100% { box-shadow: 0 0 5px rgba(16, 185, 129, 0.2); }
+            50% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.6); }
+        }
+        .nota-easy { animation: glow-emerald 2s infinite; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans">
+
+    <nav class="bg-emerald-900 text-white p-4 shadow-lg sticky top-0 z-50 border-b-4 border-emerald-500">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <!-- ESPACIO PARA LOGO DE LIGA EASY -->
+                <img src="logoeasyfemenil.jpeg" onerror="this.src='logoley57icon.jpeg'" class="w-10 h-10 bg-white rounded-full p-1">
+                <span class="font-black italic tracking-tighter text-xl uppercase">Easy <span class="text-emerald-400">Femenil</span></span>
+            </div>
+            <a href="index.html" class="text-[10px] bg-emerald-600 px-5 py-2 rounded-full font-black hover:bg-white hover:text-emerald-600 transition-all uppercase tracking-widest shadow-lg">Regresar</a>
+        </div>
+    </nav>
+
+    <header class="bg-gradient-easy text-white py-16 px-6 text-center shadow-inner relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10 pointer-events-none">
+            <i class="fa fa-softball-ball text-9xl absolute -left-10 -bottom-10 rotate-12 text-emerald-200"></i>
+            <i class="fa fa-star text-9xl absolute -right-10 -top-10 -rotate-12 text-emerald-200"></i>
+        </div>
+        <h1 class="text-4xl font-black mb-1 italic uppercase tracking-tighter drop-shadow-lg">Centro de Estadísticas</h1>
+        <p class="text-emerald-100 text-[10px] uppercase tracking-[0.5em] font-bold">Liga Easy Femenil · Temporada 2026</p>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 mt-8 mb-4">
+        <div class="nota-easy bg-emerald-50 border-2 border-emerald-600 p-5 rounded-2xl flex items-center gap-5 backdrop-blur-sm">
+            <div class="bg-emerald-600 p-3 rounded-full animate-bounce">
+                <i class="fa fa-info-circle text-white text-xl"></i>
+            </div>
+            <p class="text-xs md:text-sm font-black uppercase tracking-widest text-emerald-900 italic leading-tight">
+                Categoría Libre: <span class="text-emerald-600">Sincronización en tiempo real</span> con la mesa de anotación.
+            </p>
+        </div>
+    </div>
+
+    <main class="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
+        <!-- Tabla de Posiciones Única (Categoría Libre) -->
+        <section class="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+            <div class="bg-emerald-700 p-4 text-white font-black text-xs uppercase tracking-widest italic flex items-center gap-3">
+                <i class="fa fa-trophy text-yellow-400"></i> Tabla de Posiciones - Categoría Libre
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-400 font-black uppercase border-b text-center">
+                            <th class="p-4 text-left">Equipo</th>
+                            <th class="text-emerald-600">JJ</th><th>JG</th><th>JP</th><th>CA</th><th>CR</th><th class="text-emerald-600">DIF</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaPosiciones" class="divide-y font-bold"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 space-y-8">
+                <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-slate-900 p-6 rounded-3xl text-white shadow-xl">
+                        <h3 class="font-black uppercase text-xs mb-4 text-emerald-400 italic"><i class="fa fa-fire mr-2"></i> Líderes de Bateo</h3>
+                        <div id="topBateo" class="space-y-3 text-sm"></div>
+                    </div>
+                    <div class="bg-slate-900 p-6 rounded-3xl text-white shadow-xl">
+                        <h3 class="font-black uppercase text-xs mb-4 text-emerald-400 italic"><i class="fa fa-bolt mr-2"></i> Cuadrangulares</h3>
+                        <div id="topHR" class="space-y-3 text-sm"></div>
+                    </div>
+                </section>
+            </div>
+      
+            <div class="space-y-8">
+                <section class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden">
+                    <div class="bg-emerald-900 p-5 text-white flex items-center justify-center gap-3">
+                        <i class="fa fa-calendar-alt text-emerald-400"></i>
+                        <h3 class="font-black text-xs uppercase tracking-[0.3em] italic">Rol de Juegos</h3>
+                    </div>
+                    <div id="listaEncuentros" class="p-4 space-y-4 max-h-[400px] overflow-y-auto custom-scroll bg-slate-50/50">
+                        <p class="text-center text-slate-300 italic py-10">Cargando encuentros...</p>
+                    </div>
+                </section>
+
+                <section class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-slate-100 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-2 h-full bg-emerald-600"></div>
+                    <h3 class="text-emerald-900 font-black flex items-center gap-3 uppercase text-xs italic tracking-widest mb-6">
+                        <i class="fa fa-history text-emerald-600 animate-pulse"></i> Historial Reciente
+                    </h3>
+                    <div id="resultadosJornada" class="space-y-4 max-h-[500px] overflow-y-auto custom-scroll pr-2"></div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Roster -->
+    <div id="modalDetalleEquipo" class="fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-4 hidden">
+        <div class="bg-white w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="bg-emerald-900 p-6 text-white flex justify-between items-center border-b-4 border-emerald-500">
+                <div>
+                    <h2 id="detNombreEquipo" class="text-2xl font-black italic uppercase">---</h2>
+                    <p class="text-[10px] text-emerald-300 uppercase font-bold tracking-widest">Roster Oficial Easy Femenil</p>
+                </div>
+                <button onclick="cerrarDetalle()" class="text-3xl hover:text-emerald-400">&times;</button>
+            </div>
+            <div class="overflow-y-auto p-4 custom-scroll bg-slate-50 flex-1">
+                <table class="w-full text-left text-xs">
+                    <thead>
+                        <tr class="text-slate-400 uppercase font-black text-[10px] border-b text-center">
+                            <th class="p-3 text-left">Jugadora</th>
+                            <th>JJ</th><th>VB</th><th class="text-emerald-600">H</th><th>2B</th><th>3B</th><th class="text-emerald-600">HR</th><th>K</th><th>RBI</th><th class="text-emerald-900">AVG</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bodyDetalleJugadoras" class="divide-y"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+   <script>
+    const API = "https://ley57.onrender.com/api";
+    const LIGA = "easy_femenil";
+
+    document.addEventListener('DOMContentLoaded', cargarTodo);
+
+    async function cargarTodo() {
+        await Promise.all([
+            cargarTablas(),
+            cargarEncuentros(),
+            cargarLideres(),
+            cargarHistorial()
+        ]);
+    }
+
+    async function cargarTablas() {
+        try {
+            const [resEq, resGames] = await Promise.all([
+                fetch(`${API}/equipos?liga=${LIGA}`),
+                fetch(`${API}/games?liga=${LIGA}&status=finalizado`)
+            ]);
+            const equiposRaw = await resEq.json();
+            const juegosFinalizados = await resGames.json();
+
+            const equipos = equiposRaw.map(eq => {
+                let g = 0, p = 0, ca = 0, ce = 0;
+                const nombreEq = eq.nombre.trim().toUpperCase();
+                juegosFinalizados.forEach(j => {
+                    if(!j.resultado || !j.resultado.includes('-')) return;
+                    const scores = j.resultado.split('-').map(Number);
+                    const local = j.local.trim().toUpperCase();
+                    const visita = j.visita.trim().toUpperCase();
+                    if (local === nombreEq) {
+                        ca += scores[0]; ce += scores[1];
+                        if (scores[0] > scores[1]) g++; else if (scores[0] < scores[1]) p++;
+                    } else if (visita === nombreEq) {
+                        ca += scores[1]; ce += scores[0];
+                        if (scores[1] > scores[0]) g++; else if (scores[1] < scores[0]) p++;
+                    }
+                });
+                return { ...eq, g, p, ca, ce };
+            });
+
+            equipos.sort((a, b) => (b.g !== a.g) ? b.g - a.g : (b.ca - b.ce) - (a.ca - a.ce));
+
+            const cont = document.getElementById('tablaPosiciones');
+            cont.innerHTML = equipos.map(e => `
+                <tr class="hover:bg-emerald-50 cursor-pointer border-b transition-colors text-center" onclick="verDetalleRoster('${e.nombre}')">
+                    <td class="p-4 uppercase italic font-black text-emerald-900 text-left">${e.nombre}</td>
+                    <td class="font-bold text-slate-500 bg-slate-50/30">${e.g + e.p}</td>
+                    <td class="text-emerald-600 font-bold">${e.g}</td>
+                    <td class="text-slate-600">${e.p}</td>
+                    <td class="text-slate-500">${e.ca}</td>
+                    <td class="text-slate-500">${e.ce}</td>
+                    <td class="font-black ${e.ca - e.ce >= 0 ? 'text-emerald-600' : 'text-orange-500'}">${(e.ca - e.ce) > 0 ? '+' + (e.ca - e.ce) : (e.ca - e.ce)}</td>
+                </tr>`).join('');
+        } catch (err) { console.error(err); }
+    }
+
+    async function verDetalleRoster(nombreEquipo) {
+        const container = document.getElementById('bodyDetalleJugadoras');
+        container.innerHTML = `<tr><td colspan="10" class="p-10 text-center">Cargando...</td></tr>`;
+        document.getElementById('detNombreEquipo').innerText = nombreEquipo;
+        try {
+            const res = await fetch(`${API}/players?liga=${LIGA}&t=${new Date().getTime()}`);
+            const all = await res.json();
+            const players = all.filter(p => p.equipo.trim().toUpperCase() === nombreEquipo.trim().toUpperCase());
+            container.innerHTML = players.map(p => `
+                <tr class="hover:bg-slate-50 border-b text-center text-[10px]">
+                    <td class="p-3 font-bold uppercase text-emerald-900 text-left">${p.nombre}</td>
+                    <td>${p.jj || 0}</td><td>${p.vb || 0}</td><td class="text-emerald-600 font-bold">${p.h || 0}</td>
+                    <td>${p.dobles || 0}</td><td>${p.triples || 0}</td><td class="text-emerald-600">${p.hr || 0}</td>
+                    <td>${p.k || 0}</td><td>${p.rbi || 0}</td><td class="font-black italic">${Number(p.avg || 0).toFixed(3)}</td>
+                </tr>`).join('');
+            document.getElementById('modalDetalleEquipo').classList.remove('hidden');
+        } catch (err) { console.error(err); }
+    }
+
+    function cerrarDetalle() { document.getElementById('modalDetalleEquipo').classList.add('hidden'); }
+
+    async function cargarEncuentros() {
+        const res = await fetch(`${API}/games?liga=${LIGA}`);
+        const games = await res.json();
+        const pendientes = games.filter(g => g.status === 'pendiente');
+        const cont = document.getElementById('listaEncuentros');
+        if(pendientes.length === 0) {
+            cont.innerHTML = `<p class="text-center py-10 opacity-30 italic text-xs">Sin juegos programados</p>`;
+        } else {
+            cont.innerHTML = pendientes.map(g => `
+                <div class="bg-white p-4 rounded-2xl border-2 border-emerald-100 shadow-sm mb-4">
+                    <div class="flex justify-between text-[8px] font-bold text-slate-400 uppercase mb-2">
+                        <span>${g.fecha}</span><span>${g.hora}</span>
+                    </div>
+                    <div class="flex justify-between items-center gap-2">
+                        <span class="text-[10px] font-black uppercase text-emerald-900 truncate flex-1">${g.local}</span>
+                        <span class="text-[8px] font-black text-emerald-600 italic px-2 bg-emerald-50 rounded-full">VS</span>
+                        <span class="text-[10px] font-black uppercase text-emerald-900 truncate flex-1 text-right">${g.visita}</span>
+                    </div>
+                </div>`).join('');
+        }
+    }
+
+    async function cargarLideres() {
+        const res = await fetch(`${API}/players?liga=${LIGA}&t=${new Date().getTime()}`);
+        const players = await res.json();
+        const topAVG = [...players].sort((a,b) => (b.avg || 0) - (a.avg || 0)).slice(0, 5);
+        document.getElementById('topBateo').innerHTML = topAVG.map((p, i) => `
+            <div class="flex justify-between items-center border-b border-slate-700 pb-1 text-[11px]">
+                <span class="font-bold uppercase"><span class="text-emerald-500 mr-2">#${i+1}</span> ${p.nombre}</span>
+                <span class="font-black text-emerald-400 italic">${Number(p.avg || 0).toFixed(3)}</span>
+            </div>`).join('');
+        const topHR = [...players].sort((a,b) => (b.hr || 0) - (a.hr || 0)).slice(0, 5);
+        document.getElementById('topHR').innerHTML = topHR.map((p, i) => `
+            <div class="flex justify-between items-center border-b border-slate-700 pb-1 text-[11px]">
+                <span class="font-bold uppercase"><span class="text-emerald-500 mr-2">#${i+1}</span> ${p.nombre}</span>
+                <span class="font-black text-emerald-400 italic">${p.hr || 0} HR</span>
+            </div>`).join('');
+    }
+
+    async function cargarHistorial() {
+        const res = await fetch(`${API}/games?liga=${LIGA}&status=finalizado`);
+        const games = await res.json();
+        const cont = document.getElementById('resultadosJornada');
+        if (games.length === 0) {
+            cont.innerHTML = "<p class='text-center py-10 text-slate-400 text-xs italic uppercase opacity-50'>Sin resultados aún.</p>";
+            return;
+        }
+        games.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+        cont.innerHTML = games.map(g => `
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-emerald-100 flex flex-col gap-2 mb-3">
+                <div class="flex justify-between text-[8px] font-black text-slate-400 uppercase">
+                    <span>${g.fecha}</span>
+                    <span class="text-emerald-600 font-bold text-[7px] bg-emerald-50 px-2 rounded-full">FINALIZADO</span>
+                </div>
+                <div class="flex justify-between items-center text-center">
+                    <div class="flex-1 text-[10px] font-black text-emerald-900 uppercase truncate">${g.local}</div>
+                    <div class="mx-3 bg-emerald-700 text-white px-3 py-1 rounded-lg font-black text-sm shadow-md">${g.resultado}</div>
+                    <div class="flex-1 text-[10px] font-black text-emerald-900 uppercase truncate text-right">${g.visita}</div>
+                </div>
+            </div>`).join('');
+    }
+</script>
+</body>
+</html>

@@ -2,13 +2,13 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Alta Maestra de Jugadores - Ley 57</title>
+    <title>Alta Maestra de Jugadores - FV Digital</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen">
 
-    <nav class="bg-blue-900 text-white p-4 shadow-lg flex justify-between items-center">
+    <nav class="bg-blue-900 text-white p-4 shadow-lg flex justify-between items-center border-b-4 border-red-600">
         <div class="flex items-center gap-3">
             <a href="admin.html" class="hover:text-red-400 transition"><i class="fa fa-arrow-left text-xl"></i></a>
             <h1 class="font-black italic uppercase tracking-tighter text-xl">Alta Maestra <span class="text-red-500 text-xs block font-sans">Jugadores</span></h1>
@@ -24,6 +24,8 @@
                 <select id="selLiga" onchange="cargarEquiposPorLiga()" class="w-full p-3 border rounded-xl font-bold bg-slate-50 text-blue-900 outline-none">
                     <option value="femenil">LEY 57 (FEMENIL)</option>
                     <option value="varonil">ALV SPORT (VARONIL)</option>
+                    <option value="easy_femenil">EASY FEMENIL</option>
+                    <option value="slow_mixto">SLOW MIXTO</option>
                 </select>
             </div>
             <div>
@@ -46,7 +48,7 @@
                 <h3 class="font-black italic uppercase text-xs mb-4">Registro Individual</h3>
                 <div class="flex gap-2">
                     <input type="text" id="nombreJugador" placeholder="NOMBRE COMPLETO" class="flex-1 p-3 border rounded-xl font-bold uppercase bg-slate-50 outline-none">
-                    <button onclick="guardarIndividual()" class="bg-emerald-600 text-white px-6 rounded-xl font-black text-[10px] uppercase hover:bg-emerald-700">Agregar</button>
+                    <button onclick="guardarIndividual()" class="bg-emerald-600 text-white px-6 rounded-xl font-black text-[10px] uppercase hover:bg-emerald-700 transition-all">Agregar</button>
                 </div>
             </div>
 
@@ -54,7 +56,7 @@
                 <h3 class="font-black italic uppercase text-xs mb-4">Registro Masivo (Lista de nombres)</h3>
                 <div class="flex flex-col gap-2">
                     <textarea id="listaMasiva" placeholder="Pega los nombres aquí, uno por línea..." class="w-full p-3 border rounded-xl font-bold uppercase bg-slate-50 h-20 outline-none text-xs"></textarea>
-                    <button onclick="guardarMasivo()" class="bg-purple-600 text-white p-2 rounded-xl font-black text-[10px] uppercase hover:bg-purple-700">Cargar Roster Completo</button>
+                    <button onclick="guardarMasivo()" class="bg-purple-600 text-white p-2 rounded-xl font-black text-[10px] uppercase hover:bg-purple-700 transition-all">Cargar Roster Completo</button>
                 </div>
             </div>
         </div>
@@ -64,7 +66,7 @@
                 <h3 class="font-black italic uppercase text-xs tracking-widest">Base de Datos de Jugadores</h3>
                 <span id="contador" class="text-[10px] font-bold bg-white/20 px-3 py-1 rounded-full">0 Jugadores</span>
             </div>
-            <div class="overflow-x-auto max-h-[500px] overflow-y-auto">
+            <div class="overflow-x-auto max-h-[500px] overflow-y-auto custom-scroll">
                 <table class="w-full text-center">
                     <thead class="bg-slate-100 border-b sticky top-0 z-10">
                         <tr class="text-[10px] font-black text-slate-500 uppercase">
@@ -74,8 +76,7 @@
                             <th>Acciones</th>
                         </tr>
                     </thead>
-                    <tbody id="tablaMaestra" class="divide-y font-bold text-xs uppercase">
-                        </tbody>
+                    <tbody id="tablaMaestra" class="divide-y font-bold text-xs uppercase text-slate-700"></tbody>
                 </table>
             </div>
         </section>
@@ -117,7 +118,8 @@
         }
 
         async function cargarTodosLosJugadores() {
-            const res = await fetch(`${API}/players`); // Asumiendo que esta ruta trae todos
+            // Timestamp para evitar caché y traer datos frescos
+            const res = await fetch(`${API}/players?t=${new Date().getTime()}`);
             todosLosJugadores = await res.json();
             renderizarTabla();
         }
@@ -127,7 +129,6 @@
             const busqueda = document.getElementById('buscador').value.toUpperCase();
             const cont = document.getElementById('tablaMaestra');
             
-            // Filtramos por liga y por buscador
             const filtrados = todosLosJugadores.filter(p => 
                 p.liga === liga && 
                 p.nombre.toUpperCase().includes(busqueda)
@@ -135,11 +136,23 @@
 
             document.getElementById('contador').innerText = `${filtrados.length} Jugadores`;
 
+            // Mapeo de estilos para las etiquetas de liga
+            const estilosLiga = {
+                'varonil': 'bg-red-100 text-red-600 border border-red-200',
+                'femenil': 'bg-blue-100 text-blue-600 border border-blue-200',
+                'easy_femenil': 'bg-emerald-100 text-emerald-600 border border-emerald-200',
+                'slow_mixto': 'bg-purple-100 text-purple-600 border border-purple-200'
+            };
+
             cont.innerHTML = filtrados.map(p => `
-                <tr class="hover:bg-blue-50 transition border-b">
+                <tr class="hover:bg-slate-50 transition border-b">
                     <td class="p-4 text-left font-black text-blue-900">${p.nombre}</td>
                     <td class="text-slate-500 italic">${p.equipo}</td>
-                    <td><span class="px-2 py-1 rounded-full text-[8px] ${p.liga === 'varonil' ? 'bg-red-100 text-red-600' : 'bg-pink-100 text-pink-600'}">${p.liga}</span></td>
+                    <td>
+                        <span class="px-3 py-1 rounded-full text-[8px] font-black uppercase ${estilosLiga[p.liga] || 'bg-slate-100'}">
+                            ${p.liga.replace('_', ' ')}
+                        </span>
+                    </td>
                     <td class="p-4 flex gap-3 justify-center">
                         <button onclick="editarJugador('${p._id}', '${p.nombre}')" class="text-blue-500 hover:scale-110 transition"><i class="fa fa-edit"></i></button>
                         <button onclick="eliminarJugador('${p._id}')" class="text-red-400 hover:text-red-600 transition"><i class="fa fa-trash"></i></button>
@@ -157,7 +170,12 @@
 
             if (!nombre || !equipo) return alert("Nombre y Equipo son obligatorios");
 
-            const nuevo = { nombre: nombre.toUpperCase(), equipo, liga, jj:0, vb:0, h:0, dobles:0, triples:0, hr:0, rbi:0, k:0, avg:0 };
+            const nuevo = { 
+                nombre: nombre.toUpperCase(), 
+                equipo, 
+                liga, 
+                jj:0, vb:0, h:0, dobles:0, triples:0, hr:0, rbi:0, k:0, avg:0 
+            };
             
             await fetch(`${API}/players`, {
                 method: 'POST',
@@ -176,17 +194,30 @@
 
             if (!equipo || lista.length === 0) return alert("Selecciona equipo y pega nombres");
 
+            // Botón en estado de carga
+            const btn = event.target;
+            const originalText = btn.innerText;
+            btn.innerText = "CARGANDO...";
+            btn.disabled = true;
+
             for (let nombre of lista) {
                 if (nombre.trim() === "") continue;
                 await fetch(`${API}/players`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ nombre: nombre.trim().toUpperCase(), equipo, liga, jj:0, vb:0, h:0, dobles:0, triples:0, hr:0, rbi:0, k:0, avg:0 })
+                    body: JSON.stringify({ 
+                        nombre: nombre.trim().toUpperCase(), 
+                        equipo, 
+                        liga, 
+                        jj:0, vb:0, h:0, dobles:0, triples:0, hr:0, rbi:0, k:0, avg:0 
+                    })
                 });
             }
 
+            btn.innerText = originalText;
+            btn.disabled = false;
             document.getElementById('listaMasiva').value = "";
-            alert("Roster cargado");
+            alert("Roster cargado correctamente");
             await cargarTodosLosJugadores();
         }
 
