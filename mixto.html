@@ -54,22 +54,30 @@
 
     <main class="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
         <!-- Tabla Única (Categoría Libre) -->
-        <section class="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
-            <div class="bg-purple-800 p-4 text-white font-black text-xs uppercase tracking-widest italic flex items-center gap-3">
-                <i class="fa fa-list-ol"></i> Standing Oficial - Categoría Libre
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
-                    <thead>
-                        <tr class="bg-slate-50 text-slate-400 font-black uppercase border-b text-center">
-                            <th class="p-4 text-left">Equipo</th>
-                            <th class="text-purple-600">JJ</th><th>JG</th><th>JP</th><th>CA</th><th>CR</th><th class="text-purple-600">DIF</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tablaPosiciones" class="divide-y font-bold text-slate-700"></tbody>
-                </table>
-            </div>
-        </section>
+        <!-- TABLA DE POSICIONES CORREGIDA -->
+<section class="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+    <!-- Cambiamos bg-purple-800 por bg-emerald-700 -->
+    <div class="bg-emerald-700 p-4 text-white font-black text-xs uppercase tracking-widest italic flex items-center gap-3">
+        <i class="fa fa-list-ol"></i> Standing Oficial - Categoría Libre
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+            <thead>
+                <!-- Cambiamos text-purple-600 por text-emerald-600 en los encabezados JJ y DIF -->
+                <tr class="bg-slate-50 text-slate-400 font-black uppercase border-b text-center">
+                    <th class="p-4 text-left">Equipo</th>
+                    <th class="text-emerald-600">JJ</th>
+                    <th>JG</th>
+                    <th>JP</th>
+                    <th>CA</th>
+                    <th>CR</th>
+                    <th class="text-emerald-600">DIF</th>
+                </tr>
+            </thead>
+            <tbody id="tablaPosiciones" class="divide-y font-bold text-slate-700"></tbody>
+        </table>
+    </div>
+</section>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-8">
@@ -170,16 +178,19 @@
             equipos.sort((a, b) => (b.g !== a.g) ? b.g - a.g : (b.ca - b.ce) - (a.ca - a.ce));
 
             const cont = document.getElementById('tablaPosiciones');
-            cont.innerHTML = equipos.map(e => `
-                <tr class="hover:bg-purple-50 cursor-pointer border-b transition-colors text-center" onclick="verDetalleRoster('${e.nombre}')">
-                    <td class="p-4 uppercase italic font-black text-purple-900 text-left">${e.nombre}</td>
-                    <td class="font-bold text-slate-500 bg-slate-50/30">${e.g + e.p}</td>
-                    <td class="text-purple-600 font-bold">${e.g}</td>
-                    <td class="text-slate-600">${e.p}</td>
-                    <td class="text-slate-500">${e.ca}</td>
-                    <td class="text-slate-500">${e.ce}</td>
-                    <td class="font-black ${e.ca - e.ce >= 0 ? 'text-purple-600' : 'text-orange-500'}">${(e.ca - e.ce) > 0 ? '+' + (e.ca - e.ce) : (e.ca - e.ce)}</td>
-                </tr>`).join('');
+            // Busca esta parte dentro de cargarTablas() y ajusta las clases de color
+cont.innerHTML = equipos.map(e => `
+    <tr class="hover:bg-emerald-50 cursor-pointer border-b transition-colors text-center" onclick="verDetalleRoster('${e.nombre}')">
+        <td class="p-4 uppercase italic font-black text-emerald-900 text-left">${e.nombre}</td>
+        <td class="font-bold text-slate-500 bg-slate-50/30">${e.g + e.p}</td>
+        <td class="text-emerald-600 font-bold">${e.g}</td> <!-- Cambiado a emerald -->
+        <td class="text-slate-600">${e.p}</td>
+        <td class="text-slate-500">${e.ca}</td>
+        <td class="text-slate-500">${e.ce}</td>
+        <td class="font-black ${e.ca - e.ce >= 0 ? 'text-emerald-600' : 'text-orange-500'}">
+            ${(e.ca - e.ce) > 0 ? '+' + (e.ca - e.ce) : (e.ca - e.ce)}
+        </td>
+    </tr>`).join('');
         } catch (err) { console.error(err); }
     }
 

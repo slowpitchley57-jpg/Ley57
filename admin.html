@@ -270,6 +270,12 @@
             const jj = e.g + e.p;
             const dif = e.ca - e.ce;
             const key = e.categoria + e.liga;
+            const colorTexto = {
+    'varonil': 'text-red-600',
+    'femenil': 'text-blue-900',
+    'easy_femenil': 'text-pink-600',   // Nuevo color rosa
+    'slow_mixto': 'text-emerald-600'  // Nuevo color verde
+}[e.liga] || 'text-slate-900';
             
             if (tablas[key]) {
                 tablas[key].innerHTML += `
@@ -452,12 +458,11 @@
 
         // 1. Definimos los colores para cada liga de forma organizada
         const coloresLigas = {
-            'varonil': 'border-red-600',       // ALV Sport
-            'femenil': 'border-blue-600',      // Ley 57
-            'easy_femenil': 'border-pink-600',   // Ahora Rosa
-    'slow_mixto': 'border-emerald-600'   // Nueva Liga Mixta
-        };
-
+        'varonil': 'border-red-600',
+        'femenil': 'border-blue-600',
+        'easy_femenil': 'border-pink-600',   // Rosa para Easy
+        'slow_mixto': 'border-emerald-600'  // Verde para Mixto
+    };
         cont.innerHTML = games.filter(g => g.status === 'pendiente').map(g => {
             // 2. Seleccionamos el color según la liga o un color gris por defecto
             const bordeColor = coloresLigas[g.liga] || 'border-slate-300';
