@@ -1,98 +1,97 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mantenimiento - FV Digital & ALV Sport</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
-        
-        body { font-family: 'Inter', sans-serif; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mantenimiento - FV Digital & ALV Sport</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
+    body { font-family: 'Inter', sans-serif; }
 
-        .fade-in { animation: fadeIn 1.5s ease-out; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+    /* Animación suave de entrada */
+    .fade-in { animation: fadeIn 1.5s ease-out; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-        .logo-pulse {
-            animation: pulse-border 4s infinite;
-        }
-        @keyframes pulse-border {
-            0%, 100% { box-shadow: 0 0 0 0px rgba(220, 38, 38, 0.4); }
-            50% { box-shadow: 0 0 0 20px rgba(220, 38, 38, 0); }
-        }
+    /* Fondo animado */
+    @keyframes move-bg {
+      0% { transform: translateY(0) translateX(0); }
+      50% { transform: translateY(-20px) translateX(20px); }
+      100% { transform: translateY(0) translateX(0); }
+    }
+    .bg-animate { animation: move-bg 10s ease-in-out infinite; }
 
-        .bg-dark { background: radial-gradient(circle at top, #1e293b 0%, #020617 100%); }
+    .bg-dark { background: radial-gradient(circle at top, #1e293b 0%, #020617 100%); }
 
-        /* Animación de texto */
-        .text-fade { animation: textFade 3s ease-in-out infinite; }
-        @keyframes textFade {
-            0%, 100% { opacity: 0.6; }
-            50% { opacity: 1; }
-        }
-    </style>
+    /* Texto animado */
+    .text-fade { animation: textFade 3s ease-in-out infinite; }
+    @keyframes textFade {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+  </style>
 </head>
-<body class="bg-dark min-h-screen flex flex-col items-center justify-center text-white p-4 sm:p-6 overflow-x-hidden">
+<body class="bg-dark min-h-screen flex flex-col items-center justify-center text-white p-6 overflow-x-hidden">
 
-    <!-- Fondo decorativo -->
-    <div class="absolute inset-0 opacity-20 pointer-events-none">
-        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-900 rounded-full blur-[120px]"></div>
-        <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-red-900 rounded-full blur-[120px]"></div>
+  <!-- Fondo decorativo animado -->
+  <div class="absolute inset-0 opacity-20 pointer-events-none">
+    <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-900 rounded-full blur-[120px] bg-animate"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-red-900 rounded-full blur-[120px] bg-animate"></div>
+  </div>
+
+  <div class="max-w-3xl w-full text-center space-y-12 z-10 fade-in">
+
+    <!-- Logo libre -->
+    <div class="mb-6">
+      <img src="logoalvnegro.jpeg" alt="Logo ALV Sport" class="w-32 h-32 sm:w-48 sm:h-48 md:w-56 md:h-56 mx-auto object-cover shadow-2xl">
     </div>
 
-    <div class="max-w-3xl w-full text-center space-y-12 z-10 fade-in">
-        
-        <!-- Logo -->
-        <div class="relative inline-block mb-4">
-            <div class="logo-pulse rounded-full">
-                <img src="logoalvnegro.jpeg" alt="Logo ALV Sport" class="w-32 h-32 sm:w-48 sm:h-48 md:w-56 md:h-56 mx-auto rounded-full object-cover border-2 border-white/10 shadow-2xl">
-            </div>
-            <div class="absolute bottom-2 right-2 bg-red-600 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center border-4 border-[#020617] shadow-lg">
-                <i class="fa fa-cog fa-spin text-white text-lg sm:text-xl"></i>
-            </div>
-        </div>
-
-        <!-- Texto principal -->
-        <div class="space-y-6 px-2">
-            <h1 class="text-3xl sm:text-5xl md:text-6xl font-black uppercase italic tracking-tighter leading-tight text-fade">
-                Disculpa las molestias <br>
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-400">Página en Mantenimiento</span>
-            </h1>
-            <p class="text-slate-400 font-light uppercase tracking-[0.3em] text-[10px] sm:text-xs italic">
-                Estaré disponible muy pronto
-            </p>
-        </div>
-
-        <!-- Contenedor Glass -->
-        <div class="bg-white/[0.03] backdrop-blur-xl border border-white/10 p-6 sm:p-8 rounded-[2rem] space-y-6 shadow-2xl relative mx-2">
-            <p class="text-sm sm:text-lg text-slate-300 font-light">
-                Seguimos trabajando para que te lleves la <span class="font-bold text-white">mejor experiencia</span>.
-            </p>
-            <p class="text-xs sm:text-sm text-slate-400 italic">
-                En nombre de <span class="text-red-500 font-bold">FV Digital</span> & <span class="text-blue-400 font-bold">ALV Sport Leagues</span>
-            </p>
-        </div>
-
-        <!-- Social Links -->
-        <div class="pt-10 flex flex-col items-center gap-6">
-            <div class="w-12 h-[1px] bg-gradient-to-r from-transparent via-slate-500 to-transparent"></div>
-            <div class="flex gap-6 sm:gap-8">
-                <a href="https://www.facebook.com/profile.php?id=61582026590626" class="text-slate-400 hover:text-white transition-all transform hover:scale-125">
-                    <i class="fab fa-facebook-f text-xl sm:text-2xl"></i>
-                </a>
-                <a href="https://www.instagram.com/alv.sport57/" class="text-slate-400 hover:text-white transition-all transform hover:scale-125">
-                    <i class="fab fa-instagram text-xl sm:text-2xl"></i>
-                </a>
-                <a href="https://wa.me/526624499222?text=Hola,%20quiero%20informacion%20de%20la%20liga" class="text-slate-400 hover:text-white transition-all transform hover:scale-125">
-                    <i class="fab fa-whatsapp text-xl sm:text-2xl"></i>
-                </a>
-            </div>
-            <p class="text-[8px] sm:text-[9px] text-slate-600 uppercase font-bold tracking-[0.3em]">Hermosillo, Sonora . 2026</p>
-        </div>
+    <!-- Texto principal -->
+    <div class="space-y-6 px-2">
+      <h1 class="text-3xl sm:text-5xl md:text-6xl font-black uppercase italic tracking-tighter leading-tight text-fade">
+        Disculpa las molestias <br>
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-400">La página está en mantenimiento</span>
+      </h1>
+      <p class="text-slate-400 font-light uppercase tracking-[0.3em] text-[10px] sm:text-xs italic">
+        Estará disponible muy pronto
+      </p>
     </div>
+
+    <!-- Contenedor Glass con más texto -->
+    <div class="bg-white/[0.03] backdrop-blur-xl border border-white/10 p-6 sm:p-8 rounded-[2rem] space-y-6 shadow-2xl relative mx-2">
+      <p class="text-sm sm:text-lg text-slate-300 font-light">
+        Estamos trabajando intensamente para ofrecerte una plataforma moderna, rápida y atractiva.  
+        Nuestro compromiso es brindarte la mejor experiencia en cada visita.
+      </p>
+      <p class="text-sm sm:text-lg text-slate-300 font-light">
+        Gracias por tu paciencia y confianza en este proceso de mejora continua.
+      </p>
+      <p class="text-xs sm:text-sm text-slate-400 italic">
+        En nombre de <span class="text-red-500 font-bold">FV Digital</span> & <span class="text-blue-400 font-bold">ALV Sport Leagues</span>
+      </p>
+    </div>
+
+    <!-- Social Links -->
+    <div class="pt-10 flex flex-col items-center gap-6">
+      <div class="w-12 h-[1px] bg-gradient-to-r from-transparent via-slate-500 to-transparent"></div>
+      <div class="flex gap-6 sm:gap-8">
+        <a href="https://www.facebook.com/profile.php?id=61582026590626" class="text-slate-400 hover:text-white transition-all transform hover:scale-125">
+          <i class="fab fa-facebook-f text-xl sm:text-2xl"></i>
+        </a>
+        <a href="https://www.instagram.com/alv.sport57/" class="text-slate-400 hover:text-white transition-all transform hover:scale-125">
+          <i class="fab fa-instagram text-xl sm:text-2xl"></i>
+        </a>
+        <a href="https://wa.me/526624499222?text=Hola,%20quiero%20informacion%20de%20la%20liga" class="text-slate-400 hover:text-white transition-all transform hover:scale-125">
+          <i class="fab fa-whatsapp text-xl sm:text-2xl"></i>
+        </a>
+      </div>
+      <p class="text-[8px] sm:text-[9px] text-slate-600 uppercase font-bold tracking-[0.3em]">Hermosillo, Sonora . 2026</p>
+    </div>
+  </div>
 
 </body>
 </html>
