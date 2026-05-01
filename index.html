@@ -8,88 +8,124 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
-    body { font-family: 'Inter', sans-serif; }
+    body { font-family: 'Inter', sans-serif; background-color: #020617; }
 
-    /* Animación suave de entrada */
-    .fade-in { animation: fadeIn 1.5s ease-out; }
+    /* Animaciones */
+    .fade-in { animation: fadeIn 1.2s ease-out forwards; }
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
+      from { opacity: 0; transform: translateY(30px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Fondo animado */
-    @keyframes move-bg {
-      0% { transform: translateY(0) translateX(0); }
-      50% { transform: translateY(-20px) translateX(20px); }
-      100% { transform: translateY(0) translateX(0); }
+    .bg-animate { animation: float 15s ease-in-out infinite; }
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(40px, -40px); }
     }
-    .bg-animate { animation: move-bg 10s ease-in-out infinite; }
 
-    .bg-dark { background: radial-gradient(circle at top, #1e293b 0%, #020617 100%); }
+    /* Brillo en el borde del contenedor */
+    .border-glow {
+      position: relative;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 2rem;
+      overflow: hidden;
+    }
+    .border-glow::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      background: linear-gradient(90deg, #ef4444, #3b82f6, #10b981, #ef4444);
+      background-size: 400% 400%;
+      z-index: -1;
+      animation: moveGradient 8s linear infinite;
+      opacity: 0.3;
+    }
+    @keyframes moveGradient {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
+    }
 
-    /* Texto animado */
-    .text-fade { animation: textFade 3s ease-in-out infinite; }
-    @keyframes textFade {
-      0%, 100% { opacity: 0.6; }
-      50% { opacity: 1; }
+    /* Partículas de fondo */
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.2;
+      animation: rise 10s infinite ease-in;
+    }
+    @keyframes rise {
+      from { transform: translateY(100vh); opacity: 0.5; }
+      to { transform: translateY(-10vh); opacity: 0; }
     }
   </style>
 </head>
-<body class="bg-dark min-h-screen flex flex-col items-center justify-center text-white p-6 overflow-x-hidden">
+<body class="min-h-screen flex flex-col items-center justify-center text-white p-6 overflow-hidden relative">
 
-  <!-- Fondo decorativo animado -->
-  <div class="absolute inset-0 opacity-20 pointer-events-none">
-    <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-900 rounded-full blur-[120px] bg-animate"></div>
-    <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-red-900 rounded-full blur-[120px] bg-animate"></div>
+  <!-- Elementos de Fondo -->
+  <div class="absolute inset-0 z-0">
+    <div class="absolute top-[-10%] left-[-5%] w-[50%] h-[50%] bg-blue-600/20 rounded-full blur-[120px] bg-animate"></div>
+    <div class="absolute bottom-[-10%] right-[-5%] w-[50%] h-[50%] bg-red-600/20 rounded-full blur-[120px] bg-animate" style="animation-delay: -5s;"></div>
+    
+    <!-- Partículas Generadas -->
+    <div class="particle" style="left: 10%; animation-duration: 8s;"></div>
+    <div class="particle" style="left: 30%; animation-duration: 12s; animation-delay: 2s;"></div>
+    <div class="particle" style="left: 70%; animation-duration: 10s; animation-delay: 5s;"></div>
+    <div class="particle" style="left: 90%; animation-duration: 15s; animation-delay: 1s;"></div>
   </div>
 
   <div class="max-w-3xl w-full text-center space-y-12 z-10 fade-in">
 
-    <!-- Logo libre -->
-    <div class="mb-6">
-      <img src="logoalvnegro.jpeg" alt="Logo ALV Sport" class="w-32 h-32 sm:w-48 sm:h-48 md:w-56 md:h-56 mx-auto object-cover shadow-2xl">
+    <!-- Logo con sombra de profundidad -->
+    <div class="relative inline-block group">
+      <div class="absolute inset-0 bg-white/10 blur-3xl rounded-full scale-125 opacity-50 group-hover:opacity-80 transition-opacity"></div>
+      <img src="logoalvnegro.jpeg" alt="Logo ALV Sport" class="relative w-32 h-32 sm:w-48 sm:h-48 md:w-56 md:h-56 mx-auto object-cover rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] transform group-hover:scale-105 transition-transform duration-500">
     </div>
 
-    <!-- Texto principal -->
-    <div class="space-y-6 px-2">
-      <h1 class="text-3xl sm:text-5xl md:text-6xl font-black uppercase italic tracking-tighter leading-tight text-fade">
-        Disculpa las molestias <br>
-        <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-400">La página está en mantenimiento</span>
+    <!-- Título Principal -->
+    <div class="space-y-4">
+      <h1 class="text-4xl sm:text-6xl md:text-7xl font-black uppercase italic tracking-tighter leading-none">
+        EVOLUCIONANDO <br>
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-400 to-yellow-500">PARA LA VICTORIA</span>
       </h1>
-      <p class="text-slate-400 font-light uppercase tracking-[0.3em] text-[10px] sm:text-xs italic">
-        Estará disponible muy pronto
+      <p class="text-slate-400 font-bold uppercase tracking-[0.5em] text-[10px] sm:text-xs">
+        Mantenimiento en curso . FV Digital & ALV Sport
       </p>
     </div>
 
-    <!-- Contenedor Glass con más texto -->
-    <div class="bg-white/[0.03] backdrop-blur-xl border border-white/10 p-6 sm:p-8 rounded-[2rem] space-y-6 shadow-2xl relative mx-2">
-      <p class="text-sm sm:text-lg text-slate-300 font-light">
-        Estamos trabajando intensamente para ofrecerte una plataforma moderna, rápida y atractiva.  
-        Nuestro compromiso es brindarte la mejor experiencia en cada visita.
-      </p>
-      <p class="text-sm sm:text-lg text-slate-300 font-light">
-        Gracias por tu paciencia y confianza en este proceso de mejora continua.
-      </p>
-      <p class="text-xs sm:text-sm text-slate-400 italic">
-        En nombre de <span class="text-red-500 font-bold">FV Digital</span> & <span class="text-blue-400 font-bold">ALV Sport Leagues</span>
-      </p>
+    <!-- Contenedor Glassmorphism -->
+    <div class="border-glow p-8 sm:p-12 shadow-2xl backdrop-blur-2xl mx-2">
+      <div class="space-y-6">
+        <h2 class="text-xl sm:text-2xl font-bold text-white italic uppercase tracking-widest">Estamos cocinando algo grande</h2>
+        <p class="text-sm sm:text-lg text-slate-300 font-light leading-relaxed">
+          Nuestros ingenieros están actualizando los sistemas para ofrecerte la plataforma de estadísticas más potente de Sonora. 
+          <span class="block mt-4 font-bold text-white">Gracias por ser parte de esta nueva era.</span>
+        </p>
+        
+        <!-- Barra de progreso decorativa -->
+        <div class="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+            <div class="h-full bg-gradient-to-r from-red-600 to-blue-600 animate-[moveGradient_3s_infinite]" style="width: 70%;"></div>
+        </div>
+      </div>
     </div>
 
-    <!-- Social Links -->
-    <div class="pt-10 flex flex-col items-center gap-6">
-      <div class="w-12 h-[1px] bg-gradient-to-r from-transparent via-slate-500 to-transparent"></div>
-      <div class="flex gap-6 sm:gap-8">
-        <a href="https://www.facebook.com/profile.php?id=61582026590626" class="text-slate-400 hover:text-white transition-all transform hover:scale-125">
-          <i class="fab fa-facebook-f text-xl sm:text-2xl"></i>
+    <!-- Social & Footer -->
+    <div class="flex flex-col items-center gap-8">
+      <div class="flex gap-8">
+        <a href="https://www.facebook.com/profile.php?id=61582026590626" class="p-3 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-red-500 transition-all transform hover:-translate-y-2">
+          <i class="fab fa-facebook-f text-xl text-slate-300"></i>
         </a>
-        <a href="https://www.instagram.com/alv.sport57/" class="text-slate-400 hover:text-white transition-all transform hover:scale-125">
-          <i class="fab fa-instagram text-xl sm:text-2xl"></i>
+        <a href="https://www.instagram.com/alv.sport57/" class="p-3 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-pink-500 transition-all transform hover:-translate-y-2">
+          <i class="fab fa-instagram text-xl text-slate-300"></i>
         </a>
-        <a href="https://wa.me/526624499222?text=Hola,%20quiero%20informacion%20de%20la%20liga" class="text-slate-400 hover:text-white transition-all transform hover:scale-125">
-          <i class="fab fa-whatsapp text-xl sm:text-2xl"></i>
+        <a href="https://wa.me/526624499222" class="p-3 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-green-500 transition-all transform hover:-translate-y-2">
+          <i class="fab fa-whatsapp text-xl text-slate-300"></i>
         </a>
       </div>
-      <p class="text-[8px] sm:text-[9px] text-slate-600 uppercase font-bold tracking-[0.3em]">Hermosillo, Sonora . 2026</p>
+      <p class="text-[9px] text-slate-500 font-black uppercase tracking-[0.5em] flex items-center gap-2">
+        <span class="w-2 h-2 bg-red-600 rounded-full animate-ping"></span> Hermosillo, Sonora 2026
+      </p>
     </div>
   </div>
 
