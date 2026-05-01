@@ -3,58 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mantenimiento - Liga Ley 57</title>
+    <title>Mantenimiento - FV Digital & ALV Sport</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @keyframes pulse-red {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.05); opacity: 0.8; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; }
+
+        /* Animación suave de entrada */
+        .fade-in { animation: fadeIn 1.5s ease-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .animate-slow { animation: pulse-red 3s infinite; }
-        .bg-custom { background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); }
+
+        /* Pulso sutil para el logo */
+        .logo-pulse {
+            animation: pulse-border 4s infinite;
+        }
+        @keyframes pulse-border {
+            0%, 100% { box-shadow: 0 0 0 0px rgba(220, 38, 38, 0.4); }
+            50% { box-shadow: 0 0 0 20px rgba(220, 38, 38, 0); }
+        }
+
+        .bg-dark { background: radial-gradient(circle at top, #1e293b 0%, #020617 100%); }
     </style>
 </head>
-<body class="bg-custom min-h-screen flex items-center justify-center text-white p-6 font-sans">
+<body class="bg-dark min-h-screen flex flex-col items-center justify-center text-white p-6 overflow-hidden">
 
-    <div class="max-w-2xl w-full text-center space-y-8">
-        <!-- Logo -->
-        <div class="relative inline-block">
-            <img src="logoalvnegro.jpeg" class="w-32 h-32 mx-auto rounded-full border-4 border-red-600 shadow-2xl animate-slow">
-            <div class="absolute -bottom-2 -right-2 bg-red-600 p-2 rounded-full shadow-lg">
-                <i class="fa fa-tools text-white"></i>
+    <!-- Fondo decorativo sutil -->
+    <div class="absolute inset-0 opacity-20 pointer-events-none">
+        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-900 rounded-full blur-[120px]"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-red-900 rounded-full blur-[120px]"></div>
+    </div>
+
+    <div class="max-w-3xl w-full text-center space-y-12 z-10 fade-in">
+        
+        <!-- Logo Grande Superior -->
+        <div class="relative inline-block mb-4">
+            <div class="logo-pulse rounded-full">
+                <img src="logoalvnegro.jpeg" alt="Logo ALV Sport" class="w-48 h-48 md:w-56 md:h-56 mx-auto rounded-full object-cover border-2 border-white/10 shadow-2xl">
+            </div>
+            <div class="absolute bottom-2 right-2 bg-red-600 w-12 h-12 rounded-full flex items-center justify-center border-4 border-[#020617] shadow-lg">
+                <i class="fa fa-cog fa-spin text-white text-xl"></i>
             </div>
         </div>
 
-        <!-- Título Principal -->
-        <div class="space-y-2">
-            <h1 class="text-4xl md:text-6xl font-black italic uppercase tracking-tighter">
-                Pagina en <span class="text-red-500">Mantenimiento</span>
+        <!-- Texto Principal con Toque Formal -->
+        <div class="space-y-4">
+            <h1 class="text-5xl md:text-7xl font-black uppercase italic tracking-tighter leading-none">
+                Próximamente <br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-400">Nuevas Ligas</span>
             </h1>
-            <p class="text-slate-400 font-bold uppercase tracking-[0.3em] text-xs">
-                Estamos evolucionando para ti
+            <p class="text-slate-400 font-light uppercase tracking-[0.6em] text-[10px] md:text-xs italic">
+                Evolucionando la experiencia del Softbol
             </p>
         </div>
 
-        <!-- Mensaje de Colaboración -->
-        <div class="bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-3xl space-y-4 shadow-2xl">
-            <p class="text-sm md:text-base text-slate-200 leading-relaxed">
-                En <span class="font-black text-red-500">FV Digital</span> y <span class="font-black text-blue-400">ALV Sport</span> trabajamos en conjunto para seguir mejorando tu experiencia deportiva.
-            </p>
-            <div class="h-px bg-gradient-to-r from-transparent via-slate-500 to-transparent opacity-30"></div>
-            <p class="font-black italic uppercase text-lg text-yellow-500 tracking-widest">
-                Disponible: 5 de Mayo, 2026
-            </p>
-        </div>
-
-        <!-- Footer / Redes -->
-        <div class="pt-8 space-y-4">
-            <p class="text-[10px] text-slate-500 uppercase font-black tracking-widest">Sigue el proceso en nuestras redes</p>
-            <div class="flex justify-center gap-6">
-                <a href="https://www.facebook.com/profile.php?id=61582026590626" class="text-2xl hover:text-red-500 transition-colors"><i class="fab fa-facebook"></i></a>
-                <a href="https://www.instagram.com/alv.sport57/" class="text-2xl hover:text-red-500 transition-colors"><i class="fab fa-instagram"></i></a>
-                <a href="https://wa.me/526624499222?text=Hola,%20quiero%20informacion%20de%20la%20liga" class="text-2xl hover:text-red-500 transition-colors"><i class="fab fa-whatsapp"></i></a>
+        <!-- Contenedor Glassmorphism -->
+        <div class="bg-white/[0.03] backdrop-blur-xl border border-white/10 p-8 rounded-[2rem] space-y-6 shadow-2xl relative">
+            <div class="space-y-2">
+                <p class="text-sm md:text-lg text-slate-300 font-light">
+                    La alianza estratégica entre <span class="font-bold text-white border-b-2 border-red-600">FV Digital</span> y <span class="font-bold text-white border-b-2 border-blue-500">ALV Sport</span> está diseñando una plataforma integral para las ligas:
+                </p>
+                <div class="flex flex-wrap justify-center gap-3 mt-4 text-[10px] font-bold uppercase tracking-widest">
+                    <span class="bg-white/10 px-4 py-2 rounded-full border border-white/10 text-red-400">Easy Femenil</span>
+                    <span class="bg-white/10 px-4 py-2 rounded-full border border-white/10 text-blue-400">Slow Mixto</span>
+                    <span class="bg-white/10 px-4 py-2 rounded-full border border-white/10 text-emerald-400">Ley 57</span>
+                </div>
             </div>
+
+            <div class="pt-4">
+                <div class="inline-block px-6 py-3 rounded-2xl bg-gradient-to-r from-red-600/20 to-blue-600/20 border border-white/10">
+                    <p class="font-black italic uppercase text-xl text-yellow-500 tracking-[0.2em]">
+                        Lanzamiento: 05 . 05 . 26
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Social Links Formales -->
+        <div class="pt-10 flex flex-col items-center gap-6">
+            <div class="w-12 h-[1px] bg-gradient-to-r from-transparent via-slate-500 to-transparent"></div>
+            <div class="flex gap-8">
+                <a href="https://www.facebook.com/profile.php?id=61582026590626" class="text-slate-400 hover:text-white transition-all transform hover:scale-125">
+                    <i class="fab fa-facebook-f text-2xl"></i>
+                </a>
+                <a href="https://www.instagram.com/alv.sport57/" class="text-slate-400 hover:text-white transition-all transform hover:scale-125">
+                    <i class="fab fa-instagram text-2xl"></i>
+                </a>
+                <a href="https://wa.me/526624499222?text=Hola,%20quiero%20informacion%20de%20la%20liga" class="text-slate-400 hover:text-white transition-all transform hover:scale-125">
+                    <i class="fab fa-whatsapp text-2xl"></i>
+                </a>
+            </div>
+            <p class="text-[9px] text-slate-600 uppercase font-bold tracking-[0.4em]">Hermosillo, Sonora . 2026</p>
         </div>
     </div>
 
