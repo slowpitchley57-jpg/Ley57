@@ -8,16 +8,16 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .custom-scroll::-webkit-scrollbar { width: 5px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
-        .bg-gradient-easy { background: linear-gradient(135deg, #064e3b 0%, #059669 100%); }
-        
-        @keyframes glow-emerald {
-            0%, 100% { box-shadow: 0 0 5px rgba(16, 185, 129, 0.2); }
-            50% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.6); }
-        }
-        .nota-easy { animation: glow-emerald 2s infinite; }
-    </style>
+    .custom-scroll::-webkit-scrollbar { width: 5px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
+    .bg-gradient-mixto { background: linear-gradient(135deg, #064e3b 0%, #059669 100%); }
+    
+    @keyframes glow-emerald {
+        0%, 100% { box-shadow: 0 0 5px rgba(16, 185, 129, 0.2); }
+        50% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.6); }
+    }
+    .nota-mixto { animation: glow-emerald 2s infinite; }
+</style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans">
 
@@ -42,15 +42,15 @@
     </header>
 
     <div class="max-w-7xl mx-auto px-4 mt-8 mb-4">
-        <div class="nota-mixto bg-purple-50 border-2 border-purple-600 p-5 rounded-2xl flex items-center gap-5 backdrop-blur-sm">
-            <div class="bg-purple-600 p-3 rounded-full">
-                <i class="fa fa-venus-mars text-white text-xl"></i>
-            </div>
-            <p class="text-xs md:text-sm font-black uppercase tracking-widest text-purple-900 italic leading-tight">
-                Competición Mixta: <span class="text-purple-600">Hombres y Mujeres</span> compartiendo la pasión del Softbol.
-            </p>
+    <div class="nota-mixto bg-emerald-50 border-2 border-emerald-600 p-5 rounded-2xl flex items-center gap-5 backdrop-blur-sm">
+        <div class="bg-emerald-600 p-3 rounded-full animate-bounce">
+            <i class="fa fa-venus-mars text-white text-xl"></i>
         </div>
+        <p class="text-xs md:text-sm font-black uppercase tracking-widest text-emerald-900 italic leading-tight">
+            Regla Play-offs: <span class="text-emerald-600 underline">Mínimo 5 juegos jugados</span> para participar en la fase final de Play Offs.
+        </p>
     </div>
+</div>
 
     <main class="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
         <!-- Tabla Única (Categoría Libre) -->
