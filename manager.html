@@ -53,7 +53,7 @@
         <div class="flex items-center gap-4 mb-12">
             <div class="relative">
                 <div class="absolute inset-0 bg-red-600 blur-lg opacity-20 animate-pulse"></div>
-                <img src="imgley57.pgn.png" class="relative w-14 h-14 bg-white rounded-2xl p-1.5 border-2 border-red-600">
+                <img src="logoalvnegro.jpeg" class="relative w-14 h-14 bg-white rounded-2xl p-1.5 border-2 border-red-600">
             </div>
             <div>
                 <h1 class="font-oswald text-2xl italic leading-none uppercase tracking-tighter">LEY 57</h1>
@@ -199,58 +199,94 @@
             </div>
         </div>
     </div>
-
-    <script>
+<script>
     const API = "https://ley57.onrender.com/api";
     let equipoSeleccionado = "";
     let correoUsuario = "";
     let jugadoresEnMemoria = [];
 
-    // Formatear fecha del encabezado
-    document.getElementById('fechaHoy').innerText = new Intl.DateTimeFormat('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).format(new Date());
+    // Formatear fecha del encabezado (Estilo ESPN)
+    const fechaHeader = document.getElementById('fechaHoy');
+    if(fechaHeader) {
+        fechaHeader.innerText = new Intl.DateTimeFormat('es-MX', { 
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+        }).format(new Date());
+    }
 
     function revisarSesion() {
+        // Buscamos la sesión en ambas llaves posibles
         const sesion = localStorage.getItem('userLogueado') || localStorage.getItem('managerLogueado');
-        if (!sesion) { window.location.href = 'index.html'; return; }
+        
+        if (!sesion) { 
+            window.location.href = 'index.html'; 
+            return; 
+        }
+
         const datos = JSON.parse(sesion);
         equipoSeleccionado = datos.equipo;
         correoUsuario = datos.correo || datos.email || "";
 
-        document.getElementById('nombreEquipoCabecera').innerText = equipoSeleccionado; 
+        // Mostramos el nombre del equipo en la cabecera
+        const cabecera = document.getElementById('nombreEquipoCabecera');
+        if(cabecera) cabecera.innerText = equipoSeleccionado.toUpperCase(); 
 
+        // Configuración del botón de estadísticas (Cierre de sesión seguro)
         const btnStats = document.getElementById('btnLinkEstadisticas');
         if (btnStats) {
+            btnStats.style.cursor = 'pointer';
             btnStats.onclick = (e) => {
                 e.preventDefault();
-                if(confirm("¿Deseas ir a las estadísticas generales? Deberás iniciar sesión nuevamente después.")) { cerrarSesion(); }
+                if(confirm("¿Deseas ir a las estadísticas generales? Deberás iniciar sesión nuevamente después.")) { 
+                    cerrarSesion(); 
+                }
             };
         }
+
+        // Carga inicial de datos
         cargarMiRoster();
-        // Sincronización cada 30 segundos para no saturar
-        setInterval(() => { if (equipoSeleccionado) cargarMiRoster(); }, 30000);
+        
+        // Sincronización automática cada 30 segundos
+        setInterval(() => { 
+            if (equipoSeleccionado) cargarMiRoster(); 
+        }, 30000);
     }
 
     async function cargarMiRoster() {
-        if (!equipoSeleccionado) return;
+        if (!equipoSeleccionado) return; 
+
         try {
-            const res = await fetch(`${API}/players?equipo=${encodeURIComponent(equipoSeleccionado)}`);
-            jugadoresEnMemoria = await res.json();
+            // RUTA CRÍTICA: Filtramos por el nombre exacto del equipo en la colección 'players'
+            const respuesta = await fetch(`${API}/players?equipo=${encodeURIComponent(equipoSeleccionado)}&t=${new Date().getTime()}`);
             
-            if(jugadoresEnMemoria.length > 0) {
-                const ligaActual = jugadoresEnMemoria[0].liga;
-                cargarResultadosLiga(ligaActual);
-                cargarProximoJuego();
+            if (!respuesta.ok) throw new Error("Fallo en la conexión");
+
+            jugadoresEnMemoria = await respuesta.json();
+            
+            // Si hay jugadoras, usamos la liga del primer registro para filtrar resultados y calendario
+            if (jugadoresEnMemoria.length > 0) {
+                const ligaDelEquipo = jugadoresEnMemoria[0].liga;
+                cargarResultadosLiga(ligaDelEquipo);
+                cargarProximoJuego(); // Esta función ya filtra internamente por equipoSeleccionado
             }
+            
             renderizarRoster(jugadoresEnMemoria);
-        } catch (error) { console.error("Error roster:", error); }
+
+        } catch (error) {
+            console.error("Error al jalar roster:", error);
+            const lista = document.getElementById('miRosterLista');
+            if(lista) lista.innerHTML = `<tr><td colspan="10" class="p-10 text-red-500 italic text-center">Error de sincronización con la base de datos.</td></tr>`;
+        }
     }
 
     function renderizarRoster(lista) {
         const cont = document.getElementById('miRosterLista');
-        document.getElementById('contadorRoster').innerText = lista.length;
+        const contador = document.getElementById('contadorRoster');
+        
+        if(contador) contador.innerText = lista.length;
+        if(!cont) return;
         
         if(lista.length === 0) {
-            cont.innerHTML = `<tr><td colspan="10" class="p-16 text-slate-500 italic text-center uppercase text-[10px] tracking-widest">No hay registros en la base de datos</td></tr>`;
+            cont.innerHTML = `<tr><td colspan="10" class="p-16 text-slate-500 italic text-center uppercase text-[10px] tracking-widest">El roster está vacío en la base de datos</td></tr>`;
             return;
         }
 
@@ -260,7 +296,7 @@
                 <tr class="hover:bg-white/5 transition-all group border-b border-white/5">
                     <td class="p-5 text-left">
                         <div class="text-white uppercase italic font-oswald text-lg tracking-tighter">${p.nombre}</div>
-                        <div class="text-[8px] text-blue-400 font-bold uppercase tracking-widest mt-1">Nac: ${p.fechaNacimiento || '---'}</div>
+                        <div class="text-[8px] text-blue-400 font-bold uppercase tracking-widest mt-1">ID: ${p.posicion || 'JUGADORA'}</div>
                     </td>
                     <td class="text-slate-500 font-black">${p.jj || 0}</td>
                     <td class="bg-white/5 text-slate-400">${p.vb || 0}</td>
@@ -277,13 +313,17 @@
 
     async function cargarResultadosLiga(liga) {
         try {
+            // Filtramos solo juegos de la liga del manager que ya finalizaron
             const res = await fetch(`${API}/games?liga=${liga}&status=finalizado`);
             const games = await res.json();
             const cont = document.getElementById('resultadosJornada');
+            if(!cont) return;
+
+            // Mostramos los últimos 4 resultados (los más recientes primero)
             const ultimos = games.reverse().slice(0, 4);
             
             if(ultimos.length === 0) {
-                cont.innerHTML = `<p class="text-[9px] text-slate-500 uppercase italic p-4">No hay resultados registrados</p>`;
+                cont.innerHTML = `<p class="text-[9px] text-slate-500 uppercase italic p-4 text-center w-full">Sin resultados recientes</p>`;
                 return;
             }
 
@@ -293,25 +333,30 @@
                     <span class="bg-blue-950 text-white px-3 py-1 rounded-lg text-[11px] font-oswald italic shadow-md mx-3">${g.resultado}</span>
                     <span class="text-[9px] font-black uppercase flex-1 truncate text-right italic text-slate-400">${g.visita}</span>
                 </div>`).join('');
-        } catch(e) {}
+        } catch(e) { console.error("Error resultados:", e); }
     }
 
     async function cargarProximoJuego() {
         const cont = document.getElementById('proximoJuego');
+        if(!cont) return;
+
         try {
             const res = await fetch(`${API}/games?status=pendiente`);
             const games = await res.json();
             const miEq = equipoSeleccionado.trim().toUpperCase();
+            
+            // Buscamos el juego pendiente donde participe el equipo logueado
             const miJuego = games.find(g => (g.local.trim().toUpperCase() === miEq || g.visita.trim().toUpperCase() === miEq));
             
             if(!miJuego) {
                 cont.innerHTML = `
                     <div class="flex flex-col gap-2">
                         <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest italic">Calendario Libre</p>
-                        <p class="text-[9px] text-slate-300 font-bold uppercase">Sin juegos programados esta semana</p>
+                        <p class="text-[9px] text-slate-300 font-bold uppercase">No hay juegos programados</p>
                     </div>`;
                 return;
             }
+
             cont.innerHTML = `
                 <div class="w-full">
                     <div class="inline-flex items-center gap-2 bg-red-50 text-red-600 px-3 py-1 rounded-full font-black text-[9px] uppercase italic border border-red-100 mb-4">
@@ -323,7 +368,7 @@
                         <span class="text-[11px] font-oswald uppercase italic flex-1 truncate text-blue-950 text-right">${miJuego.visita}</span>
                     </div>
                 </div>`;
-        } catch (e) {}
+        } catch (e) { console.error("Error prox juego:", e); }
     }
 
     function filtrarRoster() {
@@ -332,30 +377,47 @@
         renderizarRoster(filtrados);
     }
 
+    // --- INTERFAZ Y MODALES ---
     function toggleMobileMenu() {
-        document.getElementById('sidebar').classList.toggle('-translate-x-full');
-        document.getElementById('sidebarOverlay').classList.toggle('hidden');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        if(sidebar) sidebar.classList.toggle('-translate-x-full');
+        if(overlay) overlay.classList.toggle('hidden');
     }
 
-    function toggleModalPassword() { document.getElementById('modalPassword').classList.toggle('hidden'); }
+    function toggleModalPassword() { 
+        const modal = document.getElementById('modalPassword');
+        if(modal) modal.classList.toggle('hidden'); 
+    }
 
     async function actualizarPassword() {
         const p1 = document.getElementById('nuevaPass').value;
         const p2 = document.getElementById('confirmPass').value;
-        if(!p1 || p1 !== p2) return alert("Las contraseñas deben coincidir.");
+        
+        if(!p1 || p1 !== p2) return alert("Las contraseñas no coinciden.");
+        
         try {
             const res = await fetch(`${API}/users/update-password`, { 
                 method: 'PUT', 
                 headers: {'Content-Type': 'application/json'}, 
                 body: JSON.stringify({ correo: correoUsuario, nuevaPass: p1 }) 
             });
-            if(res.ok) { alert("¡Éxito! Contraseña actualizada."); toggleModalPassword(); }
-        } catch(e) { alert("Error al conectar con el servidor."); }
+            if(res.ok) { 
+                alert("¡Éxito! Tu contraseña ha sido actualizada."); 
+                toggleModalPassword(); 
+            } else {
+                alert("No se pudo actualizar. Intenta más tarde.");
+            }
+        } catch(e) { alert("Error de conexión con el servidor."); }
     }
 
-    function cerrarSesion() { localStorage.clear(); window.location.href = 'index.html'; }
+    function cerrarSesion() { 
+        localStorage.clear(); 
+        window.location.href = 'index.html'; 
+    }
 
-    revisarSesion();
-    </script>
+    // Iniciar el sistema
+    document.addEventListener('DOMContentLoaded', revisarSesion);
+</script>
 </body>
 </html>
