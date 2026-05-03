@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Master Admin - Multiliga Pro</title>
-    <link rel="icon" type="image/png" href="logoalvnegro.jpeg">
+    <link rel="icon" type="image/png" href="logoley57icon.jpeg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -35,16 +35,7 @@
                 <p class="text-[9px] font-black text-blue-300 uppercase mb-2">Altas Managers</p>
                 <input type="checkbox" id="masterSwitch" onchange="toggleAltas()" class="w-5 h-5 accent-red-600 cursor-pointer">
             </div>
-            <button onclick="location.href='alta_jugadores.html'" class="w-full text-left p-3 bg-indigo-600 rounded-xl font-bold flex items-center gap-3">
-                <i class="fa fa-users-cog"></i> Alta Maestra Jugadores
-            </button>
-            <button onclick="location.href='anotador_pro.html'" class="w-full text-left p-3 bg-red-600 hover:bg-black text-white rounded-xl font-bold flex items-center gap-3 transition-all shadow-lg">
-                <i class="fa fa-stadium text-lg"></i> 
-                <div>
-                    <span class="block text-xs uppercase font-black italic">Anotador Oficial</span>
-                    <span class="block text-[8px] opacity-70 uppercase">Hoja de Anotación Digital Pro</span>
-                 </div>
-            </button>
+            <button onclick="location.href='alta_jugadores.html'" class="w-full text-left p-3 bg-indigo-600 rounded-xl font-bold flex items-center gap-3"><i class="fa fa-users-cog"></i> Alta Maestra Jugadores</button>
             <button onclick="location.reload()" class="w-full text-left p-3 hover:bg-blue-800 rounded-xl transition flex items-center gap-3"><i class="fa fa-sync"></i> Sincronizar</button>
             <button onclick="toggleModal('modalEquipo')" class="w-full text-left p-3 bg-emerald-600 rounded-xl font-bold flex items-center gap-3"><i class="fa fa-plus-circle"></i> Nuevo Equipo</button>
             <button onclick="toggleModal('modalRosters')" class="w-full text-left p-3 bg-amber-500 rounded-xl font-bold flex items-center gap-3"><i class="fa fa-user-edit"></i> Roster / Stats</button>
@@ -52,15 +43,11 @@
             <button onclick="toggleModal('modalIA')" class="w-full text-left p-3 bg-purple-600 rounded-xl font-bold flex items-center gap-3"><i class="fa fa-robot"></i> Generar Rol IA</button> 
             <hr class="opacity-20">
             <button onclick="limpiarHistorialSemanal()" class="w-full text-left p-3 bg-red-600 hover:bg-red-700 rounded-xl font-bold flex items-center gap-3 transition"><i class="fa fa-broom"></i> Limpiar Semana</button>
-            <a href="index.html" target="_blank" class="block p-3 bg-blue-700 rounded-xl text-center font-black italic uppercase text-[10px] tracking-widest no-underline text-white">Ver Portal Público</a>
-            <button onclick="cerrarSesion()" class="w-full text-left sidebar-link block p-3 rounded-xl transition flex items-center gap-3 text-red-400 font-bold uppercase text-xs tracking-widest">
-                <i class="fa fa-sign-out-alt"></i> Salir del Panel
-            </button>
+            <button onclick="cerrarSesion()" class="w-full text-left p-3 rounded-xl flex items-center gap-3 text-red-400 font-bold uppercase text-xs tracking-widest"><i class="fa fa-sign-out-alt"></i> Salir</button>
         </nav>
     </aside>
 
     <main class="flex-1 p-8 space-y-8 overflow-y-auto">
-        <!-- Ligas Originales -->
         <h2 class="text-blue-900 font-black italic uppercase border-l-4 border-blue-900 pl-3">Ley 57 - Femenil</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div class="bg-white rounded-3xl shadow-sm border overflow-hidden">
@@ -85,32 +72,25 @@
             </div>
         </div>
 
-        <!-- Ligas Nuevas (Colores Actualizados) -->
-        <h2 class="text-emerald-700 font-black italic uppercase border-l-4 border-emerald-700 pl-3">Nuevas Ligas - Expansión 2026</h2>
+        <h2 class="text-emerald-700 font-black italic uppercase border-l-4 border-emerald-700 pl-3">Expansión 2026</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="bg-white rounded-3xl shadow-sm border overflow-hidden border-pink-100">
+            <div class="bg-white rounded-3xl shadow-sm border border-pink-100 overflow-hidden">
                 <div class="bg-pink-600 p-3 text-white font-bold text-xs uppercase tracking-widest italic text-center">Easy Femenil (Libre)</div>
-                <table class="w-full text-xs text-center">
-                    <thead class="bg-slate-100 border-b font-black text-slate-500 uppercase"><tr><th class="p-4 text-left">Equipo</th><th>JJ</th><th>JG</th><th>JP</th><th>CA</th><th>CR</th><th>DIF</th><th>X</th></tr></thead>
-                    <tbody id="tablaEasyFem" class="divide-y font-bold text-pink-900"></tbody>
-                </table>
+                <table class="w-full text-xs text-center"><thead class="bg-slate-100 border-b font-black text-slate-500"><tr><th class="p-4 text-left">Equipo</th><th>JJ</th><th>JG</th><th>JP</th><th>CA</th><th>CR</th><th>DIF</th><th>X</th></tr></thead><tbody id="tablaEasyFem" class="divide-y font-bold text-pink-900"></tbody></table>
             </div>
-            <div class="bg-white rounded-3xl shadow-sm border overflow-hidden border-emerald-100">
+            <div class="bg-white rounded-3xl shadow-sm border border-emerald-100 overflow-hidden">
                 <div class="bg-emerald-600 p-3 text-white font-bold text-xs uppercase tracking-widest italic text-center">Slow Mixto (Libre)</div>
-                <table class="w-full text-xs text-center">
-                    <thead class="bg-slate-100 border-b font-black text-slate-500 uppercase"><tr><th class="p-4 text-left">Equipo</th><th>JJ</th><th>JG</th><th>JP</th><th>CA</th><th>CR</th><th>DIF</th><th>X</th></tr></thead>
-                    <tbody id="tablaSlowMix" class="divide-y font-bold text-emerald-900"></tbody>
-                </table>
+                <table class="w-full text-xs text-center"><thead class="bg-slate-100 border-b font-black text-slate-500"><tr><th class="p-4 text-left">Equipo</th><th>JJ</th><th>JG</th><th>JP</th><th>CA</th><th>CR</th><th>DIF</th><th>X</th></tr></thead><tbody id="tablaSlowMix" class="divide-y font-bold text-emerald-900"></tbody></table>
             </div>
         </div>
 
         <section class="bg-white p-6 rounded-3xl border shadow-sm">
-            <h3 class="text-blue-900 font-black mb-4 uppercase text-xs italic tracking-widest border-b pb-2">Programar Jornada</h3>
-            <div class="mb-4 bg-slate-100 p-3 rounded-xl flex items-center gap-4 text-xs">
-                <span class="font-black uppercase text-slate-500">1. Filtrar Liga:</span>
-                <select id="filtroLigaGlobal" onchange="actualizarSelectores()" class="p-2 border rounded-lg font-bold bg-white">
-                    <option value="femenil">LEY 57 (FEM)</option>
-                    <option value="varonil">ALV SPORT (VAR)</option>
+            <h3 class="text-blue-900 font-black mb-4 uppercase text-xs italic border-b pb-2">Programar Jornada</h3>
+            <div class="mb-4 flex items-center gap-4 text-xs font-bold uppercase text-slate-500">
+                1. Filtrar Liga:
+                <select id="filtroLigaGlobal" onchange="actualizarSelectores()" class="p-2 border rounded bg-white text-blue-900">
+                    <option value="femenil">LEY 57 FEM</option>
+                    <option value="varonil">ALV SPORT VAR</option>
                     <option value="easy_femenil">EASY FEM</option>
                     <option value="slow_mixto">SLOW MIXTO</option>
                 </select>
@@ -120,77 +100,65 @@
                 <select id="selVis" class="p-2 border rounded-xl text-xs font-bold"></select>
                 <input type="date" id="fec" class="p-2 border rounded-xl text-xs font-bold">
                 <input type="time" id="hor" class="p-2 border rounded-xl text-xs font-bold">
-                <input type="text" id="streamNuevo" placeholder="Link streaming" class="p-2 border rounded-xl text-[9px] font-bold">
-                <button onclick="guardarJuego()" class="bg-blue-900 text-white p-2 rounded-xl font-black text-[10px] uppercase shadow-lg hover:bg-black transition-all">Programar</button>
+                <input type="text" id="streamNuevo" placeholder="Link stream" class="p-2 border rounded-xl text-[9px]">
+                <button onclick="guardarJuego()" class="bg-blue-900 text-white p-2 rounded-xl font-black text-[10px] uppercase shadow hover:bg-black">Programar</button>
             </div>
-            <h3 class="text-blue-900 font-black my-6 uppercase text-xs italic tracking-widest border-b pb-2">Resultados Pendientes</h3>
-            <div id="listaResultados" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            <div id="listaResultados" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8"></div>
         </section>
     </main>
 
-    <!-- Modales (Equipo, Roster, IA) se mantienen igual -->
-    <!-- ... Contenido de modales previos ... -->
-
-    <!-- MODAL PITCHERS INTEGRADO -->
+    <!-- MODAL PITCHERS -->
     <div id="modalPitchers" class="modal">
         <div class="bg-white p-6 rounded-3xl w-full max-w-6xl max-h-[90vh] flex flex-col shadow-2xl border-t-8 border-cyan-600">
             <div class="flex justify-between items-center mb-6">
-                <div><h2 class="font-black text-cyan-600 italic uppercase text-xl"><i class="fa fa-baseball-ball mr-2"></i>Gestión de Pitchers</h2></div>
-                <select id="ligaPitchers" onchange="cargarPitchers()" class="p-3 border rounded-xl font-bold text-xs bg-slate-50">
+                <h2 class="font-black text-cyan-600 italic uppercase text-xl">Gestión de Pitchers</h2>
+                <select id="ligaPitchers" onchange="cargarPitchers()" class="p-3 border rounded-xl font-bold text-xs">
                     <option value="">Todas las Ligas</option>
-                    <option value="femenil">Femenil</option>
-                    <option value="varonil">Varonil</option>
-                    <option value="easy_femenil">Easy Femenil</option>
-                    <option value="slow_mixto">Slow Mixto</option>
+                    <option value="femenil">Femenil</option><option value="varonil">Varonil</option>
+                    <option value="easy_femenil">Easy Femenil</option><option value="slow_mixto">Slow Mixto</option>
                 </select>
             </div>
-            <div class="overflow-y-auto flex-1 custom-scroll pr-2">
-                <table class="w-full text-center text-[10px]">
-                    <thead class="bg-slate-100 border-b font-black text-slate-500 uppercase sticky top-0">
-                        <tr><th class="p-3 text-left">Pitcher</th><th>Equipo</th><th>JP</th><th>IP</th><th class="text-cyan-600">SO</th><th>ERA</th><th>WHIP</th><th>Acciones</th></tr>
-                    </thead>
-                    <tbody id="tablaPitchers" class="divide-y font-bold"></tbody>
-                </table>
+            <div class="overflow-y-auto flex-1 custom-scroll"><table class="w-full text-center text-[10px]"><thead class="bg-slate-100 font-black uppercase"><tr><th class="p-3 text-left">Pitcher</th><th>Equipo</th><th>JP</th><th>IP</th><th class="text-cyan-600">SO</th><th>ERA</th><th>WHIP</th><th>X</th></tr></thead><tbody id="tablaPitchers" class="divide-y font-bold"></tbody></table></div>
+            <div class="mt-4 p-4 bg-cyan-50 rounded-xl grid grid-cols-2 md:grid-cols-5 gap-2">
+                <input id="p_nombre" placeholder="Nombre" class="p-2 border rounded text-xs font-bold uppercase col-span-2">
+                <select id="p_equipo" class="p-2 border rounded text-xs font-bold"></select>
+                <input id="p_jp" type="number" placeholder="JJ" class="p-2 border rounded text-xs">
+                <input id="p_ip" type="number" step="0.1" placeholder="IP" class="p-2 border rounded text-xs">
+                <input id="p_so" type="number" placeholder="SO" class="p-2 border rounded text-xs">
+                <input id="p_cl" type="number" placeholder="CL" class="p-2 border rounded text-xs">
+                <input id="p_era" type="number" step="0.01" placeholder="ERA" class="p-2 border rounded text-xs">
+                <input id="p_whip" type="number" step="0.01" placeholder="WHIP" class="p-2 border rounded text-xs">
+                <input id="p_id" type="hidden">
+                <button onclick="guardarPitcher()" class="bg-cyan-600 text-white p-2 rounded-xl font-bold text-xs uppercase">Guardar</button>
+                <button onclick="limpiarFormPitcher()" class="bg-slate-200 p-2 rounded-xl font-bold text-xs uppercase">Limpiar</button>
             </div>
-            <div class="mt-4 p-4 bg-cyan-50 rounded-xl border border-cyan-100">
-                <div class="grid grid-cols-2 md:grid-cols-5 gap-2">
-                    <input id="p_nombre" placeholder="Nombre Pitcher" class="p-2 border rounded text-xs font-bold uppercase col-span-2">
-                    <select id="p_equipo" class="p-2 border rounded text-xs font-bold"></select>
-                    <input id="p_jp" type="number" placeholder="JJ" class="p-2 border rounded text-xs">
-                    <input id="p_ip" type="number" step="0.1" placeholder="IP" class="p-2 border rounded text-xs">
-                    <input id="p_so" type="number" placeholder="Ponches" class="p-2 border rounded text-xs">
-                    <input id="p_cl" type="number" placeholder="C. Limpias" class="p-2 border rounded text-xs">
-                    <input id="p_era" type="number" step="0.01" placeholder="ERA" class="p-2 border rounded text-xs">
-                    <input id="p_whip" type="number" step="0.01" placeholder="WHIP" class="p-2 border rounded text-xs">
-                    <input id="p_id" type="hidden">
-                    <button onclick="guardarPitcher()" class="bg-cyan-600 text-white p-2 rounded-xl font-bold text-xs uppercase shadow-md">Guardar</button>
-                    <button onclick="limpiarFormPitcher()" class="bg-slate-200 text-slate-600 p-2 rounded-xl font-bold text-xs uppercase">Limpiar</button>
-                </div>
-            </div>
-            <button onclick="toggleModal('modalPitchers')" class="mt-4 bg-slate-800 text-white p-4 rounded-2xl font-black uppercase text-xs transition-all">Cerrar</button>
+            <button onclick="toggleModal('modalPitchers')" class="mt-4 bg-slate-800 text-white p-4 rounded-2xl font-black uppercase text-xs">Cerrar</button>
         </div>
     </div>
 
-    <!-- Modal Nuevo Equipo -->
+    <!-- MODAL ROSTER -->
+    <div id="modalRosters" class="modal">
+        <div class="bg-white p-6 rounded-3xl w-full max-w-5xl max-h-[85vh] flex flex-col shadow-2xl border-t-8 border-amber-500">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="font-black text-amber-600 italic uppercase text-xl">Editor Roster</h2>
+                <div class="flex gap-2">
+                    <select id="ligaRoster" onchange="actualizarSelectRoster()" class="p-3 border rounded-xl font-bold text-xs"><option value="femenil">Femenil</option><option value="varonil">Varonil</option><option value="easy_femenil">Easy Femenil</option><option value="slow_mixto">Slow Mixto</option></select>
+                    <select id="filterRoster" onchange="verRosterEquipo()" class="p-3 border rounded-xl font-bold text-xs"></select>
+                </div>
+            </div>
+            <div id="containerRoster" class="flex-1 overflow-y-auto pr-2 custom-scroll"></div>
+            <button onclick="toggleModal('modalRosters')" class="mt-6 bg-slate-800 text-white p-4 rounded-2xl font-black uppercase text-xs">Cerrar</button>
+        </div>
+    </div>
+
+    <!-- MODAL EQUIPO -->
     <div id="modalEquipo" class="modal">
         <div class="bg-white p-8 rounded-3xl w-80 shadow-2xl border-t-8 border-emerald-600">
-            <h2 class="font-black mb-4 text-center italic uppercase font-xl">Nuevo Equipo</h2>
-            <input type="text" id="teamName" placeholder="NOMBRE EQUIPO" class="w-full p-3 border rounded-xl mb-4 font-bold outline-none uppercase bg-slate-50">
-            <select id="teamCat" class="w-full p-3 border rounded-xl mb-4 font-bold text-xs uppercase bg-slate-50">
-                <option value="Intermedia">Intermedia</option>
-                <option value="Relax">Relax</option>
-                <option value="Libre">Libre</option>
-            </select>
-            <select id="teamLiga" class="w-full p-3 border rounded-xl mb-6 font-bold text-xs uppercase bg-slate-50">
-                <option value="femenil">Ley 57 (Fem)</option>
-                <option value="varonil">ALV Sport (Var)</option>
-                <option value="easy_femenil">Easy Femenil</option>
-                <option value="slow_mixto">Slow Mixto</option>
-            </select>
-            <div class="flex gap-2">
-                <button onclick="toggleModal('modalEquipo')" class="flex-1 bg-slate-200 p-3 rounded-xl font-bold text-xs uppercase">Cerrar</button>
-                <button onclick="guardarEquipo()" class="flex-1 bg-emerald-600 text-white p-3 rounded-xl font-bold text-xs uppercase">Guardar</button>
-            </div>
+            <h2 class="font-black mb-4 text-center italic uppercase">Nuevo Equipo</h2>
+            <input type="text" id="teamName" placeholder="NOMBRE EQUIPO" class="w-full p-3 border rounded-xl mb-4 font-bold uppercase">
+            <select id="teamCat" class="w-full p-3 border rounded-xl mb-4 font-bold text-xs uppercase"><option value="Intermedia">Intermedia</option><option value="Relax">Relax</option><option value="Libre">Libre</option></select>
+            <select id="teamLiga" class="w-full p-3 border rounded-xl mb-6 font-bold text-xs uppercase"><option value="femenil">Ley 57 Fem</option><option value="varonil">ALV Sport Var</option><option value="easy_femenil">Easy Femenil</option><option value="slow_mixto">Slow Mixto</option></select>
+            <div class="flex gap-2"><button onclick="toggleModal('modalEquipo')" class="flex-1 bg-slate-200 p-3 rounded-xl font-bold text-xs uppercase">Cerrar</button><button onclick="guardarEquipo()" class="flex-1 bg-emerald-600 text-white p-3 rounded-xl font-bold text-xs uppercase">Guardar</button></div>
         </div>
     </div>
 
@@ -201,7 +169,6 @@
 
         async function cargarTodo() {
             gestionarSesion();
-            cargarConfig();
             await sincronizarDatosBase();
             cargarResultados();
             cargarEquiposParaPitchers();
@@ -214,7 +181,7 @@
                 juegosFinalizados = await resGames.json();
                 renderizarTablas();
                 actualizarSelectores();
-            } catch (err) { console.error("Error:", err); }
+            } catch (err) { console.error("Error base:", err); }
         }
 
         function renderizarTablas() {
@@ -228,108 +195,124 @@
             };
             Object.values(tablas).forEach(t => t.innerHTML = "");
 
-            const equiposConStats = todosLosEquipos.map(eq => {
+            const eqStats = todosLosEquipos.map(eq => {
                 let g = 0, p = 0, ca = 0, ce = 0;
-                const nombreEq = eq.nombre.trim().toUpperCase();
+                const nom = eq.nombre.trim().toUpperCase();
                 juegosFinalizados.forEach(j => {
                     const s = j.resultado.split('-').map(Number);
-                    if (j.local.trim().toUpperCase() === nombreEq) { ca += s[0]; ce += s[1]; if (s[0] > s[1]) g++; else if (s[0] < s[1]) p++; }
-                    else if (j.visita.trim().toUpperCase() === nombreEq) { ca += s[1]; ce += s[0]; if (s[1] > s[0]) g++; else if (s[1] < s[0]) p++; }
+                    if(j.local.trim().toUpperCase() === nom) { ca+=s[0]; ce+=s[1]; if(s[0]>s[1]) g++; else if(s[0]<s[1]) p++; }
+                    else if(j.visita.trim().toUpperCase() === nom) { ca+=s[1]; ce+=s[0]; if(s[1]>s[0]) g++; else if(s[1]<s[0]) p++; }
                 });
                 return { ...eq, g, p, ca, ce };
             });
 
-            equiposConStats.sort((a, b) => b.g - a.g);
-
-            equiposConStats.forEach(e => {
+            eqStats.sort((a,b) => b.g - a.g).forEach(e => {
                 const key = e.categoria + e.liga;
-                const colorTexto = {'varonil':'text-red-600','femenil':'text-blue-900','easy_femenil':'text-pink-600','slow_mixto':'text-emerald-600'}[e.liga] || 'text-slate-900';
-                if (tablas[key]) {
+                const col = {'varonil':'text-red-600','femenil':'text-blue-900','easy_femenil':'text-pink-600','slow_mixto':'text-emerald-600'}[e.liga];
+                if(tablas[key]) {
                     tablas[key].innerHTML += `
                         <tr class="hover:bg-slate-50 border-b text-center">
-                            <td class="p-4 text-left uppercase italic font-black ${colorTexto}">${e.nombre}</td>
-                            <td>${e.g + e.p}</td>
+                            <td class="p-4 text-left uppercase font-black ${col}">${e.nombre}</td>
+                            <td>${e.g+e.p}</td>
                             <td><input type="number" onchange="updEq('${e._id}','g',this.value)" value="${e.g}" class="input-inline"></td>
                             <td><input type="number" onchange="updEq('${e._id}','p',this.value)" value="${e.p}" class="input-inline"></td>
                             <td><input type="number" onchange="updEq('${e._id}','ca',this.value)" value="${e.ca}" class="input-inline"></td>
                             <td><input type="number" onchange="updEq('${e._id}','ce',this.value)" value="${e.ce}" class="input-inline"></td>
-                            <td class="font-black">${e.ca - e.ce}</td>
-                            <td><button onclick="eliminarEquipo('${e._id}')" class="text-slate-300 hover:text-red-500"><i class="fa fa-trash"></i></button></td>
+                            <td class="font-black">${e.ca-e.ce}</td>
+                            <td><button onclick="eliminarEquipo('${e._id}')" class="text-slate-300 hover:text-red-600"><i class="fa fa-trash"></i></button></td>
                         </tr>`;
                 }
             });
         }
 
+        async function updEq(id, cam, val) {
+            await fetch(`${API}/equipos/${id}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({[cam]: Number(val)}) });
+        }
+
         async function cargarPitchers() {
             const liga = document.getElementById('ligaPitchers').value;
             const res = await fetch(`${API}/players?esPitcher=true${liga ? '&liga='+liga : ''}`);
-            const pitchers = await res.json();
-            const cont = document.getElementById('tablaPitchers');
-            cont.innerHTML = pitchers.map(p => `
+            const data = await res.json();
+            document.getElementById('tablaPitchers').innerHTML = data.map(p => `
                 <tr class="hover:bg-cyan-50 cursor-pointer" onclick="editarPitcher('${p._id}')">
                     <td class="p-3 text-left font-black text-cyan-900 uppercase">${p.nombre}</td>
-                    <td>${p.equipo}</td><td>${p.jp || 0}</td><td>${p.ip || 0}</td><td>${p.so_pitcher || 0}</td>
-                    <td>${(p.era || 0).toFixed(2)}</td><td>${(p.whip || 0).toFixed(2)}</td>
+                    <td>${p.equipo}</td><td>${p.jp||0}</td><td>${p.ip||0}</td><td>${p.so_pitcher||0}</td><td>${(p.era||0).toFixed(2)}</td><td>${(p.whip||0).toFixed(2)}</td>
                     <td><button onclick="eliminarJugadora('${p._id}')" class="text-red-400"><i class="fa fa-trash"></i></button></td>
                 </tr>`).join('');
         }
 
-        async function editarPitcher(id) {
-            const res = await fetch(`${API}/players/${id}`);
-            const p = await res.json();
-            document.getElementById('p_id').value = p._id;
-            document.getElementById('p_nombre').value = p.nombre;
-            document.getElementById('p_equipo').value = p.equipo; // SELECCIÓN AUTOMÁTICA DE EQUIPO
-            document.getElementById('p_jp').value = p.jp || 0;
-            document.getElementById('p_ip').value = p.ip || 0;
-            document.getElementById('p_so').value = p.so_pitcher || 0;
-            document.getElementById('p_cl').value = p.cl || 0;
-            document.getElementById('p_era').value = p.era || 0;
-            document.getElementById('p_whip').value = p.whip || 0;
-        }
-
         async function guardarPitcher() {
             const id = document.getElementById('p_id').value;
-            const data = {
+            const payload = { 
                 nombre: document.getElementById('p_nombre').value.toUpperCase(),
                 equipo: document.getElementById('p_equipo').value,
-                esPitcher: true,
-                jp: parseInt(document.getElementById('p_jp').value) || 0,
-                ip: parseFloat(document.getElementById('p_ip').value) || 0,
-                so_pitcher: parseInt(document.getElementById('p_so').value) || 0,
-                cl: parseInt(document.getElementById('p_cl').value) || 0,
-                era: parseFloat(document.getElementById('p_era').value) || 0,
-                whip: parseFloat(document.getElementById('p_whip').value) || 0
+                esPitcher: true, jp: Number(document.getElementById('p_jp').value),
+                ip: Number(document.getElementById('p_ip').value), so_pitcher: Number(document.getElementById('p_so').value),
+                cl: Number(document.getElementById('p_cl').value), era: Number(document.getElementById('p_era').value),
+                whip: Number(document.getElementById('p_whip').value)
             };
-            const method = id ? 'PUT' : 'POST';
             const url = id ? `${API}/players/${id}` : `${API}/players`;
-            await fetch(url, { method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
+            await fetch(url, { method: id ? 'PUT' : 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
             limpiarFormPitcher(); cargarPitchers();
         }
 
-        async function cargarEquiposParaPitchers() {
-            const res = await fetch(`${API}/equipos`);
-            const equipos = await res.json();
-            const select = document.getElementById('p_equipo');
-            select.innerHTML = '<option value="">Seleccionar Equipo</option>' + equipos.map(e => `<option value="${e.nombre}">${e.nombre}</option>`).join('');
+        async function editarPitcher(id) {
+            const p = await (await fetch(`${API}/players/${id}`)).json();
+            document.getElementById('p_id').value = p._id; document.getElementById('p_nombre').value = p.nombre;
+            document.getElementById('p_equipo').value = p.equipo; document.getElementById('p_jp').value = p.jp||0;
+            document.getElementById('p_ip').value = p.ip||0; document.getElementById('p_so').value = p.so_pitcher||0;
+            document.getElementById('p_cl').value = p.cl||0; document.getElementById('p_era').value = p.era||0;
+            document.getElementById('p_whip').value = p.whip||0;
+        }
+
+        async function cargarResultados() {
+            const res = await fetch(`${API}/games?status=pendiente`);
+            const games = await res.json();
+            const cols = {'varonil':'border-red-600','femenil':'border-blue-600','easy_femenil':'border-pink-600','slow_mixto':'border-emerald-600'};
+            document.getElementById('listaResultados').innerHTML = games.map(g => `
+                <div class="bg-white p-4 rounded-3xl border-l-4 ${cols[g.liga]||'border-slate-300'} shadow-sm relative">
+                    <button onclick="eliminarJuego('${g._id}')" class="absolute -top-2 -right-2 bg-red-600 text-white w-6 h-6 rounded-full text-[8px]"><i class="fa fa-times"></i></button>
+                    <div class="flex justify-between text-[8px] font-black text-slate-400 uppercase"><span>${g.fecha}</span><span>${g.liga.replace('_',' ')}</span><span>${g.hora}</span></div>
+                    <div class="flex justify-between items-center py-3">
+                        <span class="text-[9px] font-black uppercase flex-1 truncate">${g.local}</span>
+                        <div class="flex gap-1 mx-1"><input id="sc-${g._id}-L" type="number" class="w-8 border text-center font-bold" placeholder="L"><input id="sc-${g._id}-V" type="number" class="w-8 border text-center font-bold" placeholder="V"></div>
+                        <span class="text-[9px] font-black uppercase flex-1 text-right truncate">${g.visita}</span>
+                    </div>
+                    <button onclick="finalizarJuego('${g._id}','${g.local}','${g.visita}')" class="w-full bg-slate-800 text-white text-[8px] font-black py-2 rounded-xl uppercase">Finalizar</button>
+                </div>`).join('');
+        }
+
+        async function finalizarJuego(id, loc, vis) {
+            const sL = parseInt(document.getElementById(`sc-${id}-L`).value), sV = parseInt(document.getElementById(`sc-${id}-V`).value);
+            if(isNaN(sL) || isNaN(sV)) return alert("Marcador incompleto");
+            await fetch(`${API}/games/resultado`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id, sL, sV, ganador: sL > sV ? loc : vis, perdedor: sL > sV ? vis : loc }) });
+            sincronizarDatosBase(); cargarResultados();
+        }
+
+        async function guardarJuego() {
+            const data = { local: document.getElementById('selLoc').value, visita: document.getElementById('selVis').value, liga: document.getElementById('filtroLigaGlobal').value, fecha: document.getElementById('fec').value, hora: document.getElementById('hor').value, status: "pendiente" };
+            await fetch(`${API}/games`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
+            cargarResultados();
         }
 
         function actualizarSelectores() {
             const liga = document.getElementById('filtroLigaGlobal').value;
-            const filtrados = todosLosEquipos.filter(e => e.liga === liga);
-            let options = '<option value="">-- EQUIPO --</option>' + filtrados.map(e => `<option value="${e.nombre}">${e.nombre}</option>`).join('');
-            document.getElementById('selLoc').innerHTML = options;
-            document.getElementById('selVis').innerHTML = options;
+            const options = '<option value="">-- EQUIPO --</option>' + todosLosEquipos.filter(e => e.liga === liga).map(e => `<option value="${e.nombre}">${e.nombre}</option>`).join('');
+            document.getElementById('selLoc').innerHTML = options; document.getElementById('selVis').innerHTML = options;
         }
 
-        // Funciones básicas compartidas
-        function toggleModal(id) { document.getElementById(id).classList.toggle('active'); }
-        function gestionarSesion() { const s = JSON.parse(localStorage.getItem('userLogueado')); if(s) document.getElementById('nombreUsuarioActivo').innerText = s.correo.split('@')[0].toUpperCase(); }
-        async function guardarEquipo() { 
-            const data = { nombre: document.getElementById('teamName').value.toUpperCase(), categoria: document.getElementById('teamCat').value, liga: document.getElementById('teamLiga').value };
-            await fetch(`${API}/equipos`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
-            toggleModal('modalEquipo'); sincronizarDatosBase();
+        async function cargarEquiposParaPitchers() {
+            const res = await fetch(`${API}/equipos`);
+            const eqs = await res.json();
+            document.getElementById('p_equipo').innerHTML = '<option value="">Seleccionar Equipo</option>' + eqs.map(e => `<option value="${e.nombre}">${e.nombre}</option>`).join('');
         }
+
+        function toggleModal(id) { document.getElementById(id).classList.toggle('active'); }
+        function gestionarSesion() { const s = JSON.parse(localStorage.getItem('userLogueado')); if(s) document.getElementById('nombreUsuarioActivo').innerText = s.correo.split('@')[0].toUpperCase(); else window.location.href = 'index.html'; }
+        async function guardarEquipo() { const data = { nombre: document.getElementById('teamName').value.toUpperCase(), categoria: document.getElementById('teamCat').value, liga: document.getElementById('teamLiga').value }; await fetch(`${API}/equipos`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) }); toggleModal('modalEquipo'); sincronizarDatosBase(); }
+        async function eliminarEquipo(id) { if(confirm("¿Borrar?")) { await fetch(`${API}/equipos/${id}`, { method: 'DELETE' }); sincronizarDatosBase(); } }
+        async function eliminarJugadora(id) { if(confirm("¿Borrar?")) { await fetch(`${API}/players/${id}`, { method: 'DELETE' }); cargarPitchers(); } }
+        async function eliminarJuego(id) { if(confirm("¿Borrar?")) { await fetch(`${API}/games/${id}`, { method: 'DELETE' }); cargarResultados(); } }
         function limpiarFormPitcher() { document.getElementById('p_id').value = ''; document.getElementById('p_nombre').value = ''; }
         function cerrarSesion() { localStorage.clear(); window.location.href = 'index.html'; }
         document.addEventListener('DOMContentLoaded', cargarTodo);
