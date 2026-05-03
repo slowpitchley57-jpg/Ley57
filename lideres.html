@@ -138,8 +138,8 @@ function cambiarTab(tab) {
     tabActual = tab;
     document.getElementById('tabBateo').className = tab === 'bateo' ? 'flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all tab-active' : 'flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all tab-inactive';
     document.getElementById('tabPitcheo').className = tab === 'pitcheo' ? 'flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all tab-active' : 'flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all tab-inactive';
-    document.getElementById('catsBateo').className = tab === 'bateo' ? 'flex flex-wrap gap-2 justify-center' : 'hidden flex flex-wrap gap-2 justify-center';
-    document.getElementById('catsPitcheo').className = tab === 'pitcheo' ? 'flex flex-wrap gap-2 justify-center' : 'hidden flex flex-wrap gap-2 justify-center';
+    document.getElementById('catsBateo').className = tab === 'bateo' ? 'flex flex-wrap gap-2 justify-center' : 'hidden';
+    document.getElementById('catsPitcheo').className = tab === 'pitcheo' ? 'flex flex-wrap gap-2 justify-center' : 'hidden';
     catActual = tab === 'bateo' ? 'avg' : 'era';
     document.querySelectorAll('.cat-btn').forEach(b => { b.className = 'cat-btn px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all tab-inactive'; });
     document.getElementById('catBtn_' + catActual).className = 'cat-btn px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all tab-active';
@@ -159,19 +159,54 @@ async function cargarLideres() {
 
     try {
         const ligaParam = ligaActual !== 'todas' ? `&liga=${ligaActual}` : '';
-        const res = await fetch(`${API}/leaders?cat=${catActual}${ligaParam}&limit=20`);
-        const data = await res.json();
+        const res = await fetch(`${API}/players?${ligaParam ? ligaParam.substring(1) : ''}&t=${new Date().getTime()}`);
+        const allPlayers = await res.json();
 
-        if (!data.leaders || data.leaders.length === 0) {
+        const players = allPlayers.filter(p => {
+            if (ligaActual === 'todas') return true;
+            return p.liga === ligaActual;
+        }).filter(p => {
+            if (tabActual === 'pitcheo') return p.esPitcher || p.jp > 0 || p.ip > 0;
+            return true;
+        });
+
+        if (players.length === 0) {
             cont.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-slate-500 italic">Sin registros en esta categoría</td></tr>';
             return;
         }
 
+        let field, sortDir;
+        switch (catActual) {
+            case 'avg': field = 'avg'; sortDir = -1; break;
+            case 'hr': field = 'hr'; sortDir = -1; break;
+            case 'dobles': field = 'dobles'; sortDir = -1; break;
+            case 'triples': field = 'triples'; sortDir = -1; break;
+            case 'rbi': field = 'rbi'; sortDir = -1; break;
+            case 'k': field = 'k'; sortDir = -1; break;
+            case 'bb': field = 'bb'; sortDir = -1; break;
+            case 'slg': field = 'slg'; sortDir = -1; break;
+            case 'obp': field = 'obp'; sortDir = -1; break;
+            case 'h': field = 'h'; sortDir = -1; break;
+            case 'era': field = 'era'; sortDir = 1; break;
+            case 'so_pitcher': field = 'so_pitcher'; sortDir = -1; break;
+            case 'whip': field = 'whip'; sortDir = 1; break;
+            case 'ip': field = 'ip'; sortDir = -1; break;
+            case 'jp': field = 'jp'; sortDir = -1; break;
+            case 'wp': field = 'wp'; sortDir = -1; break;
+            case 'blq': field = 'blq'; sortDir = -1; break;
+            default: field = 'avg'; sortDir = -1;
+        }
+
+        const sorted = sortDir === 1
+            ? [...players].sort((a, b) => (a[field] || 0) - (b[field] || 0))
+            : [...players].sort((a, b) => (b[field] || 0) - (a[field] || 0));
+        const top20 = sorted.slice(0, 20);
+
         document.getElementById('leaderTitle').innerHTML = `<i class="fa ${catIcons[catActual] || 'fa-trophy'} text-yellow-400"></i> Líderes - ${catLabels[catActual]}`;
 
-        cont.innerHTML = data.leaders.map((p, i) => {
+        cont.innerHTML = top20.map((p, i) => {
             const medal = i === 0 ? '<i class="fa fa-crown text-yellow-400"></i>' : i === 1 ? '<i class="fa fa-medal text-slate-400"></i>' : i === 2 ? '<i class="fa fa-medal text-orange-600"></i>' : `<span class="text-slate-500 font-bold">${i + 1}</span>`;
-            const valorStr = (catActual === 'avg' || catActual === 'slg' || catActual === 'obp') ? Number(p.valor).toFixed(3) : (catActual === 'era' || catActual === 'whip') ? Number(p.valor).toFixed(2) : p.valor;
+            const valorStr = (catActual === 'avg' || catActual === 'slg' || catActual === 'obp') ? Number(p[field] || 0).toFixed(3) : (catActual === 'era' || catActual === 'whip') ? Number(p[field] || 0).toFixed(2) : (p[field] || 0);
             const ligaLabel = p.liga === 'femenil' ? 'Femenil' : p.liga === 'varonil' ? 'Varonil' : p.liga === 'easy_femenil' ? 'Easy Fem.' : p.liga === 'slow_mixto' ? 'Slow Mixto' : p.liga || '---';
             const ligaColor = p.liga === 'femenil' ? 'text-pink-400' : p.liga === 'varonil' ? 'text-red-400' : p.liga === 'easy_femenil' ? 'text-pink-300' : p.liga === 'slow_mixto' ? 'text-emerald-400' : 'text-slate-500';
             return `

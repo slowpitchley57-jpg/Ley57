@@ -611,7 +611,11 @@
         if (sesion) {
             const user = JSON.parse(sesion);
             document.getElementById('nombreUsuarioActivo').innerText = user.correo.split('@')[0].toUpperCase();
-        } else { window.location.href = 'index.html'; }
+        } else {
+            if(confirm("No has iniciado sesión. ¿Ir al login?")) {
+                window.location.href = 'login.html';
+            }
+        }
     }
     async function cargarConfig() {
         const res = await fetch(`${API}/config`);

@@ -140,10 +140,19 @@ app.get('/api/players', async (req, res) => {
     const { equipo, liga } = req.query;
     let filtro = {};
     if (equipo) filtro.equipo = equipo;
-    if (liga) filtro.liga = liga; // ESTO ES LO QUE FALTA
+    if (liga) filtro.liga = liga;
     
     const players = await Player.find(filtro);
     res.json(players);
+});
+app.get('/api/players/:id', async (req, res) => {
+    try {
+        const player = await Player.findById(req.params.id);
+        if (!player) return res.status(404).json({ error: "No encontrado" });
+        res.json(player);
+    } catch (err) {
+        res.status(500).json({ error: "Error al buscar jugador" });
+    }
 });
 app.post('/api/players', async (req, res) => {
     try {
