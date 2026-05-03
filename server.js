@@ -93,7 +93,12 @@ const User = mongoose.model('User', new mongoose.Schema({
 app.post('/api/login', async (req, res) => {
     try {
         const { correo, pass } = req.body;
-        // Buscamos ignorando espacios y mayúsculas en el correo
+        
+        if (!correo || !pass) {
+            return res.status(400).json({ error: "Faltan datos" });
+        }
+
+        // Buscamos ignorando espacios y mayúsculas
         const user = await User.findOne({ 
             correo: correo.trim().toLowerCase(), 
             pass: pass.trim() 
@@ -106,10 +111,12 @@ app.post('/api/login', async (req, res) => {
                 equipo: user.equipo || "" 
             });
         } else {
-            res.status(401).json({ error: "Credenciales incorrectas" });
+            // Si no existe, mandamos 401 (Credenciales incorrectas), NO 500
+            res.status(401).json({ error: "Usuario no encontrado" });
         }
     } catch (e) {
-        res.status(500).json({ error: "Error en el servidor" });
+        console.error("Error en Login:", e);
+        res.status(500).json({ error: "Error interno del servidor" });
     }
 });
 
@@ -246,31 +253,20 @@ app.put('/api/users/update-password', async (req, res) => {
 app.get('/api/dev/usuarios', async (req, res) => {
     res.json(await User.find());
 });
-app.post('/api/login', async (req, res) => {
-    try {
-        const { correo, pass } = req.body;
-        // Buscamos ignorando mayúsculas/minúsculas y quitando espacios
-        const user = await User.findOne({ 
-            correo: correo.trim().toLowerCase(), 
-            pass: pass.trim() 
-        });
 
-        if (user) {
-            res.json({ 
-                correo: user.correo, 
-                rol: user.rol, 
-                equipo: user.equipo || "" 
-            });
-        } else {
-            res.status(401).json({ error: "Credenciales incorrectas" });
-        }
-    } catch (e) {
-        res.status(500).json({ error: "Error en el servidor" });
-    }
+// Configuración y Utilidades
+app.get('/api/config', async (req, res) => res.json(await Config.findOne() || { permitirAltas: true }));
+app.post('/api/config', async (req, res) => {
+    await Config.findOneAndUpdate({}, { permitirAltas: req.body.permitirAltas }, { upsert: true });
+    res.json({ ok: true });
 });
 
-// --- INICIO DEL SERVIDOR ---
+app.delete('/api/equipos/:id', async (req, res) => { await Team.findByIdAndDelete(req.params.id); res.json({ ok: true }); });
+app.delete('/api/players/:id', async (req, res) => { await Player.findByIdAndDelete(req.params.id); res.json({ ok: true }); });
+app.delete('/api/games/:id', async (req, res) => { await Game.findByIdAndDelete(req.params.id); res.json({ ok: true }); });
+
+// Puerto dinámico para Render
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Servidor activo en puerto ${PORT}`);
+    console.log(`🚀 Servidor Multiliga Pro activo en puerto ${PORT}`);
 });
