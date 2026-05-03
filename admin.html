@@ -553,7 +553,7 @@ async function guardarPitcher() {
         async function eliminarJugadora(id) { if(confirm("¿Borrar?")) { await fetch(`${API}/players/${id}`, { method: 'DELETE' }); cargarPitchers(); } }
         async function eliminarJuego(id) { if(confirm("¿Borrar?")) { await fetch(`${API}/games/${id}`, { method: 'DELETE' }); cargarResultados(); } }
         function limpiarFormPitcher() { document.getElementById('p_id').value = ''; document.getElementById('p_nombre').value = ''; }
-        function cerrarSesion() { localStorage.clear(); window.location.href = 'index.html'; }
+        function cerrarSesion() { localStorage.clear(); window.location.href = 'index_post.html'; }
         document.addEventListener('DOMContentLoaded', cargarTodo);
     </script>
 </body>

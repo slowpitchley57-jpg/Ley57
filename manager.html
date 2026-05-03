@@ -3,120 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manager Dashboard - Liga Ley 57</title>
-    <link rel="icon" type="image/png" href="logoley57icon.jpeg">
+    <title>Manager Dashboard - Multiliga Pro</title>
+    <link rel="icon" type="image/png" href="logoalvnegro.jpeg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .sidebar-link:hover { background-color: #1e3a8a; border-left: 4px solid #ef4444; }
-        .hidden { display: none; }
-        .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Oswald:wght@700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; }
+        .font-oswald { font-family: 'Oswald', sans-serif; }
+
+        .sidebar-link { transition: all 0.3s ease; border-left: 4px solid transparent; }
+        .sidebar-link:hover, .sidebar-link.active { 
+            background: rgba(255,255,255,0.1); 
+            border-left: 4px solid #ef4444; 
+            padding-left: 1.5rem;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
         .custom-scroll::-webkit-scrollbar { width: 5px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        #sidebar { transition: transform 0.3s ease-in-out; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #1e3a8a; border-radius: 10px; }
+        
+        #sidebar { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        .bg-manager {
+            background-color: #f8fafc;
+            background-image: radial-gradient(circle at 100% 0%, rgba(30, 58, 138, 0.05) 0%, transparent 50%);
+        }
+
+        .modal-bg { 
+            position: fixed; inset: 0; background: rgba(2, 6, 23, 0.8); 
+            z-index: 100; display: flex; align-items: center; justify-content: center; 
+            backdrop-filter: blur(8px); 
+        }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans flex min-h-screen relative overflow-x-hidden">
+<body class="bg-manager text-slate-800 flex min-h-screen relative overflow-x-hidden">
 
-    <div id="sidebarOverlay" onclick="toggleMobileMenu()" class="fixed inset-0 bg-black/60 z-40 hidden md:hidden"></div>
+    <!-- Overlay para móvil -->
+    <div id="sidebarOverlay" onclick="toggleMobileMenu()" class="fixed inset-0 bg-black/60 z-40 hidden"></div>
 
-    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-blue-900 text-white p-6 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out shadow-2xl flex flex-col h-screen">
-        <div class="flex items-center gap-3 mb-10">
-            <img src="imgley57.pgn.png" class="w-12 h-12 bg-white rounded-full p-1 border-2 border-red-500">
+    <!-- SIDEBAR LUXURY -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-blue-950 text-white p-8 transform -translate-x-full md:relative md:translate-x-0 shadow-2xl flex flex-col h-screen">
+        <div class="flex items-center gap-4 mb-12">
+            <div class="relative">
+                <div class="absolute inset-0 bg-red-600 blur-lg opacity-20 animate-pulse"></div>
+                <img src="imgley57.pgn.png" class="relative w-14 h-14 bg-white rounded-2xl p-1.5 border-2 border-red-600">
+            </div>
             <div>
-                <h1 class="font-black text-xl italic leading-none uppercase">LEY 57</h1>
-                <span class="text-[9px] text-blue-300 tracking-widest uppercase">Manager Panel</span>
+                <h1 class="font-oswald text-2xl italic leading-none uppercase tracking-tighter">LEY 57</h1>
+                <span class="text-[8px] text-blue-400 tracking-[0.3em] uppercase font-black">Manager Control</span>
             </div>
         </div>
         
-        <nav class="space-y-4 flex-1">
-            <p class="text-[9px] font-black text-blue-400 uppercase tracking-widest ml-2">Menú Principal</p>
-            <a href="#" class="sidebar-link block p-3 rounded-xl transition flex items-center gap-3 bg-blue-800 border-l-4 border-red-500">
-                <i class="fa fa-users"></i> Mi Roster / Stats
+        <nav class="space-y-3 flex-1">
+            <p class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 ml-2">Operaciones</p>
+            <a href="#" class="sidebar-link active block p-4 rounded-2xl flex items-center gap-4 bg-white/5 font-bold italic uppercase text-xs">
+                <i class="fa fa-users text-red-500"></i> Mi Roster & Stats
             </a>
-            <a id="btnLinkEstadisticas" class="sidebar-link block p-3 rounded-xl transition flex items-center gap-3 text-slate-300">
-                <i class="fa fa-chart-line"></i> Ver Tabla General
+            <a id="btnLinkEstadisticas" class="sidebar-link block p-4 rounded-2xl flex items-center gap-4 text-slate-400 font-bold italic uppercase text-xs hover:text-white">
+                <i class="fa fa-chart-line"></i> Tabla General
             </a>
             
-            <p class="text-[9px] font-black text-blue-400 uppercase tracking-widest ml-2 mt-8">Seguridad</p>
-            <button onclick="toggleModalPassword()" class="w-full text-left sidebar-link block p-3 rounded-xl transition flex items-center gap-3">
-                <i class="fa fa-key"></i> Cambiar Contraseña
+            <p class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 ml-2 mt-10">Cuenta</p>
+            <button onclick="toggleModalPassword()" class="w-full text-left sidebar-link block p-4 rounded-2xl flex items-center gap-4 text-slate-400 font-bold italic uppercase text-xs hover:text-white">
+                <i class="fa fa-fingerprint text-blue-400"></i> Seguridad
             </button>
         </nav>
 
-        <div class="mt-auto">
-            <hr class="opacity-20 mb-6">
-            <button onclick="cerrarSesion()" class="w-full text-left sidebar-link block p-3 rounded-xl transition flex items-center gap-3 text-red-400 font-bold uppercase text-xs tracking-widest">
-                <i class="fa fa-sign-out-alt"></i> Salir del Panel
+        <div class="mt-auto pt-10">
+            <button onclick="cerrarSesion()" class="group w-full flex items-center gap-4 p-4 rounded-2xl bg-red-600/10 hover:bg-red-600 transition-all duration-300">
+                <div class="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center group-hover:bg-white">
+                    <i class="fa fa-power-off text-xs text-white group-hover:text-red-600"></i>
+                </div>
+                <span class="text-xs font-black uppercase italic text-red-500 group-hover:text-white">Cerrar Sesión</span>
             </button>
         </div>
     </aside>
 
+    <!-- MAIN CONTENT -->
     <main class="flex-1 flex flex-col w-full min-w-0">
-        <header class="bg-white p-4 md:p-6 shadow-sm flex justify-between items-center border-b sticky top-0 z-30">
-            <div class="flex items-center">
-                <button onclick="toggleMobileMenu()" class="md:hidden text-blue-900 text-2xl mr-4 p-2">
-                    <i class="fa fa-bars"></i>
+        <!-- HEADER DINÁMICO -->
+        <header class="bg-white/80 backdrop-blur-md p-6 md:p-8 flex justify-between items-center border-b border-slate-200 sticky top-0 z-30">
+            <div class="flex items-center gap-6">
+                <button onclick="toggleMobileMenu()" class="md:hidden text-blue-950 text-2xl hover:scale-110 transition-transform">
+                    <i class="fa fa-bars-staggered"></i>
                 </button>
                 <div>
-                    <h2 id="nombreEquipoCabecera" class="font-black text-lg md:text-2xl text-blue-900 uppercase tracking-tighter italic text-red-600 truncate max-w-[150px] md:max-w-none">CARGANDO...</h2>
-                    <p class="text-[8px] md:text-[10px] text-slate-400 font-bold uppercase tracking-widest">Estadísticas y Seguimiento de Roster</p>
+                    <h2 id="nombreEquipoCabecera" class="font-oswald text-3xl md:text-4xl text-blue-950 uppercase italic tracking-tighter leading-none">Cargando...</h2>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-1 flex items-center gap-2">
+                        <span class="w-2 h-2 bg-emerald-500 rounded-full"></span> Panel de Gestión Oficial 2026
+                    </p>
                 </div>
             </div>
-            <div id="statusBadge" class="hidden md:block text-[9px] font-black px-4 py-2 rounded-full shadow-sm bg-blue-50 text-blue-600 border border-blue-100 uppercase italic">EQUIPO ACTIVO</div>
+            <div class="hidden lg:flex items-center gap-4">
+                <div class="text-right">
+                    <p id="fechaHoy" class="text-[9px] font-black text-slate-400 uppercase tracking-widest"></p>
+                    <p class="text-[10px] font-black text-blue-900 uppercase italic">Hermosillo, Sonora</p>
+                </div>
+            </div>
         </header>
 
-        <div class="p-4 md:p-8 space-y-6">
+        <div class="p-4 md:p-10 space-y-8 max-w-7xl">
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-                    <h3 class="text-orange-500 font-black mb-4 flex items-center gap-2 uppercase text-[10px] tracking-widest border-b pb-4 italic">
-                        <i class="fa fa-calendar-alt"></i> Próximo Encuentro
+            <!-- WIDGETS SUPERIORES -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- PRÓXIMO JUEGO -->
+                <div class="lg:col-span-1 glass-card p-8 rounded-[2.5rem] shadow-xl border-l-8 border-red-600 relative overflow-hidden group">
+                    <div class="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-110 transition-transform duration-700">
+                        <i class="fa fa-calendar-check text-9xl"></i>
+                    </div>
+                    <h3 class="text-slate-400 font-black mb-6 flex items-center gap-3 uppercase text-[10px] tracking-widest italic">
+                        <i class="fa fa-clock text-red-500"></i> Próximo Encuentro
                     </h3>
-                    <div id="proximoJuego" class="min-h-[100px] flex items-center justify-center"></div>
+                    <div id="proximoJuego" class="min-h-[80px] flex items-center"></div>
                 </div>
-                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-                    <h3 class="text-blue-900 font-black mb-4 flex items-center gap-2 uppercase text-[10px] tracking-widest border-b pb-4 italic">
-                        <i class="fa fa-history"></i> Resultados de Liga
+
+                <!-- RESULTADOS RECIENTES -->
+                <div class="lg:col-span-2 glass-card p-8 rounded-[2.5rem] shadow-xl border-l-8 border-blue-900 relative overflow-hidden group">
+                    <div class="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-110 transition-transform duration-700">
+                        <i class="fa fa-trophy text-9xl"></i>
+                    </div>
+                    <h3 class="text-slate-400 font-black mb-6 flex items-center gap-3 uppercase text-[10px] tracking-widest italic">
+                        <i class="fa fa-chart-simple text-blue-600"></i> Últimos Resultados de Liga
                     </h3>
-                    <div id="resultadosJornada" class="space-y-3"></div>
+                    <div id="resultadosJornada" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
                 </div>
             </div>
 
-            <section class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="bg-blue-900 p-4 text-white flex justify-between items-center">
-                    <h3 class="font-bold uppercase text-[10px] tracking-widest italic"><i class="fa fa-users mr-2 text-red-500"></i> Jugadoras Registradas</h3>
-                    <div class="flex gap-4 items-center">
-                        <input type="text" id="busquedaRoster" onkeyup="filtrarRoster()" placeholder="Buscar jugadora..." class="bg-blue-800 text-white text-[10px] px-4 py-1.5 rounded-full outline-none border border-blue-700 focus:border-red-500 transition">
-                        <span id="contadorRoster" class="bg-red-600 text-white px-3 py-1 rounded-full text-[10px] font-bold">0</span>
+            <!-- TABLA DE ROSTER MAESTRA -->
+            <section class="bg-blue-950 rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/5">
+                <div class="p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-red-600 p-3 rounded-2xl shadow-lg shadow-red-600/30">
+                            <i class="fa fa-users-viewfinder text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-white font-oswald text-2xl uppercase italic tracking-tighter">Jugadoras Registradas</h3>
+                            <p class="text-blue-400 text-[9px] font-bold uppercase tracking-widest">Roster Oficial & Estadísticas</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-4 w-full md:w-auto">
+                        <div class="relative flex-1 md:w-64">
+                            <i class="fa fa-search absolute left-4 top-1/2 -translate-y-1/2 text-blue-400 text-xs"></i>
+                            <input type="text" id="busquedaRoster" onkeyup="filtrarRoster()" placeholder="BUSCAR POR NOMBRE..." class="w-full bg-white/5 text-white text-[10px] font-black pl-11 pr-4 py-3.5 rounded-2xl outline-none border border-white/10 focus:border-red-500 transition-all">
+                        </div>
+                        <div class="bg-white/5 px-6 py-3.5 rounded-2xl border border-white/10 flex items-center gap-3">
+                            <span class="text-[9px] font-black text-blue-300 uppercase italic">Total</span>
+                            <span id="contadorRoster" class="text-white font-oswald text-xl leading-none">0</span>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="overflow-x-auto overflow-y-auto max-h-[600px] custom-scroll">
+                <div class="overflow-x-auto custom-scroll">
                     <table class="w-full text-center border-collapse">
-                        <thead class="bg-slate-100 sticky top-0 z-10 border-b">
-                            <tr class="text-[9px] font-black text-slate-500 uppercase italic">
-                                <th class="p-4 text-left">Jugadora</th>
-                                <th>JJ</th><th>VB</th><th>H</th><th>2B</th><th>3B</th><th>HR</th><th>K</th><th>RBI</th>
-                                <th class="text-red-600">AVG</th>
+                        <thead class="bg-white/5 border-b border-white/10">
+                            <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
+                                <th class="p-6 text-left">Info Jugadora</th>
+                                <th>JJ</th><th>VB</th><th>H</th><th>2B</th><th>3B</th><th>HR</th><th class="text-red-500">RBI</th>
+                                <th class="p-6 bg-red-600/10 text-red-500">AVG</th>
                             </tr>
                         </thead>
-                        <tbody id="miRosterLista" class="divide-y font-bold text-[10px] uppercase">
-                            </tbody>
+                        <tbody id="miRosterLista" class="divide-y divide-white/5 font-bold text-[11px] text-slate-300">
+                            <!-- Se llena dinámicamente -->
+                        </tbody>
                     </table>
                 </div>
             </section>
         </div>
     </main>
 
+    <!-- MODAL SEGURIDAD -->
     <div id="modalPassword" class="modal-bg hidden">
-        <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-sm border-t-8 border-blue-900 mx-4">
-            <h3 class="text-xl font-black text-blue-900 uppercase italic mb-6">Nueva Contraseña</h3>
-            <input type="password" id="nuevaPass" placeholder="Nueva clave" class="w-full p-4 bg-slate-100 rounded-2xl mb-4 outline-none font-bold">
-            <input type="password" id="confirmPass" placeholder="Confirmar" class="w-full p-4 bg-slate-100 rounded-2xl mb-6 outline-none font-bold">
-            <div class="flex gap-2">
-                <button onclick="toggleModalPassword()" class="flex-1 bg-slate-200 p-3 rounded-xl font-bold text-[10px] uppercase">Cancelar</button>
-                <button onclick="actualizarPassword()" class="flex-1 bg-blue-900 text-white p-3 rounded-xl font-bold text-[10px] uppercase">Guardar</button>
+        <div class="bg-white p-10 rounded-[3rem] shadow-2xl w-full max-w-sm border-t-[12px] border-blue-950 relative overflow-hidden">
+            <div class="absolute -right-6 -top-6 opacity-5">
+                <i class="fa fa-shield-halved text-9xl"></i>
+            </div>
+            <h3 class="text-2xl font-oswald text-blue-950 uppercase italic mb-2">Actualizar Acceso</h3>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-8">Protección de Cuenta Manager</p>
+            
+            <div class="space-y-4">
+                <input type="password" id="nuevaPass" placeholder="NUEVA CONTRASEÑA" class="w-full p-4 bg-slate-100 rounded-2xl outline-none font-bold border-2 border-transparent focus:border-blue-900 transition-all text-sm">
+                <input type="password" id="confirmPass" placeholder="CONFIRMAR CONTRASEÑA" class="w-full p-4 bg-slate-100 rounded-2xl outline-none font-bold border-2 border-transparent focus:border-blue-900 transition-all text-sm">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mt-10">
+                <button onclick="toggleModalPassword()" class="bg-slate-100 hover:bg-slate-200 text-slate-500 p-4 rounded-2xl font-black uppercase text-[10px] transition-all">Cancelar</button>
+                <button onclick="actualizarPassword()" class="bg-blue-950 hover:bg-black text-white p-4 rounded-2xl font-black uppercase text-[10px] shadow-lg transition-all italic">Guardar Cambios</button>
             </div>
         </div>
     </div>
@@ -125,7 +204,10 @@
     const API = "https://ley57.onrender.com/api";
     let equipoSeleccionado = "";
     let correoUsuario = "";
-    let jugadoresEnMemoria = []; // Para el buscador rápido
+    let jugadoresEnMemoria = [];
+
+    // Formatear fecha del encabezado
+    document.getElementById('fechaHoy').innerText = new Intl.DateTimeFormat('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).format(new Date());
 
     function revisarSesion() {
         const sesion = localStorage.getItem('userLogueado') || localStorage.getItem('managerLogueado');
@@ -138,22 +220,29 @@
 
         const btnStats = document.getElementById('btnLinkEstadisticas');
         if (btnStats) {
-            btnStats.style.cursor = 'pointer';
             btnStats.onclick = (e) => {
                 e.preventDefault();
-                if(confirm("¿Deseas cerrar sesión para ir a las estadísticas generales?")) { cerrarSesion(); }
+                if(confirm("¿Deseas ir a las estadísticas generales? Deberás iniciar sesión nuevamente después.")) { cerrarSesion(); }
             };
         }
-        iniciarSincronizacionRealTime();
+        cargarMiRoster();
+        // Sincronización cada 30 segundos para no saturar
+        setInterval(() => { if (equipoSeleccionado) cargarMiRoster(); }, 30000);
     }
 
-    function iniciarSincronizacionRealTime() {
-        cargarMiRoster(); 
-        setInterval(() => { 
-            if (equipoSeleccionado) { 
-                cargarMiRoster(); 
-            } 
-        }, 15000); 
+    async function cargarMiRoster() {
+        if (!equipoSeleccionado) return;
+        try {
+            const res = await fetch(`${API}/players?equipo=${encodeURIComponent(equipoSeleccionado)}`);
+            jugadoresEnMemoria = await res.json();
+            
+            if(jugadoresEnMemoria.length > 0) {
+                const ligaActual = jugadoresEnMemoria[0].liga;
+                cargarResultadosLiga(ligaActual);
+                cargarProximoJuego();
+            }
+            renderizarRoster(jugadoresEnMemoria);
+        } catch (error) { console.error("Error roster:", error); }
     }
 
     function renderizarRoster(lista) {
@@ -161,27 +250,80 @@
         document.getElementById('contadorRoster').innerText = lista.length;
         
         if(lista.length === 0) {
-            cont.innerHTML = `<tr><td colspan="10" class="p-10 text-slate-400 italic text-center">No hay jugadoras registradas aún.</td></tr>`;
+            cont.innerHTML = `<tr><td colspan="10" class="p-16 text-slate-500 italic text-center uppercase text-[10px] tracking-widest">No hay registros en la base de datos</td></tr>`;
             return;
         }
 
-        cont.innerHTML = lista.map(p => `
-            <tr class="hover:bg-blue-50 border-b">
-                <td class="p-4 text-left font-black text-blue-900 italic">
-                    ${p.nombre}
-                    <p class="text-[7px] text-slate-400 font-normal">Nacimiento: ${p.fechaNacimiento || 'S/D'}</p>
-                </td>
-                <td class="text-slate-400">${p.jj || 0}</td>
-                <td class="bg-slate-50/50">${p.vb || 0}</td>
-                <td class="text-blue-600">${p.h || 0}</td>
-                <td>${p.dobles || 0}</td>
-                <td>${p.triples || 0}</td>
-                <td class="text-red-500">${p.hr || 0}</td>
-                <td class="text-slate-300">${p.k || 0}</td>
-                <td>${p.rbi || 0}</td>
-                <td class="bg-red-50 text-red-600 font-black italic text-xs">${(p.avg || 0).toFixed(3)}</td>
-            </tr>
-        `).join('');
+        cont.innerHTML = lista.map(p => {
+            const avg = Number(p.avg || 0).toFixed(3);
+            return `
+                <tr class="hover:bg-white/5 transition-all group border-b border-white/5">
+                    <td class="p-5 text-left">
+                        <div class="text-white uppercase italic font-oswald text-lg tracking-tighter">${p.nombre}</div>
+                        <div class="text-[8px] text-blue-400 font-bold uppercase tracking-widest mt-1">Nac: ${p.fechaNacimiento || '---'}</div>
+                    </td>
+                    <td class="text-slate-500 font-black">${p.jj || 0}</td>
+                    <td class="bg-white/5 text-slate-400">${p.vb || 0}</td>
+                    <td class="text-blue-400 font-black italic">${p.h || 0}</td>
+                    <td>${p.dobles || 0}</td>
+                    <td>${p.triples || 0}</td>
+                    <td class="text-red-500/70">${p.hr || 0}</td>
+                    <td class="text-slate-500">${p.rbi || 0}</td>
+                    <td class="p-5 bg-red-600/10 text-red-500 font-oswald text-xl italic">${avg}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    async function cargarResultadosLiga(liga) {
+        try {
+            const res = await fetch(`${API}/games?liga=${liga}&status=finalizado`);
+            const games = await res.json();
+            const cont = document.getElementById('resultadosJornada');
+            const ultimos = games.reverse().slice(0, 4);
+            
+            if(ultimos.length === 0) {
+                cont.innerHTML = `<p class="text-[9px] text-slate-500 uppercase italic p-4">No hay resultados registrados</p>`;
+                return;
+            }
+
+            cont.innerHTML = ultimos.map(g => `
+                <div class="flex justify-between items-center bg-white p-3 rounded-2xl border border-slate-100 shadow-sm">
+                    <span class="text-[9px] font-black uppercase flex-1 truncate italic text-slate-400">${g.local}</span>
+                    <span class="bg-blue-950 text-white px-3 py-1 rounded-lg text-[11px] font-oswald italic shadow-md mx-3">${g.resultado}</span>
+                    <span class="text-[9px] font-black uppercase flex-1 truncate text-right italic text-slate-400">${g.visita}</span>
+                </div>`).join('');
+        } catch(e) {}
+    }
+
+    async function cargarProximoJuego() {
+        const cont = document.getElementById('proximoJuego');
+        try {
+            const res = await fetch(`${API}/games?status=pendiente`);
+            const games = await res.json();
+            const miEq = equipoSeleccionado.trim().toUpperCase();
+            const miJuego = games.find(g => (g.local.trim().toUpperCase() === miEq || g.visita.trim().toUpperCase() === miEq));
+            
+            if(!miJuego) {
+                cont.innerHTML = `
+                    <div class="flex flex-col gap-2">
+                        <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest italic">Calendario Libre</p>
+                        <p class="text-[9px] text-slate-300 font-bold uppercase">Sin juegos programados esta semana</p>
+                    </div>`;
+                return;
+            }
+            cont.innerHTML = `
+                <div class="w-full">
+                    <div class="inline-flex items-center gap-2 bg-red-50 text-red-600 px-3 py-1 rounded-full font-black text-[9px] uppercase italic border border-red-100 mb-4">
+                        <i class="fa fa-clock animate-pulse"></i> ${miJuego.fecha} @ ${miJuego.hora}
+                    </div>
+                    <div class="flex justify-between items-center gap-3">
+                        <span class="text-[11px] font-oswald uppercase italic flex-1 truncate text-blue-950">${miJuego.local}</span>
+                        <div class="bg-slate-900 text-white px-2 py-0.5 rounded text-[9px] italic font-black shadow-lg">VS</div>
+                        <span class="text-[11px] font-oswald uppercase italic flex-1 truncate text-blue-950 text-right">${miJuego.visita}</span>
+                    </div>
+                </div>`;
+        } catch (e) {}
     }
 
     function filtrarRoster() {
@@ -190,85 +332,25 @@
         renderizarRoster(filtrados);
     }
 
-    // --- FUNCIONES RESTANTES (CALENDARIO, RESULTADOS, etc.) ---
-
-    async function cargarProximoJuego() {
-        const cont = document.getElementById('proximoJuego');
-        try {
-            const res = await fetch(`${API}/games`);
-            const games = await res.json();
-            const miEq = equipoSeleccionado.trim().toUpperCase();
-            const miJuego = games.find(g => g.status === 'pendiente' && (g.local.trim().toUpperCase() === miEq || g.visita.trim().toUpperCase() === miEq));
-            
-            if(!miJuego) {
-                cont.innerHTML = `<p class="text-[9px] text-slate-300 uppercase font-black italic">No tienes juegos programados próximamente</p>`;
-                return;
-            }
-            cont.innerHTML = `
-                <div class="text-center space-y-4 w-full">
-                    <div class="inline-block bg-orange-100 text-orange-600 px-4 py-1 rounded-full font-black text-[9px] uppercase italic border border-orange-200">${miJuego.fecha} @ ${miJuego.hora}</div>
-                    <div class="flex justify-between items-center gap-4">
-                        <span class="text-[10px] font-black uppercase flex-1 truncate text-blue-900">${miJuego.local}</span>
-                        <div class="bg-slate-900 text-white px-3 py-1 rounded-lg text-xs italic font-black shadow-lg">VS</div>
-                        <span class="text-[10px] font-black uppercase flex-1 truncate text-blue-900 text-right">${miJuego.visita}</span>
-                    </div>
-                </div>`;
-        } catch (e) {}
-    }
-    // Reemplaza esta parte en tu manager.html
-async function cargarMiRoster() {
-    if (!equipoSeleccionado) return;
-    try {
-        // Obtenemos todos los jugadores del equipo (sin importar la liga)
-        const res = await fetch(`${API}/players?equipo=${encodeURIComponent(equipoSeleccionado)}`);
-        jugadoresEnMemoria = await res.json();
-        
-        // Identificamos la liga del equipo desde el primer jugador para filtrar calendarios
-        if(jugadoresEnMemoria.length > 0) {
-            const ligaActual = jugadoresEnMemoria[0].liga;
-            cargarResultadosLiga(ligaActual);
-            cargarProximoJuegoLiga(ligaActual);
-        }
-        
-        renderizarRoster(jugadoresEnMemoria);
-    } catch (error) { console.error("Error cargando roster:", error); }
-}
-
-async function cargarResultadosLiga(liga) {
-    try {
-        const res = await fetch(`${API}/games?liga=${liga}&status=finalizado`);
-        const games = await res.json();
-        const cont = document.getElementById('resultadosJornada');
-        cont.innerHTML = games.reverse().slice(0,4).map(g => `
-            <div class="flex justify-between items-center bg-slate-50 p-2 rounded-xl border border-slate-100">
-                <span class="text-[8px] font-black uppercase flex-1 truncate italic text-slate-500">${g.local}</span>
-                <span class="bg-blue-900 text-white px-2 py-0.5 rounded text-[10px] font-black italic shadow-sm">${g.resultado}</span>
-                <span class="text-[8px] font-black uppercase flex-1 truncate text-right italic text-slate-500">${g.visita}</span>
-            </div>`).join('');
-    } catch(e) {}
-}
-
     function toggleMobileMenu() {
         document.getElementById('sidebar').classList.toggle('-translate-x-full');
         document.getElementById('sidebarOverlay').classList.toggle('hidden');
     }
 
-    function toggleModalPassword() { 
-        document.getElementById('modalPassword').classList.toggle('hidden'); 
-    }
+    function toggleModalPassword() { document.getElementById('modalPassword').classList.toggle('hidden'); }
 
     async function actualizarPassword() {
         const p1 = document.getElementById('nuevaPass').value;
         const p2 = document.getElementById('confirmPass').value;
-        if(!p1 || p1 !== p2) return alert("Las contraseñas no coinciden.");
+        if(!p1 || p1 !== p2) return alert("Las contraseñas deben coincidir.");
         try {
             const res = await fetch(`${API}/users/update-password`, { 
                 method: 'PUT', 
                 headers: {'Content-Type': 'application/json'}, 
                 body: JSON.stringify({ correo: correoUsuario, nuevaPass: p1 }) 
             });
-            if(res.ok) { alert("Contraseña actualizada."); toggleModalPassword(); }
-        } catch(e) {}
+            if(res.ok) { alert("¡Éxito! Contraseña actualizada."); toggleModalPassword(); }
+        } catch(e) { alert("Error al conectar con el servidor."); }
     }
 
     function cerrarSesion() { localStorage.clear(); window.location.href = 'index.html'; }
