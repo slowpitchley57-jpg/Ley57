@@ -409,10 +409,36 @@
         }
 
         async function guardarJuego() {
-            const data = { local: document.getElementById('selLoc').value, visita: document.getElementById('selVis').value, liga: document.getElementById('filtroLigaGlobal').value, fecha: document.getElementById('fec').value, hora: document.getElementById('hor').value, status: "pendiente" };
-            await fetch(`${API}/games`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
-            cargarResultados();
-        }
+    // 1. Capturamos el link del input
+    const linkStream = document.getElementById('streamNuevo').value;
+
+    const data = { 
+        local: document.getElementById('selLoc').value, 
+        visita: document.getElementById('selVis').value, 
+        liga: document.getElementById('filtroLigaGlobal').value, 
+        fecha: document.getElementById('fec').value, 
+        hora: document.getElementById('hor').value, 
+        status: "pendiente",
+        // 2. Agregamos el link al objeto que va a la base de datos
+        streaming: linkStream 
+    };
+
+    try {
+        await fetch(`${API}/games`, { 
+            method: 'POST', 
+            headers: {'Content-Type':'application/json'}, 
+            body: JSON.stringify(data) 
+        });
+        
+        // Limpiar el campo después de programar
+        document.getElementById('streamNuevo').value = "";
+        
+        alert("Juego programado con éxito");
+        cargarResultados();
+    } catch (e) {
+        console.error("Error al guardar:", e);
+    }
+}
 
         function actualizarSelectores() {
             const liga = document.getElementById('filtroLigaGlobal').value;
