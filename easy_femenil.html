@@ -74,21 +74,21 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-8">
                 <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-slate-900 p-6 rounded-3xl text-white shadow-xl">
-                        <h3 class="font-black uppercase text-xs mb-4 text-emerald-400 italic"><i class="fa fa-fire mr-2"></i> Líderes de Bateo</h3>
+                    <div class="bg-pink-900 p-6 rounded-3xl text-white shadow-xl">
+                        <h3 class="font-black uppercase text-xs mb-4 text-pink-300 italic"><i class="fa fa-fire mr-2"></i> Líderes de Bateo</h3>
                         <div id="topBateo" class="space-y-3 text-sm"></div>
                     </div>
-                    <div class="bg-slate-900 p-6 rounded-3xl text-white shadow-xl">
-                        <h3 class="font-black uppercase text-xs mb-4 text-emerald-400 italic"><i class="fa fa-bolt mr-2"></i> Cuadrangulares</h3>
+                    <div class="bg-pink-900 p-6 rounded-3xl text-white shadow-xl">
+                        <h3 class="font-black uppercase text-xs mb-4 text-pink-300 italic"><i class="fa fa-bolt mr-2"></i> Cuadrangulares</h3>
                         <div id="topHR" class="space-y-3 text-sm"></div>
                     </div>
                 </section>
             </div>
       
             <div class="space-y-8">
-                <section class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden">
-                    <div class="bg-emerald-900 p-5 text-white flex items-center justify-center gap-3">
-                        <i class="fa fa-calendar-alt text-emerald-400"></i>
+                <section class="bg-white rounded-[2.5rem] shadow-xl border border-pink-100 overflow-hidden">
+                    <div class="bg-pink-900 p-5 text-white flex items-center justify-center gap-3">
+                        <i class="fa fa-calendar-alt text-pink-400"></i>
                         <h3 class="font-black text-xs uppercase tracking-[0.3em] italic">Rol de Juegos</h3>
                     </div>
                     <div id="listaEncuentros" class="p-4 space-y-4 max-h-[400px] overflow-y-auto custom-scroll bg-slate-50/50">
@@ -96,10 +96,10 @@
                     </div>
                 </section>
 
-                <section class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-slate-100 relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-2 h-full bg-emerald-600"></div>
-                    <h3 class="text-emerald-900 font-black flex items-center gap-3 uppercase text-xs italic tracking-widest mb-6">
-                        <i class="fa fa-history text-emerald-600 animate-pulse"></i> Historial Reciente
+                <section class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-pink-100 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-2 h-full bg-pink-600"></div>
+                    <h3 class="text-pink-900 font-black flex items-center gap-3 uppercase text-xs italic tracking-widest mb-6">
+                        <i class="fa fa-history text-pink-600 animate-pulse"></i> Historial Reciente
                     </h3>
                     <div id="resultadosJornada" class="space-y-4 max-h-[500px] overflow-y-auto custom-scroll pr-2"></div>
                 </section>
@@ -110,19 +110,19 @@
     <!-- Modal Roster -->
     <div id="modalDetalleEquipo" class="fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-4 hidden">
         <div class="bg-white w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-            <div class="bg-emerald-900 p-6 text-white flex justify-between items-center border-b-4 border-emerald-500">
+            <div class="bg-pink-900 p-6 text-white flex justify-between items-center border-b-4 border-pink-500">
                 <div>
                     <h2 id="detNombreEquipo" class="text-2xl font-black italic uppercase">---</h2>
-                    <p class="text-[10px] text-emerald-300 uppercase font-bold tracking-widest">Roster Oficial Easy Femenil</p>
+                    <p class="text-[10px] text-pink-300 uppercase font-bold tracking-widest">Roster Oficial Easy Femenil</p>
                 </div>
-                <button onclick="cerrarDetalle()" class="text-3xl hover:text-emerald-400">&times;</button>
+                <button onclick="cerrarDetalle()" class="text-3xl hover:text-pink-400">&times;</button>
             </div>
             <div class="overflow-y-auto p-4 custom-scroll bg-slate-50 flex-1">
                 <table class="w-full text-left text-xs">
                     <thead>
                         <tr class="text-slate-400 uppercase font-black text-[10px] border-b text-center">
                             <th class="p-3 text-left">Jugadora</th>
-                            <th>JJ</th><th>VB</th><th class="text-emerald-600">H</th><th>2B</th><th>3B</th><th class="text-emerald-600">HR</th><th>K</th><th>RBI</th><th class="text-emerald-900">AVG</th>
+                            <th>JJ</th><th>VB</th><th class="text-pink-600">H</th><th>2B</th><th>3B</th><th class="text-pink-600">HR</th><th>K</th><th>RBI</th><th class="text-pink-900">AVG</th>
                         </tr>
                     </thead>
                     <tbody id="bodyDetalleJugadoras" class="divide-y"></tbody>
@@ -176,16 +176,16 @@
 
             equipos.sort((a, b) => (b.g !== a.g) ? b.g - a.g : (b.ca - b.ce) - (a.ca - a.ce));
 
-            const cont = document.getElementById('tablaPosiciones');
+            const cont = document.getElementById('tablaEasyFem');
             cont.innerHTML = equipos.map(e => `
-                <tr class="hover:bg-emerald-50 cursor-pointer border-b transition-colors text-center" onclick="verDetalleRoster('${e.nombre}')">
-                    <td class="p-4 uppercase italic font-black text-emerald-900 text-left">${e.nombre}</td>
+                <tr class="hover:bg-pink-50 cursor-pointer border-b transition-colors text-center" onclick="verDetalleRoster('${e.nombre}')">
+                    <td class="p-4 uppercase italic font-black text-pink-900 text-left">${e.nombre}</td>
                     <td class="font-bold text-slate-500 bg-slate-50/30">${e.g + e.p}</td>
-                    <td class="text-emerald-600 font-bold">${e.g}</td>
+                    <td class="text-pink-600 font-bold">${e.g}</td>
                     <td class="text-slate-600">${e.p}</td>
                     <td class="text-slate-500">${e.ca}</td>
                     <td class="text-slate-500">${e.ce}</td>
-                    <td class="font-black ${e.ca - e.ce >= 0 ? 'text-emerald-600' : 'text-orange-500'}">${(e.ca - e.ce) > 0 ? '+' + (e.ca - e.ce) : (e.ca - e.ce)}</td>
+                    <td class="font-black ${e.ca - e.ce >= 0 ? 'text-pink-600' : 'text-orange-500'}">${(e.ca - e.ce) > 0 ? '+' + (e.ca - e.ce) : (e.ca - e.ce)}</td>
                 </tr>`).join('');
         } catch (err) { console.error(err); }
     }
@@ -199,10 +199,10 @@
             const all = await res.json();
             const players = all.filter(p => p.equipo.trim().toUpperCase() === nombreEquipo.trim().toUpperCase());
             container.innerHTML = players.map(p => `
-                <tr class="hover:bg-slate-50 border-b text-center text-[10px]">
-                    <td class="p-3 font-bold uppercase text-emerald-900 text-left">${p.nombre}</td>
-                    <td>${p.jj || 0}</td><td>${p.vb || 0}</td><td class="text-emerald-600 font-bold">${p.h || 0}</td>
-                    <td>${p.dobles || 0}</td><td>${p.triples || 0}</td><td class="text-emerald-600">${p.hr || 0}</td>
+                <tr class="hover:bg-pink-50 border-b text-center text-[10px]">
+                    <td class="p-3 font-bold uppercase text-pink-900 text-left">${p.nombre}</td>
+                    <td>${p.jj || 0}</td><td>${p.vb || 0}</td><td class="text-pink-600 font-bold">${p.h || 0}</td>
+                    <td>${p.dobles || 0}</td><td>${p.triples || 0}</td><td class="text-pink-600">${p.hr || 0}</td>
                     <td>${p.k || 0}</td><td>${p.rbi || 0}</td><td class="font-black italic">${Number(p.avg || 0).toFixed(3)}</td>
                 </tr>`).join('');
             document.getElementById('modalDetalleEquipo').classList.remove('hidden');
@@ -220,14 +220,14 @@
             cont.innerHTML = `<p class="text-center py-10 opacity-30 italic text-xs">Sin juegos programados</p>`;
         } else {
             cont.innerHTML = pendientes.map(g => `
-                <div class="bg-white p-4 rounded-2xl border-2 border-emerald-100 shadow-sm mb-4">
+                <div class="bg-white p-4 rounded-2xl border-2 border-pink-100 shadow-sm mb-4">
                     <div class="flex justify-between text-[8px] font-bold text-slate-400 uppercase mb-2">
                         <span>${g.fecha}</span><span>${g.hora}</span>
                     </div>
                     <div class="flex justify-between items-center gap-2">
-                        <span class="text-[10px] font-black uppercase text-emerald-900 truncate flex-1">${g.local}</span>
-                        <span class="text-[8px] font-black text-emerald-600 italic px-2 bg-emerald-50 rounded-full">VS</span>
-                        <span class="text-[10px] font-black uppercase text-emerald-900 truncate flex-1 text-right">${g.visita}</span>
+                        <span class="text-[10px] font-black uppercase text-pink-900 truncate flex-1">${g.local}</span>
+                        <span class="text-[8px] font-black text-pink-600 italic px-2 bg-pink-50 rounded-full">VS</span>
+                        <span class="text-[10px] font-black uppercase text-pink-900 truncate flex-1 text-right">${g.visita}</span>
                     </div>
                 </div>`).join('');
         }
@@ -238,15 +238,15 @@
         const players = await res.json();
         const topAVG = [...players].sort((a,b) => (b.avg || 0) - (a.avg || 0)).slice(0, 5);
         document.getElementById('topBateo').innerHTML = topAVG.map((p, i) => `
-            <div class="flex justify-between items-center border-b border-slate-700 pb-1 text-[11px]">
-                <span class="font-bold uppercase"><span class="text-emerald-500 mr-2">#${i+1}</span> ${p.nombre}</span>
-                <span class="font-black text-emerald-400 italic">${Number(p.avg || 0).toFixed(3)}</span>
+            <div class="flex justify-between items-center border-b border-pink-700 pb-1 text-[11px]">
+                <span class="font-bold uppercase"><span class="text-pink-400 mr-2">#${i+1}</span> ${p.nombre}</span>
+                <span class="font-black text-pink-300 italic">${Number(p.avg || 0).toFixed(3)}</span>
             </div>`).join('');
         const topHR = [...players].sort((a,b) => (b.hr || 0) - (a.hr || 0)).slice(0, 5);
         document.getElementById('topHR').innerHTML = topHR.map((p, i) => `
-            <div class="flex justify-between items-center border-b border-slate-700 pb-1 text-[11px]">
-                <span class="font-bold uppercase"><span class="text-emerald-500 mr-2">#${i+1}</span> ${p.nombre}</span>
-                <span class="font-black text-emerald-400 italic">${p.hr || 0} HR</span>
+            <div class="flex justify-between items-center border-b border-pink-700 pb-1 text-[11px]">
+                <span class="font-bold uppercase"><span class="text-pink-400 mr-2">#${i+1}</span> ${p.nombre}</span>
+                <span class="font-black text-pink-300 italic">${p.hr || 0} HR</span>
             </div>`).join('');
     }
 
@@ -260,15 +260,15 @@
         }
         games.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
         cont.innerHTML = games.map(g => `
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-emerald-100 flex flex-col gap-2 mb-3">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-pink-100 flex flex-col gap-2 mb-3">
                 <div class="flex justify-between text-[8px] font-black text-slate-400 uppercase">
                     <span>${g.fecha}</span>
-                    <span class="text-emerald-600 font-bold text-[7px] bg-emerald-50 px-2 rounded-full">FINALIZADO</span>
+                    <span class="text-pink-600 font-bold text-[7px] bg-pink-50 px-2 rounded-full">FINALIZADO</span>
                 </div>
                 <div class="flex justify-between items-center text-center">
-                    <div class="flex-1 text-[10px] font-black text-emerald-900 uppercase truncate">${g.local}</div>
-                    <div class="mx-3 bg-emerald-700 text-white px-3 py-1 rounded-lg font-black text-sm shadow-md">${g.resultado}</div>
-                    <div class="flex-1 text-[10px] font-black text-emerald-900 uppercase truncate text-right">${g.visita}</div>
+                    <div class="flex-1 text-[10px] font-black text-pink-900 uppercase truncate">${g.local}</div>
+                    <div class="mx-3 bg-pink-700 text-white px-3 py-1 rounded-lg font-black text-sm shadow-md">${g.resultado}</div>
+                    <div class="flex-1 text-[10px] font-black text-pink-900 uppercase truncate text-right">${g.visita}</div>
                 </div>
             </div>`).join('');
     }
