@@ -3,151 +3,166 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mantenimiento - FV Digital & ALV Sport</title>
+  <title>Bienvenido - FV Digital & ALV Sport</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
-    
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    
-    body { 
-      font-family: 'Inter', sans-serif; 
-      background-color: #020617; 
-      overflow-x: hidden;
-      width: 100%;
-      min-height: 100vh;
-    }
+    body { font-family: 'Inter', sans-serif; background-color: #020617; overflow-x: hidden; width: 100%; min-height: 100vh; color: white; }
 
     /* Animaciones */
     .fade-in { animation: fadeIn 1.2s ease-out forwards; }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
     .bg-animate { animation: float 15s ease-in-out infinite; }
-    @keyframes float {
-      0%, 100% { transform: translate(0, 0); }
-      50% { transform: translate(30px, -30px); }
+    @keyframes float { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(30px, -30px); } }
+
+    /* Botón de Entrada */
+    .btn-main {
+      background: linear-gradient(90deg, #ef4444, #f97316);
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .btn-main:hover {
+      transform: scale(1.05) rotate(-1deg);
+      box-shadow: 0 0 40px rgba(239, 68, 68, 0.8);
     }
 
-    /* Brillo en el borde del contenedor responsivo */
+    /* Glassmorphism */
     .border-glow {
       position: relative;
       background: rgba(255, 255, 255, 0.03);
-      border-radius: 1.5rem; /* Reducido un poco para móviles */
-      overflow: hidden;
+      backdrop-filter: blur(20px);
+      border-radius: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    @media (min-width: 640px) {
-      .border-glow { border-radius: 2.5rem; }
+    /* Tutorial Panel */
+    #tutorialTab {
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      transform: translateX(100%);
     }
+    #tutorialTab.active { transform: translateX(0); }
 
-    .border-glow::before {
-      content: "";
-      position: absolute;
-      inset: -2px;
-      background: linear-gradient(90deg, #ef4444, #3b82f6, #10b981, #ef4444);
-      background-size: 400% 400%;
-      z-index: -1;
-      animation: moveGradient 8s linear infinite;
-      opacity: 0.4;
-    }
-
-    @keyframes moveGradient {
-      0% { background-position: 0% 50%; }
-      100% { background-position: 100% 50%; }
-    }
-
-    .particle {
-      position: absolute;
-      width: 3px;
-      height: 3px;
-      background: white;
-      border-radius: 50%;
-      opacity: 0.15;
-      animation: rise 12s infinite linear;
-    }
-
-    @keyframes rise {
-      from { transform: translateY(110vh); }
-      to { transform: translateY(-10vh); }
-    }
+    .custom-scroll::-webkit-scrollbar { width: 4px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #ef4444; border-radius: 10px; }
   </style>
 </head>
-<body class="flex flex-col items-center justify-center text-white relative">
+<body class="flex flex-col items-center relative p-4">
 
-  <!-- Fondo decorativo (Cubre toda la pantalla) -->
+  <!-- Fondo Decorativo -->
   <div class="fixed inset-0 z-0">
-    <div class="absolute top-[-10%] left-[-5%] w-[60vw] h-[60vw] bg-blue-600/10 rounded-full blur-[100px] bg-animate"></div>
-    <div class="absolute bottom-[-10%] right-[-5%] w-[60vw] h-[60vw] bg-red-600/10 rounded-full blur-[100px] bg-animate" style="animation-delay: -5s;"></div>
+    <div class="absolute top-[-10%] left-[-5%] w-[70vw] h-[70vw] bg-blue-600/10 rounded-full blur-[120px] bg-animate"></div>
+    <div class="absolute bottom-[-10%] right-[-5%] w-[70vw] h-[70vw] bg-red-600/10 rounded-full blur-[120px] bg-animate" style="animation-delay: -5s;"></div>
+  </div>
+
+  <!-- Botón Tutorial -->
+  <button onclick="toggleTutorial()" class="fixed top-4 right-4 z-50 bg-white/10 hover:bg-white/20 p-4 rounded-full backdrop-blur-md border border-white/20 transition-all group">
+    <i class="fa fa-question-circle text-xl group-hover:scale-110 transition-transform"></i>
+  </button>
+
+  <div class="z-10 w-full max-w-5xl flex flex-col items-center py-10 fade-in">
     
-    <!-- Partículas -->
-    <div class="particle" style="left: 15%; animation-duration: 9s;"></div>
-    <div class="particle" style="left: 45%; animation-duration: 14s; animation-delay: 3s;"></div>
-    <div class="particle" style="left: 85%; animation-duration: 11s; animation-delay: 6s;"></div>
-  </div>
+    <!-- Logo Responsivo -->
+    <img src="logoalvnegro.jpeg" class="w-28 md:w-40 rounded-[2rem] shadow-2xl mb-8 border-2 border-white/10">
 
-  <!-- Contenedor Principal Adaptable -->
-  <div class="z-10 w-full max-w-[90%] md:max-w-4xl lg:max-w-5xl flex flex-col items-center py-10 fade-in">
-
-    <!-- Logo con escala adaptable -->
-    <div class="relative inline-block mb-8 group">
-      <div class="absolute inset-0 bg-white/5 blur-3xl rounded-full scale-125 opacity-40"></div>
-      <img src="logoalvnegro.jpeg" alt="Logo ALV Sport" class="relative w-32 h-32 sm:w-40 sm:h-40 md:w-52 md:h-52 object-cover rounded-[2rem] shadow-2xl transition-transform duration-700 group-hover:scale-105">
-    </div>
-
-    <!-- Título con tamaños escalonados -->
-    <div class="text-center px-4 mb-10">
-      <h1 class="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black uppercase italic tracking-tighter leading-[0.95]">
-        TRABAJANDO <br>
-        <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-400 to-yellow-500">EN MEJORAS</span>
+    <!-- Texto de Bienvenida -->
+    <div class="text-center mb-10 px-2">
+      <h1 class="text-3xl md:text-7xl font-black italic uppercase tracking-tighter leading-none mb-4">
+        BIENVENIDO AL <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-400 font-black">NUEVO PORTAL</span>
       </h1>
-      <p class="mt-6 text-slate-400 font-bold uppercase tracking-[0.4em] text-[9px] sm:text-[11px] md:text-sm italic">
-        Evolucionando para la victoria . FV Digital
-      </p>
+      <p class="text-slate-400 font-bold uppercase tracking-[0.3em] text-[10px] md:text-sm">Software de Gestión ALV Sport & Ley 57</p>
     </div>
 
-    <!-- Tarjeta Glassmorphism Responsiva -->
-    <div class="border-glow w-full p-6 sm:p-10 md:p-14 shadow-2xl backdrop-blur-3xl text-center">
-      <div class="max-w-2xl mx-auto space-y-6">
-        <h2 class="text-lg sm:text-xl md:text-2xl font-black text-white italic uppercase tracking-wider">La espera valdrá la pena</h2>
-        <p class="text-sm sm:text-base md:text-lg text-slate-300 font-light leading-relaxed">
-          Estamos actualizando nuestras bases de datos para las nuevas ligas <span class="text-pink-500 font-bold">Easy Femenil</span> y <span class="text-emerald-500 font-bold">Slow Mixto</span>. Muy pronto podrás consultar todos los standings y líderes.
-        </p>
-        
-        <!-- Barra de progreso con gradiente -->
-        <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden mt-8">
-            <div class="h-full bg-gradient-to-r from-red-600 via-emerald-500 to-blue-600 animate-[moveGradient_3s_infinite]" style="width: 85%;"></div>
-        </div>
-        <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest italic pt-2">Optimizando rendimiento al 85%</p>
+    <!-- Botón Principal Ir al Sitio -->
+    <a href="index_post.html" class="btn-main px-10 py-5 rounded-2xl text-lg md:text-xl font-black italic uppercase tracking-widest mb-12 flex items-center gap-4 group">
+      Consultar Estadísticas <i class="fa fa-arrow-right group-hover:translate-x-2 transition-transform"></i>
+    </a>
+
+    <!-- Novedades (Layout Responsivo) -->
+    <div class="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 px-2">
+      <!-- Roster Detallado -->
+      <div class="border-glow p-6">
+          <div class="w-10 h-10 bg-red-500/20 rounded-xl flex items-center justify-center mb-4 text-red-500">
+              <i class="fa fa-id-card text-xl"></i>
+          </div>
+        <h3 class="font-black italic uppercase text-sm mb-2 text-white">Roster Interactivo</h3>
+        <p class="text-slate-400 text-xs leading-relaxed">Ahora al hacer clic en el nombre de cualquier equipo, podrás ver el roster oficial y los números individuales de cada jugadora.</p>
+      </div>
+
+      <!-- Sistema de Pitchers -->
+      <div class="border-glow p-6">
+          <div class="w-10 h-10 bg-cyan-500/20 rounded-xl flex items-center justify-center mb-4 text-cyan-500">
+              <i class="fa fa-baseball-ball text-xl"></i>
+          </div>
+        <h3 class="font-black italic uppercase text-sm mb-2 text-white">Módulo Pitcheo</h3>
+        <p class="text-slate-400 text-xs leading-relaxed">Sección renovada de lanzadores. Consulta ERA, ponches y whip filtrado por categoría.</p>
+      </div>
+
+      <!-- Filtros de Ligas -->
+      <div class="border-glow p-6 sm:col-span-2 md:col-span-1">
+          <div class="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center mb-4 text-emerald-500">
+              <i class="fa fa-filter text-xl"></i>
+          </div>
+        <h3 class="font-black italic uppercase text-sm mb-2 text-white">Expansión 2026</h3>
+        <p class="text-slate-400 text-xs leading-relaxed">Integración completa de las ligas <strong>Easy Femenil</strong> y <strong>Slow Mixto</strong> con sus propios colores de identidad.</p>
       </div>
     </div>
 
-    <!-- Footer y Social (Ajustado para dedos en móviles) -->
-    <div class="mt-12 flex flex-col items-center gap-8 w-full">
-      <div class="flex gap-6 sm:gap-10">
-        <a href="https://www.facebook.com/profile.php?id=61582026590626" class="p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-red-500 transition-all">
-          <i class="fab fa-facebook-f text-xl md:text-2xl text-slate-300"></i>
-        </a>
-        <a href="https://www.instagram.com/alv.sport57/" class="p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-pink-500 transition-all">
-          <i class="fab fa-instagram text-xl md:text-2xl text-slate-300"></i>
-        </a>
-        <a href="https://wa.me/526624499222" class="p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-emerald-500 transition-all">
-          <i class="fab fa-whatsapp text-xl md:text-2xl text-slate-300"></i>
-        </a>
-      </div>
-      
-      <div class="text-center space-y-2">
-        <p class="text-[10px] md:text-xs text-slate-500 font-black uppercase tracking-[0.4em]">Hermosillo, Sonora . 2026</p>
-        <div class="flex items-center justify-center gap-2">
-            <span class="w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse"></span>
-            <span class="text-[8px] font-bold text-slate-600 uppercase tracking-widest italic">Sistema de Gestión FV Digital</span>
+    <!-- Pie de Página -->
+    <div class="mt-16 text-center space-y-4">
+        <p class="text-[9px] font-black uppercase tracking-[0.4em] text-slate-500 italic">Desarrollado por FV Digital</p>
+        <div class="flex gap-4 justify-center opacity-60">
+            <i class="fab fa-facebook text-xl hover:text-red-500 cursor-pointer transition-colors"></i>
+            <i class="fab fa-instagram text-xl hover:text-red-500 cursor-pointer transition-colors"></i>
         </div>
-      </div>
     </div>
   </div>
 
+  <!-- TUTORIAL GUÍA -->
+  <div id="tutorialTab" class="fixed top-0 right-0 h-full w-full max-w-sm bg-slate-900 border-l border-white/10 z-[100] p-8 shadow-2xl overflow-y-auto custom-scroll">
+    <div class="flex justify-between items-center mb-10">
+        <h2 class="text-xl font-black italic uppercase text-red-500">Guía del Portal</h2>
+        <button onclick="toggleTutorial()" class="text-slate-500 hover:text-white text-2xl">&times;</button>
+    </div>
+
+    <div class="space-y-10">
+        <!-- Paso 1 -->
+        <div class="flex gap-4 items-start">
+            <div class="w-8 h-8 rounded-xl bg-red-600 flex items-center justify-center font-black flex-shrink-0 shadow-lg shadow-red-600/30">1</div>
+            <div>
+                <h4 class="font-black uppercase text-xs mb-1">Entra al Portal</h4>
+                <p class="text-slate-400 text-[11px]">Haz clic en el botón principal para ver las tablas generales de todas las ligas.</p>
+            </div>
+        </div>
+        <!-- Paso 2 -->
+        <div class="flex gap-4 items-start">
+            <div class="w-8 h-8 rounded-xl bg-red-600 flex items-center justify-center font-black flex-shrink-0 shadow-lg shadow-red-600/30">2</div>
+            <div>
+                <h4 class="font-black uppercase text-xs mb-1">Selecciona un Equipo</h4>
+                <p class="text-slate-400 text-[11px]">En la tabla de posiciones, haz clic sobre el <strong>nombre del equipo</strong> para abrir su Roster Oficial.</p>
+            </div>
+        </div>
+        <!-- Paso 3 -->
+        <div class="flex gap-4 items-start">
+            <div class="w-8 h-8 rounded-xl bg-red-600 flex items-center justify-center font-black flex-shrink-0 shadow-lg shadow-red-600/30">3</div>
+            <div>
+                <h4 class="font-black uppercase text-xs mb-1">Consulta Líderes</h4>
+                <p class="text-slate-400 text-[11px]">Navega a la sección de "Líderes" para ver quiénes comandan los departamentos de bateo y pitcheo.</p>
+            </div>
+        </div>
+    </div>
+
+    <button onclick="toggleTutorial()" class="w-full mt-10 bg-white/5 p-4 rounded-xl font-black uppercase text-[9px] hover:bg-red-600 transition-all border border-white/10 hover:border-red-500">
+        ¡Entendido, vamos!
+    </button>
+  </div>
+
+  <script>
+    function toggleTutorial() {
+      document.getElementById('tutorialTab').classList.toggle('active');
+    }
+  </script>
 </body>
 </html>
