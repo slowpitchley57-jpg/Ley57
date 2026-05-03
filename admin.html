@@ -107,34 +107,41 @@
         </section>
     </main>
 
-    <!-- MODAL PITCHERS -->
-    <div id="modalPitchers" class="modal">
-        <div class="bg-white p-6 rounded-3xl w-full max-w-6xl max-h-[90vh] flex flex-col shadow-2xl border-t-8 border-cyan-600">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="font-black text-cyan-600 italic uppercase text-xl">Gestión de Pitchers</h2>
-                <select id="ligaPitchers" onchange="cargarPitchers()" class="p-3 border rounded-xl font-bold text-xs">
-                    <option value="">Todas las Ligas</option>
-                    <option value="femenil">Femenil</option><option value="varonil">Varonil</option>
-                    <option value="easy_femenil">Easy Femenil</option><option value="slow_mixto">Slow Mixto</option>
-                </select>
-            </div>
-            <div class="overflow-y-auto flex-1 custom-scroll"><table class="w-full text-center text-[10px]"><thead class="bg-slate-100 font-black uppercase"><tr><th class="p-3 text-left">Pitcher</th><th>Equipo</th><th>JP</th><th>IP</th><th class="text-cyan-600">SO</th><th>ERA</th><th>WHIP</th><th>X</th></tr></thead><tbody id="tablaPitchers" class="divide-y font-bold"></tbody></table></div>
-            <div class="mt-4 p-4 bg-cyan-50 rounded-xl grid grid-cols-2 md:grid-cols-5 gap-2">
-                <input id="p_nombre" placeholder="Nombre" class="p-2 border rounded text-xs font-bold uppercase col-span-2">
-                <select id="p_equipo" class="p-2 border rounded text-xs font-bold"></select>
-                <input id="p_jp" type="number" placeholder="JJ" class="p-2 border rounded text-xs">
-                <input id="p_ip" type="number" step="0.1" placeholder="IP" class="p-2 border rounded text-xs">
-                <input id="p_so" type="number" placeholder="SO" class="p-2 border rounded text-xs">
-                <input id="p_cl" type="number" placeholder="CL" class="p-2 border rounded text-xs">
-                <input id="p_era" type="number" step="0.01" placeholder="ERA" class="p-2 border rounded text-xs">
-                <input id="p_whip" type="number" step="0.01" placeholder="WHIP" class="p-2 border rounded text-xs">
-                <input id="p_id" type="hidden">
-                <button onclick="guardarPitcher()" class="bg-cyan-600 text-white p-2 rounded-xl font-bold text-xs uppercase">Guardar</button>
-                <button onclick="limpiarFormPitcher()" class="bg-slate-200 p-2 rounded-xl font-bold text-xs uppercase">Limpiar</button>
-            </div>
-            <button onclick="toggleModal('modalPitchers')" class="mt-4 bg-slate-800 text-white p-4 rounded-2xl font-black uppercase text-xs">Cerrar</button>
+        <div class="mt-4 p-4 bg-cyan-50 rounded-xl border border-cyan-100">
+    <h3 class="font-black text-cyan-700 text-xs uppercase mb-3">Asignar Stats de Pitcheo</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+        <!-- Primero: Seleccionar Equipo -->
+        <div>
+            <label class="block text-[8px] font-black text-cyan-600 uppercase">1. Seleccionar Equipo</label>
+            <select id="p_equipo" onchange="cargarJugadorasPorEquipo(this.value)" class="w-full p-2 border rounded text-xs font-bold"></select>
+        </div>
+        <!-- Segundo: Seleccionar Jugadora del Roster -->
+        <div>
+            <label class="block text-[8px] font-black text-cyan-600 uppercase">2. Seleccionar Jugadora</label>
+            <select id="p_jugadora_select" onchange="prepararPitcher(this.value)" class="w-full p-2 border rounded text-xs font-bold">
+                <option value="">-- Selecciona Equipo Primero --</option>
+            </select>
+        </div>
+        <!-- Nombre Visual (Solo lectura para confirmar) -->
+        <div>
+            <label class="block text-[8px] font-black text-cyan-600 uppercase">Nombre Confirmado</label>
+            <input id="p_nombre" readonly class="w-full p-2 border rounded text-xs font-bold uppercase bg-slate-100">
         </div>
     </div>
+    
+    <!-- Stats de Pitcheo -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-2">
+        <input id="p_jp" type="number" placeholder="JJ" class="p-2 border rounded text-xs">
+        <input id="p_ip" type="number" step="0.1" placeholder="IP" class="p-2 border rounded text-xs">
+        <input id="p_so" type="number" placeholder="Ponches" class="p-2 border rounded text-xs">
+        <input id="p_cl" type="number" placeholder="C. Limpias" class="p-2 border rounded text-xs">
+        <input id="p_era" type="number" step="0.01" placeholder="ERA" class="p-2 border rounded text-xs">
+        <input id="p_whip" type="number" step="0.01" placeholder="WHIP" class="p-2 border rounded text-xs">
+        <input id="p_id" type="hidden">
+        <button onclick="guardarPitcher()" class="bg-cyan-600 text-white p-2 rounded-xl font-bold text-xs uppercase shadow-md">Guardar Stats</button>
+        <button onclick="limpiarFormPitcher()" class="bg-slate-200 text-slate-600 p-2 rounded-xl font-bold text-xs uppercase">Limpiar</button>
+    </div>
+</div>
 
     <!-- MODAL ROSTER -->
     <div id="modalRosters" class="modal">
@@ -241,20 +248,7 @@
                 </tr>`).join('');
         }
 
-        async function guardarPitcher() {
-            const id = document.getElementById('p_id').value;
-            const payload = { 
-                nombre: document.getElementById('p_nombre').value.toUpperCase(),
-                equipo: document.getElementById('p_equipo').value,
-                esPitcher: true, jp: Number(document.getElementById('p_jp').value),
-                ip: Number(document.getElementById('p_ip').value), so_pitcher: Number(document.getElementById('p_so').value),
-                cl: Number(document.getElementById('p_cl').value), era: Number(document.getElementById('p_era').value),
-                whip: Number(document.getElementById('p_whip').value)
-            };
-            const url = id ? `${API}/players/${id}` : `${API}/players`;
-            await fetch(url, { method: id ? 'PUT' : 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-            limpiarFormPitcher(); cargarPitchers();
-        }
+       
 
         async function editarPitcher(id) {
             const p = await (await fetch(`${API}/players/${id}`)).json();
@@ -306,6 +300,157 @@
             const eqs = await res.json();
             document.getElementById('p_equipo').innerHTML = '<option value="">Seleccionar Equipo</option>' + eqs.map(e => `<option value="${e.nombre}">${e.nombre}</option>`).join('');
         }
+        // --- ARREGLO MODAL ROSTERS ---
+async function actualizarSelectRoster() {
+    const liga = document.getElementById('ligaRoster').value;
+    const filter = document.getElementById('filterRoster');
+    // Filtrar equipos locales que coincidan con la liga seleccionada
+    const filtrados = todosLosEquipos.filter(e => e.liga === liga);
+    
+    let options = '<option value="">-- SELECCIONAR EQUIPO --</option>';
+    filtrados.forEach(e => options += `<option value="${e.nombre}">${e.nombre}</option>`);
+    filter.innerHTML = options;
+    document.getElementById('containerRoster').innerHTML = ""; // Limpiar tabla previa
+}
+async function verRosterEquipo() {
+    const eq = document.getElementById('filterRoster').value;
+    const liga = document.getElementById('ligaRoster').value;
+    const cont = document.getElementById('containerRoster');
+    
+    if(!eq) return cont.innerHTML = "";
+    
+    cont.innerHTML = `<div class="p-10 text-center"><i class="fa fa-spinner fa-spin"></i> Cargando datos de Mongo...</div>`;
+
+    try {
+        const res = await fetch(`${API}/players?equipo=${encodeURIComponent(eq)}&liga=${liga}`);
+        const players = await res.json();
+        
+        cont.innerHTML = `
+            <table class="w-full text-[10px] text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-100 text-slate-600 uppercase font-black border-b text-center">
+                        <th class="p-2 text-left">Jugadora</th>
+                        <th class="p-1">JJ</th><th class="p-1">VB</th><th class="p-1">H</th>
+                        <th class="p-1">2B</th><th class="p-1">3B</th><th class="p-1">HR</th>
+                        <th class="p-1">K</th><th class="p-1 text-red-600">RBI</th><th class="p-1">AVG</th>
+                        <th class="p-1">Acción</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y">${players.map(p => {
+                    const avg = p.vb > 0 ? (p.h / p.vb).toFixed(3) : "0.000";
+                    return `
+                    <tr class="hover:bg-slate-50 text-center">
+                        <td class="p-2 font-bold uppercase text-slate-700 text-left">${p.nombre}</td>
+                        <td><input type="number" value="${p.jj || 0}" onchange="updPlayer('${p._id}','jj',this.value)" class="w-10 border rounded text-center p-1"></td>
+                        <td><input type="number" value="${p.vb || 0}" onchange="updPlayer('${p._id}','vb',this.value)" class="w-10 border rounded text-center p-1"></td>
+                        <td><input type="number" value="${p.h || 0}" onchange="updPlayer('${p._id}','h',this.value)" class="w-10 border rounded text-center p-1 font-bold text-blue-600"></td>
+                        <td><input type="number" value="${p.dobles || 0}" onchange="updPlayer('${p._id}','dobles',this.value)" class="w-10 border rounded text-center p-1"></td>
+                        <td><input type="number" value="${p.triples || 0}" onchange="updPlayer('${p._id}','triples',this.value)" class="w-10 border rounded text-center p-1"></td>
+                        <td><input type="number" value="${p.hr || 0}" onchange="updPlayer('${p._id}','hr',this.value)" class="w-10 border rounded text-center p-1 font-bold text-red-600"></td>
+                        <td><input type="number" value="${p.k || 0}" onchange="updPlayer('${p._id}','k',this.value)" class="w-10 border rounded text-center p-1"></td>
+                        <td><input type="number" value="${p.rbi || 0}" onchange="updPlayer('${p._id}','rbi',this.value)" class="w-10 border-2 border-red-200 rounded text-center p-1 font-black text-red-600"></td>
+                        <td class="font-black italic text-slate-400" id="avg-${p._id}">${avg}</td>
+                        <td><button onclick="eliminarJugadora('${p._id}')" class="text-red-400 hover:text-red-600"><i class="fa fa-trash"></i></button></td>
+                    </tr>`;
+                }).join('')}
+                </tbody>
+            </table>`;
+    } catch (e) {
+        cont.innerHTML = `<div class="p-10 text-red-500">Error al conectar con el servidor.</div>`;
+    }
+}
+async function updPlayer(id, campo, valor) {
+    try {
+        const nuevoValor = Number(valor) || 0;
+        
+        // 1. Obtener la fila para recalcular AVG visualmente
+        const fila = document.getElementById(`avg-${id}`).closest('tr');
+        const getVal = (idx) => Number(fila.querySelectorAll('input')[idx].value) || 0;
+        
+        // Mapeo según el orden de los inputs en el HTML: 0:jj, 1:vb, 2:h, 3:2b, 4:3b, 5:hr, 6:k, 7:rbi
+        const vb = getVal(1);
+        const h = getVal(2);
+        
+        let nuevoAvg = vb > 0 ? (h / vb) : 0;
+        document.getElementById(`avg-${id}`).innerText = nuevoAvg.toFixed(3);
+
+        // 2. Enviar a MongoDB
+        const body = { 
+            [campo]: nuevoValor,
+            avg: nuevoAvg 
+        };
+
+        await fetch(`${API}/players/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        
+        console.log(`✅ ${campo} actualizado para ${id}`);
+    } catch (err) {
+        console.error("Error al editar jugadora:", err);
+    }
+}
+
+// --- ARREGLO FLUJO PITCHERS ---
+
+// 1. Cargar jugadoras cuando se selecciona un equipo en el modal de pitchers
+async function cargarJugadorasPorEquipo(equipoNombre) {
+    const selectJ = document.getElementById('p_jugadora_select');
+    if(!equipoNombre) {
+        selectJ.innerHTML = '<option value="">-- Selecciona Equipo --</option>';
+        return;
+    }
+    
+    try {
+        const res = await fetch(`${API}/players?equipo=${encodeURIComponent(equipoNombre)}`);
+        const jugadoras = await res.json();
+        
+        let options = '<option value="">-- Seleccionar Jugadora --</option>';
+        jugadoras.forEach(j => {
+            options += `<option value="${j._id}" data-nombre="${j.nombre}">${j.nombre}</option>`;
+        });
+        selectJ.innerHTML = options;
+    } catch (e) { console.error("Error cargando jugadoras:", e); }
+}
+
+// 2. Al seleccionar la jugadora, poner su nombre en el input invisible y su ID
+function prepararPitcher(playerID) {
+    const select = document.getElementById('p_jugadora_select');
+    const option = select.options[select.selectedIndex];
+    if(playerID) {
+        document.getElementById('p_id').value = playerID;
+        document.getElementById('p_nombre').value = option.getAttribute('data-nombre');
+    }
+}
+
+// 3. Modificar guardarPitcher para que use el ID de la jugadora existente
+async function guardarPitcher() {
+    const id = document.getElementById('p_id').value;
+    if (!id) return alert('Primero selecciona equipo y jugadora');
+
+    const data = {
+        esPitcher: true, // Se marca como pitcher automáticamente al guardar stats
+        jp: parseInt(document.getElementById('p_jp').value) || 0,
+        ip: parseFloat(document.getElementById('p_ip').value) || 0,
+        so_pitcher: parseInt(document.getElementById('p_so').value) || 0,
+        cl: parseInt(document.getElementById('p_cl').value) || 0,
+        era: parseFloat(document.getElementById('p_era').value) || 0,
+        whip: parseFloat(document.getElementById('p_whip').value) || 0
+    };
+
+    try {
+        // Siempre es un PUT porque la jugadora ya existe en el roster
+        await fetch(`${API}/players/${id}`, { 
+            method: 'PUT', 
+            headers: {'Content-Type':'application/json'}, 
+            body: JSON.stringify(data) 
+        });
+        alert("Estadísticas de pitcheo actualizadas");
+        limpiarFormPitcher(); 
+        cargarPitchers();
+    } catch (err) { alert('Error al guardar'); }
+}
 
         function toggleModal(id) { document.getElementById(id).classList.toggle('active'); }
         function gestionarSesion() { const s = JSON.parse(localStorage.getItem('userLogueado')); if(s) document.getElementById('nombreUsuarioActivo').innerText = s.correo.split('@')[0].toUpperCase(); else window.location.href = 'index.html'; }
