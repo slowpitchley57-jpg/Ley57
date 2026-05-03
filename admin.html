@@ -85,26 +85,40 @@
         </div>
 
         <section class="bg-white p-6 rounded-3xl border shadow-sm">
-            <h3 class="text-blue-900 font-black mb-4 uppercase text-xs italic border-b pb-2">Programar Jornada</h3>
-            <div class="mb-4 flex items-center gap-4 text-xs font-bold uppercase text-slate-500">
-                1. Filtrar Liga:
-                <select id="filtroLigaGlobal" onchange="actualizarSelectores()" class="p-2 border rounded bg-white text-blue-900">
-                    <option value="femenil">LEY 57 FEM</option>
-                    <option value="varonil">ALV SPORT VAR</option>
-                    <option value="easy_femenil">EASY FEM</option>
-                    <option value="slow_mixto">SLOW MIXTO</option>
-                </select>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-6 gap-3 bg-slate-50 p-4 rounded-2xl border border-dashed"> 
-                <select id="selLoc" class="p-2 border rounded-xl text-xs font-bold"></select>
-                <select id="selVis" class="p-2 border rounded-xl text-xs font-bold"></select>
-                <input type="date" id="fec" class="p-2 border rounded-xl text-xs font-bold">
-                <input type="time" id="hor" class="p-2 border rounded-xl text-xs font-bold">
-                <input type="text" id="streamNuevo" placeholder="Link stream" class="p-2 border rounded-xl text-[9px]">
-                <button onclick="guardarJuego()" class="bg-blue-900 text-white p-2 rounded-xl font-black text-[10px] uppercase shadow hover:bg-black">Programar</button>
-            </div>
-            <div id="listaResultados" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8"></div>
-        </section>
+    <h3 class="text-blue-900 font-black mb-4 uppercase text-xs italic border-b pb-2">Programar Jornada</h3>
+    
+    <div class="mb-4 flex items-center gap-4 text-xs font-bold uppercase text-slate-500">
+        1. Filtrar Liga:
+        <select id="filtroLigaGlobal" onchange="actualizarSelectores()" class="p-2 border rounded bg-white text-blue-900">
+            <option value="femenil">LEY 57 FEM</option>
+            <option value="varonil">ALV SPORT VAR</option>
+            <option value="easy_femenil">EASY FEM</option>
+            <option value="slow_mixto">SLOW MIXTO</option>
+        </select>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-6 gap-3 bg-slate-50 p-4 rounded-2xl border border-dashed items-center"> 
+        <select id="selLoc" class="p-2 border rounded-xl text-xs font-bold"></select>
+        <select id="selVis" class="p-2 border rounded-xl text-xs font-bold"></select>
+        <input type="date" id="fec" class="p-2 border rounded-xl text-xs font-bold">
+        <input type="time" id="hor" class="p-2 border rounded-xl text-xs font-bold">
+        
+        <!-- Selector de Transmisión -->
+        <div class="flex flex-col gap-1">
+            <select id="streamNuevo" class="p-2 border rounded-xl text-[9px] font-bold bg-white">
+                <option value="">-- SIN EN VIVO --</option>
+                <option value="https://www.facebook.com/slowpitchley57">SLOW PITCH LEY 57</option>
+                <option value="https://www.facebook.com/alvsport57">ALV SPORT</option>
+                <option value="OTRO">OTRO (MANUAL)</option>
+            </select>
+            <input type="text" id="streamManual" placeholder="Pega link aquí" class="hidden p-1 border rounded text-[8px] mt-1">
+        </div>
+
+        <button onclick="guardarJuego()" class="bg-blue-900 text-white p-3 rounded-xl font-black text-[10px] uppercase shadow hover:bg-black transition-all">Programar</button>
+    </div>
+
+    <div id="listaResultados" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8"></div>
+</section>
     </main>
     <!-- MODAL PITCHERS (CORREGIDO Y RESPONSIVO) -->
 <div id="modalPitchers" class="modal">
@@ -295,6 +309,7 @@
 </div>
 
     <script>
+        
         const API = "https://ley57.onrender.com/api";
         let todosLosEquipos = [];
         let juegosFinalizados = [];
@@ -408,9 +423,23 @@
             sincronizarDatosBase(); cargarResultados();
         }
 
-        async function guardarJuego() {
-    // 1. Capturamos el link del input
-    const linkStream = document.getElementById('streamNuevo').value;
+       // Lógica para mostrar/ocultar el campo manual
+document.getElementById('streamNuevo').addEventListener('change', function() {
+    const manual = document.getElementById('streamManual');
+    if (this.value === "OTRO") {
+        manual.classList.remove('hidden');
+    } else {
+        manual.classList.add('hidden');
+        manual.value = "";
+    }
+});
+
+async function guardarJuego() {
+    const selStream = document.getElementById('streamNuevo').value;
+    const manualStream = document.getElementById('streamManual').value;
+    
+    // Decidimos qué link enviar
+    const linkFinal = (selStream === "OTRO") ? manualStream : selStream;
 
     const data = { 
         local: document.getElementById('selLoc').value, 
@@ -419,24 +448,30 @@
         fecha: document.getElementById('fec').value, 
         hora: document.getElementById('hor').value, 
         status: "pendiente",
-        // 2. Agregamos el link al objeto que va a la base de datos
-        streaming: linkStream 
+        streaming: linkFinal 
     };
 
+    // Validación simple
+    if(!data.local || !data.visita) return alert("Selecciona ambos equipos");
+    if(!data.fecha || !data.hora) return alert("Define fecha y hora");
+
     try {
-        await fetch(`${API}/games`, { 
+        const res = await fetch(`${API}/games`, { 
             method: 'POST', 
             headers: {'Content-Type':'application/json'}, 
             body: JSON.stringify(data) 
         });
-        
-        // Limpiar el campo después de programar
-        document.getElementById('streamNuevo').value = "";
-        
-        alert("Juego programado con éxito");
-        cargarResultados();
+
+        if(res.ok) {
+            alert("¡Juego programado con éxito!");
+            // Limpiar campos
+            document.getElementById('streamNuevo').value = "";
+            document.getElementById('streamManual').value = "";
+            document.getElementById('streamManual').classList.add('hidden');
+            cargarResultados(); // Recargar la lista de abajo
+        }
     } catch (e) {
-        console.error("Error al guardar:", e);
+        alert("Error al conectar con el servidor");
     }
 }
 
