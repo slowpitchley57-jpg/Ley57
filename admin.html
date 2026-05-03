@@ -106,42 +106,115 @@
             <div id="listaResultados" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8"></div>
         </section>
     </main>
+    <!-- MODAL PITCHERS (CORREGIDO Y RESPONSIVO) -->
+<div id="modalPitchers" class="modal">
+    <div class="bg-white p-6 rounded-3xl w-full max-w-6xl max-h-[90vh] flex flex-col shadow-2xl border-t-8 border-cyan-600">
+        
+        <!-- Encabezado del Modal -->
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h2 class="font-black text-cyan-600 italic uppercase text-xl">
+                    <i class="fa fa-baseball-ball mr-2"></i>Gestión de Pitchers
+                </h2>
+                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Asignar estadísticas desde el roster</p>
+            </div>
+            <button onclick="toggleModal('modalPitchers')" class="text-slate-400 hover:text-cyan-600 text-2xl">&times;</button>
+        </div>
 
-        <div class="mt-4 p-4 bg-cyan-50 rounded-xl border border-cyan-100">
-    <h3 class="font-black text-cyan-700 text-xs uppercase mb-3">Asignar Stats de Pitcheo</h3>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-        <!-- Primero: Seleccionar Equipo -->
-        <div>
-            <label class="block text-[8px] font-black text-cyan-600 uppercase">1. Seleccionar Equipo</label>
-            <select id="p_equipo" onchange="cargarJugadorasPorEquipo(this.value)" class="w-full p-2 border rounded text-xs font-bold"></select>
+        <!-- Tabla de visualización (Para ver quiénes ya son pitchers) -->
+        <div class="overflow-y-auto flex-1 custom-scroll pr-2 mb-4">
+            <table class="w-full text-center text-[10px]">
+                <thead class="bg-slate-100 border-b font-black text-slate-500 uppercase sticky top-0">
+                    <tr>
+                        <th class="p-3 text-left">Pitcher</th>
+                        <th>Equipo</th>
+                        <th>JJ</th>
+                        <th>IP</th>
+                        <th class="text-cyan-600">SO</th>
+                        <th>ERA</th>
+                        <th>WHIP</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaPitchers" class="divide-y font-bold">
+                    <!-- Se llena automáticamente con cargarPitchers() -->
+                </tbody>
+            </table>
         </div>
-        <!-- Segundo: Seleccionar Jugadora del Roster -->
-        <div>
-            <label class="block text-[8px] font-black text-cyan-600 uppercase">2. Seleccionar Jugadora</label>
-            <select id="p_jugadora_select" onchange="prepararPitcher(this.value)" class="w-full p-2 border rounded text-xs font-bold">
-                <option value="">-- Selecciona Equipo Primero --</option>
-            </select>
+
+        <!-- AREA DE EDICIÓN / ASIGNACIÓN (El bloque que tenías) -->
+        <div class="mt-auto p-5 bg-cyan-50 rounded-2xl border border-cyan-100 shadow-inner">
+            <h3 class="font-black text-cyan-700 text-[10px] uppercase mb-4 flex items-center gap-2">
+                <span class="bg-cyan-600 text-white w-4 h-4 rounded-full flex items-center justify-center text-[8px]">!</span>
+                Editor de Estadísticas
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <!-- 1. Seleccionar Equipo -->
+                <div>
+                    <label class="block text-[9px] font-black text-cyan-600 uppercase mb-1">1. Seleccionar Equipo</label>
+                    <select id="p_equipo" onchange="cargarJugadorasPorEquipo(this.value)" class="w-full p-2.5 border-2 border-white rounded-xl text-xs font-bold shadow-sm outline-none focus:border-cyan-400 transition-all"></select>
+                </div>
+                <!-- 2. Seleccionar Jugadora -->
+                <div>
+                    <label class="block text-[9px] font-black text-cyan-600 uppercase mb-1">2. Seleccionar Jugadora</label>
+                    <select id="p_jugadora_select" onchange="prepararPitcher(this.value)" class="w-full p-2.5 border-2 border-white rounded-xl text-xs font-bold shadow-sm outline-none focus:border-cyan-400 transition-all">
+                        <option value="">-- Selecciona Equipo Primero --</option>
+                    </select>
+                </div>
+                <!-- 3. Confirmación -->
+                <div>
+                    <label class="block text-[9px] font-black text-slate-400 uppercase mb-1">Nombre Confirmado</label>
+                    <input id="p_nombre" readonly class="w-full p-2.5 border-2 border-slate-100 rounded-xl text-xs font-black uppercase bg-slate-100 text-cyan-800 shadow-inner">
+                </div>
+            </div>
+            
+            <!-- Stats -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+                <div class="space-y-1">
+                    <span class="text-[8px] font-bold text-slate-400 ml-1 uppercase">JJ</span>
+                    <input id="p_jp" type="number" placeholder="0" class="w-full p-2 border rounded-xl text-xs font-bold text-center">
+                </div>
+                <div class="space-y-1">
+                    <span class="text-[8px] font-bold text-slate-400 ml-1 uppercase">IP</span>
+                    <input id="p_ip" type="number" step="0.1" placeholder="0.0" class="w-full p-2 border rounded-xl text-xs font-bold text-center border-cyan-200">
+                </div>
+                <div class="space-y-1">
+                    <span class="text-[8px] font-bold text-slate-400 ml-1 uppercase">SO</span>
+                    <input id="p_so" type="number" placeholder="0" class="w-full p-2 border rounded-xl text-xs font-bold text-center">
+                </div>
+                <div class="space-y-1">
+                    <span class="text-[8px] font-bold text-slate-400 ml-1 uppercase">CL</span>
+                    <input id="p_cl" type="number" placeholder="0" class="w-full p-2 border rounded-xl text-xs font-bold text-center">
+                </div>
+                <div class="space-y-1">
+                    <span class="text-[8px] font-bold text-slate-400 ml-1 uppercase">ERA</span>
+                    <input id="p_era" type="number" step="0.01" placeholder="0.00" class="w-full p-2 border rounded-xl text-xs font-bold text-center bg-white">
+                </div>
+                <div class="space-y-1">
+                    <span class="text-[8px] font-bold text-slate-400 ml-1 uppercase">WHIP</span>
+                    <input id="p_whip" type="number" step="0.01" placeholder="0.00" class="w-full p-2 border rounded-xl text-xs font-bold text-center bg-white">
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="flex gap-2 mt-5">
+                <input id="p_id" type="hidden">
+                <button onclick="guardarPitcher()" class="flex-1 bg-cyan-600 hover:bg-cyan-700 text-white p-3 rounded-xl font-black text-[10px] uppercase shadow-lg transition-all flex items-center justify-center gap-2">
+                    <i class="fa fa-save"></i> Guardar Estadísticas
+                </button>
+                <button onclick="limpiarFormPitcher()" class="bg-slate-200 hover:bg-slate-300 text-slate-600 p-3 rounded-xl font-bold text-[10px] uppercase transition-all">
+                    Limpiar
+                </button>
+            </div>
         </div>
-        <!-- Nombre Visual (Solo lectura para confirmar) -->
-        <div>
-            <label class="block text-[8px] font-black text-cyan-600 uppercase">Nombre Confirmado</label>
-            <input id="p_nombre" readonly class="w-full p-2 border rounded text-xs font-bold uppercase bg-slate-100">
-        </div>
-    </div>
-    
-    <!-- Stats de Pitcheo -->
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-2">
-        <input id="p_jp" type="number" placeholder="JJ" class="p-2 border rounded text-xs">
-        <input id="p_ip" type="number" step="0.1" placeholder="IP" class="p-2 border rounded text-xs">
-        <input id="p_so" type="number" placeholder="Ponches" class="p-2 border rounded text-xs">
-        <input id="p_cl" type="number" placeholder="C. Limpias" class="p-2 border rounded text-xs">
-        <input id="p_era" type="number" step="0.01" placeholder="ERA" class="p-2 border rounded text-xs">
-        <input id="p_whip" type="number" step="0.01" placeholder="WHIP" class="p-2 border rounded text-xs">
-        <input id="p_id" type="hidden">
-        <button onclick="guardarPitcher()" class="bg-cyan-600 text-white p-2 rounded-xl font-bold text-xs uppercase shadow-md">Guardar Stats</button>
-        <button onclick="limpiarFormPitcher()" class="bg-slate-200 text-slate-600 p-2 rounded-xl font-bold text-xs uppercase">Limpiar</button>
+
+        <button onclick="toggleModal('modalPitchers')" class="mt-4 bg-slate-800 hover:bg-black text-white p-4 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-all">
+            Cerrar Gestión
+        </button>
     </div>
 </div>
+
 
     <!-- MODAL ROSTER -->
     <div id="modalRosters" class="modal">
@@ -168,6 +241,58 @@
             <div class="flex gap-2"><button onclick="toggleModal('modalEquipo')" class="flex-1 bg-slate-200 p-3 rounded-xl font-bold text-xs uppercase">Cerrar</button><button onclick="guardarEquipo()" class="flex-1 bg-emerald-600 text-white p-3 rounded-xl font-bold text-xs uppercase">Guardar</button></div>
         </div>
     </div>
+    <!-- MODAL GENERAR ROL IA (CORREGIDO) -->
+<div id="modalIA" class="modal">
+    <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl border-t-8 border-purple-600 relative overflow-hidden">
+        
+        <!-- Decoración de fondo sutil -->
+        <div class="absolute -right-4 -top-4 opacity-5 pointer-events-none">
+            <i class="fa fa-robot text-8xl rotate-12"></i>
+        </div>
+
+        <div class="relative z-10">
+            <div class="flex flex-col items-center text-center mb-6">
+                <div class="bg-purple-100 text-purple-600 w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shadow-sm">
+                    <i class="fa fa-robot text-2xl"></i>
+                </div>
+                <h2 class="font-black text-slate-800 italic uppercase text-xl tracking-tighter">Generador de Rol IA</h2>
+                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-1">Algoritmo de Emparejamiento Pro</p>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-black text-purple-600 uppercase mb-2 ml-2">Seleccionar Liga para el Rol</label>
+                    <select id="ligaIA" class="w-full p-3.5 border-2 border-slate-100 rounded-2xl font-bold text-xs uppercase bg-slate-50 outline-none focus:border-purple-400 transition-all cursor-pointer">
+                        <option value="femenil">Ley 57 (Femenil)</option>
+                        <option value="varonil">ALV Sport (Varonil)</option>
+                        <option value="easy_femenil">Easy Femenil</option>
+                        <option value="slow_mixto">Slow Mixto</option>
+                    </select>
+                </div>
+
+                <div class="bg-amber-50 border border-amber-100 p-3 rounded-xl">
+                    <p class="text-[8px] text-amber-700 font-bold leading-tight">
+                        <i class="fa fa-info-circle mr-1"></i> 
+                        Nota: El sistema emparejará automáticamente a los equipos de la misma categoría de forma aleatoria.
+                    </p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mt-8">
+                <button onclick="toggleModal('modalIA')" class="bg-slate-100 hover:bg-slate-200 text-slate-500 p-4 rounded-2xl font-black uppercase text-[10px] transition-all">
+                    Cancelar
+                </button>
+                <button onclick="ejecutarIA()" class="bg-purple-600 hover:bg-black text-white p-4 rounded-2xl font-black uppercase text-[10px] shadow-lg shadow-purple-200 transition-all flex items-center justify-center gap-2">
+                    <i class="fa fa-bolt"></i> Generar
+                </button>
+            </div>
+        </div>
+
+        <button onclick="toggleModal('modalIA')" class="absolute top-4 right-4 text-slate-300 hover:text-red-500 transition-colors">
+            <i class="fa fa-times text-lg"></i>
+        </button>
+    </div>
+</div>
 
     <script>
         const API = "https://ley57.onrender.com/api";
@@ -359,38 +484,7 @@ async function verRosterEquipo() {
         cont.innerHTML = `<div class="p-10 text-red-500">Error al conectar con el servidor.</div>`;
     }
 }
-async function updPlayer(id, campo, valor) {
-    try {
-        const nuevoValor = Number(valor) || 0;
-        
-        // 1. Obtener la fila para recalcular AVG visualmente
-        const fila = document.getElementById(`avg-${id}`).closest('tr');
-        const getVal = (idx) => Number(fila.querySelectorAll('input')[idx].value) || 0;
-        
-        // Mapeo según el orden de los inputs en el HTML: 0:jj, 1:vb, 2:h, 3:2b, 4:3b, 5:hr, 6:k, 7:rbi
-        const vb = getVal(1);
-        const h = getVal(2);
-        
-        let nuevoAvg = vb > 0 ? (h / vb) : 0;
-        document.getElementById(`avg-${id}`).innerText = nuevoAvg.toFixed(3);
 
-        // 2. Enviar a MongoDB
-        const body = { 
-            [campo]: nuevoValor,
-            avg: nuevoAvg 
-        };
-
-        await fetch(`${API}/players/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-        });
-        
-        console.log(`✅ ${campo} actualizado para ${id}`);
-    } catch (err) {
-        console.error("Error al editar jugadora:", err);
-    }
-}
 
 // --- ARREGLO FLUJO PITCHERS ---
 
