@@ -17,8 +17,10 @@ mongoose.connect(MONGO_URI)
     .catch(err => console.log("❌ Error de conexión:", err));
 
 // --- MODELOS ---
+// --- MODELOS (Sincronizados con tus carpetas de MongoDB) ---
 
-const Team = mongoose.model('Team', { 
+// Mongoose usa el tercer parámetro para saber el nombre exacto de la colección
+const Team = mongoose.model('Team', new mongoose.Schema({ 
     nombre: String, 
     categoria: String, 
     liga: String,
@@ -26,9 +28,9 @@ const Team = mongoose.model('Team', {
     p: { type: Number, default: 0 },
     ca: { type: Number, default: 0 }, 
     ce: { type: Number, default: 0 } 
-});
+}), 'teams'); // <--- Coincide con tu carpeta 'teams'
 
-const Game = mongoose.model('Game', { 
+const Game = mongoose.model('Game', new mongoose.Schema({ 
     local: String, 
     visita: String, 
     fecha: String, 
@@ -42,9 +44,9 @@ const Game = mongoose.model('Game', {
     isLive: { type: Boolean, default: false },
     liveScore: { local: { type: Number, default: 0 }, visita: { type: Number, default: 0 } },
     inning: { type: String, default: "" }
-});
+}), 'games'); // <--- Coincide con tu carpeta 'games'
 
-const Player = mongoose.model('Player', { 
+const Player = mongoose.model('Player', new mongoose.Schema({ 
     nombre: String, 
     equipo: String, 
     fechaNacimiento: String, 
@@ -74,24 +76,41 @@ const Player = mongoose.model('Player', {
     whip: { type: Number, default: 0 },
     wp: { type: Number, default: 0 },
     blq: { type: Number, default: 0 }
-});
+}), 'players'); // <--- Coincide con tu carpeta 'players'
 
-const Config = mongoose.model('Config', { permitirAltas: Boolean });
-const User = mongoose.model('User', { correo: String, pass: String, rol: String, equipo: String });
+const Config = mongoose.model('Config', new mongoose.Schema({ 
+    permitirAltas: Boolean 
+}), 'configs'); // <--- Coincide con tu carpeta 'configs'
 
+const User = mongoose.model('User', new mongoose.Schema({ 
+    correo: String, 
+    pass: String, 
+    rol: String, 
+    equipo: String 
+}), 'users'); // <--- CORRECCIÓN CLAVE: En tu captura se llama 'users', NO 'usuarios'
 // --- RUTAS ---
 
-// Login
 app.post('/api/login', async (req, res) => {
-    const { correo, pass } = req.body;
     try {
-        const user = await User.findOne({ correo, pass });
+        const { correo, pass } = req.body;
+        // Buscamos ignorando espacios y mayúsculas en el correo
+        const user = await User.findOne({ 
+            correo: correo.trim().toLowerCase(), 
+            pass: pass.trim() 
+        });
+
         if (user) {
-            res.json({ correo: user.correo, rol: user.rol, equipo: user.equipo });
+            res.json({ 
+                correo: user.correo, 
+                rol: user.rol, 
+                equipo: user.equipo || "" 
+            });
         } else {
-            res.status(401).json({ error: "Acceso denegado" });
+            res.status(401).json({ error: "Credenciales incorrectas" });
         }
-    } catch (e) { res.status(500).json(e); }
+    } catch (e) {
+        res.status(500).json({ error: "Error en el servidor" });
+    }
 });
 
 // Config
@@ -226,6 +245,28 @@ app.put('/api/users/update-password', async (req, res) => {
 
 app.get('/api/dev/usuarios', async (req, res) => {
     res.json(await User.find());
+});
+app.post('/api/login', async (req, res) => {
+    try {
+        const { correo, pass } = req.body;
+        // Buscamos ignorando mayúsculas/minúsculas y quitando espacios
+        const user = await User.findOne({ 
+            correo: correo.trim().toLowerCase(), 
+            pass: pass.trim() 
+        });
+
+        if (user) {
+            res.json({ 
+                correo: user.correo, 
+                rol: user.rol, 
+                equipo: user.equipo || "" 
+            });
+        } else {
+            res.status(401).json({ error: "Credenciales incorrectas" });
+        }
+    } catch (e) {
+        res.status(500).json({ error: "Error en el servidor" });
+    }
 });
 
 // --- INICIO DEL SERVIDOR ---

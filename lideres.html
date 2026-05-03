@@ -3,32 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Líderes - Liga Ley 57</title>
+    <title>Líderes Oficiales - Multiliga Pro</title>
     <link rel="icon" type="image/png" href="logoley57icon.jpeg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-    .custom-scroll::-webkit-scrollbar { width: 5px; }
-    .custom-scroll::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 10px; }
-    .bg-gradient-lideres { background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #7c3aed 100%); }
-    @keyframes pulse-glow {
-        0%, 100% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.2); }
-        50% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.6); }
-    }
-    .tab-active { background: #6366f1; color: white; }
-    .tab-inactive { background: rgba(255,255,255,0.1); color: #94a3b8; }
-    .tab-inactive:hover { background: rgba(255,255,255,0.2); }
+        .custom-scroll::-webkit-scrollbar { width: 5px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 10px; }
+        .bg-gradient-lideres { background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #7c3aed 100%); }
+        .tab-active { background: #6366f1; color: white; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); }
+        .tab-inactive { background: rgba(255,255,255,0.05); color: #94a3b8; }
+        .tab-inactive:hover { background: rgba(255,255,255,0.1); }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-200 font-sans">
 
-<nav class="bg-slate-900 text-white p-4 shadow-lg sticky top-0 z-50 border-b-4 border-indigo-500">
+<nav class="bg-slate-900/80 backdrop-blur-md text-white p-4 shadow-lg sticky top-0 z-50 border-b-4 border-indigo-500">
     <div class="max-w-7xl mx-auto flex justify-between items-center">
         <div class="flex items-center gap-3">
             <i class="fa fa-trophy text-yellow-400 text-2xl"></i>
-            <span class="font-black italic tracking-tighter text-xl uppercase">Líderes <span class="text-indigo-400">Ley 57</span></span>
+            <span class="font-black italic tracking-tighter text-xl uppercase">Líderes <span class="text-indigo-400">Multiliga</span></span>
         </div>
-        <a href="index_post.html" class="text-[10px] bg-indigo-600 px-5 py-2 rounded-full font-black hover:bg-white hover:text-indigo-600 transition-all uppercase tracking-widest shadow-lg">Regresar</a>
+        <a href="index.html" class="text-[10px] bg-indigo-600 px-5 py-2 rounded-full font-black hover:bg-white hover:text-indigo-600 transition-all uppercase tracking-widest shadow-lg">Regresar</a>
     </div>
 </nav>
 
@@ -37,56 +33,48 @@
         <i class="fa fa-baseball-bat-ball text-9xl absolute -left-10 -bottom-10 rotate-12 text-indigo-200"></i>
         <i class="fa fa-crown text-9xl absolute -right-10 -top-10 -rotate-12 text-yellow-200"></i>
     </div>
-    <h1 class="text-4xl font-black mb-1 italic uppercase tracking-tighter drop-shadow-lg">Tabla de Líderes</h1>
-    <p class="text-indigo-200 text-[10px] uppercase tracking-[0.5em] font-bold">Todas las Ligas · Temporada 2026</p>
+    <h1 class="text-4xl font-black mb-1 italic uppercase tracking-tighter drop-shadow-lg">Centro de Estadísticas Individuales</h1>
+    <p class="text-indigo-200 text-[10px] uppercase tracking-[0.5em] font-bold">Sincronizado con Panel Admin · 2026</p>
 </header>
 
 <main class="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
 
     <!-- FILTROS DE LIGA -->
     <div class="flex flex-wrap gap-2 justify-center">
-        <button onclick="cambiarLiga('todas')" id="ligaBtn_todas" class="liga-btn px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all tab-active">Todas</button>
-        <button onclick="cambiarLiga('femenil')" id="ligaBtn_femenil" class="liga-btn px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all tab-inactive">Femenil</button>
-        <button onclick="cambiarLiga('varonil')" id="ligaBtn_varonil" class="liga-btn px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all tab-inactive">Varonil</button>
+        <button onclick="cambiarLiga('todas')" id="ligaBtn_todas" class="liga-btn px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all tab-active">Todas las Ligas</button>
+        <button onclick="cambiarLiga('femenil')" id="ligaBtn_femenil" class="liga-btn px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all tab-inactive">Ley 57 Fem</button>
+        <button onclick="cambiarLiga('varonil')" id="ligaBtn_varonil" class="liga-btn px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all tab-inactive">ALV Sport Var</button>
         <button onclick="cambiarLiga('easy_femenil')" id="ligaBtn_easy_femenil" class="liga-btn px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all tab-inactive">Easy Femenil</button>
         <button onclick="cambiarLiga('slow_mixto')" id="ligaBtn_slow_mixto" class="liga-btn px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all tab-inactive">Slow Mixto</button>
     </div>
 
     <!-- TABS BATEO / PITCHEO -->
-    <div class="flex gap-2 bg-slate-900 p-1.5 rounded-2xl max-w-md mx-auto">
+    <div class="flex gap-2 bg-slate-900 p-1.5 rounded-2xl max-w-md mx-auto border border-slate-800">
         <button onclick="cambiarTab('bateo')" id="tabBateo" class="flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all tab-active"><i class="fa fa-baseball-bat mr-2"></i>Bateo</button>
         <button onclick="cambiarTab('pitcheo')" id="tabPitcheo" class="flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all tab-inactive"><i class="fa fa-baseball mr-2"></i>Pitcheo</button>
     </div>
 
-    <!-- CATEGORIAS DE BATEO -->
+    <!-- CATEGORIAS DINAMICAS -->
     <div id="catsBateo" class="flex flex-wrap gap-2 justify-center">
         <button onclick="cambiarCat('avg')" id="catBtn_avg" class="cat-btn px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all tab-active">AVG</button>
         <button onclick="cambiarCat('hr')" id="catBtn_hr" class="cat-btn px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all tab-inactive">HR</button>
+        <button onclick="cambiarCat('rbi')" id="catBtn_rbi" class="cat-btn px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all tab-inactive">RBI</button>
+        <button onclick="cambiarCat('h')" id="catBtn_h" class="cat-btn px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all tab-inactive">Hits</button>
         <button onclick="cambiarCat('dobles')" id="catBtn_dobles" class="cat-btn px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all tab-inactive">2B</button>
         <button onclick="cambiarCat('triples')" id="catBtn_triples" class="cat-btn px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all tab-inactive">3B</button>
-        <button onclick="cambiarCat('rbi')" id="catBtn_rbi" class="cat-btn px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all tab-inactive">RBI</button>
-        <button onclick="cambiarCat('k')" id="catBtn_k" class="cat-btn px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all tab-inactive">Ponches (K)</button>
-        <button onclick="cambiarCat('bb')" id="catBtn_bb" class="cat-btn px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all tab-inactive">Boletos (BB)</button>
-        <button onclick="cambiarCat('slg')" id="catBtn_slg" class="cat-btn px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all tab-inactive">SLG</button>
-        <button onclick="cambiarCat('obp')" id="catBtn_obp" class="cat-btn px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all tab-inactive">OBP</button>
-        <button onclick="cambiarCat('h')" id="catBtn_h" class="cat-btn px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all tab-inactive">Hits</button>
     </div>
 
-    <!-- CATEGORIAS DE PITCHEO -->
     <div id="catsPitcheo" class="hidden flex flex-wrap gap-2 justify-center">
-        <button onclick="cambiarCat('era')" id="catBtn_era" class="cat-btn px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all tab-active">ERA</button>
-        <button onclick="cambiarCat('so_pitcher')" id="catBtn_so_pitcher" class="cat-btn px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all tab-inactive">Ponches Lanzados</button>
+        <button onclick="cambiarCat('era')" id="catBtn_era" class="cat-btn px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all tab-active">ERA (Efectividad)</button>
+        <button onclick="cambiarCat('so_pitcher')" id="catBtn_so_pitcher" class="cat-btn px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all tab-inactive">Ponches (SO)</button>
         <button onclick="cambiarCat('whip')" id="catBtn_whip" class="cat-btn px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all tab-inactive">WHIP</button>
         <button onclick="cambiarCat('ip')" id="catBtn_ip" class="cat-btn px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all tab-inactive">Innings (IP)</button>
-        <button onclick="cambiarCat('jp')" id="catBtn_jp" class="cat-btn px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all tab-inactive">Juegos Lanzados</button>
-        <button onclick="cambiarCat('wp')" id="catBtn_wp" class="cat-btn px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all tab-inactive">Wild Pitches</button>
-        <button onclick="cambiarCat('blq')" id="catBtn_blq" class="cat-btn px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all tab-inactive">Blanqueadas</button>
     </div>
 
     <!-- TABLA DE LIDERES -->
     <div class="bg-slate-900 rounded-3xl shadow-2xl border border-slate-800 overflow-hidden">
         <div id="leaderTitle" class="bg-indigo-600 p-4 text-white font-black text-xs uppercase tracking-widest italic flex items-center gap-3">
-            <i class="fa fa-crown text-yellow-400"></i> Líderes de Bateo - AVG
+            <i class="fa fa-crown text-yellow-400"></i> Cargando Rankings...
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-center text-xs">
@@ -96,10 +84,10 @@
                         <th class="p-4 text-left">Jugador</th>
                         <th>Equipo</th>
                         <th class="text-indigo-400">Valor</th>
-                        <th>Liga</th>
+                        <th>Liga Origen</th>
                     </tr>
                 </thead>
-                <tbody id="tablaLideres" class="divide-y divide-slate-800"></tbody>
+                <tbody id="tablaLideres" class="divide-y divide-slate-800 font-bold"></tbody>
             </table>
         </div>
     </div>
@@ -112,24 +100,14 @@ let tabActual = 'bateo';
 let catActual = 'avg';
 
 const catLabels = {
-    avg: 'AVG', hr: 'Home Runs', dobles: 'Dobles', triples: 'Triples',
-    rbi: 'Carreras Impulsadas', k: 'Ponches (Bateo)', bb: 'Boletos',
-    slg: 'SLG', obp: 'OBP', h: 'Hits',
-    era: 'Efectividad (ERA)', so_pitcher: 'Ponches Lanzados', whip: 'WHIP',
-    ip: 'Innings Lanzados', jp: 'Juegos Lanzados', wp: 'Wild Pitches', blq: 'Blanqueadas'
-};
-
-const catIcons = {
-    avg: 'fa-baseball-bat-ball', hr: 'fa-fire', dobles: 'fa-forward', triples: 'fa-forward-fast',
-    rbi: 'fa-person-running', k: 'fa-hand', bb: 'fa-hand-point-up',
-    slg: 'fa-chart-line', obp: 'fa-chart-area', h: 'fa-check-double',
-    era: 'fa-gauge-high', so_pitcher: 'fa-bolt', whip: 'fa-tape',
-    ip: 'fa-clock', jp: 'fa-baseball', wp: 'fa-triangle-exclamation', blq: 'fa-shield-halved'
+    avg: 'Promedio de Bateo (AVG)', hr: 'Home Runs', dobles: 'Dobles (2B)', triples: 'Triples (3B)',
+    rbi: 'Carreras Impulsadas', k: 'Ponches', bb: 'Boletos', h: 'Hits Totales',
+    era: 'Efectividad (ERA)', so_pitcher: 'Ponches Recetados (SO)', whip: 'WHIP (Bases por Inning)', ip: 'Innings Lanzados (IP)'
 };
 
 function cambiarLiga(liga) {
     ligaActual = liga;
-    document.querySelectorAll('.liga-btn').forEach(b => { b.className = 'liga-btn px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all tab-inactive'; });
+    document.querySelectorAll('.liga-btn').forEach(b => b.className = 'liga-btn px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all tab-inactive');
     document.getElementById('ligaBtn_' + liga).className = 'liga-btn px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all tab-active';
     cargarLideres();
 }
@@ -138,89 +116,94 @@ function cambiarTab(tab) {
     tabActual = tab;
     document.getElementById('tabBateo').className = tab === 'bateo' ? 'flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all tab-active' : 'flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all tab-inactive';
     document.getElementById('tabPitcheo').className = tab === 'pitcheo' ? 'flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all tab-active' : 'flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all tab-inactive';
-    document.getElementById('catsBateo').className = tab === 'bateo' ? 'flex flex-wrap gap-2 justify-center' : 'hidden';
-    document.getElementById('catsPitcheo').className = tab === 'pitcheo' ? 'flex flex-wrap gap-2 justify-center' : 'hidden';
+    
+    document.getElementById('catsBateo').classList.toggle('hidden', tab !== 'bateo');
+    document.getElementById('catsPitcheo').classList.toggle('hidden', tab !== 'pitcheo');
+    
     catActual = tab === 'bateo' ? 'avg' : 'era';
-    document.querySelectorAll('.cat-btn').forEach(b => { b.className = 'cat-btn px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all tab-inactive'; });
-    document.getElementById('catBtn_' + catActual).className = 'cat-btn px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all tab-active';
+    document.querySelectorAll('.cat-btn').forEach(b => b.className = 'cat-btn px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all tab-inactive');
+    const activeBtn = document.getElementById('catBtn_' + catActual);
+    if(activeBtn) activeBtn.className = 'cat-btn px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all tab-active';
+    
     cargarLideres();
 }
 
 function cambiarCat(cat) {
     catActual = cat;
-    document.querySelectorAll('.cat-btn').forEach(b => { b.className = 'cat-btn px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all tab-inactive'; });
+    document.querySelectorAll('.cat-btn').forEach(b => b.className = 'cat-btn px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all tab-inactive');
     document.getElementById('catBtn_' + cat).className = 'cat-btn px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all tab-active';
     cargarLideres();
 }
 
 async function cargarLideres() {
     const cont = document.getElementById('tablaLideres');
-    cont.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-slate-500"><i class="fa fa-spinner fa-spin text-2xl"></i></td></tr>';
+    cont.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-slate-500"><i class="fa fa-spinner fa-spin text-2xl"></i> Sincronizando Base de Datos...</td></tr>';
 
     try {
-        const ligaParam = ligaActual !== 'todas' ? `&liga=${ligaActual}` : '';
-        const res = await fetch(`${API}/players?${ligaParam ? ligaParam.substring(1) : ''}&t=${new Date().getTime()}`);
+        const res = await fetch(`${API}/players?t=${new Date().getTime()}`);
         const allPlayers = await res.json();
 
-        const players = allPlayers.filter(p => {
-            if (ligaActual === 'todas') return true;
-            return p.liga === ligaActual;
-        }).filter(p => {
-            if (tabActual === 'pitcheo') return p.esPitcher || p.jp > 0 || p.ip > 0;
-            return true;
+        // 1. Filtrar por Liga
+        let filtrados = allPlayers.filter(p => ligaActual === 'todas' || p.liga === ligaActual);
+
+        // 2. Filtrar por Tab (Bateo o Pitcheo)
+        if (tabActual === 'pitcheo') {
+            filtrados = filtrados.filter(p => p.esPitcher || p.ip > 0);
+        } else {
+            filtrados = filtrados.filter(p => p.vb > 0); // Mínimo un turno al bat para aparecer en bateo
+        }
+
+        // 3. Ordenar según categoría
+        const menorAMayor = ['era', 'whip']; // Estas categorías ganan con valor bajo
+        const esMenorAMayor = menorAMayor.includes(catActual);
+
+        filtrados.sort((a, b) => {
+            const valA = parseFloat(a[catActual === 'so_pitcher' ? 'so_pitcher' : catActual]) || (esMenorAMayor ? 99 : 0);
+            const valB = parseFloat(b[catActual === 'so_pitcher' ? 'so_pitcher' : catActual]) || (esMenorAMayor ? 99 : 0);
+            return esMenorAMayor ? valA - valB : valB - valA;
         });
 
-        if (players.length === 0) {
-            cont.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-slate-500 italic">Sin registros en esta categoría</td></tr>';
+        const top20 = filtrados.slice(0, 20);
+
+        // 4. Renderizar
+        document.getElementById('leaderTitle').innerHTML = `<i class="fa fa-crown text-yellow-400 mr-2"></i> ${catLabels[catActual]}`;
+
+        if (top20.length === 0) {
+            cont.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-slate-500 italic">Sin datos registrados en esta selección</td></tr>';
             return;
         }
 
-        let field, sortDir;
-        switch (catActual) {
-            case 'avg': field = 'avg'; sortDir = -1; break;
-            case 'hr': field = 'hr'; sortDir = -1; break;
-            case 'dobles': field = 'dobles'; sortDir = -1; break;
-            case 'triples': field = 'triples'; sortDir = -1; break;
-            case 'rbi': field = 'rbi'; sortDir = -1; break;
-            case 'k': field = 'k'; sortDir = -1; break;
-            case 'bb': field = 'bb'; sortDir = -1; break;
-            case 'slg': field = 'slg'; sortDir = -1; break;
-            case 'obp': field = 'obp'; sortDir = -1; break;
-            case 'h': field = 'h'; sortDir = -1; break;
-            case 'era': field = 'era'; sortDir = 1; break;
-            case 'so_pitcher': field = 'so_pitcher'; sortDir = -1; break;
-            case 'whip': field = 'whip'; sortDir = 1; break;
-            case 'ip': field = 'ip'; sortDir = -1; break;
-            case 'jp': field = 'jp'; sortDir = -1; break;
-            case 'wp': field = 'wp'; sortDir = -1; break;
-            case 'blq': field = 'blq'; sortDir = -1; break;
-            default: field = 'avg'; sortDir = -1;
-        }
-
-        const sorted = sortDir === 1
-            ? [...players].sort((a, b) => (a[field] || 0) - (b[field] || 0))
-            : [...players].sort((a, b) => (b[field] || 0) - (a[field] || 0));
-        const top20 = sorted.slice(0, 20);
-
-        document.getElementById('leaderTitle').innerHTML = `<i class="fa ${catIcons[catActual] || 'fa-trophy'} text-yellow-400"></i> Líderes - ${catLabels[catActual]}`;
-
         cont.innerHTML = top20.map((p, i) => {
-            const medal = i === 0 ? '<i class="fa fa-crown text-yellow-400"></i>' : i === 1 ? '<i class="fa fa-medal text-slate-400"></i>' : i === 2 ? '<i class="fa fa-medal text-orange-600"></i>' : `<span class="text-slate-500 font-bold">${i + 1}</span>`;
-            const valorStr = (catActual === 'avg' || catActual === 'slg' || catActual === 'obp') ? Number(p[field] || 0).toFixed(3) : (catActual === 'era' || catActual === 'whip') ? Number(p[field] || 0).toFixed(2) : (p[field] || 0);
-            const ligaLabel = p.liga === 'femenil' ? 'Femenil' : p.liga === 'varonil' ? 'Varonil' : p.liga === 'easy_femenil' ? 'Easy Fem.' : p.liga === 'slow_mixto' ? 'Slow Mixto' : p.liga || '---';
-            const ligaColor = p.liga === 'femenil' ? 'text-pink-400' : p.liga === 'varonil' ? 'text-red-400' : p.liga === 'easy_femenil' ? 'text-pink-300' : p.liga === 'slow_mixto' ? 'text-emerald-400' : 'text-slate-500';
+            const valorRaw = p[catActual === 'so_pitcher' ? 'so_pitcher' : catActual] || 0;
+            const valorFormateado = ['avg', 'slg', 'obp'].includes(catActual) ? Number(valorRaw).toFixed(3) : 
+                                   ['era', 'whip'].includes(catActual) ? Number(valorRaw).toFixed(2) : valorRaw;
+            
+            const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1;
+            
+            // Colores de liga según tu Admin
+            const configLiga = {
+                'femenil': { label: 'Ley 57 Fem', color: 'text-pink-500' },
+                'varonil': { label: 'ALV Sport Var', color: 'text-blue-400' },
+                'easy_femenil': { label: 'Easy Femenil', color: 'text-pink-400' },
+                'slow_mixto': { label: 'Slow Mixto', color: 'text-emerald-400' }
+            }[p.liga] || { label: p.liga, color: 'text-slate-500' };
+
             return `
-                <tr class="hover:bg-slate-800/50 transition-colors ${i === 0 ? 'bg-indigo-600/10' : ''}">
-                    <td class="p-4 text-left font-bold w-12">${medal}</td>
-                    <td class="p-4 text-left font-black text-white uppercase italic tracking-tighter">${p.nombre}</td>
-                    <td class="text-slate-400 font-bold text-[10px] uppercase">${p.equipo}</td>
-                    <td class="font-black text-indigo-400 italic text-sm">${valorStr}</td>
-                    <td class="${ligaColor} font-black text-[9px] uppercase">${ligaLabel}</td>
+                <tr class="hover:bg-slate-800/50 transition-all">
+                    <td class="p-4 text-left w-12 text-lg">${medal}</td>
+                    <td class="p-4 text-left">
+                        <div class="text-white uppercase italic tracking-tighter">${p.nombre}</div>
+                        <div class="text-[8px] text-slate-500 uppercase">Status: ${p.esPitcher ? 'PITCHER' : 'BATEADOR'}</div>
+                    </td>
+                    <td class="text-slate-400 uppercase text-[10px]">${p.equipo}</td>
+                    <td class="font-black text-indigo-400 italic text-sm">${valorFormateado}</td>
+                    <td class="${configLiga.color} font-black text-[9px] uppercase italic">${configLiga.label}</td>
                 </tr>`;
         }).join('');
+
     } catch (err) {
-        console.error(err);
-        cont.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-red-400">Error cargando datos</td></tr>';
+        console.error("Error:", err);
+        cont.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-red-400">Error de conexión con el servidor</td></tr>';
     }
 }
 
