@@ -40,7 +40,7 @@
     <i class="fa fa-users-cog"></i> Alta Maestra Jugadores
 </button>
             <button onclick="location.href='anotador_pro.html'" class="w-full text-left p-3 bg-red-600 hover:bg-black text-white rounded-xl font-bold flex items-center gap-3 transition-all shadow-lg">
-                <i class="fa fa- stadium text-lg"></i> 
+                <i class="fa fa-stadium text-lg"></i> 
                 <div>
                     <span class="block text-xs uppercase font-black italic">Anotador Oficial</span>
                     <span class="block text-[8px] opacity-70 uppercase">Hoja de Anotación Digital Pro</span>
@@ -49,6 +49,7 @@
             <button onclick="location.reload()" class="w-full text-left p-3 hover:bg-blue-800 rounded-xl transition flex items-center gap-3"><i class="fa fa-sync"></i> Sincronizar</button>
             <button onclick="toggleModal('modalEquipo')" class="w-full text-left p-3 bg-emerald-600 rounded-xl font-bold flex items-center gap-3"><i class="fa fa-plus-circle"></i> Nuevo Equipo</button>
             <button onclick="toggleModal('modalRosters')" class="w-full text-left p-3 bg-amber-500 rounded-xl font-bold flex items-center gap-3"><i class="fa fa-user-edit"></i> Roster / Stats</button>
+            <button onclick="toggleModal('modalPitchers')" class="w-full text-left p-3 bg-cyan-600 rounded-xl font-bold flex items-center gap-3"><i class="fa fa-baseball"></i> Pitchers</button>
             <button onclick="toggleModal('modalIA')" class="w-full text-left p-3 bg-purple-600 rounded-xl font-bold flex items-center gap-3"><i class="fa fa-robot"></i> Generar Rol IA</button> 
             <hr class="opacity-20">
             <button onclick="limpiarHistorialSemanal()" class="w-full text-left p-3 bg-red-600 hover:bg-red-700 rounded-xl font-bold flex items-center gap-3 transition"><i class="fa fa-broom"></i> Limpiar Semana</button>
@@ -97,11 +98,12 @@
 </select>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-3 bg-slate-50 p-4 rounded-2xl border border-dashed"> 
+            <div class="grid grid-cols-1 md:grid-cols-6 gap-3 bg-slate-50 p-4 rounded-2xl border border-dashed"> 
                 <select id="selLoc" class="p-2 border rounded-xl text-xs font-bold bg-white"></select>
                 <select id="selVis" class="p-2 border rounded-xl text-xs font-bold bg-white"></select>
                 <input type="date" id="fec" class="p-2 border rounded-xl text-xs font-bold">
                 <input type="time" id="hor" class="p-2 border rounded-xl text-xs font-bold">
+                <input type="text" id="streamNuevo" placeholder="Link streaming" class="p-2 border rounded-xl text-[9px] font-bold bg-white">
                 <button onclick="guardarJuego()" class="bg-blue-900 text-white p-2 rounded-xl font-black text-[10px] uppercase shadow-lg hover:bg-black">Programar Juego</button>
             </div>
 
@@ -150,6 +152,58 @@
             </div>
             <div id="containerRoster" class="flex-1 overflow-y-auto space-y-4 custom-scroll pr-2"></div>
             <button onclick="toggleModal('modalRosters')" class="mt-6 bg-slate-800 text-white p-4 rounded-2xl font-black uppercase text-xs">Cerrar</button>
+        </div>
+    </div>
+
+    <div id="modalPitchers" class="modal">
+        <div class="bg-white p-6 rounded-3xl w-full max-w-6xl max-h-[90vh] flex flex-col shadow-2xl border-t-8 border-cyan-600">
+            <div class="flex justify-between items-center mb-6">
+                <div><h2 class="font-black text-cyan-600 italic uppercase text-xl"><i class="fa fa-baseball mr-2"></i>Gestion de Pitchers</h2></div>
+                <div class="flex gap-2">
+                    <select id="ligaPitchers" onchange="cargarPitchers()" class="p-3 border rounded-xl font-bold text-xs bg-slate-50">
+                        <option value="">Todas las Ligas</option>
+                        <option value="femenil">Femenil</option>
+                        <option value="varonil">Varonil</option>
+                        <option value="easy_femenil">Easy Femenil</option>
+                        <option value="slow_mixto">Slow Mixto</option>
+                    </select>
+                </div>
+            </div>
+            <div class="overflow-y-auto flex-1 custom-scroll pr-2">
+                <table class="w-full text-center text-xs">
+                    <thead class="bg-slate-100 border-b font-black text-slate-500 uppercase sticky top-0">
+                        <tr>
+                            <th class="p-3 text-left">Pitcher</th><th>Equipo</th><th>Liga</th>
+                            <th>JP</th><th>IP</th><th class="text-cyan-600">SO</th><th>CL</th><th>CR</th><th>BB</th>
+                            <th class="text-cyan-700">ERA</th><th>WHIP</th><th>WP</th><th>BLQ</th><th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaPitchers" class="divide-y font-bold text-[10px]"></tbody>
+                </table>
+            </div>
+            <div class="mt-4 p-4 bg-cyan-50 rounded-xl">
+                <h3 class="font-black text-cyan-700 text-xs uppercase mb-3">Agregar / Editar Stats de Pitcher</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <input id="p_nombre" placeholder="Nombre" class="p-2 border rounded text-xs font-bold uppercase">
+                    <select id="p_equipo" class="p-2 border rounded text-xs font-bold"></select>
+                    <input id="p_jp" type="number" placeholder="Juegos Lanzados" class="p-2 border rounded text-xs">
+                    <input id="p_ip" type="number" step="0.1" placeholder="Innings (IP)" class="p-2 border rounded text-xs">
+                    <input id="p_so" type="number" placeholder="Ponches (SO)" class="p-2 border rounded text-xs">
+                    <input id="p_cl" type="number" placeholder="Carreras Limpias" class="p-2 border rounded text-xs">
+                    <input id="p_cr" type="number" placeholder="Carreras Totales" class="p-2 border rounded text-xs">
+                    <input id="p_bb" type="number" placeholder="Boletos" class="p-2 border rounded text-xs">
+                    <input id="p_wp" type="number" placeholder="Wild Pitches" class="p-2 border rounded text-xs">
+                    <input id="p_blq" type="number" placeholder="Blanqueadas" class="p-2 border rounded text-xs">
+                    <input id="p_era" type="number" step="0.01" placeholder="ERA" class="p-2 border rounded text-xs">
+                    <input id="p_whip" type="number" step="0.01" placeholder="WHIP" class="p-2 border rounded text-xs">
+                    <input id="p_id" type="hidden">
+                </div>
+                <div class="flex gap-2 mt-3">
+                    <button onclick="guardarPitcher()" class="flex-1 bg-cyan-600 text-white p-3 rounded-xl font-bold text-xs uppercase">Guardar</button>
+                    <button onclick="limpiarFormPitcher()" class="flex-1 bg-slate-200 p-3 rounded-xl font-bold text-xs uppercase">Limpiar</button>
+                </div>
+            </div>
+            <button onclick="toggleModal('modalPitchers')" class="mt-4 bg-slate-800 text-white p-4 rounded-2xl font-black uppercase text-xs">Cerrar</button>
         </div>
     </div>
 
@@ -454,6 +508,7 @@
     try {
         const res = await fetch(`${API}/games`);
         const games = await res.json();
+        juegosPendientes = games;
         const cont = document.getElementById('listaResultados');
 
         // 1. Definimos los colores para cada liga de forma organizada
@@ -464,21 +519,17 @@
         'slow_mixto': 'border-emerald-600'  // Verde para Mixto
     };
         cont.innerHTML = games.filter(g => g.status === 'pendiente').map(g => {
-            // 2. Seleccionamos el color según la liga o un color gris por defecto
             const bordeColor = coloresLigas[g.liga] || 'border-slate-300';
-
             return `
             <div class="bg-white p-4 rounded-3xl border shadow-sm relative border-l-4 ${bordeColor}">
                 <button onclick="eliminarJuego('${g._id}')" class="absolute -top-2 -right-2 bg-red-600 text-white w-6 h-6 rounded-full text-[8px] shadow-xl">
                     <i class="fa fa-times"></i>
                 </button>
-                
                 <div class="flex justify-between text-[8px] font-black text-slate-400 uppercase">
                     <span>${g.fecha}</span>
                     <span class="bg-slate-100 px-2 py-0.5 rounded-full">${g.liga.replace('_', ' ')}</span>
                     <span>${g.hora}</span>
                 </div>
-
                 <div class="flex justify-between items-center py-3">
                     <span class="text-[9px] font-black uppercase flex-1 truncate">${g.local}</span>
                     <div class="flex gap-1 mx-1">
@@ -487,7 +538,10 @@
                     </div>
                     <span class="text-[9px] font-black uppercase flex-1 text-right truncate">${g.visita}</span>
                 </div>
-
+                <div class="flex gap-2 mb-2">
+                    <input id="stream-${g._id}" type="text" placeholder="Link streaming (YouTube, FB, etc.)" value="${g.streaming || ''}" class="flex-1 p-1 border rounded text-[9px] bg-slate-50">
+                    <button onclick="toggleLive('${g._id}')" id="liveBtn-${g._id}" class="px-2 py-1 rounded text-[8px] font-black uppercase ${g.isLive ? 'bg-red-600 text-white' : 'bg-slate-200'}">${g.isLive ? 'EN VIVO' : 'VIVO'}</button>
+                </div>
                 <button onclick="finalizarJuego('${g._id}','${g.local}','${g.visita}')" class="w-full bg-slate-800 text-white text-[8px] font-black py-2 rounded-xl uppercase hover:bg-black transition-colors">
                     Finalizar Juego
                 </button>
@@ -502,14 +556,33 @@
     async function finalizarJuego(id, loc, vis) {
         const sL = parseInt(document.getElementById(`sc-${id}-L`).value), sV = parseInt(document.getElementById(`sc-${id}-V`).value);
         if(isNaN(sL) || isNaN(sV)) return alert("Pon marcador");
-        await fetch(`${API}/games/resultado`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id, sL, sV, ganador: sL > sV ? loc : vis, perdedor: sL > sV ? vis : loc, status: "finalizado" }) });
+        const streaming = document.getElementById(`stream-${id}`).value || '';
+        await fetch(`${API}/games/resultado`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id, sL, sV, ganador: sL > sV ? loc : vis, perdedor: sL > sV ? vis : loc, streaming }) });
         sincronizarDatosBase(); cargarResultados();
     }
 
+    async function toggleLive(id) {
+        const game = juegosPendientes.find(g => g._id === id);
+        if (!game) return;
+        if (game.isLive) {
+            const sL = parseInt(document.getElementById(`sc-${id}-L`).value) || 0;
+            const sV = parseInt(document.getElementById(`sc-${id}-V`).value) || 0;
+            await fetch(`${API}/games/${id}/end-live`, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ sL, sV, ganador: sL > sV ? game.local : game.visita, perdedor: sL > sV ? game.visita : game.local }) });
+        } else {
+            const sL = parseInt(document.getElementById(`sc-${id}-L`).value) || 0;
+            const sV = parseInt(document.getElementById(`sc-${id}-V`).value) || 0;
+            const inning = prompt("¿En qué inning va? (ej: Top 3, Bot 5):") || '';
+            await fetch(`${API}/games/${id}/live`, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ localScore: sL, visitaScore: sV, inning }) });
+        }
+        cargarResultados();
+    }
+
+    let juegosPendientes = [];
+
     async function guardarJuego() {
-        const local = document.getElementById('selLoc').value, visita = document.getElementById('selVis').value, liga = document.getElementById('filtroLigaGlobal').value, fecha = document.getElementById('fec').value, hora = document.getElementById('hor').value;
+        const local = document.getElementById('selLoc').value, visita = document.getElementById('selVis').value, liga = document.getElementById('filtroLigaGlobal').value, fecha = document.getElementById('fec').value, hora = document.getElementById('hor').value, streaming = document.getElementById('streamNuevo').value || '';
         if(!local || !visita || !fecha || !hora) return alert("Faltan datos");
-        await fetch(`${API}/games`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ local, visita, fecha, hora, liga, status: "pendiente" }) });
+        await fetch(`${API}/games`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ local, visita, fecha, hora, liga, status: "pendiente", streaming }) });
         cargarResultados();
     }
 
@@ -616,6 +689,88 @@ async function limpiarHistorialSemanal() {
     } catch (error) {
         console.error("Error al limpiar:", error);
     }
+}
+
+async function cargarPitchers() {
+    const liga = document.getElementById('ligaPitchers').value;
+    const cont = document.getElementById('tablaPitchers');
+    cont.innerHTML = '<tr><td colspan="13" class="p-6 text-center text-slate-400"><i class="fa fa-spinner fa-spin text-lg"></i></td></tr>';
+    try {
+        const url = liga ? `${API}/players?liga=${liga}` : `${API}/players`;
+        const res = await fetch(url);
+        const all = await res.json();
+        const pitchers = all.filter(p => p.esPitcher || p.jp > 0 || p.ip > 0 || p.so_pitcher > 0 || p.era > 0);
+        if (pitchers.length === 0) {
+            cont.innerHTML = '<tr><td colspan="13" class="p-6 text-center text-slate-400 italic">No hay pitchers registrados</td></tr>';
+            return;
+        }
+        const equiposRes = await fetch(`${API}/equipos`);
+        const equipos = await equiposRes.json();
+        const selectEq = document.getElementById('p_equipo');
+        selectEq.innerHTML = '<option value="">Seleccionar equipo</option>' + equipos.map(e => `<option value="${e.nombre}">${e.nombre}</option>`).join('');
+        cont.innerHTML = pitchers.map(p => `
+            <tr class="hover:bg-cyan-50 cursor-pointer transition-colors" onclick="editarPitcher('${p._id}')">
+                <td class="p-3 text-left font-black text-cyan-900 uppercase">${p.nombre}</td>
+                <td class="text-[9px]">${p.equipo}</td>
+                <td class="text-[8px]">${p.liga || '---'}</td>
+                <td>${p.jp || 0}</td><td>${p.ip || 0}</td><td class="text-cyan-600 font-bold">${p.so_pitcher || 0}</td>
+                <td>${p.cl || 0}</td><td>${p.cr || 0}</td><td>${p.bb_pitcher || 0}</td>
+                <td class="text-cyan-700 font-black">${Number(p.era || 0).toFixed(2)}</td>
+                <td>${Number(p.whip || 0).toFixed(2)}</td><td>${p.wp || 0}</td><td>${p.blq || 0}</td>
+            </tr>
+        `).join('');
+    } catch (err) { console.error(err); cont.innerHTML = '<tr><td colspan="13" class="p-6 text-center text-red-400">Error</td></tr>'; }
+}
+
+async function editarPitcher(id) {
+    const res = await fetch(`${API}/players/${id}`);
+    const p = await res.json();
+    document.getElementById('p_id').value = p._id;
+    document.getElementById('p_nombre').value = p.nombre;
+    document.getElementById('p_equipo').value = p.equipo;
+    document.getElementById('p_jp').value = p.jp || '';
+    document.getElementById('p_ip').value = p.ip || '';
+    document.getElementById('p_so').value = p.so_pitcher || '';
+    document.getElementById('p_cl').value = p.cl || '';
+    document.getElementById('p_cr').value = p.cr || '';
+    document.getElementById('p_bb').value = p.bb_pitcher || '';
+    document.getElementById('p_wp').value = p.wp || '';
+    document.getElementById('p_blq').value = p.blq || '';
+    document.getElementById('p_era').value = p.era || '';
+    document.getElementById('p_whip').value = p.whip || '';
+}
+
+async function guardarPitcher() {
+    const id = document.getElementById('p_id').value;
+    const nombre = document.getElementById('p_nombre').value.toUpperCase();
+    const equipo = document.getElementById('p_equipo').value;
+    if (!nombre || !equipo) return alert('Nombre y equipo son obligatorios');
+    const era = parseFloat(document.getElementById('p_era').value) || 0;
+    const ip = parseFloat(document.getElementById('p_ip').value) || 0;
+    const whip = parseFloat(document.getElementById('p_whip').value) || 0;
+    const data = {
+        nombre, equipo, esPitcher: true,
+        jp: parseInt(document.getElementById('p_jp').value) || 0,
+        ip, so_pitcher: parseInt(document.getElementById('p_so').value) || 0,
+        cl: parseInt(document.getElementById('p_cl').value) || 0,
+        cr: parseInt(document.getElementById('p_cr').value) || 0,
+        bb_pitcher: parseInt(document.getElementById('p_bb').value) || 0,
+        era, whip, wp: parseInt(document.getElementById('p_wp').value) || 0,
+        blq: parseInt(document.getElementById('p_blq').value) || 0
+    };
+    try {
+        if (id) {
+            await fetch(`${API}/players/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+        } else {
+            await fetch(`${API}/players`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+        }
+        limpiarFormPitcher();
+        cargarPitchers();
+    } catch (err) { console.error(err); alert('Error al guardar'); }
+}
+
+function limpiarFormPitcher() {
+    ['p_nombre','p_jp','p_ip','p_so','p_cl','p_cr','p_bb','p_wp','p_blq','p_era','p_whip','p_id'].forEach(id => document.getElementById(id).value = '');
 }
 
 function cerrarSesion() { localStorage.clear(); window.location.href = 'index.html'; }

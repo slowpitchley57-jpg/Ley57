@@ -5,8 +5,6 @@ require('dotenv').config();
 
 const app = express();
 app.use(express.json());
-app.use(cors());
-
 app.use(cors({
     origin: [
         'https://slowpitchley57-jpg.github.io', // Tu dominio de la captura
@@ -18,8 +16,8 @@ app.use(cors({
 }));
 
 
-// SOLUCIÓN DE EMERGENCIA: Conexión directa
-mongoose.connect('mongodb+srv://rosasvillah_db_user:GhnkehSpQQGFwU3K@ley57.y2bgblz.mongodb.net/LEY57?retryWrites=true&w=majority')
+// Conexión a MongoDB
+mongoose.connect(process.env.MONGO_URI || 'mongodb+srv://rosasvillah_db_user:GhnkehSpQQGFwU3K@ley57.y2bgblz.mongodb.net/LEY57?retryWrites=true&w=majority')
     .then(() => console.log("✅ Conectado a MongoDB LEY57"))
     .catch(err => console.log("❌ Error de conexión:", err));
 // --- MODELOS ACTUALIZADOS ---
@@ -41,9 +39,15 @@ const Game = mongoose.model('Game', {
     visita: String, 
     fecha: String, 
     hora: String, 
-    liga: String, // "femenil", "varonil", "easy_femenil" o "slow_mixto"
+    liga: String,
     resultado: { type: String, default: "0-0" }, 
-    status: { type: String, default: "pendiente" } 
+    status: { type: String, default: "pendiente" },
+    ganador: { type: String, default: "" },
+    perdedor: { type: String, default: "" },
+    streaming: { type: String, default: "" },
+    isLive: { type: Boolean, default: false },
+    liveScore: { local: { type: Number, default: 0 }, visita: { type: Number, default: 0 } },
+    inning: { type: String, default: "" }
 });
 
 // Agregamos liga a los jugadores
@@ -52,16 +56,31 @@ const Player = mongoose.model('Player', {
     equipo: String, 
     fechaNacimiento: String, 
     categoria: String,
-    liga: String, // "femenil", "varonil", "easy_femenil" o "slow_mixto"
+    liga: String,
+    posicion: { type: String, default: "" },
     jj: { type: Number, default: 0 }, 
     vb: { type: Number, default: 0 }, 
     h: { type: Number, default: 0 }, 
     avg: { type: Number, default: 0 },
-    dobles: { type: Number, default: 0 }, // Agregar este
-    triples: { type: Number, default: 0 }, // Agregar este
+    dobles: { type: Number, default: 0 },
+    triples: { type: Number, default: 0 }, 
     hr: { type: Number, default: 0 },
-    k: { type: Number, default: 0 },      // Agregar este
-    rbi: { type: Number, default: 0 }
+    k: { type: Number, default: 0 },
+    rbi: { type: Number, default: 0 },
+    bb: { type: Number, default: 0 },
+    slg: { type: Number, default: 0 },
+    obp: { type: Number, default: 0 },
+    esPitcher: { type: Boolean, default: false },
+    jp: { type: Number, default: 0 },
+    ip: { type: Number, default: 0 },
+    so_pitcher: { type: Number, default: 0 },
+    cl: { type: Number, default: 0 },
+    cr: { type: Number, default: 0 },
+    bb_pitcher: { type: Number, default: 0 },
+    era: { type: Number, default: 0 },
+    whip: { type: Number, default: 0 },
+    wp: { type: Number, default: 0 },
+    blq: { type: Number, default: 0 }
 });
 
 // Los modelos de Config y User se quedan igual, ya que el Admin es el mismo para ambas
@@ -85,22 +104,6 @@ app.post('/api/login', async (req, res) => {
         res.status(401).json({ error: "Acceso denegado" });
     }
 });
-function mostrarNombreAdmin() {
-    const sesion = localStorage.getItem('userLogueado');
-    if (sesion) {
-        const user = JSON.parse(sesion);
-        // Convierte "javier@ley57.com" en "JAVIER"
-        const nombreSimple = user.correo.split('@')[0].toUpperCase();
-        
-        const elemento = document.getElementById('nombreUsuarioActivo');
-        if (elemento) {
-            elemento.innerText = nombreSimple;
-        }
-    } else {
-        // Si no hay sesión, manda al login (Seguridad)
-        window.location.href = 'index.html';
-    }
-}
 
 
 // Config
@@ -161,30 +164,40 @@ app.post('/api/players', async (req, res) => {
         res.status(500).json({ error: "Error al registrar jugador" });
     }
 });
-// BUSCA ESTA RUTA EN TU SERVER.JS Y REEMPLÁZALA TODA
+// PUT jugador/pitcher - actualizacion completa
 app.put('/api/players/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const jugadoraPrevia = await Player.findById(id);
-        if (!jugadoraPrevia) return res.status(404).json({ error: "No existe" });
+        const playerPrevio = await Player.findById(id);
+        if (!playerPrevio) return res.status(404).json({ error: "No existe" });
 
-        // Recibimos los datos del cuerpo de la petición (req.body)
-        // Si un dato viene en el body, lo usamos; si no, dejamos el que ya tenía la jugadora
         const nuevosDatos = {
-            nombre: req.body.nombre !== undefined ? req.body.nombre.toUpperCase() : jugadoraPrevia.nombre,
-            equipo: req.body.equipo !== undefined ? req.body.equipo : jugadoraPrevia.equipo,
-            jj: req.body.jj !== undefined ? Number(req.body.jj) : jugadoraPrevia.jj,
-            vb: req.body.vb !== undefined ? Number(req.body.vb) : jugadoraPrevia.vb,
-            h: req.body.h !== undefined ? Number(req.body.h) : jugadoraPrevia.h,
-            dobles: req.body.dobles !== undefined ? Number(req.body.dobles) : jugadoraPrevia.dobles,
-            triples: req.body.triples !== undefined ? Number(req.body.triples) : jugadoraPrevia.triples,
-            hr: req.body.hr !== undefined ? Number(req.body.hr) : jugadoraPrevia.hr,
-            rbi: req.body.rbi !== undefined ? Number(req.body.rbi) : jugadoraPrevia.rbi,
-            k: req.body.k !== undefined ? Number(req.body.k) : jugadoraPrevia.k,
-            
-            // EL CAMBIO CLAVE:
-            // Jalar el avg directamente del Admin. No lo calculamos aquí.
-            avg: req.body.avg !== undefined ? Number(req.body.avg) : jugadoraPrevia.avg
+            nombre: req.body.nombre !== undefined ? req.body.nombre.toUpperCase() : playerPrevio.nombre,
+            equipo: req.body.equipo !== undefined ? req.body.equipo : playerPrevio.equipo,
+            posicion: req.body.posicion !== undefined ? req.body.posicion : playerPrevio.posicion,
+            esPitcher: req.body.esPitcher !== undefined ? req.body.esPitcher : playerPrevio.esPitcher,
+            jj: req.body.jj !== undefined ? Number(req.body.jj) : playerPrevio.jj,
+            vb: req.body.vb !== undefined ? Number(req.body.vb) : playerPrevio.vb,
+            h: req.body.h !== undefined ? Number(req.body.h) : playerPrevio.h,
+            dobles: req.body.dobles !== undefined ? Number(req.body.dobles) : playerPrevio.dobles,
+            triples: req.body.triples !== undefined ? Number(req.body.triples) : playerPrevio.triples,
+            hr: req.body.hr !== undefined ? Number(req.body.hr) : playerPrevio.hr,
+            rbi: req.body.rbi !== undefined ? Number(req.body.rbi) : playerPrevio.rbi,
+            k: req.body.k !== undefined ? Number(req.body.k) : playerPrevio.k,
+            bb: req.body.bb !== undefined ? Number(req.body.bb) : playerPrevio.bb,
+            avg: req.body.avg !== undefined ? Number(req.body.avg) : playerPrevio.avg,
+            slg: req.body.slg !== undefined ? Number(req.body.slg) : playerPrevio.slg,
+            obp: req.body.obp !== undefined ? Number(req.body.obp) : playerPrevio.obp,
+            jp: req.body.jp !== undefined ? Number(req.body.jp) : playerPrevio.jp,
+            ip: req.body.ip !== undefined ? Number(req.body.ip) : playerPrevio.ip,
+            so_pitcher: req.body.so_pitcher !== undefined ? Number(req.body.so_pitcher) : playerPrevio.so_pitcher,
+            cl: req.body.cl !== undefined ? Number(req.body.cl) : playerPrevio.cl,
+            cr: req.body.cr !== undefined ? Number(req.body.cr) : playerPrevio.cr,
+            bb_pitcher: req.body.bb_pitcher !== undefined ? Number(req.body.bb_pitcher) : playerPrevio.bb_pitcher,
+            era: req.body.era !== undefined ? Number(req.body.era) : playerPrevio.era,
+            whip: req.body.whip !== undefined ? Number(req.body.whip) : playerPrevio.whip,
+            wp: req.body.wp !== undefined ? Number(req.body.wp) : playerPrevio.wp,
+            blq: req.body.blq !== undefined ? Number(req.body.blq) : playerPrevio.blq
         };
 
         const actualizado = await Player.findByIdAndUpdate(id, nuevosDatos, { new: true });
@@ -194,19 +207,100 @@ app.put('/api/players/:id', async (req, res) => {
         res.status(500).json({ error: "Error interno" });
     }
 });
-// Actualización total de jugadora (Admin)
-app.put('/api/players/:id', async (req, res) => {
+
+// Endpoint para pitchers
+app.get('/api/pitchers', async (req, res) => {
+    const { liga } = req.query;
+    let filtro = { esPitcher: true };
+    if (liga) filtro.liga = liga;
+    const pitchers = await Player.find(filtro);
+    res.json(pitchers);
+});
+
+// Endpoint para leaders/top stats
+app.get('/api/leaders', async (req, res) => {
     try {
-        // Esto guarda TODO lo que mandes desde el Admin (incluyendo dobles, triples, k, rbi y el AVG calculado)
-        const playerActualizado = await Player.findByIdAndUpdate(
-            req.params.id, 
-            { $set: req.body }, 
-            { new: true }
-        );
-        res.json({ ok: true, data: playerActualizado });
-    } catch (err) {
-        console.error("Error al actualizar jugador:", err);
-        res.status(500).json({ error: "Error interno" });
+        const { liga, cat, limit } = req.query;
+        let filtro = {};
+        if (liga) filtro.liga = liga;
+        const l = parseInt(limit) || 5;
+
+        let field, sortDir;
+        switch (cat) {
+            case 'avg': field = 'avg'; sortDir = -1; break;
+            case 'hr': field = 'hr'; sortDir = -1; break;
+            case 'dobles': field = 'dobles'; sortDir = -1; break;
+            case 'triples': field = 'triples'; sortDir = -1; break;
+            case 'rbi': field = 'rbi'; sortDir = -1; break;
+            case 'k': field = 'k'; sortDir = -1; break;
+            case 'bb': field = 'bb'; sortDir = -1; break;
+            case 'slg': field = 'slg'; sortDir = -1; break;
+            case 'obp': field = 'obp'; sortDir = -1; break;
+            case 'era': field = 'era'; sortDir = 1; break;
+            case 'so_pitcher': field = 'so_pitcher'; sortDir = -1; break;
+            case 'whip': field = 'whip'; sortDir = 1; break;
+            case 'ip': field = 'ip'; sortDir = -1; break;
+            case 'jp': field = 'jp'; sortDir = -1; break;
+            case 'wp': field = 'wp'; sortDir = -1; break;
+            case 'blq': field = 'blq'; sortDir = -1; break;
+            default: field = 'avg'; sortDir = -1;
+        }
+
+        const players = await Player.find(filtro).sort({ [field]: sortDir }).limit(l);
+        res.json({ categoria: cat, leaders: players.map(p => ({
+            nombre: p.nombre,
+            equipo: p.equipo,
+            liga: p.liga,
+            valor: p[field] || 0,
+            esPitcher: p.esPitcher
+        }))});
+    } catch (error) {
+        res.status(500).json({ error: "Error al obtener leaders" });
+    }
+});
+
+// Endpoint para juegos EN VIVO
+app.get('/api/games/live', async (req, res) => {
+    try {
+        const now = new Date();
+        const games = await Game.find({ status: 'en_vivo' });
+        res.json(games);
+    } catch (error) {
+        res.status(500).json({ error: "Error al obtener juegos en vivo" });
+    }
+});
+
+// Actualizar juego en vivo
+app.put('/api/games/:id/live', async (req, res) => {
+    try {
+        const { localScore, visitaScore, inning } = req.body;
+        const game = await Game.findByIdAndUpdate(req.params.id, {
+            isLive: true,
+            status: 'en_vivo',
+            liveScore: { local: localScore, visita: visitaScore },
+            inning: inning
+        }, { new: true });
+        res.json({ ok: true, game });
+    } catch (error) {
+        res.status(500).json({ error: "Error al actualizar juego en vivo" });
+    }
+});
+
+// Finalizar juego en vivo
+app.put('/api/games/:id/end-live', async (req, res) => {
+    try {
+        const { sL, sV, ganador, perdedor } = req.body;
+        const game = await Game.findByIdAndUpdate(req.params.id, {
+            isLive: false,
+            status: 'finalizado',
+            resultado: `${sL}-${sV}`,
+            ganador: ganador,
+            perdedor: perdedor,
+            liveScore: {}
+        }, { new: true });
+        res.json({ ok: true, game });
+    } catch (error) {
+        res.status(500).json({ error: "Error al finalizar juego" });
     }
 });
 // Ruta para limpiar todos los juegos finalizados
@@ -265,21 +359,34 @@ app.get('/api/games', async (req, res) => {
     res.json(juegos);
 });
 app.post('/api/games', async (req, res) => {
-    const g = new Game(req.body); await g.save(); res.json(g);
+    const g = new Game({
+        local: req.body.local,
+        visita: req.body.visita,
+        fecha: req.body.fecha,
+        hora: req.body.hora,
+        liga: req.body.liga,
+        resultado: req.body.resultado || "0-0",
+        status: req.body.status || "pendiente",
+        streaming: req.body.streaming || "",
+        isLive: false,
+        liveScore: { local: 0, visita: 0 },
+        inning: ""
+    });
+    await g.save(); res.json(g);
 });
 // En tu servidor (Node.js)
 app.post('/api/games/resultado', async (req, res) => {
     try {
-        const { id, sL, sV, ganador, perdedor } = req.body;
-        
-        // ACTUALIZAMOS EL RESULTADO Y EL STATUS
-        const juegoActualizado = await Game.findByIdAndUpdate(id, {
+        const { id, sL, sV, ganador, perdedor, streaming } = req.body;
+        const updateData = {
             resultado: `${sL}-${sV}`,
             ganador,
             perdedor,
-            status: "finalizado" // <--- ESTO ES LO QUE TE FALTA
-        }, { new: true });
-
+            status: "finalizado",
+            isLive: false
+        };
+        if (streaming) updateData.streaming = streaming;
+        const juegoActualizado = await Game.findByIdAndUpdate(id, updateData, { new: true });
         res.json({ message: "Juego finalizado con éxito", juegoActualizado });
     } catch (error) {
         console.error("Error al finalizar juego:", error);

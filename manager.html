@@ -149,12 +149,9 @@
 
     function iniciarSincronizacionRealTime() {
         cargarMiRoster(); 
-        cargarResultados(); 
-        cargarProximoJuego(); 
         setInterval(() => { 
             if (equipoSeleccionado) { 
-                cargarResultados(); 
-                cargarProximoJuego(); 
+                cargarMiRoster(); 
             } 
         }, 15000); 
     }

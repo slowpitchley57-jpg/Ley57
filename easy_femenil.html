@@ -36,7 +36,7 @@
 <!-- HEADER CON GRADIENTE ROSA CORREGIDO -->
 <header class="bg-gradient-easy text-white py-16 px-6 text-center shadow-inner relative overflow-hidden">
     <div class="absolute inset-0 opacity-10 pointer-events-none">
-        <i class="fa fa-softball-ball text-9xl absolute -left-10 -bottom-10 rotate-12 text-pink-200"></i>
+        <i class="fa fa-baseball text-9xl absolute -left-10 -bottom-10 rotate-12 text-pink-200"></i>
         <i class="fa fa-star text-9xl absolute -right-10 -top-10 -rotate-12 text-pink-200"></i>
     </div>
     <h1 class="text-4xl font-black mb-1 italic uppercase tracking-tighter drop-shadow-lg">Centro de Estadísticas</h1>
@@ -56,6 +56,24 @@
 </div>
 
     <main class="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
+        <!-- SECCION EN VIVO -->
+        <section id="seccionEnVivo" class="hidden">
+            <div class="bg-gradient-to-r from-red-600 to-pink-600 rounded-3xl shadow-2xl p-6 text-white relative overflow-hidden animate-pulse">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10"></div>
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="bg-white/20 p-2 rounded-full">
+                        <i class="fa fa-broadcast-tower text-xl"></i>
+                    </div>
+                    <h2 class="font-black text-sm uppercase tracking-widest italic">Juego EN VIVO</h2>
+                    <div class="ml-auto flex items-center gap-2">
+                        <div class="w-3 h-3 bg-red-400 rounded-full animate-ping"></div>
+                        <span class="text-[10px] font-black uppercase">LIVE</span>
+                    </div>
+                </div>
+                <div id="contenidoEnVivo" class="flex flex-col md:flex-row items-center justify-between gap-4"></div>
+            </div>
+        </section>
+
         <!-- Tabla de Posiciones Única (Categoría Libre) -->
         <section class="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
             <div class="bg-white rounded-3xl shadow-sm border overflow-hidden border-pink-100"> <!-- Cambiado a pink -->
@@ -73,7 +91,7 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-8">
-                <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div class="bg-pink-900 p-6 rounded-3xl text-white shadow-xl">
                         <h3 class="font-black uppercase text-xs mb-4 text-pink-300 italic"><i class="fa fa-fire mr-2"></i> Líderes de Bateo</h3>
                         <div id="topBateo" class="space-y-3 text-sm"></div>
@@ -81,6 +99,10 @@
                     <div class="bg-pink-900 p-6 rounded-3xl text-white shadow-xl">
                         <h3 class="font-black uppercase text-xs mb-4 text-pink-300 italic"><i class="fa fa-bolt mr-2"></i> Cuadrangulares</h3>
                         <div id="topHR" class="space-y-3 text-sm"></div>
+                    </div>
+                    <div class="bg-pink-900 p-6 rounded-3xl text-white shadow-xl">
+                        <h3 class="font-black uppercase text-xs mb-4 text-pink-300 italic"><i class="fa fa-forward mr-2"></i> Extras (2B/3B)</h3>
+                        <div id="topExtras" class="space-y-3 text-sm"></div>
                     </div>
                 </section>
             </div>
@@ -142,8 +164,43 @@
             cargarTablas(),
             cargarEncuentros(),
             cargarLideres(),
-            cargarHistorial()
+            cargarHistorial(),
+            cargarEnVivo()
         ]);
+    }
+
+    async function cargarEnVivo() {
+        try {
+            const res = await fetch(`${API}/games/live`);
+            const liveGames = await res.json();
+            const seccion = document.getElementById('seccionEnVivo');
+            const contenido = document.getElementById('contenidoEnVivo');
+
+            const juegosLiga = liveGames.filter(g => g.liga === LIGA);
+            if (juegosLiga.length === 0) {
+                seccion.classList.add('hidden');
+                return;
+            }
+
+            seccion.classList.remove('hidden');
+            contenido.innerHTML = juegosLiga.map(g => `
+                <div class="flex items-center gap-4 bg-white/10 p-4 rounded-2xl flex-1 min-w-[250px]">
+                    <div class="flex-1 text-center">
+                        <div class="font-black text-sm uppercase">${g.local}</div>
+                        <div class="text-3xl font-black mt-1">${g.liveScore?.local || 0}</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-[8px] font-bold bg-white/20 px-2 py-1 rounded-full">${g.inning || ''}</div>
+                        <div class="text-xs font-bold mt-1">VS</div>
+                    </div>
+                    <div class="flex-1 text-center">
+                        <div class="font-black text-sm uppercase">${g.visita}</div>
+                        <div class="text-3xl font-black mt-1">${g.liveScore?.visita || 0}</div>
+                    </div>
+                    ${g.streaming ? `<a href="${g.streaming}" target="_blank" class="ml-3 bg-red-600 hover:bg-red-700 px-3 py-2 rounded-full text-[9px] font-black uppercase flex items-center gap-1"><i class="fa fa-play"></i> EN VIVO</a>` : ''}
+                </div>
+            `).join('');
+        } catch (err) { console.error(err); }
     }
 
     async function cargarTablas() {
@@ -229,6 +286,7 @@
                         <span class="text-[8px] font-black text-pink-600 italic px-2 bg-pink-50 rounded-full">VS</span>
                         <span class="text-[10px] font-black uppercase text-pink-900 truncate flex-1 text-right">${g.visita}</span>
                     </div>
+                    ${g.streaming ? `<a href="${g.streaming}" target="_blank" class="mt-2 block text-center bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-full text-[8px] font-black uppercase"><i class="fa fa-play mr-1"></i> Link Transmision</a>` : ''}
                 </div>`).join('');
         }
     }
@@ -248,6 +306,17 @@
                 <span class="font-bold uppercase"><span class="text-pink-400 mr-2">#${i+1}</span> ${p.nombre}</span>
                 <span class="font-black text-pink-300 italic">${p.hr || 0} HR</span>
             </div>`).join('');
+        const top2B = [...players].sort((a,b) => (b.dobles || 0) - (a.dobles || 0)).slice(0, 3);
+        const top3B = [...players].sort((a,b) => (b.triples || 0) - (a.triples || 0)).slice(0, 2);
+        const extras = [];
+        top2B.forEach(p => { if(p.dobles > 0) extras.push({ nombre: p.nombre, stat: `${p.dobles} 2B`, tipo: '2B' }); });
+        top3B.forEach(p => { if(p.triples > 0) extras.push({ nombre: p.nombre, stat: `${p.triples} 3B`, tipo: '3B' }); });
+        extras.sort((a,b) => b.tipo.localeCompare(a.tipo));
+        document.getElementById('topExtras').innerHTML = extras.length > 0 ? extras.slice(0, 5).map((p, i) => `
+            <div class="flex justify-between items-center border-b border-pink-700 pb-1 text-[11px]">
+                <span class="font-bold uppercase"><span class="text-pink-400 mr-2">#${i+1}</span> ${p.nombre}</span>
+                <span class="font-black text-pink-300 italic">${p.stat}</span>
+            </div>`).join('') : '<p class="text-xs text-pink-400 opacity-50 italic">Sin registros</p>';
     }
 
     async function cargarHistorial() {
