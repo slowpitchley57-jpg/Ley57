@@ -6,11 +6,7 @@ require('dotenv').config();
 const app = express();
 app.use(express.json());
 app.use(cors({
-    origin: [
-        'https://slowpitchley57-jpg.github.io', // Tu dominio de la captura
-        'http://localhost:5500',               // Para que puedas probar local
-        'http://127.0.0.1:5500'
-    ],
+    origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
 }));
