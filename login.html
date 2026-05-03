@@ -173,28 +173,42 @@
         }
 
         async function entrar() {
-            const u = document.getElementById('u').value;
-            const p = document.getElementById('p').value;
-            if(!u || !p) return alert("REQUIRED: INPUT CREDENTIALS");
+    const u = document.getElementById('u').value;
+    const p = document.getElementById('p').value;
+    
+    // Validación básica de campos vacíos
+    if(!u || !p) return alert("REQUIRED: INPUT CREDENTIALS");
 
-            try {
-                const res = await fetch(`${API}/login`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ correo: u, pass: p })
-                });
+    try {
+        const res = await fetch(`${API}/login`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ correo: u, pass: p })
+        });
 
-                if(res.ok) {
-                    const user = await res.json();
-                    localStorage.setItem(user.rol === 'admin' ? 'userLogueado' : 'managerLogueado', JSON.stringify(user));
-                    window.location.href = user.rol === 'admin' ? 'admin.html' : 'manager.html';
-                } else {
-                    alert("ERROR: INVALID CREDENTIALS");
-                }
-            } catch (e) {
-                alert("NETWORK ERROR: SERVER UNREACHABLE");
+        if(res.ok) {
+            const user = await res.json();
+            
+            // Lógica de Redirección según el Rol de la Base de Datos
+            if (user.rol === 'admin') {
+                // Si es admin, guardamos en la llave de admin y redirigimos
+                localStorage.setItem('userLogueado', JSON.stringify(user));
+                window.location.href = 'admin.html';
+            } else {
+                // Si es manager (o cualquier otro rol), guardamos en la llave de manager
+                localStorage.setItem('managerLogueado', JSON.stringify(user));
+                window.location.href = 'manager.html'; 
             }
+        } else {
+            // Manejo de error 401/404 desde el servidor
+            alert("ERROR: INVALID CREDENTIALS");
         }
+    } catch (e) {
+        // Manejo de error 500 o caída de red
+        console.error("Error en login:", e);
+        alert("NETWORK ERROR: SERVER UNREACHABLE");
+    }
+}
     </script>
 </body>
 </html>
