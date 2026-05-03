@@ -395,39 +395,44 @@
     function cerrarDetalle() { document.getElementById('modalDetalleEquipo').classList.add('hidden'); }
 
    async function cargarEncuentros() {
-    const res = await fetch(`${API}/games?liga=femenil`); // Traemos todos los de la liga
-    const games = await res.json();
-    const cont = document.getElementById('listaEncuentros');
+    try {
+        const res = await fetch(`${API}/games?liga=femenil`);
+        const games = await res.json();
+        const cont = document.getElementById('listaEncuentros');
+        if (!cont) return;
 
-    // FILTRAR AQUÍ MISMO POR STATUS 'PENDIENTE'
-    const pendientes = games.filter(g => g.status === 'pendiente');
+        const pendientes = games.filter(g => g.status === 'pendiente');
 
-    if(pendientes.length === 0) {
-        cont.innerHTML = `<p class="text-center py-10 opacity-30 italic text-xs uppercase">Sin juegos pendientes</p>`;
-    } else {
+        if(pendientes.length === 0) {
+            cont.innerHTML = `<p class="text-center py-10 opacity-30 italic text-xs uppercase">Sin juegos pendientes</p>`;
+            return;
+        }
+
         cont.innerHTML = pendientes.map(g => `
             <div class="bg-white p-4 rounded-2xl border-2 border-slate-100 shadow-sm mb-4">
                 <div class="flex justify-between text-[8px] font-bold text-slate-400 uppercase mb-2">
                     <span>${g.fecha}</span><span>${g.hora}</span>
                 </div>
-                <div class="flex justify-between items-center gap-2">
+                <div class="flex justify-between items-center gap-2 mb-3">
                     <span class="text-[10px] font-black uppercase text-blue-900 truncate flex-1">${g.local}</span>
                     <span class="text-[8px] font-black text-pink-600 italic px-2 bg-pink-50 rounded-full">VS</span>
                     <span class="text-[10px] font-black uppercase text-blue-900 truncate flex-1 text-right">${g.visita}</span>
                 </div>
-                <!-- BOTÓN DE STREAMING (Solo aparece si hay link) -->
-        ${g.streaming ? `
-            <div class="mt-4 border-t border-white/5 pt-4">
-                <a href="${g.streaming}" target="_blank" 
-                   class="flex items-center justify-center gap-2 bg-gradient-to-r from-red-600 to-red-800 text-white text-[9px] font-black py-2.5 rounded-xl uppercase tracking-widest hover:scale-105 transition-transform shadow-lg shadow-red-900/20">
-                    <i class="fa fa-clapperboard"></i> Transmisión en Vivo
-                </a>
-            </div>
-        ` : `
-            <p class="mt-4 text-[8px] text-slate-600 font-bold uppercase tracking-widest italic">Sin transmisión asignada</p>
-        `}
-    </div>
+
+                <!-- SECCIÓN DE STREAMING -->
+                <div class="pt-2 border-t border-slate-50 text-center">
+                    ${g.streaming && g.streaming.trim() !== "" ? `
+                        <a href="${g.streaming}" target="_blank" 
+                           class="flex items-center justify-center gap-2 bg-red-600 text-white text-[9px] font-black py-2.5 rounded-xl uppercase tracking-widest hover:bg-black transition-all animate-pulse">
+                            <i class="fa fa-clapperboard"></i> Transmisión en Vivo
+                        </a>
+                    ` : `
+                        <p class="text-[7px] text-slate-400 font-bold uppercase italic">Transmisión no disponible</p>
+                    `}
+                </div>
             </div>`).join('');
+    } catch (e) {
+        console.error("Error en encuentros:", e);
     }
 }
 
@@ -463,30 +468,23 @@
         const res = await fetch(`${API}/games?liga=femenil&status=finalizado`);
         const games = await res.json();
         
-        console.log("Juegos recibidos del servidor:", games); // <-- REVISA ESTO EN F12
-
-        // FILTRO MEJORADO:
+        // Filtramos resultados válidos (que no sean 0-0 o vacíos)
         const resultadosReales = games.filter(g => {
-            // Validamos que exista el resultado y no sea solo espacios
             if (!g.resultado || g.resultado.trim() === "") return false;
-            
-            // Quitamos espacios por si acaso guardaste " 10 - 5 "
             const resLimpio = g.resultado.replace(/\s+/g, ''); 
-            
-            // Aceptamos si tiene un guion y NO es 0-0
             return resLimpio.includes('-') && resLimpio !== "0-0" && resLimpio !== "00-00";
         });
 
         if (resultadosReales.length === 0) {
-            cont.innerHTML = "<p class='text-center py-10 text-slate-400 italic text-xs uppercase opacity-50'>No hay resultados válidos aún.</p>";
+            cont.innerHTML = "<p class='text-center py-10 text-slate-400 italic text-xs uppercase opacity-50'>No hay resultados aún.</p>";
             return;
         }
 
-        // Ordenamos: Los más nuevos primero (basado en fecha)
+        // Ordenamos por fecha (más recientes primero)
         resultadosReales.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
         cont.innerHTML = resultadosReales.map(g => `
-            <div class="tarjeta-resultado bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-2 mb-3">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-2 mb-3">
                 <div class="flex justify-between text-[8px] font-black text-slate-400 uppercase">
                     <span>${g.fecha}</span>
                     <span class="text-emerald-600 font-bold text-[7px] bg-emerald-50 px-2 rounded-full">FINALIZADO</span>
@@ -496,22 +494,22 @@
                     <div class="mx-3 bg-blue-900 text-white px-3 py-1 rounded-lg font-black text-sm italic shadow-md min-w-[50px]">${g.resultado}</div>
                     <div class="flex-1 text-[10px] font-black text-blue-900 uppercase truncate text-right">${g.visita}</div>
                 </div>
-                <!-- BOTÓN DE STREAMING (Solo aparece si hay link) -->
-        ${g.streaming ? `
-            <div class="mt-4 border-t border-white/5 pt-4">
-                <a href="${g.streaming}" target="_blank" 
-                   class="flex items-center justify-center gap-2 bg-gradient-to-r from-red-600 to-red-800 text-white text-[9px] font-black py-2.5 rounded-xl uppercase tracking-widest hover:scale-105 transition-transform shadow-lg shadow-red-900/20">
-                    <i class="fa fa-clapperboard"></i> Transmisión en Vivo
-                </a>
-            </div>
-        ` : `
-            <p class="mt-4 text-[8px] text-slate-600 font-bold uppercase tracking-widest italic">Sin transmisión asignada</p>
-        `}
-    </div>
+
+                <!-- SECCIÓN DE STREAMING -->
+                <div class="mt-2 border-t border-slate-50 pt-2 text-center">
+                    ${g.streaming && g.streaming.trim() !== "" ? `
+                        <a href="${g.streaming}" target="_blank" 
+                           class="flex items-center justify-center gap-2 bg-gradient-to-r from-red-600 to-red-800 text-white text-[9px] font-black py-2 rounded-xl uppercase tracking-widest hover:scale-105 transition-transform shadow-lg shadow-red-900/20">
+                            <i class="fa fa-video"></i> Ver Repetición
+                        </a>
+                    ` : `
+                        <p class="text-[7px] text-slate-400 font-bold uppercase italic">Sin transmisión grabada</p>
+                    `}
+                </div>
             </div>`).join('');
 
     } catch (error) { 
-        console.error("Error crítico en historial:", error); 
+        console.error("Error en historial:", error); 
     }
 }
 
