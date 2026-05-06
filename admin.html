@@ -585,25 +585,75 @@ async function cargarJugadorasPorEquipoPitcher(eq) {
 // 3. Carga la tabla mini de pitchers filtrada por liga
 async function cargarPitchers() {
     const liga = document.getElementById('ligaFiltroPitchers').value;
-    const res = await fetch(`${API}/players?esPitcher=true&liga=${liga}`);
-    const data = await res.json();
     
-    document.getElementById('tablaPitchers').innerHTML = data.map(p => `
-        <tr class="hover:bg-cyan-50">
-            <td class="p-3 text-left uppercase font-black">${p.nombre}</td>
-            <td class="text-[9px] uppercase">${p.equipo}</td>
-            <td>${p.jp || 0}</td>
-            <td>${p.ip || 0}</td>
-            <td>${p.so_pitcher || 0}</td>
-            <td class="text-blue-600">${(p.era || 0).toFixed(2)}</td>
-            <td>${(p.whip || 0).toFixed(2)}</td>
-            <td>
-                <button onclick="cargarEnEditorPitcher('${p._id}')" class="text-cyan-600 mr-2"><i class="fa fa-edit"></i></button>
-                <button onclick="quitarRolPitcher('${p._id}')" class="text-red-400"><i class="fa fa-trash"></i></button>
-            </td>
-        </tr>`).join('');
-}
+    // IMPORTANTE: Agregamos esPitcher=true en la URL para filtrar desde la base de datos
+    try {
+        const res = await fetch(`${API}/players?esPitcher=true&liga=${liga}`);
+        const data = await res.json();
+        
+        const tabla = document.getElementById('tablaPitchers');
+        
+        if (data.length === 0) {
+            tabla.innerHTML = `<tr><td colspan="8" class="p-10 text-center text-slate-400 uppercase font-black text-[10px]">No hay pitchers asignados en esta liga</td></tr>`;
+            return;
+        }
 
+        tabla.innerHTML = data.map(p => `
+            <tr class="hover:bg-cyan-50 border-b">
+                <td class="p-3 text-left uppercase font-black">${p.nombre}</td>
+                <td class="text-[9px] uppercase">${p.equipo}</td>
+                <td>${p.jp || 0}</td>
+                <td>${p.ip || 0}</td>
+                <td>${p.so_pitcher || 0}</td>
+                <td class="text-blue-600 font-black">${(p.era || 0).toFixed(2)}</td>
+                <td>${(p.whip || 0).toFixed(2)}</td>
+                <td>
+                    <button onclick="cargarEnEditorPitcher('${p._id}')" class="text-cyan-600 hover:text-cyan-800 mr-2">
+                        <i class="fa fa-edit"></i>
+                    </button>
+                    <button onclick="quitarRolPitcher('${p._id}')" class="text-red-300 hover:text-red-600">
+                        <i class="fa fa-user-minus"></i>
+                    </button>
+                </td>
+            </tr>`).join('');
+    } catch (err) {
+        console.error("Error al cargar la tabla de pitchers:", err);
+    }
+}
+async function quitarRolPitcher(id) {
+    if(!confirm("¿Quitar esta jugadora de la lista de pitchers? (Sus stats de bateo no se borrarán)")) return;
+
+    try {
+        await fetch(`${API}/players/${id}`, { 
+            method: 'PUT', 
+            headers: {'Content-Type':'application/json'}, 
+            body: JSON.stringify({ esPitcher: false }) 
+        });
+        cargarPitchers(); // Refrescamos la tabla
+    } catch (err) {
+        alert("Error al quitar el rol");
+    }
+}
+async function cargarEnEditorPitcher(id) {
+    try {
+        const res = await fetch(`${API}/players/${id}`);
+        const p = await res.json();
+        
+        // Llenamos el formulario con lo que ya tiene en la base de datos
+        document.getElementById('p_id_actual').value = p._id;
+        document.getElementById('p_nombre').value = p.nombre; // El input readonly
+        document.getElementById('p_jp').value = p.jp || 0;
+        document.getElementById('p_ip').value = p.ip || 0;
+        document.getElementById('p_so').value = p.so_pitcher || 0;
+        document.getElementById('p_cl').value = p.cl || 0;
+        document.getElementById('p_era').value = p.era || 0;
+        document.getElementById('p_whip').value = p.whip || 0;
+        
+        alert("Datos cargados en el editor para: " + p.nombre);
+    } catch (err) {
+        console.error("Error al cargar en editor:", err);
+    }
+}
 // 4. Prepara el ID para actualizar, NO CREAR
 function prepararPitcherExistente(id) {
     document.getElementById('p_id_actual').value = id;
