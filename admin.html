@@ -198,7 +198,7 @@
     fetch("https://ley57.onrender.com/api/games?status=pendiente")
   .then(res => res.json())
   .then(data => console.table(data));
-  
+
     const API = "https://ley57.onrender.com/api";
     let todosLosEquipos = [];
     let juegosFinalizados = [];
@@ -441,7 +441,55 @@
     filter.innerHTML = options;
     document.getElementById('containerRoster').innerHTML = ""; // Limpiamos la tabla previa
 }
+async function cargarResultados() {
+    try {
+        const res = await fetch(`${API}/games?status=pendiente`);
+        const games = await res.json();
+        
+        // Colores por liga para las tarjetitas
+        const cols = {
+            'varonil':'border-red-600',
+            'femenil':'border-blue-600',
+            'easy_femenil':'border-pink-600',
+            'slow_mixto':'border-emerald-600'
+        };
 
+        const contenedor = document.getElementById('listaResultados');
+        if (!contenedor) return;
+
+        if (games.length === 0) {
+            contenedor.innerHTML = `<p class="col-span-full text-center text-slate-400 uppercase font-black text-xs py-10">No hay juegos pendientes por finalizar</p>`;
+            return;
+        }
+
+        contenedor.innerHTML = games.map(g => `
+            <div class="bg-white p-4 rounded-3xl border-l-4 ${cols[g.liga] || 'border-slate-300'} shadow-sm relative tarjeta-resultado">
+                <button onclick="eliminarJuego('${g._id}')" class="absolute -top-2 -right-2 bg-red-600 text-white w-6 h-6 rounded-full text-[8px]"><i class="fa fa-times"></i></button>
+                
+                <div class="flex justify-between text-[8px] font-black text-slate-400 uppercase mb-2">
+                    <span>${g.fecha}</span>
+                    <span class="bg-slate-100 px-2 rounded-full">${g.liga.replace('_',' ')}</span>
+                    <span>${g.hora} HS</span>
+                </div>
+
+                <div class="flex justify-between items-center py-3 border-y border-slate-50 mb-3">
+                    <span class="text-[10px] font-black uppercase flex-1 truncate">${g.local}</span>
+                    <div class="flex gap-1 mx-2">
+                        <input id="sc-${g._id}-L" type="number" class="w-10 border-2 border-slate-100 rounded-lg text-center font-bold text-blue-900" placeholder="L">
+                        <input id="sc-${g._id}-V" type="number" class="w-10 border-2 border-slate-100 rounded-lg text-center font-bold text-red-600" placeholder="V">
+                    </div>
+                    <span class="text-[10px] font-black uppercase flex-1 text-right truncate">${g.visita}</span>
+                </div>
+
+                <button onclick="finalizarJuego('${g._id}','${g.local}','${g.visita}')" class="w-full bg-blue-900 hover:bg-black text-white text-[9px] font-black py-3 rounded-2xl uppercase transition-all shadow-lg shadow-blue-100">
+                    <i class="fa fa-check-circle mr-1"></i> Finalizar y Guardar
+                </button>
+            </div>
+        `).join('');
+    } catch (err) {
+        console.error("Error al cargar juegos pendientes:", err);
+    }
+}
     // Funciones de utilidad restantes heredadas
     function toggleModal(id) { document.getElementById(id).classList.toggle('active'); }
     function gestionarSesion() { const s = JSON.parse(localStorage.getItem('userLogueado')); if(s) document.getElementById('nombreUsuarioActivo').innerText = s.correo.split('@')[0].toUpperCase(); else window.location.href = 'index.html'; }
