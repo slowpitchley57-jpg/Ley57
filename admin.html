@@ -46,7 +46,10 @@
             <button onclick="location.href='alta_jugadores.html'" class="w-full text-left p-3 bg-indigo-600 rounded-xl font-bold text-xs flex items-center gap-3 shadow-lg"><i class="fa fa-users-cog"></i> Alta Maestra</button>
             <button onclick="toggleModal('modalEquipo')" class="w-full text-left p-3 bg-emerald-600 rounded-xl font-bold text-xs flex items-center gap-3 shadow-lg"><i class="fa fa-plus-circle"></i> Nuevo Equipo</button>
             <button onclick="toggleModal('modalRosters')" class="w-full text-left p-3 bg-amber-500 rounded-xl font-bold text-xs flex items-center gap-3 shadow-lg"><i class="fa fa-user-edit"></i> Roster / Stats Bat</button>
-            <button onclick="toggleModal('modalPitchers')" class="w-full text-left p-3 bg-cyan-600 rounded-xl font-bold text-xs flex items-center gap-3 shadow-lg"><i class="fa fa-baseball-ball"></i> Stats Pitchers</button>
+            <!-- Busca este botón en tu sidebar y cámbialo para que tenga ambas funciones -->
+<button onclick="toggleModal('modalPitchers'); cargarEquiposModalPitcher(); cargarPitchers();" class="w-full text-left p-3 bg-cyan-600 rounded-xl font-bold text-xs flex items-center gap-3">
+    <i class="fa fa-baseball-ball"></i> Gestión Pitchers
+</button>
             <button onclick="toggleModal('modalIA')" class="w-full text-left p-3 bg-purple-600 rounded-xl font-bold text-xs flex items-center gap-3 shadow-lg"><i class="fa fa-robot"></i> Generar Rol IA</button> 
             <button onclick="cerrarSesion()" class="w-full text-left p-3 rounded-xl flex items-center gap-3 text-red-400 font-bold uppercase text-[10px] tracking-widest mt-4"><i class="fa fa-sign-out-alt"></i> Salir</button>
         </nav>
@@ -565,40 +568,42 @@ async function finalizarJuego(id, loc, vis) {
         alert("Error de conexión con la base de datos.");
     }
 }
-// 1. Carga inicial de equipos en el modal de pitchers
+
+// 1. Llena el selector de equipos (Paso 1 del formulario)
 async function cargarEquiposModalPitcher() {
-    const res = await fetch(`${API}/equipos`);
-    const eqs = await res.json();
-    document.getElementById('p_equipo_select').innerHTML = '<option value="">-- Seleccionar Equipo --</option>' + 
-        eqs.map(e => `<option value="${e.nombre}">${e.nombre}</option>`).join('');
+    const selEq = document.getElementById('p_equipo_select');
+    // Usamos la variable global todosLosEquipos que ya tienes en el admin
+    if (todosLosEquipos.length > 0) {
+        selEq.innerHTML = '<option value="">-- SELECCIONAR EQUIPO --</option>' + 
+            todosLosEquipos.map(e => `<option value="${e.nombre}">${e.nombre}</option>`).join('');
+    } else {
+        // Si por algo no han cargado, los pedimos a la API
+        const res = await fetch(`${API}/equipos`);
+        const eqs = await res.json();
+        selEq.innerHTML = '<option value="">-- SELECCIONAR EQUIPO --</option>' + 
+            eqs.map(e => `<option value="${e.nombre}">${e.nombre}</option>`).join('');
+    }
 }
 
-// 2. Carga jugadoras de ese equipo para asignar
-async function cargarJugadorasPorEquipoPitcher(eq) {
-    const res = await fetch(`${API}/players?equipo=${encodeURIComponent(eq)}`);
-    const jug = await res.json();
-    let opt = '<option value="">-- Seleccionar Jugadora --</option>';
-    jug.forEach(j => opt += `<option value="${j._id}">${j.nombre}</option>`);
-    document.getElementById('p_jugadora_select').innerHTML = opt;
-}
-
-// 3. Carga la tabla mini de pitchers filtrada por liga
+// 2. Carga la tabla filtrando SOLAMENTE a las que tienen estadísticas reales
 async function cargarPitchers() {
     const liga = document.getElementById('ligaFiltroPitchers').value;
+    const tabla = document.getElementById('tablaPitchers');
     
-    // IMPORTANTE: Agregamos esPitcher=true en la URL para filtrar desde la base de datos
     try {
         const res = await fetch(`${API}/players?esPitcher=true&liga=${liga}`);
         const data = await res.json();
         
-        const tabla = document.getElementById('tablaPitchers');
-        
-        if (data.length === 0) {
-            tabla.innerHTML = `<tr><td colspan="8" class="p-10 text-center text-slate-400 uppercase font-black text-[10px]">No hay pitchers asignados en esta liga</td></tr>`;
+        // FILTRO CRÍTICO: Solo mostramos si tienen IP (Entradas Lanzadas) mayor a 0
+        // Esto quitará a Lizeth y Guadalupe de tu lista si no tienen juego
+        const pitchersReales = data.filter(p => p.ip > 0 || p.jp > 0);
+
+        if (pitchersReales.length === 0) {
+            tabla.innerHTML = `<tr><td colspan="8" class="p-10 text-center text-slate-400 uppercase font-black text-[10px]">No hay estadísticas de pitcheo registradas</td></tr>`;
             return;
         }
 
-        tabla.innerHTML = data.map(p => `
+        tabla.innerHTML = pitchersReales.map(p => `
             <tr class="hover:bg-cyan-50 border-b">
                 <td class="p-3 text-left uppercase font-black">${p.nombre}</td>
                 <td class="text-[9px] uppercase">${p.equipo}</td>
@@ -608,18 +613,32 @@ async function cargarPitchers() {
                 <td class="text-blue-600 font-black">${(p.era || 0).toFixed(2)}</td>
                 <td>${(p.whip || 0).toFixed(2)}</td>
                 <td>
-                    <button onclick="cargarEnEditorPitcher('${p._id}')" class="text-cyan-600 hover:text-cyan-800 mr-2">
-                        <i class="fa fa-edit"></i>
-                    </button>
-                    <button onclick="quitarRolPitcher('${p._id}')" class="text-red-300 hover:text-red-600">
-                        <i class="fa fa-user-minus"></i>
-                    </button>
+                    <button onclick="cargarEnEditorPitcher('${p._id}')" class="text-cyan-600 mr-2"><i class="fa fa-edit"></i></button>
+                    <button onclick="quitarRolPitcher('${p._id}')" class="text-red-400"><i class="fa fa-user-minus"></i></button>
                 </td>
             </tr>`).join('');
     } catch (err) {
-        console.error("Error al cargar la tabla de pitchers:", err);
+        console.error("Error cargando pitchers:", err);
     }
 }
+
+// 3. Cargar jugadoras cuando seleccionas equipo (Paso 2)
+async function cargarJugadorasPorEquipoPitcher(eqNombre) {
+    const selectJ = document.getElementById('p_jugadora_select');
+    try {
+        const res = await fetch(`${API}/players?equipo=${encodeURIComponent(eqNombre)}`);
+        const jugadoras = await res.json();
+        
+        let options = '<option value="">-- Seleccionar Jugadora --</option>';
+        jugadoras.forEach(j => {
+            options += `<option value="${j._id}">${j.nombre}</option>`;
+        });
+        selectJ.innerHTML = options;
+    } catch (e) {
+        console.error("Error al cargar jugadoras del equipo:", e);
+    }
+}
+
 async function quitarRolPitcher(id) {
     if(!confirm("¿Quitar esta jugadora de la lista de pitchers? (Sus stats de bateo no se borrarán)")) return;
 
