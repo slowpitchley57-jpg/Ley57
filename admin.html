@@ -655,12 +655,17 @@ async function quitarRolPitcher(id) {
 }
 async function cargarEnEditorPitcher(id) {
     try {
+        // IMPORTANTE: Verifica que la URL sea exactamente ${API}/players/${id}
         const res = await fetch(`${API}/players/${id}`);
+        
+        // Si el servidor responde con error, lanzamos una excepción para no intentar leer JSON
+        if (!res.ok) throw new Error("No se encontró la jugadora en la base de datos");
+
         const p = await res.json();
         
-        // Llenamos el formulario con lo que ya tiene en la base de datos
+        // Llenamos el formulario del modal con los datos actuales
         document.getElementById('p_id_actual').value = p._id;
-        document.getElementById('p_nombre').value = p.nombre; // El input readonly
+        document.getElementById('p_nombre').value = p.nombre; // Asegúrate de tener este input en el HTML
         document.getElementById('p_jp').value = p.jp || 0;
         document.getElementById('p_ip').value = p.ip || 0;
         document.getElementById('p_so').value = p.so_pitcher || 0;
@@ -668,9 +673,10 @@ async function cargarEnEditorPitcher(id) {
         document.getElementById('p_era').value = p.era || 0;
         document.getElementById('p_whip').value = p.whip || 0;
         
-        alert("Datos cargados en el editor para: " + p.nombre);
+        alert("Datos cargados: Ahora puedes corregir los números y darle a Guardar.");
     } catch (err) {
         console.error("Error al cargar en editor:", err);
+        alert("Error: No se pudieron jalar los datos de la pitcher. Revisa la consola.");
     }
 }
 // 4. Prepara el ID para actualizar, NO CREAR
