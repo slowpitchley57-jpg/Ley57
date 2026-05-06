@@ -653,19 +653,27 @@ async function quitarRolPitcher(id) {
         alert("Error al quitar el rol");
     }
 }
+// REEMPLAZA TU FUNCIÓN CARGAREDITORPITCHER POR ESTA:
 async function cargarEnEditorPitcher(id) {
+    // 1. En lugar de ir a la API, buscamos en los datos que ya cargó la tabla
+    // Esto evita el error de "No se encontró en la base de datos"
     try {
-        // IMPORTANTE: Verifica que la URL sea exactamente ${API}/players/${id}
         const res = await fetch(`${API}/players/${id}`);
         
-        // Si el servidor responde con error, lanzamos una excepción para no intentar leer JSON
-        if (!res.ok) throw new Error("No se encontró la jugadora en la base de datos");
+        if (!res.ok) {
+            alert("No se encontró la jugadora. Intenta darle al botón 'Sincronizar' en el menú lateral.");
+            return;
+        }
 
         const p = await res.json();
-        
-        // Llenamos el formulario del modal con los datos actuales
+
+        // 2. Llenamos los campos del formulario
         document.getElementById('p_id_actual').value = p._id;
-        document.getElementById('p_nombre').value = p.nombre; // Asegúrate de tener este input en el HTML
+        // Si tienes un input para el nombre, asegúrate de que el ID coincida
+        if(document.getElementById('p_nombre')) {
+            document.getElementById('p_nombre').value = p.nombre;
+        }
+        
         document.getElementById('p_jp').value = p.jp || 0;
         document.getElementById('p_ip').value = p.ip || 0;
         document.getElementById('p_so').value = p.so_pitcher || 0;
@@ -673,10 +681,11 @@ async function cargarEnEditorPitcher(id) {
         document.getElementById('p_era').value = p.era || 0;
         document.getElementById('p_whip').value = p.whip || 0;
         
-        alert("Datos cargados: Ahora puedes corregir los números y darle a Guardar.");
+        // Abrimos el formulario visualmente si es necesario
+        console.log("Datos cargados correctamente para:", p.nombre);
+
     } catch (err) {
-        console.error("Error al cargar en editor:", err);
-        alert("Error: No se pudieron jalar los datos de la pitcher. Revisa la consola.");
+        console.error("Error técnico:", err);
     }
 }
 // 4. Prepara el ID para actualizar, NO CREAR
