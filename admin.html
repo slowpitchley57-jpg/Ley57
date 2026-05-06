@@ -236,41 +236,60 @@
         'Libreeasy_femenil': document.getElementById('tablaEasyFem'),
         'Libreslow_mixto': document.getElementById('tablaSlowMix')
     };
+
     Object.values(tablas).forEach(t => { if (t) t.innerHTML = ""; });
 
+    // 1. Procesamos las estadísticas equipo por equipo
     const eqStats = todosLosEquipos.map(eq => {
-        let gAuto = 0, pAuto = 0, caAuto = 0, ceAuto = 0;
-        const nom = eq.nombre.trim().toUpperCase();
+        let g = 0, p = 0, ca = 0, ce = 0;
+        // Limpiamos el nombre del equipo de la base de datos (quitamos espacios extras)
+        const nombreBase = eq.nombre.trim().toUpperCase();
 
-        // Cálculo automático basado en juegos finalizados
         juegosFinalizados.forEach(j => {
+            // Verificamos que el juego tenga un resultado válido (ej: "19-4")
             if (!j.resultado || !j.resultado.includes('-')) return;
-            const s = j.resultado.split('-').map(Number);
-            if (j.local.trim().toUpperCase() === nom) { 
-                caAuto += s[0]; ceAuto += s[1]; 
-                if (s[0] > s[1]) gAuto++; else if (s[0] < s[1]) pAuto++; 
-            }
-            else if (j.visita.trim().toUpperCase() === nom) { 
-                caAuto += s[1]; ceAuto += s[0]; 
-                if (s[1] > s[0]) gAuto++; else if (s[1] < s[0]) pAuto++; 
+
+            // Limpiamos los nombres de los equipos en el registro del juego
+            const localJuego = j.local.trim().toUpperCase();
+            const visitaJuego = j.visita.trim().toUpperCase();
+            const score = j.resultado.split('-').map(Number);
+
+            // Si el equipo fue LOCAL
+            if (localJuego === nombreBase) {
+                ca += score[0]; // Carreras a Favor
+                ce += score[1]; // Carreras en Contra
+                if (score[0] > score[1]) g++; 
+                else if (score[0] < score[1]) p++;
+            } 
+            // Si el equipo fue VISITA
+            else if (visitaJuego === nombreBase) {
+                ca += score[1]; // Carreras a Favor
+                ce += score[0]; // Carreras en Contra
+                if (score[1] > score[0]) g++; 
+                else if (score[1] < score[0]) p++;
             }
         });
 
-        // PRIORIDAD: Si el equipo ya tiene valores manuales en la DB (eq.g, eq.p, etc.), 
-        // usamos esos. Si son 0 o no existen, usamos el cálculo automático.
-        return { 
-            ...eq, 
-            g: (eq.g !== undefined && eq.g !== 0) ? eq.g : gAuto, 
-            p: (eq.p !== undefined && eq.p !== 0) ? eq.p : pAuto, 
-            ca: (eq.ca !== undefined && eq.ca !== 0) ? eq.ca : caAuto, 
-            ce: (eq.ce !== undefined && eq.ce !== 0) ? eq.ce : ceAuto 
-        };
+        // Retornamos el objeto del equipo con sus datos calculados
+        return { ...eq, g, p, ca, ce };
     });
 
-    // Ordenar y Renderizar
-    eqStats.sort((a, b) => b.g - a.g).forEach(e => {
+    // 2. Ordenamos por Juegos Ganados (JG) y luego por Diferencia (DIF)
+    eqStats.sort((a, b) => {
+        if (b.g !== a.g) return b.g - a.g;
+        return (b.ca - b.ce) - (a.ca - a.ce);
+    });
+
+    // 3. Renderizamos en el HTML
+    eqStats.forEach(e => {
         const key = e.categoria + e.liga;
-        const col = {'varonil':'text-red-600','femenil':'text-blue-900','easy_femenil':'text-pink-600','slow_mixto':'text-emerald-600'}[e.liga];
+        const col = {
+            'varonil': 'text-red-600',
+            'femenil': 'text-blue-900',
+            'easy_femenil': 'text-pink-600',
+            'slow_mixto': 'text-emerald-600'
+        }[e.liga];
+
         if (tablas[key]) {
             const dif = e.ca - e.ce;
             tablas[key].innerHTML += `
@@ -344,7 +363,6 @@
         alert("Pitcher Actualizada");
         limpiarFormPitcher(); cargarPitchers();
     }
-
     async function verRosterEquipo() {
     const eq = document.getElementById('filterRoster').value;
     const liga = document.getElementById('ligaRoster').value;
@@ -352,65 +370,73 @@
     
     if(!eq) return cont.innerHTML = "";
     
-    cont.innerHTML = `<div class="p-10 text-center"><i class="fa fa-spinner fa-spin"></i> Cargando datos de Mongo...</div>`;
+    cont.innerHTML = `<div class="p-10 text-center"><i class="fa fa-spinner fa-spin"></i> Cargando jugadores...</div>`;
 
     try {
-        const res = await fetch(`${API}/players?equipo=${encodeURIComponent(eq)}&liga=${liga}`);
+        // Usamos encodeURIComponent por si el nombre del equipo tiene espacios o símbolos
+        const res = await fetch(`${API}/players?equipo=${encodeURIComponent(eq.trim())}&liga=${liga}`);
         const players = await res.json();
         
+        if (players.length === 0) {
+            cont.innerHTML = `<div class="p-10 text-center text-slate-400 uppercase font-black text-xs">No hay jugadores registrados en este equipo.</div>`;
+            return;
+        }
+
         cont.innerHTML = `
             <table class="w-full text-[10px] text-left border-collapse">
                 <thead>
                     <tr class="bg-slate-100 text-slate-600 uppercase font-black border-b text-center">
-                        <th class="p-2 text-left">Jugadora</th>
+                        <th class="p-2 text-left">Jugador/a</th>
                         <th class="p-1">JJ</th><th class="p-1">VB</th><th class="p-1">H</th>
                         <th class="p-1">2B</th><th class="p-1">3B</th><th class="p-1">HR</th>
-                        <th class="p-1">K</th><th class="p-1 text-red-600">RBI</th><th class="p-1">AVG</th>
+                        <th class="p-1 text-red-600">RBI</th><th class="p-1">AVG</th>
                         <th class="p-1">Acción</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y">
-                    ${players.map(p => {
-                        // Cálculo de AVG inicial: Hits / Veces al Bate
-                        const avg = p.vb > 0 ? (p.h / p.vb).toFixed(3) : "0.000";
-                        
-                        return `
-                        <tr class="hover:bg-slate-50 text-center">
-                            <td class="p-2 font-bold uppercase text-slate-700 text-left">${p.nombre}</td>
-                            <td><input type="number" value="${p.jj || 0}" onchange="updPlayer('${p._id}','jj',this.value)" class="w-10 border rounded text-center p-1"></td>
-                            
-                           
-                            <td><input type="number" value="${p.vb || 0}" onchange="updPlayer('${p._id}','vb',this.value)" class="w-10 border rounded text-center p-1"></td>
-                            <td><input type="number" value="${p.h || 0}" onchange="updPlayer('${p._id}','h',this.value)" class="w-10 border rounded text-center p-1 font-bold text-blue-600"></td>
-                            
-                            <td><input type="number" value="${p.dobles || 0}" onchange="updPlayer('${p._id}','dobles',this.value)" class="w-10 border rounded text-center p-1"></td>
-                            <td><input type="number" value="${p.triples || 0}" onchange="updPlayer('${p._id}','triples',this.value)" class="w-10 border rounded text-center p-1"></td>
-                            <td><input type="number" value="${p.hr || 0}" onchange="updPlayer('${p._id}','hr',this.value)" class="w-10 border rounded text-center p-1 font-bold text-red-600"></td>
-                            <td><input type="number" value="${p.k || 0}" onchange="updPlayer('${p._id}','k',this.value)" class="w-10 border rounded text-center p-1"></td>
-                            <td><input type="number" value="${p.rbi || 0}" onchange="updPlayer('${p._id}','rbi',this.value)" class="w-10 border-2 border-red-200 rounded text-center p-1 font-black text-red-600"></td>
-                            
-                           
-                            <td class="font-black italic text-slate-400 text-xs" id="avg-${p._id}">${avg}</td>
-                            
-                            <td><button onclick="eliminarJugadora('${p._id}')" class="text-red-400 hover:text-red-600"><i class="fa fa-trash"></i></button></td>
-                        </tr>`;
-                    }).join('')}
+                <tbody class="divide-y">${players.map(p => {
+                    // Cálculo de AVG: Hits / Veces al Bate
+                    const avg = p.vb > 0 ? (p.h / p.vb).toFixed(3) : "0.000";
+                    
+                    return `
+                    <tr class="hover:bg-slate-50 text-center">
+                        <td class="p-2 font-bold uppercase text-slate-700 text-left">${p.nombre}</td>
+                        <td><input type="number" value="${p.jj || 0}" onchange="updPlayer('${p._id}','jj',this.value)" class="w-10 border rounded text-center p-1"></td>
+                        <td><input type="number" value="${p.vb || 0}" onchange="updPlayer('${p._id}','vb',this.value)" class="w-10 border rounded text-center p-1"></td>
+                        <td><input type="number" value="${p.h || 0}" onchange="updPlayer('${p._id}','h',this.value)" class="w-10 border rounded text-center p-1 font-bold text-blue-600"></td>
+                        <td><input type="number" value="${p.dobles || 0}" onchange="updPlayer('${p._id}','dobles',this.value)" class="w-10 border rounded text-center p-1"></td>
+                        <td><input type="number" value="${p.triples || 0}" onchange="updPlayer('${p._id}','triples',this.value)" class="w-10 border rounded text-center p-1"></td>
+                        <td><input type="number" value="${p.hr || 0}" onchange="updPlayer('${p._id}','hr',this.value)" class="w-10 border rounded text-center p-1 font-bold text-red-600"></td>
+                        <td><input type="number" value="${p.rbi || 0}" onchange="updPlayer('${p._id}','rbi',this.value)" class="w-10 border-2 border-red-100 rounded text-center p-1 font-black text-red-600"></td>
+                        <td class="font-black italic text-slate-500" id="avg-${p._id}">${avg}</td>
+                        <td>
+                            <button onclick="eliminarJugadora('${p._id}')" class="text-slate-300 hover:text-red-600">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>`;
+                }).join('')}
                 </tbody>
             </table>`;
     } catch (e) {
-        cont.innerHTML = `<div class="p-10 text-red-500">Error al conectar con el servidor.</div>`;
+        cont.innerHTML = `<div class="p-10 text-red-500 font-black uppercase text-xs text-center">Error al conectar con la base de datos.</div>`;
     }
 }
-    async function sincronizarDatosBase() {
-            try {
-                const [resEq, resGames] = await Promise.all([fetch(`${API}/equipos`), fetch(`${API}/games?status=finalizado`)]);
-                todosLosEquipos = await resEq.json();
-                juegosFinalizados = await resGames.json();
-                renderizarTablas();
-                actualizarSelectores();
-            } catch (err) { console.error("Error base:", err); }
-        }
 
+    async function actualizarSelectRoster() {
+    const liga = document.getElementById('ligaRoster').value;
+    const filter = document.getElementById('filterRoster');
+    
+    // Filtramos los equipos que pertenecen a la liga seleccionada
+    const filtrados = todosLosEquipos.filter(e => e.liga === liga);
+    
+    let options = '<option value="">-- SELECCIONAR EQUIPO --</option>';
+    filtrados.forEach(e => {
+        options += `<option value="${e.nombre}">${e.nombre}</option>`;
+    });
+    
+    filter.innerHTML = options;
+    document.getElementById('containerRoster').innerHTML = ""; // Limpiamos la tabla previa
+}
 
     // Funciones de utilidad restantes heredadas
     function toggleModal(id) { document.getElementById(id).classList.toggle('active'); }
