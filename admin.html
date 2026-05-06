@@ -144,34 +144,65 @@
         </div>
     </div>
 
-    <!-- MODAL PITCHERS -->
-    <div id="modalPitchers" class="modal">
-        <div class="bg-white p-6 rounded-3xl w-full max-w-6xl max-h-[90vh] flex flex-col shadow-2xl border-t-8 border-cyan-600">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="font-black text-cyan-600 italic uppercase text-xl"><i class="fa fa-baseball-ball mr-2"></i>Gestión de Pitchers</h2>
-                <button onclick="toggleModal('modalPitchers')" class="text-slate-400 hover:text-cyan-600 text-2xl">&times;</button>
-            </div>
-            <div class="overflow-y-auto flex-1 custom-scroll mb-4">
-                <table class="w-full text-center text-[10px]"><thead class="bg-slate-100 border-b font-black text-slate-500 uppercase sticky top-0"><tr><th class="p-3 text-left">Pitcher</th><th>Equipo</th><th>JJ</th><th>IP</th><th>SO</th><th>ERA</th><th>WHIP</th><th>Acciones</th></tr></thead><tbody id="tablaPitchers" class="divide-y font-bold"></tbody></table>
-            </div>
-            <div class="p-5 bg-cyan-50 rounded-2xl border border-cyan-100">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <select id="p_equipo" onchange="cargarJugadorasPorEquipo(this.value)" class="p-2 border rounded-xl text-xs font-bold"></select>
-                    <select id="p_jugadora_select" onchange="prepararPitcher(this.value)" class="p-2 border rounded-xl text-xs font-bold"><option value="">-- Selecciona Jugadora --</option></select>
-                    <input id="p_nombre" readonly class="p-2 border rounded-xl text-xs font-black uppercase bg-white">
+    <!-- MODAL GESTIÓN PITCHERS REESTRUCTURADO -->
+<div id="modalPitchers" class="modal">
+    <div class="bg-white p-6 rounded-3xl w-full max-w-6xl max-h-[90vh] flex flex-col shadow-2xl border-t-8 border-cyan-600">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="font-black text-cyan-600 italic uppercase text-xl"><i class="fa fa-baseball-ball mr-2"></i>Panel de Pitchers</h2>
+            <button onclick="toggleModal('modalPitchers')" class="text-slate-400 hover:text-red-500 text-2xl">&times;</button>
+        </div>
+
+        <!-- FILTRO DE LIGA PARA LA TABLA -->
+        <div class="mb-4 p-4 bg-slate-50 rounded-2xl flex gap-4 items-center">
+            <span class="text-[10px] font-black uppercase text-slate-500">Ver liga:</span>
+            <select id="ligaFiltroPitchers" onchange="cargarPitchers()" class="p-2 border rounded-xl font-bold text-xs">
+                <option value="femenil">Ley 57 Fem</option>
+                <option value="varonil">ALV Sport Var</option>
+                <option value="easy_femenil">Easy Femenil</option>
+                <option value="slow_mixto">Slow Mixto</option>
+            </select>
+        </div>
+
+        <!-- TABLA DE PITCHERS (Mini Roster) -->
+        <div class="overflow-y-auto flex-1 custom-scroll mb-4 border rounded-2xl">
+            <table class="w-full text-center text-[10px]">
+                <thead class="bg-slate-100 border-b font-black text-slate-500 uppercase sticky top-0">
+                    <tr>
+                        <th class="p-3 text-left">Lanzadora</th>
+                        <th>Equipo</th><th>JJ</th><th>IP</th><th>SO</th><th>ERA</th><th>WHIP</th><th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaPitchers" class="divide-y font-bold text-cyan-900"></tbody>
+            </table>
+        </div>
+
+        <!-- FORMULARIO DE ASIGNACIÓN -->
+        <div class="p-5 bg-cyan-50 rounded-2xl border border-cyan-100 shadow-inner">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-[9px] font-black text-cyan-700 uppercase mb-1">1. Equipo</label>
+                    <select id="p_equipo_select" onchange="cargarJugadorasPorEquipoPitcher(this.value)" class="w-full p-2 border rounded-xl font-bold text-xs"></select>
                 </div>
-                <div class="grid grid-cols-3 md:grid-cols-6 gap-2 mb-4">
-                    <input id="p_jp" type="number" placeholder="JJ" class="p-2 border rounded-lg text-center text-xs">
-                    <input id="p_ip" type="number" step="0.1" placeholder="IP" class="p-2 border rounded-lg text-center text-xs">
-                    <input id="p_so" type="number" placeholder="SO" class="p-2 border rounded-lg text-center text-xs">
-                    <input id="p_cl" type="number" placeholder="CL" class="p-2 border rounded-lg text-center text-xs">
-                    <input id="p_era" type="number" step="0.01" placeholder="ERA" class="p-2 border rounded-lg text-center text-xs">
-                    <input id="p_whip" type="number" step="0.01" placeholder="WHIP" class="p-2 border rounded-lg text-center text-xs">
+                <div>
+                    <label class="block text-[9px] font-black text-cyan-700 uppercase mb-1">2. Seleccionar Jugadora del Roster</label>
+                    <select id="p_jugadora_select" onchange="prepararPitcherExistente(this.value)" class="w-full p-2 border rounded-xl font-bold text-xs">
+                        <option value="">-- Selecciona Equipo Primero --</option>
+                    </select>
                 </div>
-                <div class="flex gap-2"><input id="p_id" type="hidden"><button onclick="guardarPitcher()" class="flex-1 bg-cyan-600 text-white p-3 rounded-xl font-black text-[10px] uppercase shadow">Guardar Pitcheo</button><button onclick="limpiarFormPitcher()" class="bg-slate-200 p-3 rounded-xl font-bold text-[10px] uppercase">Limpiar</button></div>
             </div>
+            <div class="grid grid-cols-3 md:grid-cols-6 gap-2 mb-4">
+                <input id="p_jp" type="number" placeholder="JJ" class="p-2 border rounded-lg text-center font-bold">
+                <input id="p_ip" type="number" step="0.1" placeholder="IP" class="p-2 border rounded-lg text-center font-bold">
+                <input id="p_so" type="number" placeholder="SO" class="p-2 border rounded-lg text-center font-bold">
+                <input id="p_cl" type="number" placeholder="CL" class="p-2 border rounded-lg text-center font-bold">
+                <input id="p_era" type="number" step="0.01" placeholder="ERA" class="p-2 border rounded-lg text-center font-bold">
+                <input id="p_whip" type="number" step="0.01" placeholder="WHIP" class="p-2 border rounded-lg text-center font-bold">
+            </div>
+            <input type="hidden" id="p_id_actual">
+            <button onclick="guardarStatsPitcher()" class="w-full bg-cyan-600 text-white p-3 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-cyan-700 transition-all">Guardar y Actualizar Tabla</button>
         </div>
     </div>
+</div>
 
     <!-- MODAL EQUIPO -->
     <div id="modalEquipo" class="modal">
@@ -336,7 +367,7 @@
         } catch (err) { console.error(err); }
     }
 
-    async function cargarPitchers() {
+    /*async function cargarPitchers() {
         const res = await fetch(`${API}/players?esPitcher=true`);
         const data = await res.json();
         document.getElementById('tablaPitchers').innerHTML = data.map(p => `
@@ -350,7 +381,7 @@
                 <td><input type="number" step="0.01" value="${p.whip||0}" onchange="updPlayer('${p._id}','whip',this.value)" class="input-inline"></td>
                 <td><button onclick="eliminarJugadora('${p._id}')" class="text-red-400"><i class="fa fa-trash"></i></button></td>
             </tr>`).join('');
-    }
+    }*/
 
     async function guardarPitcher() {
         const id = document.getElementById('p_id').value;
@@ -533,6 +564,77 @@ async function finalizarJuego(id, loc, vis) {
         console.error("Error al finalizar el juego:", err);
         alert("Error de conexión con la base de datos.");
     }
+}
+// 1. Carga inicial de equipos en el modal de pitchers
+async function cargarEquiposModalPitcher() {
+    const res = await fetch(`${API}/equipos`);
+    const eqs = await res.json();
+    document.getElementById('p_equipo_select').innerHTML = '<option value="">-- Seleccionar Equipo --</option>' + 
+        eqs.map(e => `<option value="${e.nombre}">${e.nombre}</option>`).join('');
+}
+
+// 2. Carga jugadoras de ese equipo para asignar
+async function cargarJugadorasPorEquipoPitcher(eq) {
+    const res = await fetch(`${API}/players?equipo=${encodeURIComponent(eq)}`);
+    const jug = await res.json();
+    let opt = '<option value="">-- Seleccionar Jugadora --</option>';
+    jug.forEach(j => opt += `<option value="${j._id}">${j.nombre}</option>`);
+    document.getElementById('p_jugadora_select').innerHTML = opt;
+}
+
+// 3. Carga la tabla mini de pitchers filtrada por liga
+async function cargarPitchers() {
+    const liga = document.getElementById('ligaFiltroPitchers').value;
+    const res = await fetch(`${API}/players?esPitcher=true&liga=${liga}`);
+    const data = await res.json();
+    
+    document.getElementById('tablaPitchers').innerHTML = data.map(p => `
+        <tr class="hover:bg-cyan-50">
+            <td class="p-3 text-left uppercase font-black">${p.nombre}</td>
+            <td class="text-[9px] uppercase">${p.equipo}</td>
+            <td>${p.jp || 0}</td>
+            <td>${p.ip || 0}</td>
+            <td>${p.so_pitcher || 0}</td>
+            <td class="text-blue-600">${(p.era || 0).toFixed(2)}</td>
+            <td>${(p.whip || 0).toFixed(2)}</td>
+            <td>
+                <button onclick="cargarEnEditorPitcher('${p._id}')" class="text-cyan-600 mr-2"><i class="fa fa-edit"></i></button>
+                <button onclick="quitarRolPitcher('${p._id}')" class="text-red-400"><i class="fa fa-trash"></i></button>
+            </td>
+        </tr>`).join('');
+}
+
+// 4. Prepara el ID para actualizar, NO CREAR
+function prepararPitcherExistente(id) {
+    document.getElementById('p_id_actual').value = id;
+}
+
+// 5. Guarda y limpia
+async function guardarStatsPitcher() {
+    const id = document.getElementById('p_id_actual').value;
+    if (!id) return alert("Selecciona una jugadora primero");
+
+    const data = {
+        esPitcher: true,
+        jp: parseInt(document.getElementById('p_jp').value) || 0,
+        ip: parseFloat(document.getElementById('p_ip').value) || 0,
+        so_pitcher: parseInt(document.getElementById('p_so').value) || 0,
+        cl: parseInt(document.getElementById('p_cl').value) || 0,
+        era: parseFloat(document.getElementById('p_era').value) || 0,
+        whip: parseFloat(document.getElementById('p_whip').value) || 0
+    };
+
+    await fetch(`${API}/players/${id}`, { 
+        method: 'PUT', 
+        headers: {'Content-Type':'application/json'}, 
+        body: JSON.stringify(data) 
+    });
+
+    alert("Pitcher actualizada con éxito");
+    // Limpiar campos
+    document.getElementById('p_id_actual').value = "";
+    document.querySelectorAll('#modalPitchers input[type="number"]').forEach(i => i.value = "");
+    cargarPitchers(); // Refrescar mini tabla
 }
     // Funciones de utilidad restantes heredadas
     function toggleModal(id) { document.getElementById(id).classList.toggle('active'); }
