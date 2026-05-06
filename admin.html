@@ -652,6 +652,32 @@ async function guardarPitcher() {
         function limpiarFormPitcher() { document.getElementById('p_id').value = ''; document.getElementById('p_nombre').value = ''; }
         function cerrarSesion() { localStorage.clear(); window.location.href = 'index_post.html'; }
         document.addEventListener('DOMContentLoaded', cargarTodo);
+        
+        async function updPlayer(id, campo, valor) {
+    try {
+        // 1. Enviar la actualización al servidor
+        await fetch(`${API}/players/${id}`, { 
+            method: 'PUT', 
+            headers: {'Content-Type':'application/json'}, 
+            body: JSON.stringify({ [campo]: Number(valor) }) 
+        });
+
+        // 2. Obtener los valores actuales de la fila para recalcular el AVG
+        // Buscamos los inputs de Hits y VB de esa jugadora específica
+        const fila = document.getElementById(`avg-${id}`).parentElement;
+        const vbs = Number(fila.querySelector('input[onchange*="vb"]').value) || 0;
+        const hits = Number(fila.querySelector('input[onchange*="h"]').value) || 0;
+
+        // 3. Calcular nuevo AVG (H / VB)
+        const nuevoAVG = vbs > 0 ? (hits / vbs).toFixed(3) : "0.000";
+
+        // 4. Actualizar visualmente la celda del AVG
+        document.getElementById(`avg-${id}`).innerText = nuevoAVG;
+
+    } catch (err) {
+        console.error("Error al actualizar jugadora:", err);
+    }
+}
     </script>
 </body>
 </html>
