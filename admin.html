@@ -184,7 +184,8 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                     <label class="block text-[9px] font-black text-cyan-700 uppercase mb-1">1. Equipo</label>
-                    <select id="p_equipo_select" onchange="cargarJugadorasPorEquipoPitcher(this.value)" class="w-full p-2 border rounded-xl font-bold text-xs"></select>
+                    <!--<select id="p_equipo_select" onchange="cargarJugadorasPorEquipoPitcher(this.value)" class="w-full p-2 border rounded-xl font-bold text-xs"></select>-->
+                    <select id="p_equipo" onchange="cargarJugadorasPorEquipo(this.value)" ...></select>
                 </div>
                 <div>
                     <label class="block text-[9px] font-black text-cyan-700 uppercase mb-1">2. Seleccionar Jugadora del Roster</label>
@@ -200,6 +201,7 @@
                 <input id="p_cl" type="number" placeholder="CL" class="p-2 border rounded-lg text-center font-bold">
                 <input id="p_era" type="number" step="0.01" placeholder="ERA" class="p-2 border rounded-lg text-center font-bold">
                 <input id="p_whip" type="number" step="0.01" placeholder="WHIP" class="p-2 border rounded-lg text-center font-bold">
+                <select id="p_equipo" onchange="cargarJugadorasPorEquipo(this.value)" ...></select>
             </div>
             <input type="hidden" id="p_id_actual">
             <button onclick="guardarStatsPitcher()" class="w-full bg-cyan-600 text-white p-3 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-cyan-700 transition-all">Guardar y Actualizar Tabla</button>
@@ -621,6 +623,49 @@ async function cargarPitchers() {
         console.error("Error cargando pitchers:", err);
     }
 }
+// 1. Corregimos la carga de equipos para evitar el error de "null"
+async function cargarEquiposParaPitchers() {
+    const el = document.getElementById('p_equipo');
+    if (!el) return; // Si el elemento no existe en este HTML, no hacemos nada y evitamos el error
+
+    try {
+        const res = await fetch(`${API}/equipos`);
+        const eqs = await res.json();
+        el.innerHTML = '<option value="">Seleccionar Equipo</option>' + 
+                       eqs.map(e => `<option value="${e.nombre}">${e.nombre}</option>`).join('');
+    } catch (err) {
+        console.error("Error al cargar equipos:", err);
+    }
+}
+
+// 2. Función de edición robusta (Evita el 404)
+async function cargarEnEditorPitcher(id) {
+    try {
+        const res = await fetch(`${API}/players/${id}`);
+        
+        // Si el servidor da 404, avisamos al usuario para que sincronice
+        if (!res.ok) {
+            alert("Esa jugadora ya no existe en la base de datos. Por favor, dale al botón 'Sincronizar' para actualizar la lista.");
+            return;
+        }
+
+        const p = await res.json();
+
+        // Llenamos los campos usando los nombres exactos de tu base de datos (p.so_pitcher, etc.)
+        document.getElementById('p_id_actual').value = p._id;
+        if(document.getElementById('p_nombre')) document.getElementById('p_nombre').value = p.nombre;
+        
+        document.getElementById('p_jp').value = p.jp || 0;
+        document.getElementById('p_ip').value = p.ip || 0;
+        document.getElementById('p_so').value = p.so_pitcher || 0;
+        document.getElementById('p_cl').value = p.cl || 0;
+        document.getElementById('p_era').value = p.era || 0;
+        document.getElementById('p_whip').value = p.whip || 0;
+
+    } catch (err) {
+        console.error("Error en la petición:", err);
+    }
+}
 
 // 3. Cargar jugadoras cuando seleccionas equipo (Paso 2)
 async function cargarJugadorasPorEquipoPitcher(eqNombre) {
@@ -651,41 +696,6 @@ async function quitarRolPitcher(id) {
         cargarPitchers(); // Refrescamos la tabla
     } catch (err) {
         alert("Error al quitar el rol");
-    }
-}
-// REEMPLAZA TU FUNCIÓN CARGAREDITORPITCHER POR ESTA:
-async function cargarEnEditorPitcher(id) {
-    // 1. En lugar de ir a la API, buscamos en los datos que ya cargó la tabla
-    // Esto evita el error de "No se encontró en la base de datos"
-    try {
-        const res = await fetch(`${API}/players/${id}`);
-        
-        if (!res.ok) {
-            alert("No se encontró la jugadora. Intenta darle al botón 'Sincronizar' en el menú lateral.");
-            return;
-        }
-
-        const p = await res.json();
-
-        // 2. Llenamos los campos del formulario
-        document.getElementById('p_id_actual').value = p._id;
-        // Si tienes un input para el nombre, asegúrate de que el ID coincida
-        if(document.getElementById('p_nombre')) {
-            document.getElementById('p_nombre').value = p.nombre;
-        }
-        
-        document.getElementById('p_jp').value = p.jp || 0;
-        document.getElementById('p_ip').value = p.ip || 0;
-        document.getElementById('p_so').value = p.so_pitcher || 0;
-        document.getElementById('p_cl').value = p.cl || 0;
-        document.getElementById('p_era').value = p.era || 0;
-        document.getElementById('p_whip').value = p.whip || 0;
-        
-        // Abrimos el formulario visualmente si es necesario
-        console.log("Datos cargados correctamente para:", p.nombre);
-
-    } catch (err) {
-        console.error("Error técnico:", err);
     }
 }
 // 4. Prepara el ID para actualizar, NO CREAR
