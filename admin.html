@@ -212,11 +212,12 @@
         document.getElementById('ligaActivaLabel').innerText = `(${liga.replace('_',' ').toUpperCase()})`;
         actualizarSelectores();
     }
+   
 
     async function cargarTodo() {
         gestionarSesion();
         await sincronizarDatosBase();
-        cargarResultados();
+        await cargarResultados();
         cargarEquiposParaPitchers();
         cargarPitchers();
         switchLiga('femenil');
@@ -488,6 +489,49 @@ async function cargarResultados() {
         `).join('');
     } catch (err) {
         console.error("Error al cargar juegos pendientes:", err);
+    }
+}
+async function finalizarJuego(id, loc, vis) {
+    // 1. Obtener los scores de los inputs usando el ID del juego
+    const sL = parseInt(document.getElementById(`sc-${id}-L`).value);
+    const sV = parseInt(document.getElementById(`sc-${id}-V`).value);
+
+    // 2. Validación: No dejar que guarden si falta algún número
+    if (isNaN(sL) || isNaN(sV)) {
+        return alert("Por favor, captura el marcador completo antes de finalizar.");
+    }
+
+    // 3. Confirmación para evitar errores de dedo
+    if (!confirm(`¿Confirmar resultado final? ${loc}: ${sL} - ${vis}: ${sV}`)) return;
+
+    try {
+        // 4. Enviar el resultado al endpoint de juegos
+        const res = await fetch(`${API}/games/resultado`, { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify({ 
+                id, 
+                sL, 
+                sV, 
+                ganador: sL > sV ? loc : vis, 
+                perdedor: sL > sV ? vis : loc 
+            }) 
+        });
+
+        if (res.ok) {
+            alert("¡Resultado guardado y estadísticas actualizadas!");
+            
+            // 5. Sincronizar todo de nuevo para que las tablas reflejen el cambio
+            await sincronizarDatosBase(); 
+            
+            // 6. Recargar la lista de juegos pendientes (el juego finalizado desaparecerá de aquí)
+            await cargarResultados(); 
+        } else {
+            alert("Hubo un problema al guardar el resultado en el servidor.");
+        }
+    } catch (err) {
+        console.error("Error al finalizar el juego:", err);
+        alert("Error de conexión con la base de datos.");
     }
 }
     // Funciones de utilidad restantes heredadas
