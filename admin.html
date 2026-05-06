@@ -195,6 +195,10 @@
     </div>
 
 <script>
+    fetch("https://ley57.onrender.com/api/games?status=pendiente")
+  .then(res => res.json())
+  .then(data => console.table(data));
+  
     const API = "https://ley57.onrender.com/api";
     let todosLosEquipos = [];
     let juegosFinalizados = [];
