@@ -13,7 +13,7 @@
         .custom-scroll::-webkit-scrollbar { width: 5px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
-        /* Clases para el manejo de secciones */
+        /* Manejo de secciones por liga */
         .liga-section { display: none; }
         .liga-section.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -21,6 +21,7 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans flex min-h-screen">
 
+    <!-- SIDEBAR PRINCIPAL -->
     <aside class="w-64 bg-blue-900 text-white p-6 sticky top-0 h-screen shadow-2xl flex flex-col">
         <div class="flex flex-col gap-1 mb-6 italic border-b border-blue-800 pb-4 flex-shrink-0">
             <div class="flex items-center gap-3">
@@ -35,32 +36,33 @@
             </div>
         </div>
 
-        <!-- MENU DE SELECCIÓN DE LIGA -->
-        <div class="mb-6 space-y-2">
+        <!-- SELECTOR DE LIGA ACTIVA -->
+        <div class="mb-6 space-y-1">
             <p class="text-[9px] font-black text-blue-300 uppercase tracking-widest mb-2 px-2">Administrar Liga:</p>
-            <button onclick="switchLiga('femenil')" class="w-full text-left p-3 hover:bg-blue-800 rounded-xl transition flex items-center gap-3 text-xs font-bold active-liga-btn"><i class="fa fa-venus"></i> Ley 57 Fem</button>
-            <button onclick="switchLiga('varonil')" class="w-full text-left p-3 hover:bg-blue-800 rounded-xl transition flex items-center gap-3 text-xs font-bold"><i class="fa fa-mars"></i> ALV Sport Var</button>
-            <button onclick="switchLiga('easy_femenil')" class="w-full text-left p-3 hover:bg-blue-800 rounded-xl transition flex items-center gap-3 text-xs font-bold"><i class="fa fa-star"></i> Easy Femenil</button>
-            <button onclick="switchLiga('slow_mixto')" class="w-full text-left p-3 hover:bg-blue-800 rounded-xl transition flex items-center gap-3 text-xs font-bold"><i class="fa fa-users"></i> Slow Mixto</button>
+            <button onclick="switchLiga('femenil')" class="liga-btn w-full text-left p-3 hover:bg-blue-800 rounded-xl transition flex items-center gap-3 text-xs font-bold"><i class="fa fa-venus"></i> Ley 57 Fem</button>
+            <button onclick="switchLiga('varonil')" class="liga-btn w-full text-left p-3 hover:bg-blue-800 rounded-xl transition flex items-center gap-3 text-xs font-bold"><i class="fa fa-mars"></i> ALV Sport Var</button>
+            <button onclick="switchLiga('easy_femenil')" class="liga-btn w-full text-left p-3 hover:bg-blue-800 rounded-xl transition flex items-center gap-3 text-xs font-bold"><i class="fa fa-star"></i> Easy Femenil</button>
+            <button onclick="switchLiga('slow_mixto')" class="liga-btn w-full text-left p-3 hover:bg-blue-800 rounded-xl transition flex items-center gap-3 text-xs font-bold"><i class="fa fa-users"></i> Slow Mixto</button>
         </div>
 
-        <nav class="space-y-4 flex-1 overflow-y-auto pr-2 custom-scroll">
+        <!-- ACCIONES DE GESTIÓN -->
+        <nav class="space-y-3 flex-1 overflow-y-auto pr-2 custom-scroll">
             <hr class="opacity-20 mb-4">
-            <button onclick="location.href='alta_jugadores.html'" class="w-full text-left p-3 bg-indigo-600 rounded-xl font-bold text-xs flex items-center gap-3"><i class="fa fa-users-cog"></i> Alta Maestra</button>
-            <button onclick="toggleModal('modalEquipo')" class="w-full text-left p-3 bg-emerald-600 rounded-xl font-bold text-xs flex items-center gap-3"><i class="fa fa-plus-circle"></i> Nuevo Equipo</button>
-            <button onclick="toggleModal('modalRosters')" class="w-full text-left p-3 bg-amber-500 rounded-xl font-bold text-xs flex items-center gap-3"><i class="fa fa-user-edit"></i> Roster / Stats</button>
-            <button onclick="toggleModal('modalPitchers')" class="w-full text-left p-3 bg-cyan-600 rounded-xl font-bold text-xs flex items-center gap-3"><i class="fa fa-baseball-ball"></i> Pitchers</button>
-            <button onclick="toggleModal('modalIA')" class="w-full text-left p-3 bg-purple-600 rounded-xl font-bold text-xs flex items-center gap-3"><i class="fa fa-robot"></i> Generar Rol IA</button> 
-            <button onclick="cerrarSesion()" class="w-full text-left p-3 rounded-xl flex items-center gap-3 text-red-400 font-bold uppercase text-[10px] tracking-widest"><i class="fa fa-sign-out-alt"></i> Salir</button>
+            <button onclick="location.href='alta_jugadores.html'" class="w-full text-left p-3 bg-indigo-600 rounded-xl font-bold text-xs flex items-center gap-3 shadow-lg"><i class="fa fa-users-cog"></i> Alta Maestra</button>
+            <button onclick="toggleModal('modalEquipo')" class="w-full text-left p-3 bg-emerald-600 rounded-xl font-bold text-xs flex items-center gap-3 shadow-lg"><i class="fa fa-plus-circle"></i> Nuevo Equipo</button>
+            <button onclick="toggleModal('modalRosters')" class="w-full text-left p-3 bg-amber-500 rounded-xl font-bold text-xs flex items-center gap-3 shadow-lg"><i class="fa fa-user-edit"></i> Roster / Stats</button>
+            <button onclick="toggleModal('modalPitchers')" class="w-full text-left p-3 bg-cyan-600 rounded-xl font-bold text-xs flex items-center gap-3 shadow-lg"><i class="fa fa-baseball-ball"></i> Gestión Pitchers</button>
+            <button onclick="toggleModal('modalIA')" class="w-full text-left p-3 bg-purple-600 rounded-xl font-bold text-xs flex items-center gap-3 shadow-lg"><i class="fa fa-robot"></i> Generar Rol IA</button> 
+            <button onclick="cerrarSesion()" class="w-full text-left p-3 rounded-xl flex items-center gap-3 text-red-400 font-bold uppercase text-[10px] tracking-widest mt-4"><i class="fa fa-sign-out-alt"></i> Salir</button>
         </nav>
     </aside>
 
     <main class="flex-1 p-8 space-y-8 overflow-y-auto">
         
-        <!-- SECCIÓN LEY 57 FEMENIL -->
+        <!-- CONTENEDORES DE TABLAS POR LIGA -->
         <div id="section-femenil" class="liga-section active">
             <h2 class="text-blue-900 font-black italic uppercase border-l-4 border-blue-900 pl-3 mb-6">Ley 57 - Femenil</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="bg-white rounded-3xl shadow-sm border overflow-hidden">
                     <div class="bg-blue-600 p-3 text-white font-bold text-xs uppercase tracking-widest italic text-center">Intermedia Femenil</div>
                     <table class="w-full text-xs text-center"><thead class="bg-slate-100 border-b font-black text-slate-500 uppercase"><tr><th class="p-4 text-left">Equipo</th><th>JJ</th><th>JG</th><th>JP</th><th>CA</th><th>CR</th><th>DIF</th><th>X</th></tr></thead><tbody id="tablaIntermedia" class="divide-y font-bold text-blue-900"></tbody></table>
@@ -72,10 +74,9 @@
             </div>
         </div>
 
-        <!-- SECCIÓN ALV SPORT VARONIL -->
         <div id="section-varonil" class="liga-section">
             <h2 class="text-red-600 font-black italic uppercase border-l-4 border-red-600 pl-3 mb-6">Amigos del Easy - Varonil</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="bg-white rounded-3xl shadow-sm border overflow-hidden border-red-100">
                     <div class="bg-red-600 p-3 text-white font-bold text-xs uppercase tracking-widest italic text-center">Intermedia Varonil</div>
                     <table class="w-full text-xs text-center"><thead class="bg-slate-100 border-b font-black text-slate-500 uppercase"><tr><th class="p-4 text-left">Equipo</th><th>JJ</th><th>JG</th><th>JP</th><th>CA</th><th>CR</th><th>DIF</th><th>X</th></tr></thead><tbody id="tablaIntermediaVar" class="divide-y font-bold text-red-900"></tbody></table>
@@ -87,30 +88,28 @@
             </div>
         </div>
 
-        <!-- SECCIÓN EASY FEMENIL -->
         <div id="section-easy_femenil" class="liga-section">
             <h2 class="text-pink-600 font-black italic uppercase border-l-4 border-pink-600 pl-3 mb-6">Easy Femenil (Libre)</h2>
-            <div class="bg-white rounded-3xl shadow-sm border border-pink-100 overflow-hidden mb-8 max-w-2xl">
-                <div class="bg-pink-600 p-3 text-white font-bold text-xs uppercase tracking-widest italic text-center">Easy Femenil (Libre)</div>
-                <table class="w-full text-xs text-center"><thead class="bg-slate-100 border-b font-black text-slate-500"><tr><th class="p-4 text-left">Equipo</th><th>JJ</th><th>JG</th><th>JP</th><th>CA</th><th>CR</th><th>DIF</th><th>X</th></tr></thead><tbody id="tablaEasyFem" class="divide-y font-bold text-pink-900"></tbody></table>
+            <div class="bg-white rounded-3xl shadow-sm border border-pink-100 overflow-hidden max-w-2xl">
+                <div class="bg-pink-600 p-3 text-white font-bold text-xs uppercase tracking-widest italic text-center">Easy Femenil</div>
+                <table class="w-full text-xs text-center"><thead class="bg-slate-100 border-b font-black text-slate-500 uppercase"><tr><th class="p-4 text-left">Equipo</th><th>JJ</th><th>JG</th><th>JP</th><th>CA</th><th>CR</th><th>DIF</th><th>X</th></tr></thead><tbody id="tablaEasyFem" class="divide-y font-bold text-pink-900"></tbody></table>
             </div>
         </div>
 
-        <!-- SECCIÓN SLOW MIXTO -->
         <div id="section-slow_mixto" class="liga-section">
             <h2 class="text-emerald-700 font-black italic uppercase border-l-4 border-emerald-700 pl-3 mb-6">Slow Mixto (Libre)</h2>
-            <div class="bg-white rounded-3xl shadow-sm border border-emerald-100 overflow-hidden mb-8 max-w-2xl">
-                <div class="bg-emerald-600 p-3 text-white font-bold text-xs uppercase tracking-widest italic text-center">Slow Mixto (Libre)</div>
-                <table class="w-full text-xs text-center"><thead class="bg-slate-100 border-b font-black text-slate-500"><tr><th class="p-4 text-left">Equipo</th><th>JJ</th><th>JG</th><th>JP</th><th>CA</th><th>CR</th><th>DIF</th><th>X</th></tr></thead><tbody id="tablaSlowMix" class="divide-y font-bold text-emerald-900"></tbody></table>
+            <div class="bg-white rounded-3xl shadow-sm border border-emerald-100 overflow-hidden max-w-2xl">
+                <div class="bg-emerald-600 p-3 text-white font-bold text-xs uppercase tracking-widest italic text-center">Slow Mixto</div>
+                <table class="w-full text-xs text-center"><thead class="bg-slate-100 border-b font-black text-slate-500 uppercase"><tr><th class="p-4 text-left">Equipo</th><th>JJ</th><th>JG</th><th>JP</th><th>CA</th><th>CR</th><th>DIF</th><th>X</th></tr></thead><tbody id="tablaSlowMix" class="divide-y font-bold text-emerald-900"></tbody></table>
             </div>
         </div>
 
-        <!-- PROGRAMADOR DE JORNADA (GLOBAL PERO ACTUALIZABLE) -->
+        <!-- PROGRAMADOR DE JORNADA DINÁMICO -->
         <section class="bg-white p-6 rounded-3xl border shadow-sm">
             <h3 class="text-blue-900 font-black mb-4 uppercase text-xs italic border-b pb-2">Programar Jornada <span id="ligaActivaLabel" class="text-red-500 ml-2"></span></h3>
             <div class="grid grid-cols-1 md:grid-cols-6 gap-3 bg-slate-50 p-4 rounded-2xl border border-dashed items-center"> 
-                <select id="selLoc" class="p-2 border rounded-xl text-xs font-bold"></select>
-                <select id="selVis" class="p-2 border rounded-xl text-xs font-bold"></select>
+                <select id="selLoc" class="p-2 border rounded-xl text-xs font-bold bg-white"></select>
+                <select id="selVis" class="p-2 border rounded-xl text-xs font-bold bg-white"></select>
                 <input type="date" id="fec" class="p-2 border rounded-xl text-xs font-bold">
                 <input type="time" id="hor" class="p-2 border rounded-xl text-xs font-bold">
                 
@@ -121,14 +120,16 @@
                         <option value="https://www.facebook.com/alvsport57">ALV SPORT</option>
                         <option value="OTRO">OTRO (MANUAL)</option>
                     </select>
-                    <input type="text" id="streamManual" placeholder="Pega link aquí" class="hidden p-1 border rounded text-[8px] mt-1">
+                    <input type="text" id="streamManual" placeholder="Link manual" class="hidden p-1 border rounded text-[8px] mt-1">
                 </div>
                 <button onclick="guardarJuego()" class="bg-blue-900 text-white p-3 rounded-xl font-black text-[10px] uppercase shadow hover:bg-black transition-all">Programar</button>
             </div>
+            
+            <!-- RESULTADOS PENDIENTES -->
             <div id="listaResultados" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8"></div>
         </section>
 
-        <!-- INPUT OCULTO PARA MANTENER LA LIGA SELECCIONADA EN EL SCRIPT -->
+        <!-- INPUTS OCULTOS PARA COMPATIBILIDAD CON SCRIPT -->
         <select id="filtroLigaGlobal" class="hidden">
             <option value="femenil">femenil</option>
             <option value="varonil">varonil</option>
@@ -138,432 +139,325 @@
 
     </main>
 
+    <!-- MODAL ROSTERS Y ESTADÍSTICAS -->
+    <div id="modalRosters" class="modal">
+        <div class="bg-white p-6 rounded-3xl w-full max-w-5xl max-h-[85vh] flex flex-col shadow-2xl border-t-8 border-amber-500">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="font-black text-amber-600 italic uppercase text-xl">Editor Roster / Stats</h2>
+                <div class="flex gap-2">
+                    <select id="ligaRoster" onchange="actualizarSelectRoster()" class="p-3 border rounded-xl font-bold text-xs uppercase">
+                        <option value="femenil">Femenil</option>
+                        <option value="varonil">Varonil</option>
+                        <option value="easy_femenil">Easy Femenil</option>
+                        <option value="slow_mixto">Slow Mixto</option>
+                    </select>
+                    <select id="filterRoster" onchange="verRosterEquipo()" class="p-3 border rounded-xl font-bold text-xs uppercase flex-1"></select>
+                </div>
+            </div>
+            <div id="containerRoster" class="flex-1 overflow-y-auto pr-2 custom-scroll"></div>
+            <button onclick="toggleModal('modalRosters')" class="mt-6 bg-slate-800 text-white p-4 rounded-2xl font-black uppercase text-xs">Cerrar Editor</button>
+        </div>
+    </div>
+
+    <!-- MODAL GESTIÓN PITCHERS -->
+    <div id="modalPitchers" class="modal">
+        <div class="bg-white p-6 rounded-3xl w-full max-w-6xl max-h-[90vh] flex flex-col shadow-2xl border-t-8 border-cyan-600">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="font-black text-cyan-600 italic uppercase text-xl"><i class="fa fa-baseball-ball mr-2"></i>Gestión de Pitchers</h2>
+                <button onclick="toggleModal('modalPitchers')" class="text-slate-400 hover:text-cyan-600 text-2xl">&times;</button>
+            </div>
+            <div class="overflow-y-auto flex-1 custom-scroll mb-4">
+                <table class="w-full text-center text-[10px]"><thead class="bg-slate-100 border-b font-black text-slate-500 uppercase sticky top-0"><tr><th class="p-3 text-left">Pitcher</th><th>Equipo</th><th>JJ</th><th>IP</th><th>SO</th><th>ERA</th><th>WHIP</th><th>Acciones</th></tr></thead><tbody id="tablaPitchers" class="divide-y font-bold"></tbody></table>
+            </div>
+            <div class="p-5 bg-cyan-50 rounded-2xl border border-cyan-100">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <select id="p_equipo" onchange="cargarJugadorasPorEquipo(this.value)" class="p-2 border rounded-xl text-xs font-bold"></select>
+                    <select id="p_jugadora_select" onchange="prepararPitcher(this.value)" class="p-2 border rounded-xl text-xs font-bold"><option value="">-- Selecciona Jugadora --</option></select>
+                    <input id="p_nombre" readonly class="p-2 border rounded-xl text-xs font-black uppercase bg-white">
+                </div>
+                <div class="grid grid-cols-3 md:grid-cols-6 gap-2 mb-4">
+                    <input id="p_jp" type="number" placeholder="JJ" class="p-2 border rounded-lg text-center text-xs">
+                    <input id="p_ip" type="number" step="0.1" placeholder="IP" class="p-2 border rounded-lg text-center text-xs">
+                    <input id="p_so" type="number" placeholder="SO" class="p-2 border rounded-lg text-center text-xs">
+                    <input id="p_cl" type="number" placeholder="CL" class="p-2 border rounded-lg text-center text-xs">
+                    <input id="p_era" type="number" step="0.01" placeholder="ERA" class="p-2 border rounded-lg text-center text-xs">
+                    <input id="p_whip" type="number" step="0.01" placeholder="WHIP" class="p-2 border rounded-lg text-center text-xs">
+                </div>
+                <div class="flex gap-2">
+                    <input id="p_id" type="hidden">
+                    <button onclick="guardarPitcher()" class="flex-1 bg-cyan-600 text-white p-3 rounded-xl font-black text-[10px] uppercase shadow">Guardar Pitcheo</button>
+                    <button onclick="limpiarFormPitcher()" class="bg-slate-200 p-3 rounded-xl font-bold text-[10px] uppercase">Limpiar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL NUEVO EQUIPO -->
+    <div id="modalEquipo" class="modal">
+        <div class="bg-white p-8 rounded-3xl w-80 shadow-2xl border-t-8 border-emerald-600">
+            <h2 class="font-black mb-4 text-center italic uppercase">Nuevo Equipo</h2>
+            <input type="text" id="teamName" placeholder="NOMBRE EQUIPO" class="w-full p-3 border rounded-xl mb-4 font-bold uppercase">
+            <select id="teamCat" class="w-full p-3 border rounded-xl mb-4 font-bold text-xs uppercase"><option value="Intermedia">Intermedia</option><option value="Relax">Relax</option><option value="Libre">Libre</option></select>
+            <select id="teamLiga" class="w-full p-3 border rounded-xl mb-6 font-bold text-xs uppercase text-emerald-600"><option value="femenil">Ley 57 Fem</option><option value="varonil">ALV Sport Var</option><option value="easy_femenil">Easy Femenil</option><option value="slow_mixto">Slow Mixto</option></select>
+            <div class="flex gap-2"><button onclick="toggleModal('modalEquipo')" class="flex-1 bg-slate-200 p-3 rounded-xl font-bold text-xs uppercase text-slate-500">Cerrar</button><button onclick="guardarEquipo()" class="flex-1 bg-emerald-600 text-white p-3 rounded-xl font-bold text-xs uppercase">Guardar</button></div>
+        </div>
+    </div>
+
+    <!-- MODAL ROL IA -->
+    <div id="modalIA" class="modal">
+        <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl border-t-8 border-purple-600 text-center">
+            <i class="fa fa-robot text-4xl text-purple-600 mb-4"></i>
+            <h2 class="font-black italic uppercase text-xl mb-4">Generar Rol IA</h2>
+            <select id="ligaIA" class="w-full p-3 border-2 rounded-2xl font-bold text-xs uppercase mb-6"><option value="femenil">Ley 57 Fem</option><option value="varonil">ALV Sport Var</option><option value="easy_femenil">Easy Femenil</option><option value="slow_mixto">Slow Mixto</option></select>
+            <div class="flex gap-3"><button onclick="toggleModal('modalIA')" class="flex-1 bg-slate-100 p-4 rounded-2xl font-black uppercase text-[10px]">Cancelar</button><button onclick="ejecutarIA()" class="flex-1 bg-purple-600 text-white p-4 rounded-2xl font-black uppercase text-[10px] shadow-lg">Generar</button></div>
+        </div>
+    </div>
     <!-- SCRIPT DE NAVEGACIÓN -->
-    <script>
-        function switchLiga(liga) {
-            // 1. Ocultar todas las secciones
-            document.querySelectorAll('.liga-section').forEach(section => {
-                section.classList.remove('active');
-            });
-            
-            // 2. Mostrar la sección seleccionada
-            document.getElementById(`section-${liga}`).classList.add('active');
-            
-            // 3. Actualizar el input oculto que usa tu script original
-            const selectGlobal = document.getElementById('filtroLigaGlobal');
-            selectGlobal.value = liga;
-            
-            // 4. Actualizar etiquetas visuales
-            const labels = {
-                'femenil': 'LEY 57 FEM',
-                'varonil': 'ALV SPORT VAR',
-                'easy_femenil': 'EASY FEM',
-                'slow_mixto': 'SLOW MIXTO'
-            };
-            document.getElementById('ligaActivaLabel').innerText = `(${labels[liga]})`;
-            
-            // 5. Llamar a tu función de sincronización original
-            if (typeof actualizarSelectores === "function") {
-                actualizarSelectores();
-            }
-        }
+     <script>
+    // 1. CONFIGURACIÓN GLOBAL
+    const API = "https://ley57.onrender.com/api";
+    let todosLosEquipos = [];
+    let juegosFinalizados = [];
+    let ligaActiva = 'femenil'; // Liga por defecto
 
-        // Inicializar con Femenil al cargar
-        window.addEventListener('load', () => switchLiga('femenil'));
-    </script>
-    <script>
+    // 2. NAVEGACIÓN Y CAMBIO DE LIGA
+    function switchLiga(liga) {
+        ligaActiva = liga;
         
-        const API = "https://ley57.onrender.com/api";
-        let todosLosEquipos = [];
-        let juegosFinalizados = [];
-
-        async function cargarTodo() {
-            gestionarSesion();
-            await sincronizarDatosBase();
-            cargarResultados();
-            cargarEquiposParaPitchers();
-        }
-
-        async function sincronizarDatosBase() {
-            try {
-                const [resEq, resGames] = await Promise.all([fetch(`${API}/equipos`), fetch(`${API}/games?status=finalizado`)]);
-                todosLosEquipos = await resEq.json();
-                juegosFinalizados = await resGames.json();
-                renderizarTablas();
-                actualizarSelectores();
-            } catch (err) { console.error("Error base:", err); }
-        }
-
-        function renderizarTablas() {
-    // 1. Mapeo de contenedores HTML para cada liga y categoría
-    const tablas = {
-        'Intermediafemenil': document.getElementById('tablaIntermedia'),
-        'Relaxfemenil': document.getElementById('tablaRelax'),
-        'Intermediavaronil': document.getElementById('tablaIntermediaVar'),
-        'Relaxvaronil': document.getElementById('tablaRelaxVar'),
-        'Libreeasy_femenil': document.getElementById('tablaEasyFem'),
-        'Libreslow_mixto': document.getElementById('tablaSlowMix')
-    };
-
-    // Limpiar todas las tablas antes de renderizar
-    Object.values(tablas).forEach(t => { if (t) t.innerHTML = ""; });
-
-    // 2. Cálculo de estadísticas de equipos basado en juegos finalizados
-    const eqStats = todosLosEquipos.map(eq => {
-        let g = 0, p = 0, ca = 0, ce = 0;
-        const nom = eq.nombre.trim().toUpperCase();
-
-        juegosFinalizados.forEach(j => {
-            // Aseguramos que el resultado tenga el formato correcto antes de procesar
-            if (!j.resultado || !j.resultado.includes('-')) return;
-            
-            const s = j.resultado.split('-').map(Number);
-            
-            if (j.local.trim().toUpperCase() === nom) { 
-                ca += s[0]; 
-                ce += s[1]; 
-                if (s[0] > s[1]) g++; else if (s[0] < s[1]) p++; 
-            }
-            else if (j.visita.trim().toUpperCase() === nom) { 
-                ca += s[1]; 
-                ce += s[0]; 
-                if (s[1] > s[0]) g++; else if (s[1] < s[0]) p++; 
-            }
+        // Ocultar todas las secciones
+        document.querySelectorAll('.liga-section').forEach(section => {
+            section.classList.remove('active');
         });
-        return { ...eq, g, p, ca, ce };
-    });
-
-    // 3. Ordenamiento y renderizado en el HTML
-    // Ordenamos por Juegos Ganados (G) de mayor a menor
-    eqStats.sort((a, b) => b.g - a.g).forEach(e => {
-        const key = e.categoria + e.liga;
         
-        // Asignación de colores de identidad según la liga
+        // Mostrar la sección seleccionada
+        const targetSection = document.getElementById(`section-${liga}`);
+        if (targetSection) targetSection.classList.add('active');
+        
+        // Actualizar el input oculto que usa el programador de juegos
+        const selectGlobal = document.getElementById('filtroLigaGlobal');
+        if (selectGlobal) selectGlobal.value = liga;
+        
+        // Actualizar etiquetas visuales del encabezado
+        const labels = {
+            'femenil': 'LEY 57 FEM',
+            'varonil': 'ALV SPORT VAR',
+            'easy_femenil': 'EASY FEM',
+            'slow_mixto': 'SLOW MIXTO'
+        };
+        const labelElement = document.getElementById('ligaActivaLabel');
+        if (labelElement) labelElement.innerText = `(${labels[liga]})`;
+        
+        // Estilo de botones laterales (opcional: para resaltar el activo)
+        document.querySelectorAll('aside button').forEach(btn => {
+            btn.classList.remove('bg-blue-800', 'border-l-4', 'border-red-500');
+        });
+
+        // Refrescar selectores de equipos para el programador
+        actualizarSelectores();
+    }
+
+    // 3. CARGA DE DATOS (PROMISE ALL)
+    async function cargarTodo() {
+        gestionarSesion();
+        await sincronizarDatosBase();
+        cargarResultados();
+        cargarEquiposParaPitchers();
+        
+        // Una vez cargado todo, activamos la liga inicial
+        switchLiga('femenil');
+    }
+
+    async function sincronizarDatosBase() {
+        try {
+            const [resEq, resGames] = await Promise.all([
+                fetch(`${API}/equipos`), 
+                fetch(`${API}/games?status=finalizado`)
+            ]);
+            todosLosEquipos = await resEq.json();
+            juegosFinalizados = await resGames.json();
+            
+            renderizarTablas();
+        } catch (err) { 
+            console.error("Error sincronizando base:", err); 
+        }
+    }
+
+    // 4. FUNCIONES DE RENDERIZADO (STANDINGS)
+    function renderizarTablas() {
+        const tablas = {
+            'Intermediafemenil': document.getElementById('tablaIntermedia'),
+            'Relaxfemenil': document.getElementById('tablaRelax'),
+            'Intermediavaronil': document.getElementById('tablaIntermediaVar'),
+            'Relaxvaronil': document.getElementById('tablaRelaxVar'),
+            'Libreeasy_femenil': document.getElementById('tablaEasyFem'),
+            'Libreslow_mixto': document.getElementById('tablaSlowMix')
+        };
+
+        Object.values(tablas).forEach(t => { if (t) t.innerHTML = ""; });
+
+        const eqStats = todosLosEquipos.map(eq => {
+            let g = 0, p = 0, ca = 0, ce = 0;
+            const nom = eq.nombre.trim().toUpperCase();
+            juegosFinalizados.forEach(j => {
+                if (!j.resultado || !j.resultado.includes('-')) return;
+                const s = j.resultado.split('-').map(Number);
+                if (j.local.trim().toUpperCase() === nom) { 
+                    ca += s[0]; ce += s[1]; 
+                    if (s[0] > s[1]) g++; else if (s[0] < s[1]) p++; 
+                } else if (j.visita.trim().toUpperCase() === nom) { 
+                    ca += s[1]; ce += s[0]; 
+                    if (s[1] > s[0]) g++; else if (s[1] < s[0]) p++; 
+                }
+            });
+            return { ...eq, g, p, ca, ce };
+        });
+
         const colores = {
             'varonil': 'text-red-600',
             'femenil': 'text-blue-900',
             'easy_femenil': 'text-pink-600',
             'slow_mixto': 'text-emerald-600'
         };
-        const col = colores[e.liga] || 'text-slate-900';
 
-        if (tablas[key]) {
-            // Cálculo de Diferencia de Carreras (DIF)
-            const dif = e.ca - e.ce;
+        eqStats.sort((a, b) => b.g - a.g).forEach(e => {
+            const key = e.categoria + e.liga;
+            const col = colores[e.liga] || 'text-slate-900';
+            if (tablas[key]) {
+                const dif = e.ca - e.ce;
+                tablas[key].innerHTML += `
+                    <tr class="hover:bg-slate-50 border-b text-center transition-colors">
+                        <td class="p-4 text-left uppercase font-black ${col}">${e.nombre}</td>
+                        <td class="font-bold text-slate-500">${e.g + e.p}</td>
+                        <td><input type="number" onchange="updEq('${e._id}','g',this.value)" value="${e.g}" class="input-inline"></td>
+                        <td><input type="number" onchange="updEq('${e._id}','p',this.value)" value="${e.p}" class="input-inline"></td>
+                        <td><input type="number" onchange="updEq('${e._id}','ca',this.value)" value="${e.ca}" class="input-inline"></td>
+                        <td><input type="number" onchange="updEq('${e._id}','ce',this.value)" value="${e.ce}" class="input-inline"></td>
+                        <td class="font-black ${dif > 0 ? 'text-emerald-600' : 'text-red-600'}">${dif}</td>
+                        <td><button onclick="eliminarEquipo('${e._id}')" class="text-slate-300 hover:text-red-600"><i class="fa fa-trash"></i></button></td>
+                    </tr>`;
+            }
+        });
+    }
 
-            tablas[key].innerHTML += `
-                <tr class="hover:bg-slate-50 border-b text-center transition-colors">
-                    <td class="p-4 text-left uppercase font-black ${col}">${e.nombre}</td>
-                    <td class="font-bold text-slate-500">${e.g + e.p}</td>
-                    <td><input type="number" onchange="updEq('${e._id}','g',this.value)" value="${e.g}" class="input-inline"></td>
-                    <td><input type="number" onchange="updEq('${e._id}','p',this.value)" value="${e.p}" class="input-inline"></td>
-                    <td><input type="number" onchange="updEq('${e._id}','ca',this.value)" value="${e.ca}" class="input-inline"></td>
-                    <td><input type="number" onchange="updEq('${e._id}','ce',this.value)" value="${e.ce}" class="input-inline"></td>
-                    <td class="font-black ${dif > 0 ? 'text-emerald-600' : 'text-red-600'}">${dif}</td>
-                    <td>
-                        <button onclick="eliminarEquipo('${e._id}')" class="text-slate-300 hover:text-red-600 transition-colors">
-                            <i class="fa fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>`;
-        }
-    });
-}
+    // 5. FUNCIONES DE ACTUALIZACIÓN (STATS & AVG)
+    async function updPlayer(id, campo, valor) {
+        try {
+            await fetch(`${API}/players/${id}`, { 
+                method: 'PUT', 
+                headers: {'Content-Type':'application/json'}, 
+                body: JSON.stringify({ [campo]: Number(valor) }) 
+            });
+            const celdaAvg = document.getElementById(`avg-${id}`);
+            const fila = celdaAvg.parentElement;
+            const vbs = Number(fila.querySelector('input[onchange*="\'vb\'"]').value) || 0;
+            const hits = Number(fila.querySelector('input[onchange*="\'h\'"]').value) || 0;
+            celdaAvg.innerText = vbs > 0 ? (hits / vbs).toFixed(3) : "0.000";
+        } catch (err) { console.error("Error AVG:", err); }
+    }
 
-        async function updEq(id, cam, val) {
-            await fetch(`${API}/equipos/${id}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({[cam]: Number(val)}) });
-        }
+    async function updEq(id, cam, val) {
+        await fetch(`${API}/equipos/${id}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({[cam]: Number(val)}) });
+    }
 
-        async function cargarPitchers() {
-            const liga = document.getElementById('ligaPitchers').value;
-            const res = await fetch(`${API}/players?esPitcher=true${liga ? '&liga='+liga : ''}`);
-            const data = await res.json();
-            document.getElementById('tablaPitchers').innerHTML = data.map(p => `
-                <tr class="hover:bg-cyan-50 cursor-pointer" onclick="editarPitcher('${p._id}')">
-                    <td class="p-3 text-left font-black text-cyan-900 uppercase">${p.nombre}</td>
-                    <td>${p.equipo}</td><td>${p.jp||0}</td><td>${p.ip||0}</td><td>${p.so_pitcher||0}</td><td>${(p.era||0).toFixed(2)}</td><td>${(p.whip||0).toFixed(2)}</td>
-                    <td><button onclick="eliminarJugadora('${p._id}')" class="text-red-400"><i class="fa fa-trash"></i></button></td>
-                </tr>`).join('');
-        }
+    // 6. PROGRAMADOR DE JORNADA
+    function actualizarSelectores() {
+        const liga = ligaActiva; // Usamos la liga global activa
+        const options = '<option value="">-- EQUIPO --</option>' + 
+            todosLosEquipos.filter(e => e.liga === liga)
+            .map(e => `<option value="${e.nombre}">${e.nombre}</option>`).join('');
+        
+        const selLoc = document.getElementById('selLoc');
+        const selVis = document.getElementById('selVis');
+        if (selLoc) selLoc.innerHTML = options; 
+        if (selVis) selVis.innerHTML = options;
+    }
 
-       
+    async function guardarJuego() {
+        const selStream = document.getElementById('streamNuevo').value;
+        const manualStream = document.getElementById('streamManual').value;
+        const linkFinal = (selStream === "OTRO") ? manualStream : selStream;
 
-        async function editarPitcher(id) {
-            const p = await (await fetch(`${API}/players/${id}`)).json();
-            document.getElementById('p_id').value = p._id; document.getElementById('p_nombre').value = p.nombre;
-            document.getElementById('p_equipo').value = p.equipo; document.getElementById('p_jp').value = p.jp||0;
-            document.getElementById('p_ip').value = p.ip||0; document.getElementById('p_so').value = p.so_pitcher||0;
-            document.getElementById('p_cl').value = p.cl||0; document.getElementById('p_era').value = p.era||0;
-            document.getElementById('p_whip').value = p.whip||0;
-        }
+        const data = { 
+            local: document.getElementById('selLoc').value, 
+            visita: document.getElementById('selVis').value, 
+            liga: ligaActiva, 
+            fecha: document.getElementById('fec').value, 
+            hora: document.getElementById('hor').value, 
+            status: "pendiente",
+            streaming: linkFinal 
+        };
 
-        async function cargarResultados() {
-            const res = await fetch(`${API}/games?status=pendiente`);
-            const games = await res.json();
-            const cols = {'varonil':'border-red-600','femenil':'border-blue-600','easy_femenil':'border-pink-600','slow_mixto':'border-emerald-600'};
-            document.getElementById('listaResultados').innerHTML = games.map(g => `
+        if(!data.local || !data.visita) return alert("Selecciona equipos");
+
+        try {
+            const res = await fetch(`${API}/games`, { 
+                method: 'POST', 
+                headers: {'Content-Type':'application/json'}, 
+                body: JSON.stringify(data) 
+            });
+            if(res.ok) {
+                alert("Juego programado");
+                cargarResultados();
+            }
+        } catch (e) { alert("Error de red"); }
+    }
+
+    // 7. RESULTADOS Y SESIÓN
+    async function cargarResultados() {
+        const res = await fetch(`${API}/games?status=pendiente`);
+        const games = await res.json();
+        const cols = {'varonil':'border-red-600','femenil':'border-blue-600','easy_femenil':'border-pink-600','slow_mixto':'border-emerald-600'};
+        const lista = document.getElementById('listaResultados');
+        if (lista) {
+            lista.innerHTML = games.map(g => `
                 <div class="bg-white p-4 rounded-3xl border-l-4 ${cols[g.liga]||'border-slate-300'} shadow-sm relative">
                     <button onclick="eliminarJuego('${g._id}')" class="absolute -top-2 -right-2 bg-red-600 text-white w-6 h-6 rounded-full text-[8px]"><i class="fa fa-times"></i></button>
-                    <div class="flex justify-between text-[8px] font-black text-slate-400 uppercase"><span>${g.fecha}</span><span>${g.liga.replace('_',' ')}</span><span>${g.hora}</span></div>
+                    <div class="flex justify-between text-[8px] font-black text-slate-400 uppercase"><span>${g.fecha}</span><span>${g.liga}</span><span>${g.hora}</span></div>
                     <div class="flex justify-between items-center py-3">
                         <span class="text-[9px] font-black uppercase flex-1 truncate">${g.local}</span>
-                        <div class="flex gap-1 mx-1"><input id="sc-${g._id}-L" type="number" class="w-8 border text-center font-bold" placeholder="L"><input id="sc-${g._id}-V" type="number" class="w-8 border text-center font-bold" placeholder="V"></div>
+                        <div class="flex gap-1 mx-1">
+                            <input id="sc-${g._id}-L" type="number" class="w-8 border text-center font-bold">
+                            <input id="sc-${g._id}-V" type="number" class="w-8 border text-center font-bold">
+                        </div>
                         <span class="text-[9px] font-black uppercase flex-1 text-right truncate">${g.visita}</span>
                     </div>
                     <button onclick="finalizarJuego('${g._id}','${g.local}','${g.visita}')" class="w-full bg-slate-800 text-white text-[8px] font-black py-2 rounded-xl uppercase">Finalizar</button>
                 </div>`).join('');
         }
-
-        async function finalizarJuego(id, loc, vis) {
-            const sL = parseInt(document.getElementById(`sc-${id}-L`).value), sV = parseInt(document.getElementById(`sc-${id}-V`).value);
-            if(isNaN(sL) || isNaN(sV)) return alert("Marcador incompleto");
-            await fetch(`${API}/games/resultado`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id, sL, sV, ganador: sL > sV ? loc : vis, perdedor: sL > sV ? vis : loc }) });
-            sincronizarDatosBase(); cargarResultados();
-            
-        }
-
-       // Lógica para mostrar/ocultar el campo manual
-document.getElementById('streamNuevo').addEventListener('change', function() {
-    const manual = document.getElementById('streamManual');
-    if (this.value === "OTRO") {
-        manual.classList.remove('hidden');
-    } else {
-        manual.classList.add('hidden');
-        manual.value = "";
     }
-});
 
-async function guardarJuego() {
-    const selStream = document.getElementById('streamNuevo').value;
-    const manualStream = document.getElementById('streamManual').value;
-    
-    // Decidimos qué link enviar
-    const linkFinal = (selStream === "OTRO") ? manualStream : selStream;
-
-    const data = { 
-        local: document.getElementById('selLoc').value, 
-        visita: document.getElementById('selVis').value, 
-        liga: document.getElementById('filtroLigaGlobal').value, 
-        fecha: document.getElementById('fec').value, 
-        hora: document.getElementById('hor').value, 
-        status: "pendiente",
-        streaming: linkFinal 
-    };
-
-    // Validación simple
-    if(!data.local || !data.visita) return alert("Selecciona ambos equipos");
-    if(!data.fecha || !data.hora) return alert("Define fecha y hora");
-
-    try {
-        const res = await fetch(`${API}/games`, { 
+    async function finalizarJuego(id, loc, vis) {
+        const sL = parseInt(document.getElementById(`sc-${id}-L`).value);
+        const sV = parseInt(document.getElementById(`sc-${id}-V`).value);
+        if(isNaN(sL) || isNaN(sV)) return alert("Falta marcador");
+        await fetch(`${API}/games/resultado`, { 
             method: 'POST', 
-            headers: {'Content-Type':'application/json'}, 
-            body: JSON.stringify(data) 
+            headers: {'Content-Type': 'application/json'}, 
+            body: JSON.stringify({ id, sL, sV, ganador: sL > sV ? loc : vis, perdedor: sL > sV ? vis : loc }) 
         });
-
-        if(res.ok) {
-            alert("¡Juego programado con éxito!");
-            // Limpiar campos
-            document.getElementById('streamNuevo').value = "";
-            document.getElementById('streamManual').value = "";
-            document.getElementById('streamManual').classList.add('hidden');
-            cargarResultados(); // Recargar la lista de abajo
-        }
-    } catch (e) {
-        alert("Error al conectar con el servidor");
+        sincronizarDatosBase(); 
+        cargarResultados();
     }
-}
 
-        function actualizarSelectores() {
-            const liga = document.getElementById('filtroLigaGlobal').value;
-            const options = '<option value="">-- EQUIPO --</option>' + todosLosEquipos.filter(e => e.liga === liga).map(e => `<option value="${e.nombre}">${e.nombre}</option>`).join('');
-            document.getElementById('selLoc').innerHTML = options; document.getElementById('selVis').innerHTML = options;
-        }
-
-        async function cargarEquiposParaPitchers() {
-            const res = await fetch(`${API}/equipos`);
-            const eqs = await res.json();
-            document.getElementById('p_equipo').innerHTML = '<option value="">Seleccionar Equipo</option>' + eqs.map(e => `<option value="${e.nombre}">${e.nombre}</option>`).join('');
-        }
-        // --- ARREGLO MODAL ROSTERS ---
-async function actualizarSelectRoster() {
-    const liga = document.getElementById('ligaRoster').value;
-    const filter = document.getElementById('filterRoster');
-    // Filtrar equipos locales que coincidan con la liga seleccionada
-    const filtrados = todosLosEquipos.filter(e => e.liga === liga);
-    
-    let options = '<option value="">-- SELECCIONAR EQUIPO --</option>';
-    filtrados.forEach(e => options += `<option value="${e.nombre}">${e.nombre}</option>`);
-    filter.innerHTML = options;
-    document.getElementById('containerRoster').innerHTML = ""; // Limpiar tabla previa
-}
-
-async function verRosterEquipo() {
-    const eq = document.getElementById('filterRoster').value;
-    const liga = document.getElementById('ligaRoster').value;
-    const cont = document.getElementById('containerRoster');
-    
-    if(!eq) return cont.innerHTML = "";
-    
-    cont.innerHTML = `<div class="p-10 text-center"><i class="fa fa-spinner fa-spin"></i> Cargando datos de Mongo...</div>`;
-
-    try {
-        const res = await fetch(`${API}/players?equipo=${encodeURIComponent(eq)}&liga=${liga}`);
-        const players = await res.json();
-        
-        cont.innerHTML = `
-            <table class="w-full text-[10px] text-left border-collapse">
-                <thead>
-                    <tr class="bg-slate-100 text-slate-600 uppercase font-black border-b text-center">
-                        <th class="p-2 text-left">Jugadora</th>
-                        <th class="p-1">JJ</th><th class="p-1">VB</th><th class="p-1">H</th>
-                        <th class="p-1">2B</th><th class="p-1">3B</th><th class="p-1">HR</th>
-                        <th class="p-1">K</th><th class="p-1 text-red-600">RBI</th><th class="p-1">AVG</th>
-                        <th class="p-1">Acción</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y">
-                    ${players.map(p => {
-                        // Cálculo de AVG inicial: Hits / Veces al Bate
-                        const avg = p.vb > 0 ? (p.h / p.vb).toFixed(3) : "0.000";
-                        
-                        return `
-                        <tr class="hover:bg-slate-50 text-center">
-                            <td class="p-2 font-bold uppercase text-slate-700 text-left">${p.nombre}</td>
-                            <td><input type="number" value="${p.jj || 0}" onchange="updPlayer('${p._id}','jj',this.value)" class="w-10 border rounded text-center p-1"></td>
-                            
-                           
-                            <td><input type="number" value="${p.vb || 0}" onchange="updPlayer('${p._id}','vb',this.value)" class="w-10 border rounded text-center p-1"></td>
-                            <td><input type="number" value="${p.h || 0}" onchange="updPlayer('${p._id}','h',this.value)" class="w-10 border rounded text-center p-1 font-bold text-blue-600"></td>
-                            
-                            <td><input type="number" value="${p.dobles || 0}" onchange="updPlayer('${p._id}','dobles',this.value)" class="w-10 border rounded text-center p-1"></td>
-                            <td><input type="number" value="${p.triples || 0}" onchange="updPlayer('${p._id}','triples',this.value)" class="w-10 border rounded text-center p-1"></td>
-                            <td><input type="number" value="${p.hr || 0}" onchange="updPlayer('${p._id}','hr',this.value)" class="w-10 border rounded text-center p-1 font-bold text-red-600"></td>
-                            <td><input type="number" value="${p.k || 0}" onchange="updPlayer('${p._id}','k',this.value)" class="w-10 border rounded text-center p-1"></td>
-                            <td><input type="number" value="${p.rbi || 0}" onchange="updPlayer('${p._id}','rbi',this.value)" class="w-10 border-2 border-red-200 rounded text-center p-1 font-black text-red-600"></td>
-                            
-                           
-                            <td class="font-black italic text-slate-400 text-xs" id="avg-${p._id}">${avg}</td>
-                            
-                            <td><button onclick="eliminarJugadora('${p._id}')" class="text-red-400 hover:text-red-600"><i class="fa fa-trash"></i></button></td>
-                        </tr>`;
-                    }).join('')}
-                </tbody>
-            </table>`;
-    } catch (e) {
-        cont.innerHTML = `<div class="p-10 text-red-500">Error al conectar con el servidor.</div>`;
-    }
-}
-
-
-// --- ARREGLO FLUJO PITCHERS ---
-
-// 1. Cargar jugadoras cuando se selecciona un equipo en el modal de pitchers
-async function cargarJugadorasPorEquipo(equipoNombre) {
-    const selectJ = document.getElementById('p_jugadora_select');
-    if(!equipoNombre) {
-        selectJ.innerHTML = '<option value="">-- Selecciona Equipo --</option>';
-        return;
+    // 8. UTILIDADES
+    function gestionarSesion() { 
+        const s = JSON.parse(localStorage.getItem('userLogueado')); 
+        if(s) document.getElementById('nombreUsuarioActivo').innerText = s.correo.split('@')[0].toUpperCase(); 
+        else window.location.href = 'index.html'; 
     }
     
-    try {
-        const res = await fetch(`${API}/players?equipo=${encodeURIComponent(equipoNombre)}`);
-        const jugadoras = await res.json();
-        
-        let options = '<option value="">-- Seleccionar Jugadora --</option>';
-        jugadoras.forEach(j => {
-            options += `<option value="${j._id}" data-nombre="${j.nombre}">${j.nombre}</option>`;
-        });
-        selectJ.innerHTML = options;
-    } catch (e) { console.error("Error cargando jugadoras:", e); }
-}
-
-// 2. Al seleccionar la jugadora, poner su nombre en el input invisible y su ID
-function prepararPitcher(playerID) {
-    const select = document.getElementById('p_jugadora_select');
-    const option = select.options[select.selectedIndex];
-    if(playerID) {
-        document.getElementById('p_id').value = playerID;
-        document.getElementById('p_nombre').value = option.getAttribute('data-nombre');
+    function toggleModal(id) { 
+        const m = document.getElementById(id);
+        if (m) m.classList.toggle('active'); 
     }
-}
 
-// 3. Modificar guardarPitcher para que use el ID de la jugadora existente
-async function guardarPitcher() {
-    const id = document.getElementById('p_id').value;
-    if (!id) return alert('Primero selecciona equipo y jugadora');
-
-    const data = {
-        esPitcher: true, // Se marca como pitcher automáticamente al guardar stats
-        jp: parseInt(document.getElementById('p_jp').value) || 0,
-        ip: parseFloat(document.getElementById('p_ip').value) || 0,
-        so_pitcher: parseInt(document.getElementById('p_so').value) || 0,
-        cl: parseInt(document.getElementById('p_cl').value) || 0,
-        era: parseFloat(document.getElementById('p_era').value) || 0,
-        whip: parseFloat(document.getElementById('p_whip').value) || 0
-    };
-
-    try {
-        // Siempre es un PUT porque la jugadora ya existe en el roster
-        await fetch(`${API}/players/${id}`, { 
-            method: 'PUT', 
-            headers: {'Content-Type':'application/json'}, 
-            body: JSON.stringify(data) 
-        });
-        alert("Estadísticas de pitcheo actualizadas");
-        limpiarFormPitcher(); 
-        cargarPitchers();
-    } catch (err) { alert('Error al guardar'); }
-}
-async function updPlayer(id, campo, valor) {
-    try {
-        // 1. Mandamos el cambio a la base de datos (MongoDB)
-        await fetch(`${API}/players/${id}`, { 
-            method: 'PUT', 
-            headers: {'Content-Type':'application/json'}, 
-            body: JSON.stringify({ [campo]: Number(valor) }) 
-        });
-
-        // 2. Localizamos la fila de la jugadora en la tabla
-        const celdaAvg = document.getElementById(`avg-${id}`);
-        const fila = celdaAvg.parentElement;
-
-        // 3. Obtenemos los valores actuales de los inputs de ESA fila
-        // Buscamos los inputs de Hits (H) y Veces al Bate (VB)
-        const vbInput = fila.querySelector('input[onchange*="\'vb\'"]');
-        const hInput = fila.querySelector('input[onchange*="\'h\'"]');
-
-        const vbs = Number(vbInput.value) || 0;
-        const hits = Number(hInput.value) || 0;
-
-        // 4. CÁLCULO DE LA FÓRMULA: H / VB
-        const nuevoAVG = vbs > 0 ? (hits / vbs).toFixed(3) : "0.000";
-
-        // 5. Pintamos el resultado en la celda de AVG
-        celdaAvg.innerText = nuevoAVG;
-        
-        // Efecto visual de que se guardó (opcional)
-        celdaAvg.classList.add('text-blue-600');
-        setTimeout(() => celdaAvg.classList.remove('text-blue-600'), 1000);
-
-    } catch (err) {
-        console.error("Error al actualizar y calcular AVG:", err);
+    function cerrarSesion() { 
+        localStorage.clear(); 
+        window.location.href = 'index.html'; 
     }
-}
 
-        function toggleModal(id) { document.getElementById(id).classList.toggle('active'); }
-        function gestionarSesion() { const s = JSON.parse(localStorage.getItem('userLogueado')); if(s) document.getElementById('nombreUsuarioActivo').innerText = s.correo.split('@')[0].toUpperCase(); else window.location.href = 'index.html'; }
-        async function guardarEquipo() { const data = { nombre: document.getElementById('teamName').value.toUpperCase(), categoria: document.getElementById('teamCat').value, liga: document.getElementById('teamLiga').value }; await fetch(`${API}/equipos`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) }); toggleModal('modalEquipo'); sincronizarDatosBase(); }
-        async function eliminarEquipo(id) { if(confirm("¿Borrar?")) { await fetch(`${API}/equipos/${id}`, { method: 'DELETE' }); sincronizarDatosBase(); } }
-        async function eliminarJugadora(id) { if(confirm("¿Borrar?")) { await fetch(`${API}/players/${id}`, { method: 'DELETE' }); cargarPitchers(); } }
-        async function eliminarJuego(id) { if(confirm("¿Borrar?")) { await fetch(`${API}/games/${id}`, { method: 'DELETE' }); cargarResultados(); } }
-        function limpiarFormPitcher() { document.getElementById('p_id').value = ''; document.getElementById('p_nombre').value = ''; }
-        function cerrarSesion() { localStorage.clear(); window.location.href = 'index_post.html'; }
-        document.addEventListener('DOMContentLoaded', cargarTodo);
-
-        
-    </script>
-
-    
+    // INICIO
+    document.addEventListener('DOMContentLoaded', cargarTodo);
+</script>   
 </body>
 </html>
