@@ -25,8 +25,8 @@
     <nav class="bg-blue-900 text-white p-4 shadow-lg sticky top-0 z-50 border-b-4 border-pink-600">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <img src="logoley57icon.jpeg" class="w-10 h-10 bg-white rounded-full p-1">
-                <span class="font-black italic tracking-tighter text-xl uppercase">Ley 57 - <span class="text-pink-500">Slow Pitch Femenil</span></span>
+                <img src="logoslowpichfemenilnuevo.jpeg" class="w-10 h-10 bg-white rounded-full p-1">
+                <span class="font-black italic tracking-tighter text-xl uppercase">Ley 57 - <span class="text-pink-500">Slow Picht Femenil</span></span>
             </div>
             <a href="index_post.html" class="text-[10px] bg-pink-600 px-5 py-2 rounded-full font-black hover:bg-white hover:text-pink-600 transition-all uppercase tracking-widest shadow-lg">Regresar</a>
         </div>
@@ -514,16 +514,42 @@
 }
 
     function filtrarJuegos() {
-        const bus = document.getElementById('inputBusquedaJuegos').value.toUpperCase();
-        const t = document.getElementsByClassName('tarjeta-resultado');
-        const cont = document.getElementById('contadorResultados');
-        let n = 0;
-        for(let i=0; i<t.length; i++) {
-            if(t[i].innerText.toUpperCase().includes(bus)) { t[i].style.display = ""; n++; }
-            else t[i].style.display = "none";
+    // 1. Capturamos la búsqueda y limpiamos espacios
+    const busqueda = document.getElementById('inputBusquedaJuegos').value.toUpperCase().trim();
+    const tarjetas = document.getElementsByClassName('tarjeta-resultado');
+    const contador = document.getElementById('contadorResultados');
+    let encontrados = 0;
+
+    // 2. Iteramos por cada tarjeta de resultado
+    for (let i = 0; i < tarjetas.length; i++) {
+        const tarjeta = tarjetas[i];
+        
+        // Extraemos el texto de los equipos y la fecha específicamente
+        // Esto evita que el buscador se active por palabras como "FINALIZADO"
+        const contenidoBusqueda = tarjeta.innerText.toUpperCase();
+
+        // 3. Lógica de visibilidad
+        if (contenidoBusqueda.includes(busqueda)) {
+            tarjeta.style.display = ""; // Mostramos si coincide
+            tarjeta.classList.add('fade-in'); // Opcional: añade tu animación de lujo
+            encontrados++;
+        } else {
+            tarjeta.style.display = "none"; // Ocultamos si no coincide
         }
-        cont.innerText = bus === "" ? "" : `${n} resultados encontrados`;
     }
+
+    // 4. Actualizamos el contador de resultados de forma profesional
+    if (busqueda === "") {
+        contador.innerText = "";
+        contador.classList.add('hidden');
+    } else {
+        contador.classList.remove('hidden');
+        contador.innerHTML = `
+            <span class="bg-red-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase italic animate-pulse">
+                ${encontrados} resultados encontrados
+            </span>`;
+    }
+}
 </script>
 </body>
 </html>

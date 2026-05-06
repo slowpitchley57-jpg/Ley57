@@ -332,45 +332,80 @@
         }
 
         function renderizarTablas() {
-            const tablas = {
-                'Intermediafemenil': document.getElementById('tablaIntermedia'),
-                'Relaxfemenil': document.getElementById('tablaRelax'),
-                'Intermediavaronil': document.getElementById('tablaIntermediaVar'),
-                'Relaxvaronil': document.getElementById('tablaRelaxVar'),
-                'Libreeasy_femenil': document.getElementById('tablaEasyFem'),
-                'Libreslow_mixto': document.getElementById('tablaSlowMix')
-            };
-            Object.values(tablas).forEach(t => t.innerHTML = "");
+    // 1. Mapeo de contenedores HTML para cada liga y categoría
+    const tablas = {
+        'Intermediafemenil': document.getElementById('tablaIntermedia'),
+        'Relaxfemenil': document.getElementById('tablaRelax'),
+        'Intermediavaronil': document.getElementById('tablaIntermediaVar'),
+        'Relaxvaronil': document.getElementById('tablaRelaxVar'),
+        'Libreeasy_femenil': document.getElementById('tablaEasyFem'),
+        'Libreslow_mixto': document.getElementById('tablaSlowMix')
+    };
 
-            const eqStats = todosLosEquipos.map(eq => {
-                let g = 0, p = 0, ca = 0, ce = 0;
-                const nom = eq.nombre.trim().toUpperCase();
-                juegosFinalizados.forEach(j => {
-                    const s = j.resultado.split('-').map(Number);
-                    if(j.local.trim().toUpperCase() === nom) { ca+=s[0]; ce+=s[1]; if(s[0]>s[1]) g++; else if(s[0]<s[1]) p++; }
-                    else if(j.visita.trim().toUpperCase() === nom) { ca+=s[1]; ce+=s[0]; if(s[1]>s[0]) g++; else if(s[1]<s[0]) p++; }
-                });
-                return { ...eq, g, p, ca, ce };
-            });
+    // Limpiar todas las tablas antes de renderizar
+    Object.values(tablas).forEach(t => { if (t) t.innerHTML = ""; });
 
-            eqStats.sort((a,b) => b.g - a.g).forEach(e => {
-                const key = e.categoria + e.liga;
-                const col = {'varonil':'text-red-600','femenil':'text-blue-900','easy_femenil':'text-pink-600','slow_mixto':'text-emerald-600'}[e.liga];
-                if(tablas[key]) {
-                    tablas[key].innerHTML += `
-                        <tr class="hover:bg-slate-50 border-b text-center">
-                            <td class="p-4 text-left uppercase font-black ${col}">${e.nombre}</td>
-                            <td>${e.g+e.p}</td>
-                            <td><input type="number" onchange="updEq('${e._id}','g',this.value)" value="${e.g}" class="input-inline"></td>
-                            <td><input type="number" onchange="updEq('${e._id}','p',this.value)" value="${e.p}" class="input-inline"></td>
-                            <td><input type="number" onchange="updEq('${e._id}','ca',this.value)" value="${e.ca}" class="input-inline"></td>
-                            <td><input type="number" onchange="updEq('${e._id}','ce',this.value)" value="${e.ce}" class="input-inline"></td>
-                            <td class="font-black">${e.ca-e.ce}</td>
-                            <td><button onclick="eliminarEquipo('${e._id}')" class="text-slate-300 hover:text-red-600"><i class="fa fa-trash"></i></button></td>
-                        </tr>`;
-                }
-            });
+    // 2. Cálculo de estadísticas de equipos basado en juegos finalizados
+    const eqStats = todosLosEquipos.map(eq => {
+        let g = 0, p = 0, ca = 0, ce = 0;
+        const nom = eq.nombre.trim().toUpperCase();
+
+        juegosFinalizados.forEach(j => {
+            // Aseguramos que el resultado tenga el formato correcto antes de procesar
+            if (!j.resultado || !j.resultado.includes('-')) return;
+            
+            const s = j.resultado.split('-').map(Number);
+            
+            if (j.local.trim().toUpperCase() === nom) { 
+                ca += s[0]; 
+                ce += s[1]; 
+                if (s[0] > s[1]) g++; else if (s[0] < s[1]) p++; 
+            }
+            else if (j.visita.trim().toUpperCase() === nom) { 
+                ca += s[1]; 
+                ce += s[0]; 
+                if (s[1] > s[0]) g++; else if (s[1] < s[0]) p++; 
+            }
+        });
+        return { ...eq, g, p, ca, ce };
+    });
+
+    // 3. Ordenamiento y renderizado en el HTML
+    // Ordenamos por Juegos Ganados (G) de mayor a menor
+    eqStats.sort((a, b) => b.g - a.g).forEach(e => {
+        const key = e.categoria + e.liga;
+        
+        // Asignación de colores de identidad según la liga
+        const colores = {
+            'varonil': 'text-red-600',
+            'femenil': 'text-blue-900',
+            'easy_femenil': 'text-pink-600',
+            'slow_mixto': 'text-emerald-600'
+        };
+        const col = colores[e.liga] || 'text-slate-900';
+
+        if (tablas[key]) {
+            // Cálculo de Diferencia de Carreras (DIF)
+            const dif = e.ca - e.ce;
+
+            tablas[key].innerHTML += `
+                <tr class="hover:bg-slate-50 border-b text-center transition-colors">
+                    <td class="p-4 text-left uppercase font-black ${col}">${e.nombre}</td>
+                    <td class="font-bold text-slate-500">${e.g + e.p}</td>
+                    <td><input type="number" onchange="updEq('${e._id}','g',this.value)" value="${e.g}" class="input-inline"></td>
+                    <td><input type="number" onchange="updEq('${e._id}','p',this.value)" value="${e.p}" class="input-inline"></td>
+                    <td><input type="number" onchange="updEq('${e._id}','ca',this.value)" value="${e.ca}" class="input-inline"></td>
+                    <td><input type="number" onchange="updEq('${e._id}','ce',this.value)" value="${e.ce}" class="input-inline"></td>
+                    <td class="font-black ${dif > 0 ? 'text-emerald-600' : 'text-red-600'}">${dif}</td>
+                    <td>
+                        <button onclick="eliminarEquipo('${e._id}')" class="text-slate-300 hover:text-red-600 transition-colors">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>`;
         }
+    });
+}
 
         async function updEq(id, cam, val) {
             await fetch(`${API}/equipos/${id}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({[cam]: Number(val)}) });
@@ -421,6 +456,7 @@
             if(isNaN(sL) || isNaN(sV)) return alert("Marcador incompleto");
             await fetch(`${API}/games/resultado`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id, sL, sV, ganador: sL > sV ? loc : vis, perdedor: sL > sV ? vis : loc }) });
             sincronizarDatosBase(); cargarResultados();
+            
         }
 
        // Lógica para mostrar/ocultar el campo manual
