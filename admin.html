@@ -584,6 +584,10 @@ async function cargarResultados() {
                 <button onclick="finalizarJuego('${g._id}','${g.local}','${g.visita}')" class="w-full bg-blue-900 hover:bg-black text-white text-[9px] font-black py-3 rounded-2xl uppercase transition-all shadow-lg shadow-blue-100">
                     <i class="fa fa-check-circle mr-1"></i> Finalizar y Guardar
                 </button>
+                // Dentro del .map de cargarResultados, junto al botón de "Finalizar":
+<button onclick="confiscarJuego('${g._id}','${g.local}','${g.visita}')" class="w-full mt-2 bg-orange-600 text-white text-[9px] font-black py-2 rounded-xl uppercase hover:bg-black transition-all">
+    <i class="fa fa-exclamation-triangle mr-1"></i> Confiscar / Revisión
+</button>
             </div>
         `).join('');
     } catch (err) {
@@ -957,42 +961,62 @@ function mostrarCamposEspeciales(tipo) {
     const contenedor = document.getElementById('contenedorMotivos');
     const selectMotivo = document.getElementById('docMotivo');
     const label = document.getElementById('labelMotivo');
-    
-    // Contenedores de equipos y juegos para ocultar/mostrar
     const campoEquipos = document.getElementById('docEquipos').parentElement;
     const campoJuego = document.getElementById('docJuego').parentElement;
 
-    // Resetear visibilidad por defecto
+    // Reset general
     campoEquipos.classList.remove('hidden');
     campoJuego.classList.remove('hidden');
-    contenedor.classList.add('hidden');
+    contenedor.classList.remove('hidden');
 
     if (tipo === "PROTESTA DE JUEGO") {
-        contenedor.classList.remove('hidden');
         label.innerText = "Motivo de la Protesta:";
         selectMotivo.innerHTML = `
             <option value="">-- Elige motivo --</option>
-            <option value="ALINEACIÓN INDEBIDA">Alineación Indebida (Jugador no registrado)</option>
-            <option value="USO DE EQUIPO ILEGAL">Uso de Bat no autorizado / Alterado</option>
-            <option value="VIOLACIÓN TÉCNICA">Violación técnica al Reglamento de Campo</option>
-            <option value="PROTESTA DE AMPAYEO">Apelación por interpretación de regla</option>
+            <option value="ALINEACIÓN INDEBIDA">Alineación Indebida (Punto 4)</option>
+            <option value="USO DE EQUIPO ILEGAL">Bate No Autorizado (Punto 11)</option>
+            <option value="PROTESTA DE REGLA">Interpretación de Regla</option>
         `;
     } else if (tipo === "RESOLUCIÓN DISCIPLINARIA") {
-        contenedor.classList.remove('hidden');
-        label.innerText = "Tipo de Falta:";
+        label.innerText = "Falta Cometida:";
         selectMotivo.innerHTML = `
             <option value="">-- Elige falta --</option>
-            <option value="AGRESIÓN VERBAL">Falta de respeto / Agresión Verbal</option>
-            <option value="AGRESIÓN FÍSICA">Intento de agresión / Agresión Física</option>
-            <option value="CONDUCTA ANTIDEPORTIVA">Conducta Antideportiva General</option>
+            <option value="AGRESIÓN">Agresión Física/Verbal (Punto 16)</option>
+            <option value="CONDUCTA">Falta de Ética/Moral (Punto 15)</option>
         `;
     } else if (tipo === "COMUNICADO OFICIAL") {
-        // OCULTAR equipos y juegos para comunicados generales
+        contenedor.classList.add('hidden');
         campoEquipos.classList.add('hidden');
         campoJuego.classList.add('hidden');
-        precargarTextoPro(); // Carga el texto base directamente
-    } else {
         precargarTextoPro();
+    }
+}
+
+function precargarTextoPro() {
+    const tipo = document.getElementById('docTipo').value;
+    const motivo = document.getElementById('docMotivo').value;
+    const campo = document.getElementById('docTexto');
+
+    const textos = {
+        "PROTESTA DE JUEGO": {
+            "ALINEACIÓN INDEBIDA": `ASUNTO: IMPUGNACIÓN POR ALINEACIÓN INDEBIDA (PUNTO 4)\n\nPRESENTE:\nSe notifica la violación al Punto 4 del Reglamento Oficial, el cual estipula que los jugadores deben ingresar antes del término de la 2da entrada. Se detectó la participación de un elemento fuera de este margen legal.\n\nDICTAMEN SOLICITADO:\nSe pide la aplicación de la sanción administrativa correspondiente y el ajuste del resultado del encuentro.`,
+            
+            "USO DE EQUIPO ILEGAL": `ASUNTO: REPORTE POR USO DE BATE NO AUTORIZADO (PUNTO 11)\n\nSe hace constar la violación al Punto 11 del Reglamento, relativo al uso de equipo ilegal. El jugador fue detectado utilizando un bate que no cumple con las especificaciones de la liga, procediendo a la aplicación de la regla "OUT POR REGLA" y la protesta del marcador final.`,
+            
+            "PROTESTA DE REGLA": `ASUNTO: APELACIÓN TÉCNICA Y CONSULTA DE CUERPO TÉCNICO\n\nBajo el procedimiento oficial, se presenta una protesta legal. Se ha cubierto la cuota de $500.00 M.N. (No reembolsables). Se solicita la revisión del juego según el apartado de apelaciones, debiendo resolverse en un plazo no mayor a 24 horas.`
+        },
+        "RESOLUCIÓN DISCIPLINARIA": {
+            "AGRESIÓN": `ASUNTO: SANCIÓN DISCIPLINARIA POR AGRESIÓN (PUNTO 16)\n\nEl Reglamento Oficial en su Punto 16 es estricto: "Jugadores y público deberán mantener una postura de respeto". Debido a la agresión reportada, la directiva aplica la facultad de suspender al involucrado por un periodo de (___) juegos.`,
+            
+            "CONDUCTA": `ASUNTO: VIOLACIÓN AL CÓDIGO DE ÉTICA Y MORAL (PUNTO 15)\n\nBasado en el Punto 15, nuestra liga profesa valores de integridad. La conducta antideportiva mostrada conlleva una amonestación formal y sanción administrativa para preservar la armonía deportiva de la Ley 57.`
+        },
+        "COMUNICADO OFICIAL": `ASUNTO: COMUNICADO OFICIAL - DIRECTIVA ALV SPORT\n\nA TODOS LOS PARTICIPANTES:\n\nSe les informa que para mantener el orden en la Unidad Deportiva Ley 57 (Campo de Puertas Cerradas - Punto 14), se aplicará la siguiente medida:\n\n(Escribir mensaje aquí...)\n\nATENTAMENTE:\nFRANCISCO JAVIER YOCUPICIO`
+    };
+
+    if (textos[tipo] && typeof textos[tipo] === 'object') {
+        campo.value = textos[tipo][motivo] || "Selecciona un motivo arriba para ver la referencia reglamentaria...";
+    } else {
+        campo.value = textos[tipo] || "";
     }
 }
 // Carga de equipos y juegos dinámica
@@ -1015,32 +1039,30 @@ function autollenarEquipos(val) {
     document.getElementById('docEquipos').value = `${loc} VS ${vis}`;
 }
 
-// TEXTO PRO PROFESIONAL
-function precargarTextoPro() {
-    const tipo = document.getElementById('docTipo').value;
-    const motivo = document.getElementById('docMotivo').value;
-    const campo = document.getElementById('docTexto');
 
-    const textos = {
-        "PROTESTA DE JUEGO": {
-            "ALINEACIÓN INDEBIDA": `ASUNTO: IMPUGNACIÓN FORMAL POR ALINEACIÓN INDEBIDA\n\nESTIMADA DIRECTIVA:\n\nSe presenta una PROTESTA LEGAL basada en el incumplimiento del registro oficial. Se detectó la participación de elementos no autorizados en el roster activo[cite: 44]. Se solicita la revisión de la cédula y la aplicación del FORFAIT conforme al reglamento[cite: 18, 52, 103].`,
-            "USO DE EQUIPO ILEGAL": `ASUNTO: REPORTE TÉCNICO POR USO DE BAT NO AUTORIZADO\n\nSe notifica la protesta por uso de equipo que no cumple con especificaciones de seguridad o presenta alteraciones[cite: 50, 78]. Se solicita revisión técnica del artículo según las categorías autorizadas (Aluminio/100% Alloy)[cite: 51, 79, 80].`,
-            "VIOLACIÓN TÉCNICA": `ASUNTO: APELACIÓN POR VIOLACIÓN TÉCNICA AL REGLAMENTO\n\nSe presenta queja por interpretación errónea de las reglas de campo en la Unidad Ley 57[cite: 56]. Se solicita rectificación inmediata de la situación de juego[cite: 31, 102].`,
-            "PROTESTA DE AMPAYEO": `ASUNTO: APELACIÓN POR INTERPRETACIÓN DE REGLA\n\nSe solicita la revisión de la marcación de apreciación del Ampayer, basándose en el reglamento oficial de la modalidad[cite: 40, 102]. Se ha cubierto la cuota de $500.00 M.N. obligatoria para este proceso.`
-        },
-        "RESOLUCIÓN DISCIPLINARIA": {
-            "AGRESIÓN VERBAL": `ASUNTO: DICTAMEN POR FALTA DE RESPETO\n\nBasado en el Artículo 16, se determina conducta inapropiada hacia colaboradores o público[cite: 58, 99]. Se aplica suspensión de (____) juegos. La reincidencia resultará en baja definitiva[cite: 19, 73].`,
-            "AGRESIÓN FÍSICA": `ASUNTO: EXPULSIÓN POR AGRESIÓN FÍSICA\n\nPolítica de CERO TOLERANCIA ante violencia física[cite: 99]. Se dictamina baja inmediata. El castigo puede extenderse hasta por 365 días fuera de la liga[cite: 19, 73].`,
-            "CONDUCTA ANTIDEPORTIVA": `ASUNTO: SANCIÓN POR CONDUCTA ANTIDEPORTIVA\n\nSe sanciona al jugador/equipo por actos que dañan la integridad moral y armonía deportiva[cite: 57, 58].`
-        },
-        "SITUACIÓN DE JUEGO": `ASUNTO: REPORTE DE ESTATUS DE JUEGO LEGAL\n\nSe informa suspensión por causas ajenas (Clima/Luz)[cite: 105]. Se declara JUEGO LEGAL al concluir la 4ta entrada[cite: 35, 86, 106]. El marcador actual queda oficializado[cite: 35].`,
-        "COMUNICADO OFICIAL": `ASUNTO: COMUNICADO ADMINISTRATIVO ALV SPORT\n\nA TODOS LOS MANAGERS Y AFICIÓN:\n\nSe les comunica lo siguiente:\n(Escribir mensaje aquí...)\n\nAtentamente:\nFRANCISCO JAVIER YOCUPICIO [cite: 62, 63]`
-    };
+async function confiscarJuego(id, loc, vis) {
+    if (!confirm(`¿Confirmar CONFISCACIÓN del juego ${loc} vs ${vis}? El juego quedará bajo revisión de la directiva.`)) return;
 
-    if (tipo === "PROTESTA DE JUEGO" || tipo === "RESOLUCIÓN DISCIPLINARIA") {
-        campo.value = textos[tipo][motivo] || "Selecciona un motivo específico arriba para generar el texto...";
-    } else {
-        campo.value = textos[tipo] || "";
+    try {
+        const res = await fetch(`${API}/games/resultado`, { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify({ 
+                id, 
+                sL: 0, 
+                sV: 0, 
+                status: "confiscado", // Nuevo estatus
+                ganador: "PENDIENTE", 
+                perdedor: "PENDIENTE" 
+            }) 
+        });
+
+        if (res.ok) {
+            alert("⚠️ JUEGO CONFISCADO: Se ha movido a revisión. No afectará standings hasta el dictamen final.");
+            await cargarResultados(); // Refrescar lista
+        }
+    } catch (err) {
+        console.error("Error al confiscar:", err);
     }
 }
     // Funciones de utilidad restantes heredadas
