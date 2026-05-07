@@ -559,6 +559,7 @@ async function cargarResultados() {
 
         if (games.length === 0) {
             contenedor.innerHTML = `<p class="col-span-full text-center text-slate-400 uppercase font-black text-xs py-10">No hay juegos pendientes por finalizar</p>`;
+            
             return;
         }
 
@@ -584,12 +585,12 @@ async function cargarResultados() {
                 <button onclick="finalizarJuego('${g._id}','${g.local}','${g.visita}')" class="w-full bg-blue-900 hover:bg-black text-white text-[9px] font-black py-3 rounded-2xl uppercase transition-all shadow-lg shadow-blue-100">
                     <i class="fa fa-check-circle mr-1"></i> Finalizar y Guardar
                 </button>
-                // AL DAR CLIC AL BOTON DE CONFISCAR, EL JUEGO SE QUEDARA COMO PENIDIENTE Y NO SE DARA EL GANADO A NADIE NI EL PERDIDO Y SE IRA A REVISIÓN PARA VER QUE PASO EN ESE JUEGO Y SE PODRA EDITAR EL RESULTADO O DAR GANADOR O PERDEDOR DEPENDIENDO DE LO QUE SE VEA EN LA REVISIÓN
-<button onclick="confiscarJuego('${g._id}','${g.local}','${g.visita}')" class="w-full mt-2 bg-orange-600 text-white text-[9px] font-black py-2 rounded-xl uppercase hover:bg-black transition-all">
+                    <button onclick="confiscarJuego('${g._id}','${g.local}','${g.visita}')" class="w-full mt-2 bg-orange-600 text-white text-[9px] font-black py-2 rounded-xl uppercase hover:bg-black transition-all">
     <i class="fa fa-exclamation-triangle mr-1"></i> Confiscar / Revisión
 </button>
             </div>
         `).join('');
+        await cargarJuegosConfiscados();
     } catch (err) {
         console.error("Error al cargar juegos pendientes:", err);
     }
@@ -796,6 +797,49 @@ async function guardarStatsPitcher() {
     document.getElementById('p_id_actual').value = "";
     document.querySelectorAll('#modalPitchers input[type="number"]').forEach(i => i.value = "");
     cargarPitchers(); // Refrescar mini tabla
+}
+async function cargarJuegosConfiscados() {
+    const cont = document.getElementById('listaResultados'); // Usamos el mismo contenedor
+    try {
+        // Buscamos en la base de datos los que están en el limbo
+        const res = await fetch(`${API}/games?status=en revisión`);
+        const games = await res.json();
+
+        if (games.length === 0) return; // Si no hay nada en revisión, no hacemos nada
+
+        // Si hay juegos, los pegamos al principio de la lista con un diseño de alerta
+        const htmlConfiscados = games.map(g => `
+            <div class="bg-orange-50 p-4 rounded-3xl border-2 border-orange-500 shadow-lg relative mb-6">
+                <div class="absolute -top-3 left-4 bg-orange-500 text-white px-3 py-1 rounded-full text-[9px] font-black uppercase italic animate-pulse">
+                    ⚠️ BAJO REVISIÓN DIRECTIVA
+                </div>
+                
+                <div class="flex justify-between text-[8px] font-black text-slate-400 uppercase mb-2 mt-2">
+                    <span>${g.fecha}</span>
+                    <span class="bg-orange-100 text-orange-700 px-2 rounded-full">${g.liga.replace('_',' ')}</span>
+                </div>
+
+                <div class="flex justify-between items-center py-3 border-y border-orange-100 mb-3">
+                    <span class="text-[10px] font-black uppercase flex-1">${g.local}</span>
+                    <div class="flex gap-1 mx-2">
+                        <input id="sc-${g._id}-L" type="number" class="w-10 border-2 border-orange-200 rounded-lg text-center font-bold" placeholder="L">
+                        <input id="sc-${g._id}-V" type="number" class="w-10 border-2 border-orange-200 rounded-lg text-center font-bold" placeholder="V">
+                    </div>
+                    <span class="text-[10px] font-black uppercase flex-1 text-right">${g.visita}</span>
+                </div>
+
+                <button onclick="finalizarJuego('${g._id}','${g.local}','${g.visita}')" class="w-full bg-orange-600 hover:bg-black text-white text-[9px] font-black py-3 rounded-2xl uppercase transition-all shadow-md">
+                    <i class="fa fa-gavel mr-1"></i> Dictaminar Resultado Final
+                </button>
+            </div>
+        `).join('');
+
+        // Los ponemos arriba de los juegos pendientes normales
+        cont.innerHTML = htmlConfiscados + cont.innerHTML;
+
+    } catch (e) {
+        console.error("Error al cargar confiscados:", e);
+    }
 }
 
 // Manejo visual del input de link manual
