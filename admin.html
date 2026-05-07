@@ -584,7 +584,7 @@ async function cargarResultados() {
                 <button onclick="finalizarJuego('${g._id}','${g.local}','${g.visita}')" class="w-full bg-blue-900 hover:bg-black text-white text-[9px] font-black py-3 rounded-2xl uppercase transition-all shadow-lg shadow-blue-100">
                     <i class="fa fa-check-circle mr-1"></i> Finalizar y Guardar
                 </button>
-                // Dentro del .map de cargarResultados, junto al botón de "Finalizar":
+                // AL DAR CLIC AL BOTON DE CONFISCAR, EL JUEGO SE QUEDARA COMO PENIDIENTE Y NO SE DARA EL GANADO A NADIE NI EL PERDIDO Y SE IRA A REVISIÓN PARA VER QUE PASO EN ESE JUEGO Y SE PODRA EDITAR EL RESULTADO O DAR GANADOR O PERDEDOR DEPENDIENDO DE LO QUE SE VEA EN LA REVISIÓN
 <button onclick="confiscarJuego('${g._id}','${g.local}','${g.visita}')" class="w-full mt-2 bg-orange-600 text-white text-[9px] font-black py-2 rounded-xl uppercase hover:bg-black transition-all">
     <i class="fa fa-exclamation-triangle mr-1"></i> Confiscar / Revisión
 </button>
@@ -999,22 +999,22 @@ function precargarTextoPro() {
 
     const textos = {
         "PROTESTA DE JUEGO": {
-            "ALINEACIÓN INDEBIDA": `ASUNTO: IMPUGNACIÓN POR ALINEACIÓN INDEBIDA (PUNTO 4)\n\nPRESENTE:\nSe notifica la violación al Punto 4 del Reglamento Oficial, el cual estipula que los jugadores deben ingresar antes del término de la 2da entrada. Se detectó la participación de un elemento fuera de este margen legal.\n\nDICTAMEN SOLICITADO:\nSe pide la aplicación de la sanción administrativa correspondiente y el ajuste del resultado del encuentro.`,
+            "ALINEACIÓN INDEBIDA": `ASUNTO: REPORTE DE PROTESTA POR ALINEACIÓN INDEBIDA\n\nESTIMADA DIRECTIVA:\n\nSe presenta una protesta formal basada en el PUNTO 4 del Reglamento Oficial de ALV Sport, el cual estipula que los jugadores deben ingresar antes del término de la 2da entrada. Se detectó la participación de elementos no autorizados en el roster activo fuera de este margen legal.\n\nSOLICITUD:\nSe solicita la revisión de la cédula y la aplicación de la sanción administrativa correspondiente según los estatutos de la liga.`,
             
-            "USO DE EQUIPO ILEGAL": `ASUNTO: REPORTE POR USO DE BATE NO AUTORIZADO (PUNTO 11)\n\nSe hace constar la violación al Punto 11 del Reglamento, relativo al uso de equipo ilegal. El jugador fue detectado utilizando un bate que no cumple con las especificaciones de la liga, procediendo a la aplicación de la regla "OUT POR REGLA" y la protesta del marcador final.`,
+            "USO DE EQUIPO ILEGAL": `ASUNTO: REPORTE POR USO DE BATE NO AUTORIZADO\n\nPRESENTE:\n\nSe notifica la violación al PUNTO 11 del reglamento, relativo al uso de equipo ilegal. Se detectó el uso de un bat que no cumple con las especificaciones técnicas permitidas (1.20 BPF / ASA / USA Softball). \n\nDICTAMEN:\nSe solicita el decomiso preventivo y la anulación del turno al bat según lo marca la regla oficial para preservar la integridad de los jugadores.`,
             
-            "PROTESTA DE REGLA": `ASUNTO: APELACIÓN TÉCNICA Y CONSULTA DE CUERPO TÉCNICO\n\nBajo el procedimiento oficial, se presenta una protesta legal. Se ha cubierto la cuota de $500.00 M.N. (No reembolsables). Se solicita la revisión del juego según el apartado de apelaciones, debiendo resolverse en un plazo no mayor a 24 horas.`
+            "PROTESTA DE REGLA": `ASUNTO: APELACIÓN POR INTERPRETACIÓN TÉCNICA DE REGLA\n\nSe solicita la intervención del Consejo Técnico para revisar una interpretación de regla ocurrida durante el encuentro. Se hace constar que se ha cubierto la cuota de $500.00 M.N. estipulada en el reglamento de SLOW PITCH para trámites de apelación formal.`
         },
         "RESOLUCIÓN DISCIPLINARIA": {
-            "AGRESIÓN": `ASUNTO: SANCIÓN DISCIPLINARIA POR AGRESIÓN (PUNTO 16)\n\nEl Reglamento Oficial en su Punto 16 es estricto: "Jugadores y público deberán mantener una postura de respeto". Debido a la agresión reportada, la directiva aplica la facultad de suspender al involucrado por un periodo de (___) juegos.`,
+            "AGRESIÓN": `ASUNTO: DICTAMEN DISCIPLINARIO POR FALTA DE RESPETO (PUNTO 16)\n\nEl Reglamento de ALV Sport en su PUNTO 16 es estricto: "Jugadores y público deberán mantener una postura de respeto y armonía deportiva". Debido a la agresión reportada, se aplica la facultad de suspender al involucrado.\n\nSANCIÓN:\nSe dictamina una suspensión de (___) juegos efectivos, con advertencia de baja definitiva en caso de reincidencia.`,
             
-            "CONDUCTA": `ASUNTO: VIOLACIÓN AL CÓDIGO DE ÉTICA Y MORAL (PUNTO 15)\n\nBasado en el Punto 15, nuestra liga profesa valores de integridad. La conducta antideportiva mostrada conlleva una amonestación formal y sanción administrativa para preservar la armonía deportiva de la Ley 57.`
+            "CONDUCTA": `ASUNTO: VIOLACIÓN AL CÓDIGO DE ÉTICA Y CONDUCTA (PUNTO 15)\n\nNuestra liga profesa valores de integridad y respeto según el PUNTO 15 de los estatutos. La conducta antideportiva mostrada conlleva esta sanción formal para preservar la seguridad de la Unidad Deportiva Ley 57.`
         },
-        "COMUNICADO OFICIAL": `ASUNTO: COMUNICADO OFICIAL - DIRECTIVA ALV SPORT\n\nA TODOS LOS PARTICIPANTES:\n\nSe les informa que para mantener el orden en la Unidad Deportiva Ley 57 (Campo de Puertas Cerradas - Punto 14), se aplicará la siguiente medida:\n\n(Escribir mensaje aquí...)\n\nATENTAMENTE:\nFRANCISCO JAVIER YOCUPICIO`
+        "COMUNICADO OFICIAL": `ASUNTO: COMUNICADO ADMINISTRATIVO - DIRECTIVA ALV SPORT\n\nA TODOS LOS MANAGERS Y AFICIÓN:\n\nPara mantener el orden y la seguridad en el Campo de la Ley 57 (CAMPO DE PUERTAS CERRADAS - PUNTO 14), se les informa lo siguiente:\n\n(ESCRIBIR AQUÍ EL MENSAJE...)\n\nATENTAMENTE:\nFRANCISCO JAVIER YOCUPICIO\nPRESIDENTE DE LA LIGA`
     };
 
     if (textos[tipo] && typeof textos[tipo] === 'object') {
-        campo.value = textos[tipo][motivo] || "Selecciona un motivo arriba para ver la referencia reglamentaria...";
+        campo.value = textos[tipo][motivo] || "Selecciona un motivo específico arriba...";
     } else {
         campo.value = textos[tipo] || "";
     }
@@ -1041,7 +1041,7 @@ function autollenarEquipos(val) {
 
 
 async function confiscarJuego(id, loc, vis) {
-    if (!confirm(`¿Confirmar CONFISCACIÓN del juego ${loc} vs ${vis}? El juego quedará bajo revisión de la directiva.`)) return;
+    if (!confirm(`¿CONFIRMAR ESTADO DE REVISIÓN? El encuentro entre ${loc} y ${vis} se marcará como CONFISCADO y no afectará estadísticas hasta el dictamen oficial.`)) return;
 
     try {
         const res = await fetch(`${API}/games/resultado`, { 
@@ -1051,15 +1051,15 @@ async function confiscarJuego(id, loc, vis) {
                 id, 
                 sL: 0, 
                 sV: 0, 
-                status: "confiscado", // Nuevo estatus
+                status: "en revisión", // Cambiamos el estatus
                 ganador: "PENDIENTE", 
                 perdedor: "PENDIENTE" 
             }) 
         });
 
         if (res.ok) {
-            alert("⚠️ JUEGO CONFISCADO: Se ha movido a revisión. No afectará standings hasta el dictamen final.");
-            await cargarResultados(); // Refrescar lista
+            alert("⚠️ JUEGO EN REVISIÓN: El encuentro ha sido confiscado. El resultado queda pendiente de la resolución del Consejo Técnico.");
+            await cargarResultados(); // Esto lo quita de la lista de pendientes actual
         }
     } catch (err) {
         console.error("Error al confiscar:", err);
