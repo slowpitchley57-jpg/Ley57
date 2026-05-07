@@ -957,6 +957,15 @@ function mostrarCamposEspeciales(tipo) {
     const contenedor = document.getElementById('contenedorMotivos');
     const selectMotivo = document.getElementById('docMotivo');
     const label = document.getElementById('labelMotivo');
+    
+    // Contenedores de equipos y juegos para ocultar/mostrar
+    const campoEquipos = document.getElementById('docEquipos').parentElement;
+    const campoJuego = document.getElementById('docJuego').parentElement;
+
+    // Resetear visibilidad por defecto
+    campoEquipos.classList.remove('hidden');
+    campoJuego.classList.remove('hidden');
+    contenedor.classList.add('hidden');
 
     if (tipo === "PROTESTA DE JUEGO") {
         contenedor.classList.remove('hidden');
@@ -977,12 +986,15 @@ function mostrarCamposEspeciales(tipo) {
             <option value="AGRESIÓN FÍSICA">Intento de agresión / Agresión Física</option>
             <option value="CONDUCTA ANTIDEPORTIVA">Conducta Antideportiva General</option>
         `;
+    } else if (tipo === "COMUNICADO OFICIAL") {
+        // OCULTAR equipos y juegos para comunicados generales
+        campoEquipos.classList.add('hidden');
+        campoJuego.classList.add('hidden');
+        precargarTextoPro(); // Carga el texto base directamente
     } else {
-        contenedor.classList.add('hidden');
-        precargarTextoPro(); // Carga texto base si no hay sub-motivo
+        precargarTextoPro();
     }
 }
-
 // Carga de equipos y juegos dinámica
 async function actualizarEquiposYJuegosDoc(liga) {
     if(!liga) return;
@@ -1009,28 +1021,24 @@ function precargarTextoPro() {
     const motivo = document.getElementById('docMotivo').value;
     const campo = document.getElementById('docTexto');
 
-    // Diccionario de textos técnicos y formales
     const textos = {
         "PROTESTA DE JUEGO": {
-            "ALINEACIÓN INDEBIDA": `ASUNTO: IMPUGNACIÓN FORMAL POR ALINEACIÓN INDEBIDA\n\nESTIMADA DIRECTIVA:\n\nPor medio del presente oficio, el equipo solicitante presenta una PROTESTA LEGAL basada en el incumplimiento del registro oficial de jugadores. Se ha detectado la participación de elementos no autorizados en el roster activo durante el encuentro citado.\n\nFUNDAMENTO:\nConforme a los estatutos de inscripción, se solicita la revisión de la cédula del partido. Se adjunta el comprobante de pago de $500.00 MXN (Cuota de Apelación), solicitando el dictamen de FORFAIT a favor del equipo afectado según el reglamento vigente.`,
-            
-            "USO DE EQUIPO ILEGAL": `ASUNTO: REPORTE TÉCNICO POR USO DE BAT NO AUTORIZADO\n\nPRESENTE:\n\nSe notifica formalmente la protesta de juego debido a la detección de equipo (BAT) que no cumple con las especificaciones de seguridad o cuenta con alteraciones físicas. La anomalía fue señalada al cuerpo de ampayeo en el momento del incidente.\n\nSOLICITUD:\nSe pide el decomiso o revisión técnica del artículo y la aplicación de la sanción correspondiente al bateador involucrado, salvaguardando la integridad física de todos los participantes bajo el código de ética de ALV Sport.`,
-            
-            "VIOLACIÓN TÉCNICA": `ASUNTO: APELACIÓN POR VIOLACIÓN TÉCNICA AL REGLAMENTO DE CAMPO\n\nA LA COMISIÓN TÉCNICA:\n\nSe presenta esta queja formal debido a una interpretación errónea o falta de aplicación de las reglas de campo en la Unidad Deportiva Ley 57. Se hace especial énfasis en la Regla de "Puertas Cerradas" y el manejo de pelotas atoradas.\n\nRESOLUCIÓN ESPERADA:\nSolicitamos el análisis del cuerpo de ampayeo y la rectificación del conteo o situación de juego para mantener la justicia deportiva en la jornada activa.`
+            "ALINEACIÓN INDEBIDA": `ASUNTO: IMPUGNACIÓN FORMAL POR ALINEACIÓN INDEBIDA\n\nESTIMADA DIRECTIVA:\n\nSe presenta una PROTESTA LEGAL basada en el incumplimiento del registro oficial. Se detectó la participación de elementos no autorizados en el roster activo[cite: 44]. Se solicita la revisión de la cédula y la aplicación del FORFAIT conforme al reglamento[cite: 18, 52, 103].`,
+            "USO DE EQUIPO ILEGAL": `ASUNTO: REPORTE TÉCNICO POR USO DE BAT NO AUTORIZADO\n\nSe notifica la protesta por uso de equipo que no cumple con especificaciones de seguridad o presenta alteraciones[cite: 50, 78]. Se solicita revisión técnica del artículo según las categorías autorizadas (Aluminio/100% Alloy)[cite: 51, 79, 80].`,
+            "VIOLACIÓN TÉCNICA": `ASUNTO: APELACIÓN POR VIOLACIÓN TÉCNICA AL REGLAMENTO\n\nSe presenta queja por interpretación errónea de las reglas de campo en la Unidad Ley 57[cite: 56]. Se solicita rectificación inmediata de la situación de juego[cite: 31, 102].`,
+            "PROTESTA DE AMPAYEO": `ASUNTO: APELACIÓN POR INTERPRETACIÓN DE REGLA\n\nSe solicita la revisión de la marcación de apreciación del Ampayer, basándose en el reglamento oficial de la modalidad[cite: 40, 102]. Se ha cubierto la cuota de $500.00 M.N. obligatoria para este proceso.`
         },
         "RESOLUCIÓN DISCIPLINARIA": {
-            "AGRESIÓN VERBAL": `ASUNTO: DICTAMEN POR FALTA DE RESPETO Y AGRESIÓN VERBAL\n\nAL EQUIPO INVOLUCRADO:\n\nTras analizar el reporte de ampayeo y basándonos en el Artículo 16 del Reglamento ALV Sport, se determina que existió una conducta que rompe la armonía deportiva mediante insultos y lenguaje inapropiado.\n\nSANCIÓN:\nSe aplica una SUSPENSIÓN DE (____) JUEGOS. Este documento sirve como ADVERTENCIA FORMAL; una segunda incidencia resultará en la expulsión definitiva del torneo sin derecho a reembolso.`,
-            
-            "AGRESIÓN FÍSICA": `ASUNTO: EXPULSIÓN Y SANCIÓN POR AGRESIÓN FÍSICA O INTENTO\n\nCOMUNICADO DISCIPLINARIO:\n\nLa Liga Ley 57 mantiene una política de CERO TOLERANCIA ante la violencia. Debido a los hechos violentos reportados en el encuentro, se ha dictaminado la baja inmediata de los involucrados.\n\nDICTAMEN:\nSuspensión total de toda actividad deportiva en nuestras ligas por un periodo de (____). El respeto e integridad son nuestros valores pilares y no son negociables.`
+            "AGRESIÓN VERBAL": `ASUNTO: DICTAMEN POR FALTA DE RESPETO\n\nBasado en el Artículo 16, se determina conducta inapropiada hacia colaboradores o público[cite: 58, 99]. Se aplica suspensión de (____) juegos. La reincidencia resultará en baja definitiva[cite: 19, 73].`,
+            "AGRESIÓN FÍSICA": `ASUNTO: EXPULSIÓN POR AGRESIÓN FÍSICA\n\nPolítica de CERO TOLERANCIA ante violencia física[cite: 99]. Se dictamina baja inmediata. El castigo puede extenderse hasta por 365 días fuera de la liga[cite: 19, 73].`,
+            "CONDUCTA ANTIDEPORTIVA": `ASUNTO: SANCIÓN POR CONDUCTA ANTIDEPORTIVA\n\nSe sanciona al jugador/equipo por actos que dañan la integridad moral y armonía deportiva[cite: 57, 58].`
         },
-        "SITUACIÓN DE JUEGO": `ASUNTO: REPORTE DE INCIDENCIA Y ESTATUS DE JUEGO LEGAL\n\nA QUIEN CORRESPONDA:\n\nSe informa sobre la suspensión del encuentro debido a causas ajenas (Clima/Iluminación). Bajo el reglamento de SLOW PITCH, se declara JUEGO LEGAL al haber concluido la 4ta entrada.\n\nESTADO FINAL:\nEl marcador queda oficializado como se encontraba al momento de la interrupción. La directiva informará sobre el impacto en el standing oficial.`,
-        
-        "COMUNICADO OFICIAL": `ASUNTO: COMUNICADO ADMINISTRATIVO DE LA LIGA LEY 57\n\nA TODOS LOS MANAGERS Y AFICIÓN:\n\nSe les comunica por este medio oficial los siguientes ajustes en la logística de la jornada:\n\n(ESCRIBIR AQUÍ EL MENSAJE...)\n\nAgradecemos su colaboración para mantener el nivel profesional de nuestra competencia.\n\nATENTAMENTE:\nCONSEJO ADMINISTRATIVO ALV SPORT`
+        "SITUACIÓN DE JUEGO": `ASUNTO: REPORTE DE ESTATUS DE JUEGO LEGAL\n\nSe informa suspensión por causas ajenas (Clima/Luz)[cite: 105]. Se declara JUEGO LEGAL al concluir la 4ta entrada[cite: 35, 86, 106]. El marcador actual queda oficializado[cite: 35].`,
+        "COMUNICADO OFICIAL": `ASUNTO: COMUNICADO ADMINISTRATIVO ALV SPORT\n\nA TODOS LOS MANAGERS Y AFICIÓN:\n\nSe les comunica lo siguiente:\n(Escribir mensaje aquí...)\n\nAtentamente:\nFRANCISCO JAVIER YOCUPICIO [cite: 62, 63]`
     };
 
-    // Lógica para elegir el texto correcto
     if (tipo === "PROTESTA DE JUEGO" || tipo === "RESOLUCIÓN DISCIPLINARIA") {
-        campo.value = textos[tipo][motivo] || `Selecciona un motivo arriba para generar el texto profesional...`;
+        campo.value = textos[tipo][motivo] || "Selecciona un motivo específico arriba para generar el texto...";
     } else {
         campo.value = textos[tipo] || "";
     }
