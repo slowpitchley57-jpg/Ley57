@@ -235,54 +235,60 @@
     </div>
     <!-- MODAL DOCUMENTOS OFICIALES -->
     <div id="modalDocumentos" class="modal">
-    <div class="bg-white p-6 rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl border-t-8 border-slate-800">
+    <div class="bg-white p-6 rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl border-t-8 border-slate-900">
         <div class="flex justify-between items-center mb-4">
-            <h2 class="font-black text-slate-800 italic uppercase text-xl"><i class="fa fa-file-signature mr-2"></i>Oficios Oficiales</h2>
+            <h2 class="font-black text-slate-900 italic uppercase text-xl"><i class="fa fa-file-pdf mr-2"></i>Oficios Administrativos</h2>
             <button onclick="toggleModal('modalDocumentos')" class="text-slate-400 hover:text-red-500 text-2xl">&times;</button>
         </div>
 
         <div class="space-y-4 overflow-y-auto custom-scroll pr-2">
-            <div>
-                <label class="block text-[10px] font-black uppercase text-slate-500 mb-1">Tipo de Oficio</label>
-                <select id="docTipo" onchange="precargarTextoDoc()" class="w-full p-3 border rounded-xl font-bold text-xs">
-    <option value="">-- Selecciona el motivo --</option>
-    <option value="PROTESTA DE JUEGO">REPORTE DE PROTESTA</option>
-    <option value="SITUACIÓN DE JUEGO">AVISO DE SITUACIÓN DE JUEGO</option>
-    <option value="RESOLUCIÓN DISCIPLINARIA">RESOLUCIÓN DISCIPLINARIA</option>
-    <option value="COMUNICADO OFICIAL">COMUNICADO OFICIAL</option>
-</select>
-            </div>
-
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1">Liga</label>
-                    <select id="docLiga" onchange="cargarJuegosParaDoc(this.value)" class="w-full p-3 border rounded-xl font-bold text-xs">
-                        <option value="">-- Seleccionar --</option>
-                        <option value="femenil">Ley 57 Fem</option>
-                        <option value="varonil">ALV Sport Var</option>
+                    <label class="block text-[9px] font-black uppercase text-slate-500 mb-1">1. Seleccionar Liga</label>
+                    <select id="docLiga" onchange="actualizarEquiposYJuegosDoc(this.value)" class="w-full p-2 border rounded-xl font-bold text-xs">
+                        <option value="">-- ELIGE LIGA --</option>
+                        <option value="femenil">Ley 57 Femenil</option>
+                        <option value="varonil">ALV Sport Varonil</option>
+                        <option value="easy_femenil">Easy Femenil</option>
+                        <option value="slow_mixto">Slow Mixto</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1">Juego Relacionado</label>
-                    <select id="docJuego" class="w-full p-3 border rounded-xl font-bold text-[10px]">
-                        <option value="">-- Selecciona Liga Primero --</option>
+                    <label class="block text-[9px] font-black uppercase text-slate-500 mb-1">2. Tipo de Oficio</label>
+                    <select id="docTipo" onchange="mostrarCamposEspeciales(this.value)" class="w-full p-2 border rounded-xl font-bold text-xs">
+                        <option value="">-- SELECCIONA TIPO --</option>
+                        <option value="PROTESTA DE JUEGO">REPORTE DE PROTESTA</option>
+                        <option value="RESOLUCIÓN DISCIPLINARIA">SANCIÓN DISCIPLINARIA</option>
+                        <option value="SITUACIÓN DE JUEGO">INCIDENCIA DE JUEGO</option>
+                        <option value="COMUNICADO OFICIAL">COMUNICADO GENERAL</option>
                     </select>
                 </div>
             </div>
 
-            <div>
-                <label class="block text-[10px] font-black uppercase text-slate-500 mb-1">Equipos Involucrados / Afectados</label>
-                <input type="text" id="docEquipos" placeholder="Ej: NOBAS vs WILD ANGELS" class="w-full p-3 border rounded-xl font-bold text-xs uppercase">
+            <div id="contenedorMotivos" class="hidden bg-slate-50 p-3 rounded-xl border border-dashed border-slate-200">
+                <label id="labelMotivo" class="block text-[9px] font-black uppercase text-red-600 mb-1">Motivo Específico</label>
+                <select id="docMotivo" onchange="precargarTextoPro()" class="w-full p-2 border rounded-lg font-bold text-xs">
+                    </select>
+            </div>
+
+            <div class="grid grid-cols-1 gap-3">
+                <label class="block text-[9px] font-black uppercase text-slate-500 mb-1">Juego de Referencia</label>
+                <select id="docJuego" onchange="autollenarEquipos(this.value)" class="w-full p-2 border rounded-xl font-bold text-[10px]"></select>
             </div>
 
             <div>
-                <label class="block text-[10px] font-black uppercase text-slate-500 mb-1">Descripción de los hechos / Resolución</label>
-                <textarea id="docTexto" rows="4" class="w-full p-3 border rounded-xl font-bold text-xs" placeholder="Escribe aquí los detalles del documento..."></textarea>
+                <label class="block text-[9px] font-black uppercase text-slate-500 mb-1">Equipos Involucrados</label>
+                <input type="text" id="docEquipos" class="w-full p-2 border rounded-xl font-bold text-xs uppercase" placeholder="EJ: EQUIPO A VS EQUIPO B">
+            </div>
+
+            <div>
+                <label class="block text-[9px] font-black uppercase text-slate-500 mb-1">Cuerpo del Documento</label>
+                <textarea id="docTexto" rows="6" class="w-full p-3 border rounded-xl font-bold text-[11px] leading-relaxed"></textarea>
             </div>
         </div>
 
-        <button onclick="generarPDFOficial()" class="mt-6 bg-red-600 text-white p-4 rounded-2xl font-black uppercase text-xs shadow-lg hover:bg-black transition-all flex items-center justify-center gap-2">
-            <i class="fa fa-download"></i> Descargar Documento PDF
+        <button onclick="generarPDFOficial()" class="mt-6 bg-slate-900 text-white p-4 rounded-2xl font-black uppercase text-xs shadow-lg hover:bg-black flex items-center justify-center gap-2">
+            <i class="fa fa-file-export"></i> Generar y Descargar PDF Oficial
         </button>
     </div>
 </div>
@@ -945,66 +951,89 @@ doc.addImage(logo, 'JPEG', 15, 5, 25, 25);
     // Descargar
     doc.save(`Oficio_${liga}_${fechaActual}.pdf`);
 }
-function precargarTextoDoc() {
+
+// Mostrar motivos según el tipo de documento
+function mostrarCamposEspeciales(tipo) {
+    const contenedor = document.getElementById('contenedorMotivos');
+    const selectMotivo = document.getElementById('docMotivo');
+    const label = document.getElementById('labelMotivo');
+
+    if (tipo === "PROTESTA DE JUEGO") {
+        contenedor.classList.remove('hidden');
+        label.innerText = "Motivo de la Protesta:";
+        selectMotivo.innerHTML = `
+            <option value="">-- Elige motivo --</option>
+            <option value="ALINEACIÓN INDEBIDA">Alineación Indebida (Jugador no registrado)</option>
+            <option value="USO DE EQUIPO ILEGAL">Uso de Bat no autorizado / Alterado</option>
+            <option value="VIOLACIÓN TÉCNICA">Violación técnica al Reglamento de Campo</option>
+            <option value="PROTESTA DE AMPAYEO">Apelación por interpretación de regla</option>
+        `;
+    } else if (tipo === "RESOLUCIÓN DISCIPLINARIA") {
+        contenedor.classList.remove('hidden');
+        label.innerText = "Tipo de Falta:";
+        selectMotivo.innerHTML = `
+            <option value="">-- Elige falta --</option>
+            <option value="AGRESIÓN VERBAL">Falta de respeto / Agresión Verbal</option>
+            <option value="AGRESIÓN FÍSICA">Intento de agresión / Agresión Física</option>
+            <option value="CONDUCTA ANTIDEPORTIVA">Conducta Antideportiva General</option>
+        `;
+    } else {
+        contenedor.classList.add('hidden');
+        precargarTextoPro(); // Carga texto base si no hay sub-motivo
+    }
+}
+
+// Carga de equipos y juegos dinámica
+async function actualizarEquiposYJuegosDoc(liga) {
+    if(!liga) return;
+    try {
+        const res = await fetch(`${API}/games?liga=${liga}`);
+        const games = await res.json();
+        let opt = '<option value="">-- Selecciona el encuentro --</option>';
+        games.forEach(g => {
+            opt += `<option value="${g.local}|${g.visita}|${g.fecha}">${g.fecha} - ${g.local} VS ${g.visita}</option>`;
+        });
+        document.getElementById('docJuego').innerHTML = opt;
+    } catch(e) { console.error(e); }
+}
+
+function autollenarEquipos(val) {
+    if(!val) return;
+    const [loc, vis] = val.split('|');
+    document.getElementById('docEquipos').value = `${loc} VS ${vis}`;
+}
+
+// TEXTO PRO PROFESIONAL
+function precargarTextoPro() {
     const tipo = document.getElementById('docTipo').value;
-    const campoTexto = document.getElementById('docTexto');
-    
-    // Plantillas enriquecidas basadas en los reglamentos de ALV SPORT y LEY 57
-    const plantillas = {
-        "PROTESTA DE JUEGO": `ASUNTO: NOTIFICACIÓN FORMAL DE PROTESTA LEGAL
+    const motivo = document.getElementById('docMotivo').value;
+    const campo = document.getElementById('docTexto');
 
-A QUIEN CORRESPONDA:
-
-Por medio de la presente, el equipo abajo firmante hace entrega de este REPORTE DE PROTESTA bajo los lineamientos del reglamento vigente. Se informa que se ha cubierto la cuota administrativa de $500.00 (Quinientos pesos 00/100 M.N.) según lo estipulado en el apartado de APELACIONES, misma que no cuenta con devolución independientemente del fallo.
-
-DETALLES DE LA IMPUGNACIÓN:
-- Motivo: (Describir si es Alineación Indebida, Uso de Bats no autorizados o Regla Técnica).
-- Evidencia: (Mencionar si hay fotos, video o anotación en el score oficial).
-
-Se solicita al cuerpo técnico y al presidente Javier Yocupicio la revisión de esta solicitud, quedando a la espera de una resolución en un plazo no mayor a 24 horas hábiles.`,
-
-        "SITUACIÓN DE JUEGO": `ASUNTO: REPORTE DE INCIDENCIA Y ESTATUS DE ENCUENTRO
-
-A LA DIRECTIVA DE ALV SPORT:
-
-Se hace constar la suspensión/modificación del encuentro citado en la referencia debido a causas de fuerza mayor. Bajo el artículo de "SUSPENSIÓN DE JUEGO", se dictamina lo siguiente:
-
-ESTATUS LEGAL:
-( ) JUEGO LEGAL: Se cumplió con el término de la 4ta entrada (Regla de Incidencias Ajenas). El marcador se congela y se da por finalizado.
-( ) REPROGRAMACIÓN: La suspensión ocurrió antes de la 4ta entrada. El juego se reanudará en nueva fecha respetando exactamente el lineamiento donde se detuvo (Inning, Out, Marcador y Conteo).
-
-OBSERVACIONES ADICIONALES:
-(Describir si fue por lluvia, falta de iluminación o emergencia médica).`,
-
-        "RESOLUCIÓN DISCIPLINARIA": `ASUNTO: DICTAMEN DISCIPLINARIO Y SANCIÓN ADMINISTRATIVA
-
-PRESENTE:
-
-Tras el análisis de los hechos ocurridos y consultando con el cuerpo de ampayeo, el Consejo Técnico de ALV Sport All Leagues emite la siguiente resolución basada en el Código de Ética y Conducta (Artículos 12 y 16):
-
-CONSIDERANDOS:
-Cualquier agresión física o verbal hacia jugadores, ampayeo o público presente rompe la armonía deportiva. Por lo tanto, se dictamina una SANCIÓN DE:
-- Castigo: (Ej. 2 juegos de suspensión / Expulsión de la liga).
-- Vigencia: A partir de la fecha de expedición de este documento.
-
-Se advierte que la reincidencia en faltas de respeto o integridad moral resultará en un castigo de hasta 365 días de suspensión total de nuestras ligas.`,
-
-        "COMUNICADO OFICIAL": `COMUNICADO OFICIAL: DIRECTIVA ALV SPORT - LEY 57
-
-A TODOS LOS MANAGERS, JUGADORES Y AFICIÓN:
-
-El Grupo Administrativo de ALV Sport informa sobre el siguiente acuerdo/cambio en beneficio de la liga:
-
-ACUERDO:
-(Escribir el aviso aquí, por ejemplo: recordatorio de uniformes, cambios de horarios o avisos de Play-offs).
-
-Recordamos a todos los participantes que el campo de la Ley 57 es de "Puertas Cerradas" y la pelota siempre está en juego salvo que salga del límite o se atore. Apelamos a sus valores de respeto e integridad para llevar a cabo la jornada de la mejor manera.
-
-ATENTAMENTE:
-CONSEJO TÉCNICO ALV SPORT`
+    // Diccionario de textos técnicos y formales
+    const textos = {
+        "PROTESTA DE JUEGO": {
+            "ALINEACIÓN INDEBIDA": `ASUNTO: IMPUGNACIÓN FORMAL POR ALINEACIÓN INDEBIDA\n\nESTIMADA DIRECTIVA:\n\nPor medio del presente oficio, el equipo solicitante presenta una PROTESTA LEGAL basada en el incumplimiento del registro oficial de jugadores. Se ha detectado la participación de elementos no autorizados en el roster activo durante el encuentro citado.\n\nFUNDAMENTO:\nConforme a los estatutos de inscripción, se solicita la revisión de la cédula del partido. Se adjunta el comprobante de pago de $500.00 MXN (Cuota de Apelación), solicitando el dictamen de FORFAIT a favor del equipo afectado según el reglamento vigente.`,
+            
+            "USO DE EQUIPO ILEGAL": `ASUNTO: REPORTE TÉCNICO POR USO DE BAT NO AUTORIZADO\n\nPRESENTE:\n\nSe notifica formalmente la protesta de juego debido a la detección de equipo (BAT) que no cumple con las especificaciones de seguridad o cuenta con alteraciones físicas. La anomalía fue señalada al cuerpo de ampayeo en el momento del incidente.\n\nSOLICITUD:\nSe pide el decomiso o revisión técnica del artículo y la aplicación de la sanción correspondiente al bateador involucrado, salvaguardando la integridad física de todos los participantes bajo el código de ética de ALV Sport.`,
+            
+            "VIOLACIÓN TÉCNICA": `ASUNTO: APELACIÓN POR VIOLACIÓN TÉCNICA AL REGLAMENTO DE CAMPO\n\nA LA COMISIÓN TÉCNICA:\n\nSe presenta esta queja formal debido a una interpretación errónea o falta de aplicación de las reglas de campo en la Unidad Deportiva Ley 57. Se hace especial énfasis en la Regla de "Puertas Cerradas" y el manejo de pelotas atoradas.\n\nRESOLUCIÓN ESPERADA:\nSolicitamos el análisis del cuerpo de ampayeo y la rectificación del conteo o situación de juego para mantener la justicia deportiva en la jornada activa.`
+        },
+        "RESOLUCIÓN DISCIPLINARIA": {
+            "AGRESIÓN VERBAL": `ASUNTO: DICTAMEN POR FALTA DE RESPETO Y AGRESIÓN VERBAL\n\nAL EQUIPO INVOLUCRADO:\n\nTras analizar el reporte de ampayeo y basándonos en el Artículo 16 del Reglamento ALV Sport, se determina que existió una conducta que rompe la armonía deportiva mediante insultos y lenguaje inapropiado.\n\nSANCIÓN:\nSe aplica una SUSPENSIÓN DE (____) JUEGOS. Este documento sirve como ADVERTENCIA FORMAL; una segunda incidencia resultará en la expulsión definitiva del torneo sin derecho a reembolso.`,
+            
+            "AGRESIÓN FÍSICA": `ASUNTO: EXPULSIÓN Y SANCIÓN POR AGRESIÓN FÍSICA O INTENTO\n\nCOMUNICADO DISCIPLINARIO:\n\nLa Liga Ley 57 mantiene una política de CERO TOLERANCIA ante la violencia. Debido a los hechos violentos reportados en el encuentro, se ha dictaminado la baja inmediata de los involucrados.\n\nDICTAMEN:\nSuspensión total de toda actividad deportiva en nuestras ligas por un periodo de (____). El respeto e integridad son nuestros valores pilares y no son negociables.`
+        },
+        "SITUACIÓN DE JUEGO": `ASUNTO: REPORTE DE INCIDENCIA Y ESTATUS DE JUEGO LEGAL\n\nA QUIEN CORRESPONDA:\n\nSe informa sobre la suspensión del encuentro debido a causas ajenas (Clima/Iluminación). Bajo el reglamento de SLOW PITCH, se declara JUEGO LEGAL al haber concluido la 4ta entrada.\n\nESTADO FINAL:\nEl marcador queda oficializado como se encontraba al momento de la interrupción. La directiva informará sobre el impacto en el standing oficial.`,
+        
+        "COMUNICADO OFICIAL": `ASUNTO: COMUNICADO ADMINISTRATIVO DE LA LIGA LEY 57\n\nA TODOS LOS MANAGERS Y AFICIÓN:\n\nSe les comunica por este medio oficial los siguientes ajustes en la logística de la jornada:\n\n(ESCRIBIR AQUÍ EL MENSAJE...)\n\nAgradecemos su colaboración para mantener el nivel profesional de nuestra competencia.\n\nATENTAMENTE:\nCONSEJO ADMINISTRATIVO ALV SPORT`
     };
 
-    campoTexto.value = plantillas[tipo] || "";
+    // Lógica para elegir el texto correcto
+    if (tipo === "PROTESTA DE JUEGO" || tipo === "RESOLUCIÓN DISCIPLINARIA") {
+        campo.value = textos[tipo][motivo] || `Selecciona un motivo arriba para generar el texto profesional...`;
+    } else {
+        campo.value = textos[tipo] || "";
+    }
 }
     // Funciones de utilidad restantes heredadas
     function toggleModal(id) { document.getElementById(id).classList.toggle('active'); }
