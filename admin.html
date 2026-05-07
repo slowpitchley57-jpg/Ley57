@@ -1109,6 +1109,34 @@ async function confiscarJuego(id, loc, vis) {
         console.error("Error al confiscar:", err);
     }
 }
+async function eliminarJuego(id, local, visita) {
+    // 1. Confirmación de seguridad para no borrar por error
+    const confirmar = confirm(`¿Estás seguro de eliminar permanentemente el juego: ${local} vs ${visita}?\n\nEsta acción borrará el registro de la base de datos y no se puede deshacer.`);
+    
+    if (!confirmar) return;
+
+    try {
+        // 2. Petición DELETE al servidor
+        const res = await fetch(`${API}/games/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (res.ok) {
+            alert("✅ Juego eliminado correctamente de la base de datos.");
+            // 3. Refrescar la lista automáticamente
+            await cargarResultados(); 
+        } else {
+            const error = await res.json();
+            alert("❌ No se pudo eliminar: " + (error.message || "Error en el servidor"));
+        }
+    } catch (err) {
+        console.error("Error al eliminar juego:", err);
+        alert("❌ Error de conexión. Verifica que el servidor esté encendido.");
+    }
+}
     // Funciones de utilidad restantes heredadas
     function toggleModal(id) { document.getElementById(id).classList.toggle('active'); }
     function gestionarSesion() { const s = JSON.parse(localStorage.getItem('userLogueado')); if(s) document.getElementById('nombreUsuarioActivo').innerText = s.correo.split('@')[0].toUpperCase(); else window.location.href = 'index.html'; }
