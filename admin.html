@@ -5,6 +5,7 @@
     <title>Master Admin - Multiliga Pro</title>
     <link rel="icon" type="image/png" href="logoley57icon.jpeg">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 1000; }
@@ -46,10 +47,13 @@
             <button onclick="location.href='alta_jugadores.html'" class="w-full text-left p-3 bg-indigo-600 rounded-xl font-bold text-xs flex items-center gap-3 shadow-lg"><i class="fa fa-users-cog"></i> Alta Maestra</button>
             <button onclick="toggleModal('modalEquipo')" class="w-full text-left p-3 bg-emerald-600 rounded-xl font-bold text-xs flex items-center gap-3 shadow-lg"><i class="fa fa-plus-circle"></i> Nuevo Equipo</button>
             <button onclick="toggleModal('modalRosters')" class="w-full text-left p-3 bg-amber-500 rounded-xl font-bold text-xs flex items-center gap-3 shadow-lg"><i class="fa fa-user-edit"></i> Roster / Stats Bat</button>
-            <!-- Busca este botón en tu sidebar y cámbialo para que tenga ambas funciones -->
-<button onclick="toggleModal('modalPitchers'); cargarEquiposModalPitcher(); cargarPitchers();" class="w-full text-left p-3 bg-cyan-600 rounded-xl font-bold text-xs flex items-center gap-3">
-    <i class="fa fa-baseball-ball"></i> Gestión Pitchers
-</button>
+            
+            <button onclick="toggleModal('modalPitchers'); cargarEquiposModalPitcher(); cargarPitchers();" class="w-full text-left p-3 bg-cyan-600 rounded-xl font-bold text-xs flex items-center gap-3">
+                 <i class="fa fa-baseball-ball"></i> Gestión Pitchers
+            </button>   
+            <button onclick="abrirModalDocumentos()" class="w-full text-left p-3 bg-slate-700 rounded-xl font-bold text-xs flex items-center gap-3 shadow-lg">
+                <i class="fa fa-file-pdf"></i> Generar Documentos
+            </button>
             <button onclick="toggleModal('modalIA')" class="w-full text-left p-3 bg-purple-600 rounded-xl font-bold text-xs flex items-center gap-3 shadow-lg"><i class="fa fa-robot"></i> Generar Rol IA</button> 
             <button onclick="cerrarSesion()" class="w-full text-left p-3 rounded-xl flex items-center gap-3 text-red-400 font-bold uppercase text-[10px] tracking-widest mt-4"><i class="fa fa-sign-out-alt"></i> Salir</button>
         </nav>
@@ -229,6 +233,59 @@
             <div class="flex gap-3"><button onclick="toggleModal('modalIA')" class="flex-1 bg-slate-100 p-4 rounded-2xl font-black uppercase text-[10px]">Cancelar</button><button onclick="ejecutarIA()" class="flex-1 bg-purple-600 text-white p-4 rounded-2xl font-black uppercase text-[10px] shadow-lg">Generar</button></div>
         </div>
     </div>
+    <!-- MODAL DOCUMENTOS OFICIALES -->
+    <div id="modalDocumentos" class="modal">
+    <div class="bg-white p-6 rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl border-t-8 border-slate-800">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="font-black text-slate-800 italic uppercase text-xl"><i class="fa fa-file-signature mr-2"></i>Oficios Oficiales</h2>
+            <button onclick="toggleModal('modalDocumentos')" class="text-slate-400 hover:text-red-500 text-2xl">&times;</button>
+        </div>
+
+        <div class="space-y-4 overflow-y-auto custom-scroll pr-2">
+            <div>
+                <label class="block text-[10px] font-black uppercase text-slate-500 mb-1">Tipo de Oficio</label>
+                <select id="docTipo" onchange="precargarTextoDoc()" class="w-full p-3 border rounded-xl font-bold text-xs">
+    <option value="">-- Selecciona el motivo --</option>
+    <option value="PROTESTA DE JUEGO">REPORTE DE PROTESTA</option>
+    <option value="SITUACIÓN DE JUEGO">AVISO DE SITUACIÓN DE JUEGO</option>
+    <option value="RESOLUCIÓN DISCIPLINARIA">RESOLUCIÓN DISCIPLINARIA</option>
+    <option value="COMUNICADO OFICIAL">COMUNICADO OFICIAL</option>
+</select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1">Liga</label>
+                    <select id="docLiga" onchange="cargarJuegosParaDoc(this.value)" class="w-full p-3 border rounded-xl font-bold text-xs">
+                        <option value="">-- Seleccionar --</option>
+                        <option value="femenil">Ley 57 Fem</option>
+                        <option value="varonil">ALV Sport Var</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1">Juego Relacionado</label>
+                    <select id="docJuego" class="w-full p-3 border rounded-xl font-bold text-[10px]">
+                        <option value="">-- Selecciona Liga Primero --</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-black uppercase text-slate-500 mb-1">Equipos Involucrados / Afectados</label>
+                <input type="text" id="docEquipos" placeholder="Ej: NOBAS vs WILD ANGELS" class="w-full p-3 border rounded-xl font-bold text-xs uppercase">
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-black uppercase text-slate-500 mb-1">Descripción de los hechos / Resolución</label>
+                <textarea id="docTexto" rows="4" class="w-full p-3 border rounded-xl font-bold text-xs" placeholder="Escribe aquí los detalles del documento..."></textarea>
+            </div>
+        </div>
+
+        <button onclick="generarPDFOficial()" class="mt-6 bg-red-600 text-white p-4 rounded-2xl font-black uppercase text-xs shadow-lg hover:bg-black transition-all flex items-center justify-center gap-2">
+            <i class="fa fa-download"></i> Descargar Documento PDF
+        </button>
+    </div>
+</div>
 
 <script>
     fetch("https://ley57.onrender.com/api/games?status=pendiente")
@@ -730,6 +787,225 @@ async function guardarStatsPitcher() {
     document.querySelectorAll('#modalPitchers input[type="number"]').forEach(i => i.value = "");
     cargarPitchers(); // Refrescar mini tabla
 }
+
+// Manejo visual del input de link manual
+document.getElementById('streamNuevo').addEventListener('change', function() {
+    const manual = document.getElementById('streamManual');
+    if (this.value === "OTRO") {
+        manual.classList.remove('hidden');
+        manual.focus();
+    } else {
+        manual.classList.add('hidden');
+        manual.value = "";
+    }
+});
+async function guardarJuego() {
+    // 1. Obtener valores de los campos
+    const local = document.getElementById('selLoc').value;
+    const visita = document.getElementById('selVis').value;
+    const fecha = document.getElementById('fec').value;
+    const hora = document.getElementById('hor').value;
+    
+    // Lógica del link de transmisión
+    const selStream = document.getElementById('streamNuevo').value;
+    const manualStream = document.getElementById('streamManual').value;
+    const linkFinal = (selStream === "OTRO") ? manualStream : selStream;
+
+    // 2. Validaciones básicas para evitar errores en la base de datos
+    if (!local || !visita) return alert("❌ Por favor, selecciona ambos equipos.");
+    if (local === visita) return alert("❌ Un equipo no puede jugar contra sí mismo.");
+    if (!fecha || !hora) return alert("❌ Debes definir una fecha y hora para el encuentro.");
+
+    // 3. Crear el objeto de datos (ligaActiva viene de tu función switchLiga)
+    const datosJuego = {
+        local: local.trim(),
+        visita: visita.trim(),
+        fecha: fecha,
+        hora: hora,
+        liga: ligaActiva, // Usamos la liga que está seleccionada actualmente en el menú
+        status: "pendiente",
+        streaming: linkFinal || ""
+    };
+
+    try {
+        // 4. Petición POST a tu API
+        const res = await fetch(`${API}/games`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(datosJuego)
+        });
+
+        if (res.ok) {
+            alert("✅ ¡Juego programado con éxito!");
+            
+            // 5. Limpiar el formulario
+            document.getElementById('fec').value = "";
+            document.getElementById('hor').value = "";
+            document.getElementById('streamManual').value = "";
+            document.getElementById('streamNuevo').value = "";
+            document.getElementById('streamManual').classList.add('hidden');
+
+            // 6. Recargar la lista de resultados para que aparezca el nuevo juego
+            await cargarResultados(); 
+        } else {
+            const error = await res.json();
+            alert("❌ Error al programar: " + (error.message || "Error del servidor"));
+        }
+    } catch (err) {
+        console.error("Error en guardarJuego:", err);
+        alert("❌ Error de conexión. Revisa que el servidor en Render esté activo.");
+    }
+}
+// Lógica para el Generador de Documentos
+function abrirModalDocumentos() {
+    toggleModal('modalDocumentos');
+}
+
+// Cargar juegos finalizados o pendientes de la liga seleccionada
+async function cargarJuegosParaDoc(liga) {
+    if(!liga) return;
+    try {
+        const res = await fetch(`${API}/games?liga=${liga}`);
+        const games = await res.json();
+        
+        let opt = '<option value="N/A">-- No aplica a un juego --</option>';
+        games.forEach(g => {
+            opt += `<option value="${g.fecha} | ${g.local} vs ${g.visita}">${g.fecha} - ${g.local} vs ${g.visita}</option>`;
+        });
+        document.getElementById('docJuego').innerHTML = opt;
+    } catch (e) { console.error("Error al jalar juegos:", e); }
+}
+async function generarPDFOficial() {
+    
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const logo = new Image();
+logo.src = 'logoalvnegro.jpeg'; // O el nombre de tu archivo de logo
+doc.addImage(logo, 'JPEG', 15, 5, 25, 25);
+    
+    const tipo = document.getElementById('docTipo').value;
+    const liga = document.getElementById('docLiga').options[document.getElementById('docLiga').selectedIndex].text;
+    const juego = document.getElementById('docJuego').value;
+    const equipos = document.getElementById('docEquipos').value;
+    const texto = document.getElementById('docTexto').value;
+    const fechaActual = new Date().toLocaleDateString();
+
+    // --- DISEÑO ESTÉTICO ---
+    // Franja Superior
+    doc.setFillColor(30, 58, 138); 
+    doc.rect(0, 0, 210, 45, 'F');
+    
+    // Títulos
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(24);
+    doc.text("ALV SPORT", 105, 20, { align: "center" });
+    doc.setFontSize(12);
+    doc.text("ALL LEAGUES - GRUPO ADMINISTRATIVO PROFESIONAL", 105, 30, { align: "center" });
+    doc.text("UNIDAD DEPORTIVA LEY 57", 105, 38, { align: "center" });
+
+    // Cuerpo
+    doc.setTextColor(40, 40, 40);
+    doc.setFontSize(11);
+    doc.text(`Hermosillo, Sonora a ${fechaActual}`, 190, 55, { align: "right" });
+
+    doc.setFontSize(18);
+    doc.text(tipo, 105, 75, { align: "center" });
+    doc.line(40, 78, 170, 78);
+
+    // Tabla de Referencia
+    doc.setFillColor(245, 245, 245);
+    doc.rect(20, 85, 170, 25, 'F');
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.text(`LIGA: ${liga.toUpperCase()}`, 25, 92);
+    doc.text(`EQUIPOS: ${equipos.toUpperCase()}`, 25, 99);
+    doc.text(`JUEGO REF: ${juego}`, 25, 106);
+
+    // Contenido del Oficio
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+    const splitText = doc.splitTextToSize(texto, 170);
+    doc.text(splitText, 20, 125);
+
+    // Firmas Finales
+    const yFirma = 240;
+    doc.setDrawColor(150, 150, 150);
+    doc.line(30, yFirma, 90, yFirma);
+    doc.line(120, yFirma, 180, yFirma);
+    
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.text("FRANCISCO JAVIER YOCUPICIO", 60, yFirma + 5, { align: "center" });
+    doc.text("PRESIDENTE DE LA LIGA", 60, yFirma + 10, { align: "center" });
+    
+    doc.text("CONSEJO TÉCNICO", 150, yFirma + 5, { align: "center" });
+    doc.text("GRUPO ADMINISTRATIVO", 150, yFirma + 10, { align: "center" });
+
+    // Descargar
+    doc.save(`Oficio_${liga}_${fechaActual}.pdf`);
+}
+function precargarTextoDoc() {
+    const tipo = document.getElementById('docTipo').value;
+    const campoTexto = document.getElementById('docTexto');
+    
+    // Plantillas enriquecidas basadas en los reglamentos de ALV SPORT y LEY 57
+    const plantillas = {
+        "PROTESTA DE JUEGO": `ASUNTO: NOTIFICACIÓN FORMAL DE PROTESTA LEGAL
+
+A QUIEN CORRESPONDA:
+
+Por medio de la presente, el equipo abajo firmante hace entrega de este REPORTE DE PROTESTA bajo los lineamientos del reglamento vigente. Se informa que se ha cubierto la cuota administrativa de $500.00 (Quinientos pesos 00/100 M.N.) según lo estipulado en el apartado de APELACIONES, misma que no cuenta con devolución independientemente del fallo.
+
+DETALLES DE LA IMPUGNACIÓN:
+- Motivo: (Describir si es Alineación Indebida, Uso de Bats no autorizados o Regla Técnica).
+- Evidencia: (Mencionar si hay fotos, video o anotación en el score oficial).
+
+Se solicita al cuerpo técnico y al presidente Javier Yocupicio la revisión de esta solicitud, quedando a la espera de una resolución en un plazo no mayor a 24 horas hábiles.`,
+
+        "SITUACIÓN DE JUEGO": `ASUNTO: REPORTE DE INCIDENCIA Y ESTATUS DE ENCUENTRO
+
+A LA DIRECTIVA DE ALV SPORT:
+
+Se hace constar la suspensión/modificación del encuentro citado en la referencia debido a causas de fuerza mayor. Bajo el artículo de "SUSPENSIÓN DE JUEGO", se dictamina lo siguiente:
+
+ESTATUS LEGAL:
+( ) JUEGO LEGAL: Se cumplió con el término de la 4ta entrada (Regla de Incidencias Ajenas). El marcador se congela y se da por finalizado.
+( ) REPROGRAMACIÓN: La suspensión ocurrió antes de la 4ta entrada. El juego se reanudará en nueva fecha respetando exactamente el lineamiento donde se detuvo (Inning, Out, Marcador y Conteo).
+
+OBSERVACIONES ADICIONALES:
+(Describir si fue por lluvia, falta de iluminación o emergencia médica).`,
+
+        "RESOLUCIÓN DISCIPLINARIA": `ASUNTO: DICTAMEN DISCIPLINARIO Y SANCIÓN ADMINISTRATIVA
+
+PRESENTE:
+
+Tras el análisis de los hechos ocurridos y consultando con el cuerpo de ampayeo, el Consejo Técnico de ALV Sport All Leagues emite la siguiente resolución basada en el Código de Ética y Conducta (Artículos 12 y 16):
+
+CONSIDERANDOS:
+Cualquier agresión física o verbal hacia jugadores, ampayeo o público presente rompe la armonía deportiva. Por lo tanto, se dictamina una SANCIÓN DE:
+- Castigo: (Ej. 2 juegos de suspensión / Expulsión de la liga).
+- Vigencia: A partir de la fecha de expedición de este documento.
+
+Se advierte que la reincidencia en faltas de respeto o integridad moral resultará en un castigo de hasta 365 días de suspensión total de nuestras ligas.`,
+
+        "COMUNICADO OFICIAL": `COMUNICADO OFICIAL: DIRECTIVA ALV SPORT - LEY 57
+
+A TODOS LOS MANAGERS, JUGADORES Y AFICIÓN:
+
+El Grupo Administrativo de ALV Sport informa sobre el siguiente acuerdo/cambio en beneficio de la liga:
+
+ACUERDO:
+(Escribir el aviso aquí, por ejemplo: recordatorio de uniformes, cambios de horarios o avisos de Play-offs).
+
+Recordamos a todos los participantes que el campo de la Ley 57 es de "Puertas Cerradas" y la pelota siempre está en juego salvo que salga del límite o se atore. Apelamos a sus valores de respeto e integridad para llevar a cabo la jornada de la mejor manera.
+
+ATENTAMENTE:
+CONSEJO TÉCNICO ALV SPORT`
+    };
+
+    campoTexto.value = plantillas[tipo] || "";
+}
     // Funciones de utilidad restantes heredadas
     function toggleModal(id) { document.getElementById(id).classList.toggle('active'); }
     function gestionarSesion() { const s = JSON.parse(localStorage.getItem('userLogueado')); if(s) document.getElementById('nombreUsuarioActivo').innerText = s.correo.split('@')[0].toUpperCase(); else window.location.href = 'index.html'; }
@@ -743,6 +1019,7 @@ async function guardarStatsPitcher() {
     function prepararPitcher(pid) { const opt = document.getElementById('p_jugadora_select').options[document.getElementById('p_jugadora_select').selectedIndex]; if(pid) { document.getElementById('p_id').value = pid; document.getElementById('p_nombre').value = opt.getAttribute('data-nombre'); }}
     function actualizarSelectores() { const liga = document.getElementById('filtroLigaGlobal').value; const opt = '<option value="">-- EQUIPO --</option>' + todosLosEquipos.filter(e => e.liga === liga).map(e => `<option value="${e.nombre}">${e.nombre}</option>`).join(''); document.getElementById('selLoc').innerHTML = opt; document.getElementById('selVis').innerHTML = opt; }
     async function cargarEquiposParaPitchers() { const res = await fetch(`${API}/equipos`); const eqs = await res.json(); document.getElementById('p_equipo').innerHTML = '<option value="">Seleccionar Equipo</option>' + eqs.map(e => `<option value="${e.nombre}">${e.nombre}</option>`).join(''); }
+
 
     document.addEventListener('DOMContentLoaded', cargarTodo);
 </script>
