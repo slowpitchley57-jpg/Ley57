@@ -1189,8 +1189,8 @@ function obtenerRangoSemanaActual() {
     return { inicio, fin };
 }
 async function generarResumenIA() {
-    toggleModal('modalResumenIA');
-    const container = document.getElementById('contenidoResumenIA');
+    const modal = document.getElementById('modalResumenIA');
+    if(modal) modal.classList.remove('hidden');
     const loader = document.getElementById('loaderIA');
     const { inicio, fin } = obtenerRangoSemanaActual();
     
