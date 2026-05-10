@@ -347,19 +347,25 @@
 async function verDetalleRoster(nombreEquipo) {
     const container = document.getElementById('bodyDetalleJugadoras');
     const modal = document.getElementById('modalDetalleEquipo');
+    const tituloModal = document.getElementById('detNombreEquipo'); // Asegúrate que este ID exista en tu HTML
     
-    container.innerHTML = `<tr><td colspan="10" class="p-10 text-center">Cargando...</td></tr>`;
+    // 1. Ponemos el nombre del equipo en el título del modal
+    if (tituloModal) {
+        tituloModal.innerText = nombreEquipo.toUpperCase();
+    }
+
+    container.innerHTML = `<tr><td colspan="10" class="p-10 text-center text-pink-800">Sincronizando con Base de Datos...</td></tr>`;
 
     try {
-        // Abrimos el modal de inmediato
         if (modal) modal.classList.remove('hidden');
 
+        // Traemos los datos frescos
         const res = await fetch(`${API}/players?t=${new Date().getTime()}`);
         const all = await res.json();
         
         const buscado = nombreEquipo.trim().toUpperCase();
 
-        // Filtramos por equipo y nos aseguramos de que la liga sea 'femenil'
+        // Filtramos por equipo y liga
         const players = all.filter(p => {
             const eq = (p.team || p.equipo || "").trim().toUpperCase();
             const li = (p.liga || "").trim().toLowerCase();
@@ -367,11 +373,16 @@ async function verDetalleRoster(nombreEquipo) {
         });
 
         if (players.length === 0) {
-            container.innerHTML = `<tr><td colspan="10" class="p-5 text-center">No hay jugadoras en ${nombreEquipo}</td></tr>`;
+            container.innerHTML = `<tr><td colspan="10" class="p-5 text-center">No hay registros para este equipo</td></tr>`;
         } else {
-            container.innerHTML = players.map(p => `
+            container.innerHTML = players.map(p => {
+                // IMPORTANTE: Aquí no hacemos cálculos. 
+                // Usamos p.avg que es el valor que ya viste que está bien en el Admin (primera imagen).
+                const avgOficial = p.avg !== undefined ? Number(p.avg).toFixed(3) : "0.000";
+                
+                return `
                 <tr class="hover:bg-pink-50 border-b text-center text-[10px]">
-                    <td class="p-3 font-bold uppercase text-left">${p.nombre}</td>
+                    <td class="p-3 font-bold uppercase text-left text-pink-900">${p.nombre}</td>
                     <td>${p.jj || 0}</td>
                     <td>${p.vb || 0}</td>
                     <td class="text-pink-600 font-bold">${p.h || 0}</td>
@@ -380,11 +391,13 @@ async function verDetalleRoster(nombreEquipo) {
                     <td class="text-pink-600">${p.hr || 0}</td>
                     <td>${p.k || 0}</td>
                     <td>${p.rbi || 0}</td>
-                    <td class="p-2 font-black text-pink-900">${Number(p.avg || 0).toFixed(3)}</td>
-                </tr>`).join('');
+                    <td class="p-2 font-black text-pink-900 bg-pink-50">${avgOficial}</td>
+                </tr>`;
+            }).join('');
         }
     } catch (err) { 
-        container.innerHTML = `<tr><td colspan="10" class="p-5 text-center text-red-500">Error de conexión con la base de datos</td></tr>`;
+        console.error(err);
+        container.innerHTML = `<tr><td colspan="10" class="p-5 text-center text-red-500">Error de red</td></tr>`;
     }
 }
     function cerrarDetalle() { document.getElementById('modalDetalleEquipo').classList.add('hidden'); }
