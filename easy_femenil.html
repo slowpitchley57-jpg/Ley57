@@ -253,7 +253,8 @@
         container.innerHTML = `<tr><td colspan="10" class="p-10 text-center">Cargando...</td></tr>`;
         document.getElementById('detNombreEquipo').innerText = nombreEquipo;
         try {
-            const res = await fetch(`${API}/players?liga=${LIGA}&t=${new Date().getTime()}`);
+            // Cambia tu línea de fetch por esta en las 4 páginas
+const res = await fetch(`${API}/players?liga=${LIGA}&t=${new Date().getTime()}`);
             const all = await res.json();
             const players = all.filter(p => p.equipo.trim().toUpperCase() === nombreEquipo.trim().toUpperCase());
             container.innerHTML = players.map(p => `
@@ -261,7 +262,8 @@
                     <td class="p-3 font-bold uppercase text-pink-900 text-left">${p.nombre}</td>
                     <td>${p.jj || 0}</td><td>${p.vb || 0}</td><td class="text-pink-600 font-bold">${p.h || 0}</td>
                     <td>${p.dobles || 0}</td><td>${p.triples || 0}</td><td class="text-pink-600">${p.hr || 0}</td>
-                    <td>${p.k || 0}</td><td>${p.rbi || 0}</td><td class="font-black italic">${Number(p.avg || 0).toFixed(3)}</td>
+                    <td>${p.k || 0}</td><td>${p.rbi || 0}</td>
+                    <td class="p-2 font-bold">${Number(p.avg || 0).toFixed(3)}</td>
                 </tr>`).join('');
             document.getElementById('modalDetalleEquipo').classList.remove('hidden');
         } catch (err) { console.error(err); }
@@ -295,7 +297,8 @@
     async function cargarLideres() {
         const res = await fetch(`${API}/players?liga=${LIGA}&t=${new Date().getTime()}`);
         const players = await res.json();
-        const topAVG = [...players].sort((a,b) => (b.avg || 0) - (a.avg || 0)).slice(0, 5);
+
+        const topAVG = [...players].sort((a, b) => (b.avg || 0) - (a.avg || 0)).slice(0, 5);
         document.getElementById('topBateo').innerHTML = topAVG.map((p, i) => `
             <div class="flex justify-between items-center border-b border-pink-700 pb-1 text-[11px]">
                 <span class="font-bold uppercase"><span class="text-pink-400 mr-2">#${i+1}</span> ${p.nombre}</span>

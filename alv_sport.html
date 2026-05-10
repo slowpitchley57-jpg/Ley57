@@ -327,7 +327,7 @@
             const players = await res.json();
             
             // TOP 5 AVG
-            const topAVG = [...players].sort((a,b) => (b.avg || 0) - (a.avg || 0)).slice(0, 5);
+            const topAVG = [...players].sort((a, b) => (b.avg || 0) - (a.avg || 0)).slice(0, 5);
             document.getElementById('topBateo').innerHTML = topAVG.map((p, i) => `
                 <div class="flex justify-between items-center border-b border-zinc-800 pb-1 text-[11px]">
                     <span class="font-bold uppercase text-zinc-300"><span class="text-red-600 mr-2">#${i+1}</span> ${p.nombre}</span>
@@ -349,7 +349,8 @@
     document.getElementById('detNombreEquipo').innerText = nombreEquipo;
     
     try {
-        const res = await fetch(`${API}/players?liga=varonil`);
+       // Cambia tu línea de fetch por esta en las 4 páginas
+const res = await fetch(`${API}/players?liga=${LIGA}&t=${new Date().getTime()}`);
         const allPlayers = await res.json();
         
         // Filtramos por equipo
@@ -372,11 +373,10 @@
         <td class="text-orange-500 font-black">${p.hr || 0}</td>
         <td class="text-zinc-500">${p.k || 0}</td>
         <td class="text-red-500 font-black">${p.rbi || 0}</td>
+        <td class="p-2 font-bold">${Number(p.avg || 0).toFixed(3)}</td>
         
-        <!-- JALAMOS EL AVG DIRECTO DE LA BASE DE DATOS -->
-        <td class="text-red-600 font-black text-xs italic">
-            ${Number(p.avg || 0).toFixed(3)}
-        </td>
+        
+        
     </tr>`).join('');
         }
         
