@@ -249,26 +249,45 @@
     }
 
     async function verDetalleRoster(nombreEquipo) {
-        const container = document.getElementById('bodyDetalleJugadoras');
-        container.innerHTML = `<tr><td colspan="10" class="p-10 text-center">Cargando...</td></tr>`;
-        document.getElementById('detNombreEquipo').innerText = nombreEquipo;
-        try {
-            // Cambia tu línea de fetch por esta en las 4 páginas
-const res = await fetch(`${API}/players?liga=${LIGA}&t=${new Date().getTime()}`);
-            const all = await res.json();
-            const players = all.filter(p => p.equipo.trim().toUpperCase() === nombreEquipo.trim().toUpperCase());
+    const container = document.getElementById('bodyDetalleJugadoras');
+    // Limpiamos y ponemos estado de carga
+    container.innerHTML = `<tr><td colspan="10" class="p-10 text-center">Cargando...</td></tr>`;
+    document.getElementById('detNombreEquipo').innerText = nombreEquipo;
+
+    try {
+        // Agregamos el timestamp para evitar caché
+        const res = await fetch(`${API}/players?liga=${LIGA}&t=${new Date().getTime()}`);
+        const all = await res.json();
+        
+        // CORRECCIÓN: Usamos p.team (que es como viene de tu API/DB)
+        const players = all.filter(p => 
+            p.team && p.team.trim().toUpperCase() === nombreEquipo.trim().toUpperCase()
+        );
+
+        if (players.length === 0) {
+            container.innerHTML = `<tr><td colspan="10" class="p-5 text-center text-gray-500">No hay jugadores registrados en este equipo</td></tr>`;
+        } else {
             container.innerHTML = players.map(p => `
                 <tr class="hover:bg-pink-50 border-b text-center text-[10px]">
                     <td class="p-3 font-bold uppercase text-pink-900 text-left">${p.nombre}</td>
-                    <td>${p.jj || 0}</td><td>${p.vb || 0}</td><td class="text-pink-600 font-bold">${p.h || 0}</td>
-                    <td>${p.dobles || 0}</td><td>${p.triples || 0}</td><td class="text-pink-600">${p.hr || 0}</td>
-                    <td>${p.k || 0}</td><td>${p.rbi || 0}</td>
-                    <td class="p-2 font-bold">${Number(p.avg || 0).toFixed(3)}</td>
+                    <td>${p.jj || 0}</td>
+                    <td>${p.vb || 0}</td>
+                    <td class="text-pink-600 font-bold">${p.h || 0}</td>
+                    <td>${p.dobles || 0}</td>
+                    <td>${p.triples || 0}</td>
+                    <td class="text-pink-600">${p.hr || 0}</td>
+                    <td>${p.k || 0}</td>
+                    <td>${p.rbi || 0}</td>
+                    <td class="p-2 font-bold text-pink-900">${Number(p.avg || 0).toFixed(3)}</td>
                 </tr>`).join('');
-            document.getElementById('modalDetalleEquipo').classList.remove('hidden');
-        } catch (err) { console.error(err); }
+        }
+        document.getElementById('modalDetalleEquipo').classList.remove('hidden');
+    } catch (err) { 
+        console.error("Error al cargar roster:", err);
+        container.innerHTML = `<tr><td colspan="10" class="p-5 text-center text-red-500">Error al conectar con el servidor</td></tr>`;
     }
-
+}
+    
     function cerrarDetalle() { document.getElementById('modalDetalleEquipo').classList.add('hidden'); }
 
     async function cargarEncuentros() {
@@ -294,35 +313,48 @@ const res = await fetch(`${API}/players?liga=${LIGA}&t=${new Date().getTime()}`)
         }
     }
 
-    async function cargarLideres() {
+async function cargarLideres() {
+    try {
         const res = await fetch(`${API}/players?liga=${LIGA}&t=${new Date().getTime()}`);
         const players = await res.json();
 
+        if (!players || players.length === 0) return;
+
+        // TOP AVG - Sincronizado con el campo 'avg' del Admin
         const topAVG = [...players].sort((a, b) => (b.avg || 0) - (a.avg || 0)).slice(0, 5);
         document.getElementById('topBateo').innerHTML = topAVG.map((p, i) => `
             <div class="flex justify-between items-center border-b border-pink-700 pb-1 text-[11px]">
                 <span class="font-bold uppercase"><span class="text-pink-400 mr-2">#${i+1}</span> ${p.nombre}</span>
                 <span class="font-black text-pink-300 italic">${Number(p.avg || 0).toFixed(3)}</span>
             </div>`).join('');
+
+        // TOP HR
         const topHR = [...players].sort((a,b) => (b.hr || 0) - (a.hr || 0)).slice(0, 5);
         document.getElementById('topHR').innerHTML = topHR.map((p, i) => `
             <div class="flex justify-between items-center border-b border-pink-700 pb-1 text-[11px]">
                 <span class="font-bold uppercase"><span class="text-pink-400 mr-2">#${i+1}</span> ${p.nombre}</span>
                 <span class="font-black text-pink-300 italic">${p.hr || 0} HR</span>
             </div>`).join('');
+
+        // TOP EXTRAS (Dobles y Triples)
         const top2B = [...players].sort((a,b) => (b.dobles || 0) - (a.dobles || 0)).slice(0, 3);
         const top3B = [...players].sort((a,b) => (b.triples || 0) - (a.triples || 0)).slice(0, 2);
         const extras = [];
         top2B.forEach(p => { if(p.dobles > 0) extras.push({ nombre: p.nombre, stat: `${p.dobles} 2B`, tipo: '2B' }); });
         top3B.forEach(p => { if(p.triples > 0) extras.push({ nombre: p.nombre, stat: `${p.triples} 3B`, tipo: '3B' }); });
-        extras.sort((a,b) => b.tipo.localeCompare(a.tipo));
-        document.getElementById('topExtras').innerHTML = extras.length > 0 ? extras.slice(0, 5).map((p, i) => `
-            <div class="flex justify-between items-center border-b border-pink-700 pb-1 text-[11px]">
-                <span class="font-bold uppercase"><span class="text-pink-400 mr-2">#${i+1}</span> ${p.nombre}</span>
-                <span class="font-black text-pink-300 italic">${p.stat}</span>
-            </div>`).join('') : '<p class="text-xs text-pink-400 opacity-50 italic">Sin registros</p>';
-    }
+        
+        document.getElementById('topExtras').innerHTML = extras.length > 0 
+            ? extras.slice(0, 5).map((p, i) => `
+                <div class="flex justify-between items-center border-b border-pink-700 pb-1 text-[11px]">
+                    <span class="font-bold uppercase"><span class="text-pink-400 mr-2">#${i+1}</span> ${p.nombre}</span>
+                    <span class="font-black text-pink-300 italic">${p.stat}</span>
+                </div>`).join('') 
+            : '<p class="text-xs text-pink-400 opacity-50 italic">Sin registros</p>';
 
+    } catch (error) {
+        console.error("Error cargando líderes:", error);
+    }
+}
     async function cargarHistorial() {
         const res = await fetch(`${API}/games?liga=${LIGA}&status=finalizado`);
         const games = await res.json();
