@@ -250,23 +250,36 @@
 
     async function verDetalleRoster(nombreEquipo) {
     const container = document.getElementById('bodyDetalleJugadoras');
-    // Limpiamos y ponemos estado de carga
-    container.innerHTML = `<tr><td colspan="10" class="p-10 text-center">Cargando...</td></tr>`;
+    // 1. Limpieza total antes de empezar
+    container.innerHTML = `<tr><td colspan="10" class="p-10 text-center text-pink-900">Buscando jugadoras...</td></tr>`;
     document.getElementById('detNombreEquipo').innerText = nombreEquipo;
 
     try {
-        // Agregamos el timestamp para evitar caché
+        // 2. Fetch con timestamp para evitar datos viejos
         const res = await fetch(`${API}/players?liga=${LIGA}&t=${new Date().getTime()}`);
         const all = await res.json();
         
-        // CORRECCIÓN: Usamos p.team (que es como viene de tu API/DB)
-        const players = all.filter(p => 
-            p.team && p.team.trim().toUpperCase() === nombreEquipo.trim().toUpperCase()
-        );
+        // 3. FILTRO INTELIGENTE:
+        // Convertimos ambos a Mayúsculas y quitamos espacios al inicio y al final (.trim())
+        const nombreBuscado = nombreEquipo.trim().toUpperCase();
+        
+        const players = all.filter(p => {
+            // Verificamos si existe el campo 'team' o 'equipo' por si acaso
+            const equipoEnDB = (p.team || p.equipo || "").trim().toUpperCase();
+            return equipoEnDB === nombreBuscado;
+        });
 
+        // 4. VALIDACIÓN DE RESULTADOS
         if (players.length === 0) {
-            container.innerHTML = `<tr><td colspan="10" class="p-5 text-center text-gray-500">No hay jugadores registrados en este equipo</td></tr>`;
+            container.innerHTML = `
+                <tr>
+                    <td colspan="10" class="p-10 text-center">
+                        <p class="text-red-500 font-bold">No se encontraron jugadoras para: ${nombreEquipo}</p>
+                        <p class="text-[10px] text-gray-400">Verifica que el nombre en el Admin coincida exactamente.</p>
+                    </td>
+                </tr>`;
         } else {
+            // 5. RENDERIZADO (Usando el AVG que ya calculó el Admin)
             container.innerHTML = players.map(p => `
                 <tr class="hover:bg-pink-50 border-b text-center text-[10px]">
                     <td class="p-3 font-bold uppercase text-pink-900 text-left">${p.nombre}</td>
@@ -278,13 +291,16 @@
                     <td class="text-pink-600">${p.hr || 0}</td>
                     <td>${p.k || 0}</td>
                     <td>${p.rbi || 0}</td>
-                    <td class="p-2 font-bold text-pink-900">${Number(p.avg || 0).toFixed(3)}</td>
+                    <td class="p-2 font-bold text-pink-900 bg-pink-100">${Number(p.avg || 0).toFixed(3)}</td>
                 </tr>`).join('');
         }
+        
+        // Abrir el modal
         document.getElementById('modalDetalleEquipo').classList.remove('hidden');
+
     } catch (err) { 
-        console.error("Error al cargar roster:", err);
-        container.innerHTML = `<tr><td colspan="10" class="p-5 text-center text-red-500">Error al conectar con el servidor</td></tr>`;
+        console.error("Error crítico:", err);
+        container.innerHTML = `<tr><td colspan="10" class="p-10 text-center text-red-600">Error de conexión con la base de datos</td></tr>`;
     }
 }
     

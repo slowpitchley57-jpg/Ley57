@@ -344,27 +344,43 @@
     }
 }
 
-    // Función para el Roster
-      async function verDetalleRoster(nombreEquipo) {
+    async function verDetalleRoster(nombreEquipo) {
     const container = document.getElementById('bodyDetalleJugadoras');
-    // Limpiamos y ponemos estado de carga
-    container.innerHTML = `<tr><td colspan="10" class="p-10 text-center">Cargando...</td></tr>`;
+    const modal = document.getElementById('modalDetalleEquipo');
+    
+    // 1. Limpieza y preparación
+    container.innerHTML = `<tr><td colspan="10" class="p-10 text-center text-pink-800">Cargando jugadoras...</td></tr>`;
     document.getElementById('detNombreEquipo').innerText = nombreEquipo;
 
     try {
-        // Agregamos el timestamp para evitar caché
+        // 2. Intento de mostrar el modal primero para mejorar la respuesta visual
+        if (modal) modal.classList.remove('hidden');
+
+        // 3. Obtención de datos frescos
         const res = await fetch(`${API}/players?liga=${LIGA}&t=${new Date().getTime()}`);
         const all = await res.json();
         
-        // CORRECCIÓN: Usamos p.team (que es como viene de tu API/DB)
-        const players = all.filter(p => 
-            p.team && p.team.trim().toUpperCase() === nombreEquipo.trim().toUpperCase()
-        );
+        // 4. Filtro por equipo (robusto contra espacios y mayúsculas)
+        const buscado = nombreEquipo.trim().toUpperCase();
+        const players = all.filter(p => {
+            const teamDB = (p.team || p.equipo || "").trim().toUpperCase();
+            return teamDB === buscado;
+        });
 
+        // 5. Generación de la tabla
         if (players.length === 0) {
-            container.innerHTML = `<tr><td colspan="10" class="p-5 text-center text-gray-500">No hay jugadores registrados en este equipo</td></tr>`;
+            container.innerHTML = `
+                <tr>
+                    <td colspan="10" class="p-10 text-center text-gray-500 italic">
+                        No hay jugadoras registradas en el equipo: ${nombreEquipo}
+                    </td>
+                </tr>`;
         } else {
-            container.innerHTML = players.map(p => `
+            container.innerHTML = players.map(p => {
+                // Validación de AVG para evitar que .toFixed(3) rompa el código
+                const avgValue = Number(p.avg || 0).toFixed(3);
+                
+                return `
                 <tr class="hover:bg-pink-50 border-b text-center text-[10px]">
                     <td class="p-3 font-bold uppercase text-pink-900 text-left">${p.nombre}</td>
                     <td>${p.jj || 0}</td>
@@ -375,13 +391,17 @@
                     <td class="text-pink-600">${p.hr || 0}</td>
                     <td>${p.k || 0}</td>
                     <td>${p.rbi || 0}</td>
-                    <td class="p-2 font-bold text-pink-900">${Number(p.avg || 0).toFixed(3)}</td>
-                </tr>`).join('');
+                    <!-- Mostramos el AVG calculado desde el Admin -->
+                    <td class="p-2 font-black text-pink-900 bg-pink-100">${avgValue}</td>
+                </tr>`;
+            }).join('');
         }
-        document.getElementById('modalDetalleEquipo').classList.remove('hidden');
+
     } catch (err) { 
-        console.error("Error al cargar roster:", err);
-        container.innerHTML = `<tr><td colspan="10" class="p-5 text-center text-red-500">Error al conectar con el servidor</td></tr>`;
+        console.error("Error en Roster Femenil:", err);
+        container.innerHTML = `<tr><td colspan="10" class="p-10 text-center text-red-500 font-bold">Error al cargar datos. Intenta de nuevo.</td></tr>`;
+        // Aseguramos que el modal se abra aunque falle la carga para mostrar el error
+        if (modal) modal.classList.remove('hidden');
     }
 }
     function cerrarDetalle() { document.getElementById('modalDetalleEquipo').classList.add('hidden'); }
