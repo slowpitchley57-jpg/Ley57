@@ -344,48 +344,34 @@
     }
 }
 
-    async function verDetalleRoster(nombreEquipo) {
+async function verDetalleRoster(nombreEquipo) {
     const container = document.getElementById('bodyDetalleJugadoras');
     const modal = document.getElementById('modalDetalleEquipo');
     
-    container.innerHTML = `<tr><td colspan="10" class="p-10 text-center text-pink-800">Cargando jugadoras...</td></tr>`;
-    document.getElementById('detNombreEquipo').innerText = nombreEquipo;
+    container.innerHTML = `<tr><td colspan="10" class="p-10 text-center">Cargando...</td></tr>`;
 
     try {
+        // Abrimos el modal de inmediato
         if (modal) modal.classList.remove('hidden');
 
-        // Pedimos los datos con timestamp para evitar el caché del navegador
-        const res = await fetch(`${API}/players?liga=${LIGA}&t=${new Date().getTime()}`);
+        const res = await fetch(`${API}/players?t=${new Date().getTime()}`);
         const all = await res.json();
         
         const buscado = nombreEquipo.trim().toUpperCase();
-        
-        // FILTRO MEJORADO: Compara equipo y liga sin importar mayúsculas
+
+        // Filtramos por equipo y nos aseguramos de que la liga sea 'femenil'
         const players = all.filter(p => {
-            const teamDB = (p.team || p.equipo || "").trim().toUpperCase();
-            const ligaDB = (p.liga || "").trim().toLowerCase();
-            
-            // Verificamos que coincida el equipo Y que la liga sea 'femenil'
-            return teamDB === buscado && ligaDB === "femenil";
+            const eq = (p.team || p.equipo || "").trim().toUpperCase();
+            const li = (p.liga || "").trim().toLowerCase();
+            return eq === buscado && li === "femenil";
         });
 
         if (players.length === 0) {
-            container.innerHTML = `
-                <tr>
-                    <td colspan="10" class="p-10 text-center text-gray-500 italic">
-                        No hay jugadoras en "${nombreEquipo}" para la liga femenil.
-                        <br><span class="text-[9px]">Revisa el Admin: Liga debe ser 'femenil'</span>
-                    </td>
-                </tr>`;
+            container.innerHTML = `<tr><td colspan="10" class="p-5 text-center">No hay jugadoras en ${nombreEquipo}</td></tr>`;
         } else {
-            container.innerHTML = players.map(p => {
-                // USAMOS EL AVG QUE YA VIENE DEL ADMIN
-                // Si el admin calculó (H+2B+3B+HR)/VB, aquí se mostrará ese valor.
-                const avgMostrado = Number(p.avg || 0).toFixed(3);
-                
-                return `
+            container.innerHTML = players.map(p => `
                 <tr class="hover:bg-pink-50 border-b text-center text-[10px]">
-                    <td class="p-3 font-bold uppercase text-pink-900 text-left">${p.nombre}</td>
+                    <td class="p-3 font-bold uppercase text-left">${p.nombre}</td>
                     <td>${p.jj || 0}</td>
                     <td>${p.vb || 0}</td>
                     <td class="text-pink-600 font-bold">${p.h || 0}</td>
@@ -394,15 +380,11 @@
                     <td class="text-pink-600">${p.hr || 0}</td>
                     <td>${p.k || 0}</td>
                     <td>${p.rbi || 0}</td>
-                    <!-- Sincronizado con la nueva fórmula del Admin -->
-                    <td class="p-2 font-black text-pink-900 bg-pink-100">${avgMostrado}</td>
-                </tr>`;
-            }).join('');
+                    <td class="p-2 font-black text-pink-900">${Number(p.avg || 0).toFixed(3)}</td>
+                </tr>`).join('');
         }
-
     } catch (err) { 
-        console.error("Error:", err);
-        container.innerHTML = `<tr><td colspan="10" class="p-10 text-center text-red-500">Error de conexión</td></tr>`;
+        container.innerHTML = `<tr><td colspan="10" class="p-5 text-center text-red-500">Error de conexión con la base de datos</td></tr>`;
     }
 }
     function cerrarDetalle() { document.getElementById('modalDetalleEquipo').classList.add('hidden'); }

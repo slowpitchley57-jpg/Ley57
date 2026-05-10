@@ -459,15 +459,38 @@
     }
 
     async function updPlayer(id, campo, valor) {
-        try {
-            await fetch(`${API}/players/${id}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ [campo]: Number(valor) }) });
-            const celdaAvg = document.getElementById(`avg-${id}`);
-            const fila = celdaAvg.parentElement;
-            const vb = Number(fila.querySelector('input[onchange*="\'vb\'"]').value) || 0;
-            const h = Number(fila.querySelector('input[onchange*="\'h\'"]').value) || 0;
-            celdaAvg.innerText = vb > 0 ? (h / vb).toFixed(3) : "0.000";
-        } catch (err) { console.error(err); }
+    try {
+        // 1. Guardamos el cambio (H o VB) en la jugadora
+        await fetch(`${API}/players/${id}`, { 
+            method: 'PUT', 
+            headers: {'Content-Type':'application/json'}, 
+            body: JSON.stringify({ [campo]: Number(valor) }) 
+        });
+
+        // 2. Buscamos la fila en la tabla para obtener los valores actuales
+        const celdaAvg = document.getElementById(`avg-${id}`);
+        const fila = celdaAvg.parentElement;
+        const vb = Number(fila.querySelector('input[onchange*="\'vb\'"]').value) || 0;
+        const h = Number(fila.querySelector('input[onchange*="\'h\'"]').value) || 0;
+
+        // 3. Calculamos el AVG clásico: H / VB
+        const nuevoAvg = vb > 0 ? (h / vb).toFixed(3) : "0.000";
+
+        // 4. ¡IMPORTANTE! Guardamos este AVG en la base de datos
+        // Sin este paso, las páginas de estadísticas siempre verán 0
+        await fetch(`${API}/players/${id}`, { 
+            method: 'PUT', 
+            headers: {'Content-Type':'application/json'}, 
+            body: JSON.stringify({ avg: Number(nuevoAvg) }) 
+        });
+
+        // Actualizamos la vista del admin
+        celdaAvg.innerText = nuevoAvg;
+
+    } catch (err) { 
+        console.error("Error al actualizar y guardar AVG:", err); 
     }
+}
 
     /*async function cargarPitchers() {
         const res = await fetch(`${API}/players?esPitcher=true`);
