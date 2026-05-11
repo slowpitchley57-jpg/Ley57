@@ -2,9 +2,10 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
-const fs = require('fs'); // Necesario para guardar el archivo
-const path = require('path');
 const app = express();
+const PDFDocument = require('pdfkit');
+const fs = require('fs');
+const path = require('path');
 
 // --- CONFIGURACIÓN DE CORS (UNIFICADA) ---
 app.use(cors()); // Esto permite conexiones desde cualquier origen, ideal para arreglar errores de acceso
@@ -94,8 +95,8 @@ const teamSchema = new mongoose.Schema({
     liga: String,
     categoria: String,
     // CAMPOS DE FINANZAS (Asegúrate de que estén así)
-    totalAbonado: { type: Number, default: 0 },
-    fianzaTotal: { type: Number, default: 10000 },
+    totalAbonado: { type: Number, default: 0 }, // DEBE SER NUMBER
+    historialPagos: { type: Array, default: [] },
     historialPagos: [{
         monto: Number,
         folio: String,
@@ -277,128 +278,155 @@ app.put('/api/users/update-password', async (req, res) => {
     res.json({ ok: true });
 });
 
-app.get('/api/dev/usuarios', async (req, res) => {
-    res.json(await User.find());
-});
-const PDFDocument = require('pdfkit');
-
 app.post('/api/registrar-pago', async (req, res) => {
     const { equipoId, montoAbono } = req.body;
 
     try {
+        // 1. OBTENER Y VALIDAR EQUIPO
         const equipo = await Team.findById(equipoId);
         if (!equipo) return res.status(404).json({ success: false, error: "Equipo no encontrado" });
 
         const abonoLimpio = parseFloat(montoAbono);
+        if (isNaN(abonoLimpio) || abonoLimpio <= 0) {
+            return res.status(400).json({ success: false, error: "Monto de abono inválido" });
+        }
 
-        // 1. Inicializar si es la primera vez (Evita que se quede en blanco)
-        if (isNaN(equipo.totalAbonado)) equipo.totalAbonado = 0;
+        // 2. ACTUALIZACIÓN DE BASE DE DATOS (PERSISTENCIA TOTAL)
+        if (typeof equipo.totalAbonado !== 'number') equipo.totalAbonado = 0;
         if (!equipo.historialPagos) equipo.historialPagos = [];
 
-        // 2. Sumar el abono al total acumulado
         equipo.totalAbonado += abonoLimpio;
-
-        const folio = `F-${Date.now().toString().slice(-6)}`;
-
-        // 3. Agregar al historial
+        const folio = `REC-${Date.now().toString().slice(-6)}`;
+        
         equipo.historialPagos.push({
             monto: abonoLimpio,
             folio: folio,
             fecha: new Date()
         });
 
-        // --- CRUCIAL: Notificar a Mongoose que el historial cambió ---
-        equipo.markModified('historialPagos');
+        // Forzar guardado en MongoDB
         equipo.markModified('totalAbonado');
-
-        // 4. Guardar en la base de datos
+        equipo.markModified('historialPagos');
         await equipo.save();
 
-        // 5. Calcular saldo para el PDF y la respuesta
-        const metaFianza = 10000; 
+        const metaFianza = 10000;
         const saldoPendiente = metaFianza - equipo.totalAbonado;
 
-        // --- 1. CREACIÓN DEL DOCUMENTO (Esto faltaba) ---
+        // 3. CONFIGURACIÓN DEL ARCHIVO PDF
         const fileName = `factura_${folio}.pdf`;
-        const filePath = path.join(__dirname, 'public', 'recibos', fileName);
-        
-        // Crear carpeta si no existe
-        if (!fs.existsSync(path.join(__dirname, 'public', 'recibos'))) {
-            fs.mkdirSync(path.join(__dirname, 'public', 'recibos'), { recursive: true });
+        const publicPath = path.join(__dirname, 'public', 'recibos');
+        const filePath = path.join(publicPath, fileName);
+
+        if (!fs.existsSync(publicPath)) {
+            fs.mkdirSync(publicPath, { recursive: true });
         }
 
-        const doc = new PDFDocument({ size: 'A4', margin: 0 }); // Aquí definimos 'doc'
+        const doc = new PDFDocument({ size: 'A4', margin: 0 });
         const stream = fs.createWriteStream(filePath);
         doc.pipe(stream);
 
-        // --- 2. DISEÑO PROFESIONAL ---
-        // Encabezado Azul
-        doc.rect(0, 0, 600, 150).fill('#1e3a8a'); 
+        // --- DISEÑO DE ÉLITE ---
+
+        // Fondo y Decoración Lateral
+        doc.rect(0, 0, 600, 842).fill('#ffffff'); // Fondo blanco
+        doc.rect(0, 0, 20, 842).fill('#1e3a8a'); // Barra lateral decorativa azul
+
+        // Encabezado Principal
+        doc.rect(20, 0, 580, 150).fill('#1e3a8a');
         
-        // Logo (Asegúrate de tener la ruta correcta o déjalo comentado)
-        doc.image('logoalvnegro.jpeg', 50, 30, { width: 80 });
-        
+        // Logo (Asegúrate de que el archivo exista en la raíz)
+        try {
+            doc.image('logoalvnegro.jpeg', 50, 35, { width: 85 });
+        } catch (e) {
+            console.log("Aviso: Logo no encontrado, continuando sin imagen.");
+        }
+
         doc.fillColor('white')
-           .fontSize(25).text('LIGA LEY 57', 150, 45)
-           .fontSize(10).text('COMPROBANTE OFICIAL DE PAGO - FIANZA', 150, 75)
-           .fontSize(10).text('Hermosillo, Sonora, México', 150, 90);
+           .font('Helvetica-Bold').fontSize(28).text('LIGA LEY 57', 160, 45)
+           .fontSize(10).font('Helvetica').text('ADMINISTRACIÓN DE LIGAS DE SOFTBALL PROFESIONAL', 160, 80)
+           .text('Hermosillo, Sonora | Unidad Deportiva Ley 57', 160, 95);
 
-        // Cuadro de Folio
-        doc.rect(400, 40, 150, 70).stroke('white');
-        doc.fontSize(10).text('FOLIO DE FACTURA', 410, 55);
-        doc.fontSize(16).text(folio, 410, 75, { weight: 'bold' });
+        // Badge de Folio
+        doc.rect(420, 40, 140, 70).lineWidth(2).stroke('white');
+        doc.fontSize(9).text('FOLIO DE RECIBO', 430, 55, { align: 'center', width: 120 });
+        doc.fontSize(16).font('Helvetica-Bold').text(folio, 430, 75, { align: 'center', width: 120 });
 
-        // Cuerpo
-        doc.fillColor('#1f2937').fontSize(14).text('DETALLES DEL CLIENTE / EQUIPO', 50, 180);
-        doc.rect(50, 195, 500, 2).fill('#e5e7eb');
+        // Marca de Agua Central (Sutil)
+        doc.fillColor('#f1f5f9').fontSize(100).opacity(0.1)
+           .text('LEY 57', 100, 350, { rotation: -45 });
+        doc.opacity(1); // Reset de opacidad
 
-        doc.fontSize(11).fillColor('black');
-        doc.text(`EQUIPO: ${equipo.nombre.toUpperCase()}`, 50, 210);
-        doc.text(`LIGA: ${equipo.liga.toUpperCase()}`, 50, 225);
-        doc.text(`FECHA DE EMISIÓN: ${new Date().toLocaleDateString()}`, 350, 210);
+        // Información del Equipo
+        doc.fillColor('#1e3a8a').fontSize(14).font('Helvetica-Bold').text('INFORMACIÓN DEL EQUIPO', 60, 190);
+        doc.rect(60, 208, 480, 1).fill('#cbd5e1');
 
-        // Tabla de Conceptos
-        const tableTop = 280;
-        doc.rect(50, tableTop, 500, 25).fill('#f3f4f6');
-        doc.fillColor('#111827').fontSize(10);
-        doc.text('DESCRIPCIÓN', 60, tableTop + 8);
-        doc.text('MONTO ABONADO', 400, tableTop + 8);
+        doc.fillColor('#334155').fontSize(11).font('Helvetica')
+           .text(`EQUIPO:`, 60, 225).font('Helvetica-Bold').text(equipo.nombre.toUpperCase(), 120, 225)
+           .font('Helvetica').text(`LIGA:`, 60, 245).font('Helvetica-Bold').text(equipo.liga.toUpperCase(), 120, 245)
+           .font('Helvetica').text(`FECHA:`, 380, 225).font('Helvetica-Bold').text(new Date().toLocaleDateString(), 430, 225);
 
-        doc.fillColor('black').text(`Abono a cuenta de fianza de temporada`, 60, tableTop + 40);
-        doc.fontSize(12).text(`$${abonoLimpio.toLocaleString()}`, 400, tableTop + 40, { weight: 'bold' });
+        // Tabla de Pagos
+        const tableTop = 320;
+        doc.rect(60, tableTop, 480, 30).fill('#1e3a8a');
+        doc.fillColor('white').font('Helvetica-Bold').fontSize(10)
+           .text('CONCEPTO', 75, tableTop + 10)
+           .text('MÉTODO', 260, tableTop + 10)
+           .text('IMPORTE ABONADO', 410, tableTop + 10);
 
-        // Resumen Financiero
-        const footerTop = 450;
-        doc.rect(300, footerTop, 250, 100).fill('#f9fafb');
-        doc.fillColor('black').fontSize(10).text('Meta Total de Fianza:', 310, footerTop + 15);
-        doc.text(`$${metaFianza.toLocaleString()}`, 480, footerTop + 15);
-        doc.text('Total Acumulado:', 310, footerTop + 35);
-        doc.text(`$${equipo.totalAbonado.toLocaleString()}`, 480, footerTop + 35);
-        doc.fillColor('red').fontSize(12).text('SALDO PENDIENTE:', 310, footerTop + 65, { weight: 'bold' });
-        doc.text(`$${saldoPendiente.toLocaleString()}`, 460, footerTop + 65);
+        doc.fillColor('#1e293b').font('Helvetica').fontSize(11)
+           .text('Abono a Fianza de Temporada 2026', 75, tableTop + 50)
+           .text('Efectivo/Transf.', 260, tableTop + 50)
+           .font('Helvetica-Bold').text(`$${abonoLimpio.toLocaleString('es-MX')}.00`, 410, tableTop + 50);
+        
+        doc.rect(60, tableTop + 75, 480, 1).fill('#e2e8f0');
 
-        // Firmas
-        doc.fillColor('black').fontSize(9).text('Este documento sirve como comprobante legal de ingreso.', 50, 650, { align: 'center' });
-        doc.text('__________________________', 80, 750);
-        doc.text('Javier Yocupicio', 80, 765);
-        doc.text('__________________________', 350, 750);
-        doc.text('Representante del Equipo', 350, 765);
+        // Cuadro de Resumen (Corte de Caja)
+        const summaryTop = 500;
+        doc.rect(330, summaryTop, 210, 120).fill('#f8fafc').lineWidth(1).stroke('#cbd5e1');
+        
+        doc.fillColor('#64748b').fontSize(9).font('Helvetica')
+           .text('TOTAL FIANZA:', 345, summaryTop + 20)
+           .text('TOTAL ACUMULADO:', 345, summaryTop + 45);
+        
+        doc.fillColor('#1e293b').fontSize(10).font('Helvetica-Bold')
+           .text(`$${metaFianza.toLocaleString('es-MX')}.00`, 450, summaryTop + 20)
+           .text(`$${equipo.totalAbonado.toLocaleString('es-MX')}.00`, 450, summaryTop + 45);
+
+        doc.rect(345, summaryTop + 70, 180, 1).fill('#cbd5e1');
+        
+        doc.fillColor('#dc2626').fontSize(12)
+           .text('SALDO RESTANTE:', 345, summaryTop + 85)
+           .text(`$${saldoPendiente.toLocaleString('es-MX')}.00`, 450, summaryTop + 85);
+
+        // Pie de Página y Firmas
+        const footerY = 720;
+        doc.fillColor('#1e3a8a').rect(80, footerY, 160, 1).fill();
+        doc.rect(360, footerY, 160, 1).fill();
+
+        doc.fillColor('#475569').fontSize(9).font('Helvetica-Bold')
+           .text('JAVIER YOCUPICIO', 80, footerY + 10, { width: 160, align: 'center' })
+           .text('DIRECTOR DE LIGA', 80, footerY + 22, { width: 160, align: 'center' })
+           .text('REPRESENTANTE', 360, footerY + 10, { width: 160, align: 'center' })
+           .text('FIRMA DE CONFORMIDAD', 360, footerY + 22, { width: 160, align: 'center' });
+
+        doc.fontSize(8).fillColor('#94a3b8')
+           .text('Este documento es un comprobante oficial. El saldo pendiente debe cubrirse según el reglamento.', 20, 800, { align: 'center', width: 580 });
 
         doc.end();
 
-        // --- 3. RESPUESTA AL CLIENTE ---
+        // 4. ENVÍO DE RESPUESTA CUANDO EL PDF ESTÉ LISTO
         stream.on('finish', () => {
             res.json({ 
-            success: true, 
-            saldo: saldoPendiente,
-            totalAbonado: equipo.totalAbonado,
-            folio: folio,
-            pdfUrl: `https://ley57.onrender.com/recibos/factura_${folio}.pdf`
-        });
+                success: true, 
+                saldo: saldoPendiente,
+                totalAbonado: equipo.totalAbonado,
+                folio: folio,
+                pdfUrl: `https://ley57.onrender.com/recibos/${fileName}`
+            });
         });
 
     } catch (error) {
-        console.error("Error al guardar abono:", error);
+        console.error("Error fatal en registro de pago:", error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
