@@ -163,6 +163,18 @@ app.delete('/api/equipos/:id', async (req, res) => {
     await Team.findByIdAndDelete(req.params.id);
     res.json({ ok: true });
 });
+// Ruta para obtener equipos filtrados por liga
+app.get('/teams', async (req, res) => {
+    try {
+        const { liga } = req.query;
+        // Si mandas liga, filtra. Si no, manda todos.
+        const filtro = liga ? { liga: liga } : {};
+        const equipos = await Team.find(filtro);
+        res.json(equipos);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
 // Jugadores
 app.get('/api/players', async (req, res) => {

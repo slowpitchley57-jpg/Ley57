@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ley57-v1';
+const CACHE_NAME = 'ALV-SPORT-LEAGUES-V1';
 const assets = [
   '/',
   '/index.html',

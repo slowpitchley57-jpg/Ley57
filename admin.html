@@ -1405,43 +1405,68 @@ async function cargarEquiposPorLiga() {
 
 // Función principal para el botón
 async function procesarPagoYFactura() {
-    const equipoId = document.getElementById('selEquipoFinanza').value;
-    const monto = document.getElementById('montoInput').value;
+    const selectorEquipo = document.getElementById('selEquipoFinanza');
+    const equipoId = selectorEquipo.value;
+    const montoInput = document.getElementById('montoInput');
+    const monto = montoInput.value;
 
-    if(!equipoId || !monto || monto <= 0) {
-        return Swal.fire("Atención", "Selecciona un equipo e ingresa un monto válido", "warning");
+    // 1. Validaciones iniciales
+    if (!equipoId || equipoId === "") {
+        return Swal.fire({
+            title: "Selecciona un equipo",
+            text: "Primero elige la liga y luego el equipo para poder generar la factura.",
+            icon: "info",
+            confirmButtonColor: "#3b82f6"
+        });
     }
 
-    // Mostrar mensaje de carga
+    if (!monto || monto <= 0) {
+        return Swal.fire("Monto Inválido", "Ingresa la cantidad que el equipo está pagando.", "warning");
+    }
+
+    // 2. Mostrar mensaje de carga (Loading)
     Swal.fire({
         title: 'Procesando pago...',
-        text: 'Generando factura oficial',
+        text: 'Actualizando saldo y generando factura oficial',
         allowOutsideClick: false,
         didOpen: () => { Swal.showLoading() }
     });
 
     try {
+        // 3. Llamada al servidor (Render)
+        // Asegúrate de que la variable API tenga la URL de tu backend
         const res = await fetch(`${API}/api/registrar-pago`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ equipoId, montoAbono: monto })
         });
 
-        if (res.ok) {
-            const data = await res.json();
-            
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+            // 4. Éxito: Mostrar saldo y opción de descarga
             Swal.fire({
                 title: "¡Pago Registrado!",
-                html: `Se abonaron <b>$${monto}</b>.<br>Saldo pendiente: <span style="color:red">$${data.saldo}</span>`,
+                html: `Se abonaron <b>$${monto}</b>.<br>Folio: <b>${data.folio}</b><br><br><span style="font-size: 1.2em;">Saldo pendiente: <b style="color:red">$${data.saldo}</b></span>`,
                 icon: "success",
-                confirmButtonText: "Descargar Recibo"
-            }).then(() => {
-                // Si el server responde con el PDF o una URL, aquí se descarga
-                if(data.pdfUrl) window.open(data.pdfUrl, '_blank');
+                confirmButtonText: "Cerrar",
+                showCancelButton: true,
+                cancelButtonText: "Descargar PDF",
+                cancelButtonColor: "#1e40af"
+            }).then((result) => {
+                // Limpiar el campo de monto para el siguiente pago
+                montoInput.value = "";
+                
+                // Si el servidor genera un archivo, puedes manejar la descarga aquí
+                // Si por ahora solo guarda datos, con el mensaje basta
             });
+        } else {
+            throw new Error(data.error || "Error en el servidor");
         }
+
     } catch (error) {
-        Swal.fire("Error", "No se pudo conectar con el servidor", "error");
+        console.error("Error:", error);
+        Swal.fire("Error", "No se pudo registrar el pago: " + error.message, "error");
     }
 }
     // Funciones de utilidad restantes heredadas
