@@ -307,36 +307,7 @@
     </div>
     
 </div>
-<div id="seccion-fianzas" style="display: block !important;" class="glass p-6 mt-6 border border-blue-500/50 rounded-xl">
-    <h2 class="text-2xl font-bold text-blue-400 mb-4">💰 Gestión de Fianzas (Pagos)</h2>
-    
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="flex flex-col">
-            <label class="text-white text-sm mb-1 font-bold">1. Seleccionar Liga:</label>
-            <select id="selLigaFinanza" onchange="cargarEquiposPorLiga()" class="bg-slate-800 text-white p-3 rounded-lg border border-blue-500/30 outline-none">
-                <option value="">-- Elige la Liga --</option>
-                <option value="femenil">Ley 57 Femenil</option>
-                <option value="varonil">ALV Sport Varonil</option>
-            </select>
-        </div>
 
-        <div class="flex flex-col">
-            <label class="text-white text-sm mb-1 font-bold">2. Seleccionar Equipo:</label>
-            <select id="selEquipoFinanza" class="bg-slate-800 text-white p-3 rounded-lg border border-blue-500/30 outline-none">
-                <option value="">-- Primero elige liga --</option>
-            </select>
-        </div>
-
-        <div class="flex flex-col">
-            <label class="text-white text-sm mb-1 font-bold">3. Monto a Abonar ($):</label>
-            <input type="number" id="montoInput" class="bg-slate-800 text-white p-3 rounded-lg border border-green-500/30 outline-none" placeholder="Ej: 2000">
-        </div>
-    </div>
-
-    <button onclick="procesarPagoYFactura()" class="w-full mt-6 bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl shadow-lg transition-all transform active:scale-95">
-        GENERAR FACTURA Y GUARDAR ABONO
-    </button>
-</div>
 <div id="modalResumenIA" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-700 w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl glass">
         <div class="p-6 border-b border-slate-800 flex justify-between items-center sticky top-0 bg-slate-900/90 backdrop-blur-md">
@@ -363,6 +334,44 @@
                 Descargar Reporte (PDF)
             </button>
         </div>
+    </div>
+</div>
+<button onclick="abrirModalFianza()" class="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 rounded-lg shadow-lg mb-4">
+    💰 Registrar Nuevo Abono
+</button>
+
+<div id="modalFianza" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] hidden flex items-center justify-center p-4">
+    <div class="glass p-8 rounded-3xl border border-white/20 shadow-2xl w-full max-w-4xl relative">
+        <button onclick="cerrarModalFianza()" class="absolute top-4 right-4 text-white hover:text-red-500 text-2xl">&times;</button>
+        
+        <h2 class="text-3xl font-bold text-blue-400 mb-6 text-center">Gestión de Fianzas (Pagos)</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="flex flex-col">
+                <label class="text-white text-xs font-bold uppercase mb-2">1. Seleccionar Liga:</label>
+                <select id="selLigaFinanza" onchange="cargarEquiposPorLiga()" class="bg-slate-900 text-white p-3 rounded-xl border border-blue-500/50 outline-none focus:ring-2 ring-blue-500">
+                    <option value="">-- Elige la Liga --</option>
+                    <option value="femenil">Ley 57 Femenil</option>
+                    <option value="varonil">ALV Sport Varonil</option>
+                </select>
+            </div>
+
+            <div class="flex flex-col">
+                <label class="text-white text-xs font-bold uppercase mb-2">2. Seleccionar Equipo:</label>
+                <select id="selEquipoFinanza" class="bg-slate-900 text-white p-3 rounded-xl border border-blue-500/50 outline-none">
+                    <option value="">-- Primero elige liga --</option>
+                </select>
+            </div>
+
+            <div class="flex flex-col">
+                <label class="text-white text-xs font-bold uppercase mb-2">3. Monto a Abonar ($):</label>
+                <input type="number" id="montoInput" class="bg-slate-900 text-white p-3 rounded-xl border border-green-500/50 outline-none focus:ring-2 ring-green-500" placeholder="Ej: 2000">
+            </div>
+        </div>
+
+        <button onclick="procesarPagoYFactura()" class="w-full mt-8 bg-blue-600 hover:bg-blue-400 text-white font-black py-4 rounded-2xl shadow-xl transition-all transform active:scale-95">
+            GENERAR FACTURA Y GUARDAR ABONO
+        </button>
     </div>
 </div>
 
@@ -1375,28 +1384,38 @@ function cardLiderIA(titulo, nombre, valor, color) {
     `;
 }
 
+// Funciones para el Modal
+function abrirModalFianza() {
+    document.getElementById('modalFianza').classList.remove('hidden');
+}
+
+function cerrarModalFianza() {
+    document.getElementById('modalFianza').classList.add('hidden');
+}
+
+// Función corregida para cargar equipos
 async function cargarEquiposPorLiga() {
     const ligaSeleccionada = document.getElementById('selLigaFinanza').value;
     const selectEquipo = document.getElementById('selEquipoFinanza');
 
-    // Si el usuario vuelve a poner "-- Elige la Liga --", limpiamos el segundo cuadro
     if (!ligaSeleccionada) {
         selectEquipo.innerHTML = '<option value="">-- Primero elige liga --</option>';
         return;
     }
 
-    // Mensaje temporal mientras carga
     selectEquipo.innerHTML = '<option value="">Cargando equipos...</option>';
 
     try {
-        // Llamamos a tu servidor para traer los equipos de esa liga
-        // Asegúrate de que la variable API tenga tu URL de Render (ej: https://tu-link.render.com)
-        const response = await fetch(`${API}/teams?liga=${ligaSeleccionada}`);
-        const equipos = await response.json();
+        // MUY IMPORTANTE: Verifica que la variable API tenga tu URL de Render
+         const API = "https://ley57.onrender.com/api";
+        const res = await fetch(`${API}/teams?liga=${ligaSeleccionada}`);
+        
+        if (!res.ok) throw new Error("Error en la respuesta del servidor");
+        
+        const equipos = await res.json();
 
-        // Limpiamos y llenamos con los equipos reales
         selectEquipo.innerHTML = '<option value="">-- Selecciona el Equipo --</option>';
-
+        
         if (equipos.length === 0) {
             selectEquipo.innerHTML = '<option value="">No hay equipos en esta liga</option>';
             return;
@@ -1404,15 +1423,13 @@ async function cargarEquiposPorLiga() {
 
         equipos.forEach(equipo => {
             const option = document.createElement('option');
-            // IMPORTANTE: el value debe ser el _id para que MongoDB lo encuentre
-            option.value = equipo._id; 
+            option.value = equipo._id;
             option.textContent = equipo.nombre;
             selectEquipo.appendChild(option);
         });
-
     } catch (error) {
-        console.error("Error al cargar equipos:", error);
-        Swal.fire("Error", "No se pudieron obtener los equipos de la base de datos", "error");
+        console.error(error);
+        Swal.fire("Error", "No se pudieron cargar los equipos. Verifica la conexión con el servidor.", "error");
     }
 }
 

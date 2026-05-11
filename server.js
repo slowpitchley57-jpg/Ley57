@@ -101,7 +101,6 @@ const teamSchema = new mongoose.Schema({
         folio: String
     }]
 });
-const TeamWithFianza = mongoose.model('TeamWithFianza', teamSchema, 'teams'); // Reutilizamos la colección 'teams' para no crear una nueva
 // --- RUTAS ---
 
 app.post('/api/login', async (req, res) => {
