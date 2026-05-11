@@ -246,23 +246,67 @@ cont.innerHTML = equipos.map(e => `
     }
 
     async function verDetalleRoster(nombreEquipo) {
-        const container = document.getElementById('bodyDetalleJugadoras');
-        container.innerHTML = `<tr><td colspan="10" class="p-10 text-center">Sincronizando Roster...</td></tr>`;
-        document.getElementById('detNombreEquipo').innerText = nombreEquipo;
-        try {
-            const res = await fetch(`${API}/players?liga=${LIGA}&t=${new Date().getTime()}`);
-            const all = await res.json();
-            const players = all.filter(p => p.equipo.trim().toUpperCase() === nombreEquipo.trim().toUpperCase());
-            container.innerHTML = players.map(p => `
-                <tr class="hover:bg-emerald-50 border-b text-center text-[10px]">
-                    <td class="p-3 font-bold uppercase text-emerald-900 text-left">${p.nombre}</td>
-                    <td>${p.jj || 0}</td><td>${p.vb || 0}</td><td class="text-emerald-600 font-bold">${p.h || 0}</td>
-                    <td>${p.dobles || 0}</td><td>${p.triples || 0}</td><td class="text-emerald-600">${p.hr || 0}</td>
-                    <td>${p.k || 0}</td><td>${p.rbi || 0}</td><td class="font-black italic">${Number(p.avg || 0).toFixed(3)}</td>
-                </tr>`).join('');
-            document.getElementById('modalDetalleEquipo').classList.remove('hidden');
-        } catch (err) { console.error(err); }
+    const container = document.getElementById('bodyDetalleJugadoras');
+    const modal = document.getElementById('modalDetalleEquipo');
+    const tituloModal = document.getElementById('detNombreEquipo');
+    
+    // 1. Escribimos el nombre del equipo en el encabezado del modal
+    if (tituloModal) {
+        tituloModal.innerText = nombreEquipo.toUpperCase();
     }
+
+    // Estado de carga con estilo verde
+    container.innerHTML = `<tr><td colspan="10" class="p-10 text-center text-emerald-800 font-bold italic">Cargando Roster Mixto...</td></tr>`;
+
+    try {
+        if (modal) modal.classList.remove('hidden');
+
+        // Fetch con timestamp para evitar el caché
+        const res = await fetch(`${API}/players?t=${new Date().getTime()}`);
+        const all = await res.json();
+        
+        const buscado = nombreEquipo.trim().toUpperCase();
+
+        // FILTRO ESPECÍFICO PARA SLOW MIXTO
+        const players = all.filter(p => {
+            const eq = (p.team || p.equipo || "").trim().toUpperCase();
+            const li = (p.liga || "").trim().toLowerCase();
+            // Comparamos con el nombre exacto de tu base de datos
+            return eq === buscado && li === "slow_mixto";
+        });
+
+        if (players.length === 0) {
+            container.innerHTML = `
+                <tr>
+                    <td colspan="10" class="p-10 text-center text-gray-400 font-bold">
+                        No hay registros para "${nombreEquipo}" en la liga Slow Mixto.
+                    </td>
+                </tr>`;
+        } else {
+            container.innerHTML = players.map(p => {
+                // Obtenemos el AVG que el Admin ya calculó y guardó
+                const avgOficial = p.avg !== undefined ? Number(p.avg).toFixed(3) : "0.000";
+                
+                return `
+                <tr class="hover:bg-emerald-50 border-b text-center text-[10px]">
+                    <td class="p-3 font-bold uppercase text-left text-emerald-900">${p.nombre}</td>
+                    <td>${p.jj || 0}</td>
+                    <td>${p.vb || 0}</td>
+                    <td class="text-emerald-600 font-bold">${p.h || 0}</td>
+                    <td>${p.dobles || 0}</td>
+                    <td>${p.triples || 0}</td>
+                    <td class="text-green-700 font-bold">${p.hr || 0}</td>
+                    <td>${p.k || 0}</td>
+                    <td>${p.rbi || 0}</td>
+                    <td class="p-2 font-black text-emerald-900 bg-emerald-100">${avgOficial}</td>
+                </tr>`;
+            }).join('');
+        }
+    } catch (err) { 
+        console.error("Error en Slow Mixto:", err);
+        container.innerHTML = `<tr><td colspan="10" class="p-5 text-center text-red-500 font-bold">Error de conexión con el servidor</td></tr>`;
+    }
+}
 
     function cerrarDetalle() { document.getElementById('modalDetalleEquipo').classList.add('hidden'); }
 

@@ -3,93 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Página Suspendida - Ley 57</title>
+    <title>Próximamente | Ley 57 & ALV Sport</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @keyframes gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap');
+        
+        :root {
+            --primary-blue: #3b82f6;
+            --dark-bg: #020617;
         }
 
         body {
-            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #111827, #020617);
-            background-size: 400% 400%;
-            animation: gradient 15s ease infinite;
-            height: 100vh;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark-bg);
+            color: white;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: white;
+            margin: 0;
         }
 
-        .glass-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+        /* Fondo de estrellas/partículas */
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #1e1b4b 0%, #020617 100%);
+            z-index: -1;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            padding: 3rem;
-            text-align: center;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
-            animation: float 4s ease-in-out infinite;
-            max-width: 90%;
-            width: 500px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
-        .status-dot {
-            height: 12px;
-            width: 12px;
-            background-color: #ef4444;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 8px;
-            box-shadow: 0 0 10px #ef4444;
-            animation: pulse 2s infinite;
+        .counter-number {
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
         }
 
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.3; }
-            100% { opacity: 1; }
+        .reveal-anim { animation: reveal 1s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        @keyframes reveal {
+            from { opacity: 0; transform: scale(0.9) translateY(30px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
         }
+
+        .glow-border {
+            position: relative;
+        }
+        .glow-border::after {
+            content: '';
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            background: linear-gradient(45deg, #3b82f6, #6366f1, #3b82f6);
+            z-index: -1;
+            border-radius: 20px;
+            opacity: 0.3;
+            filter: blur(10px);
+        }
+
+        .btn-access {
+            background: linear-gradient(90deg, #2563eb, #4f46e5);
+            box-shadow: 0 0 20px rgba(37, 99, 235, 0.4);
+            transition: all 0.4s ease;
+        }
+        .btn-access:hover {
+            box-shadow: 0 0 35px rgba(37, 99, 235, 0.7);
+            transform: translateY(-3px) scale(1.02);
+        }
+
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <div class="glass-card">
-        <div class="mb-6">
-            <span class="status-dot"></span>
-            <span class="text-xs uppercase tracking-widest text-gray-400">Estado del Sistema: Offline</span>
+    <div class="stars-container"></div>
+
+    <div id="countdown-section" class="max-w-5xl w-full text-center px-6 reveal-anim">
+        
+        <div class="flex flex-col md:flex-row justify-center items-center gap-6 mb-12">
+            <img src="imgley57.pgn.png" alt="Ley 57" class="h-24 filter drop-shadow-lg">
+            <div class="h-10 w-px bg-white/20 hidden md:block"></div>
+            <img src="logoalvnegro.jpeg" alt="ALV Sport" class="h-20 rounded-full border-2 border-blue-500/30">
         </div>
 
-        <h1 class="text-4xl md:text-5xl font-black mb-4 tracking-tighter bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-            PÁGINA SUSPENDIDA
+        <h2 class="text-blue-400 font-bold tracking-[0.4em] uppercase text-xs mb-4">Lanzamiento Oficial 2026</h2>
+        <h1 class="text-5xl md:text-7xl font-black mb-10 tracking-tighter">
+            ESTAMOS LISTOS <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-200 to-gray-500">PARA TI</span>
         </h1>
 
-        <div class="w-16 h-1 bg-red-500 mx-auto mb-6"></div>
-
-        <p class="text-lg text-gray-300 font-light">
-            Lo siento, la página sigue teniendo problemas de carga.
-        </p>
-        
-        <p class="mt-8 text-sm text-gray-500 italic">
-            Estamos trabajando para restablecer el servicio de la Liga Ley 57 & ALV Sport pronto.
-        </p>
-
-        <div class="mt-10">
-            <div class="text-xs text-gray-600">
-                &copy; 2026 FV Digital . Sports Central Hub
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
+            <div class="glass p-6 rounded-2xl glow-border">
+                <span id="days" class="counter-number text-4xl md:text-5xl block">00</span>
+                <span class="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold">Días</span>
+            </div>
+            <div class="glass p-6 rounded-2xl glow-border">
+                <span id="hours" class="counter-number text-4xl md:text-5xl block">00</span>
+                <span class="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold">Horas</span>
+            </div>
+            <div class="glass p-6 rounded-2xl glow-border">
+                <span id="minutes" class="counter-number text-4xl md:text-5xl block">00</span>
+                <span class="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold">Minutos</span>
+            </div>
+            <div class="glass p-6 rounded-2xl border-blue-500/50">
+                <span id="seconds" class="counter-number text-4xl md:text-5xl block text-blue-500">00</span>
+                <span class="text-[10px] uppercase tracking-[0.2em] text-blue-400 font-bold italic">Segundos</span>
             </div>
         </div>
+
+        <p class="mt-12 text-gray-500 text-sm font-light tracking-widest">
+            PROYECTO DESARROLLADO POR <span class="text-white font-semibold">FV DIGITAL</span> EN COLABORACIÓN CON <span class="text-white font-semibold">ALV SPORT</span>
+        </p>
     </div>
 
+    <div id="ready-section" class="hidden max-w-4xl w-full text-center px-6">
+        <div class="mb-8">
+            <i class="fa-solid fa-trophy text-8xl text-yellow-500 drop-shadow-[0_0_30px_rgba(234,179,8,0.4)]"></i>
+        </div>
+        <h1 class="text-6xl md:text-8xl font-black tracking-tighter mb-6">
+            ¡DIAMANTE <span class="text-blue-500">ABIERTO!</span>
+        </h1>
+        <p class="text-xl text-gray-300 mb-10 max-w-xl mx-auto">
+            La espera ha terminado. La plataforma de estadísticas de la Liga Ley 57 ya está disponible para el público.
+        </p>
+        <a href="index_post.html" class="btn-access inline-flex items-center gap-4 text-white px-12 py-5 rounded-full text-2xl font-black uppercase tracking-tighter transition-all">
+            ENTRAR A LA LIGA <i class="fa-solid fa-chevron-right"></i>
+        </a>
+    </div>
+
+    <script>
+        // CONFIGURACIÓN DE FECHA: 12 de Mayo de 2026, 6:00 PM
+        const targetDate = new Date("May 12, 2026 18:00:00").getTime();
+
+        const timer = setInterval(() => {
+            const now = new Date().getTime();
+            const diff = targetDate - now;
+
+            if (diff <= 0) {
+                clearInterval(timer);
+                revealSystem();
+                return;
+            }
+
+            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+            document.getElementById("days").innerText = d.toString().padStart(2, '0');
+            document.getElementById("hours").innerText = h.toString().padStart(2, '0');
+            document.getElementById("minutes").innerText = m.toString().padStart(2, '0');
+            document.getElementById("seconds").innerText = s.toString().padStart(2, '0');
+        }, 1000);
+
+        function revealSystem() {
+            const countSec = document.getElementById("countdown-section");
+            const readySec = document.getElementById("ready-section");
+
+            countSec.style.transition = "opacity 0.5s ease";
+            countSec.style.opacity = "0";
+            
+            setTimeout(() => {
+                countSec.classList.add("hidden");
+                readySec.classList.remove("hidden");
+                readySec.classList.add("reveal-anim");
+                
+                // Efecto de vibración suave al terminar
+                if ("vibrate" in navigator) navigator.vibrate([100, 50, 100]);
+            }, 500);
+        }
+    </script>
 </body>
 </html>
