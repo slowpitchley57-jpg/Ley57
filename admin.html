@@ -311,11 +311,11 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
             <label class="block text-sm mb-1">Seleccionar Liga:</label>
-            <select id="selLigaFinanza" class="w-full bg-slate-800 p-2 rounded border border-blue-500/30" onchange="cargarEquiposPorLiga()">
-                <option value="">-- Elige Liga --</option>
-                <option value="femenil">Ley 57 Femenil</option>
-                <option value="varonil">ALV Sport Varonil</option>
-            </select>
+            <select id="selLigaFinanza" onchange="cargarEquiposPorLiga()">
+    <option value="">-- Elige la Liga --</option>
+    <option value="femenil">Ley 57 Femenil</option>
+    <option value="varonil">ALV Sport Varonil</option>
+</select>
         </div>
 
         <div>
@@ -1375,16 +1375,32 @@ function cardLiderIA(titulo, nombre, valor, color) {
 }
 
 // Función para que el filtro de equipo cambie según la liga
+// Esta función se activa cuando cambias la Liga
 async function cargarEquiposPorLiga() {
-    const liga = document.getElementById('selLigaFinanza').value;
+    const ligaSeleccionada = document.getElementById('selLigaFinanza').value;
     const selectEquipo = document.getElementById('selEquipoFinanza');
-    
-    const res = await fetch(`${API}/teams?liga=${liga}`); // Asumiendo que tienes esta ruta
-    const equipos = await res.json();
-    
-    selectEquipo.innerHTML = equipos.map(e => 
-        `<option value="${e._id}">${e.nombre}</option>`
-    ).join('');
+
+    if (!ligaSeleccionada) return;
+
+    try {
+        // Pedimos al servidor los equipos de esa liga específica
+        const respuesta = await fetch(`${API}/teams?liga=${ligaSeleccionada}`);
+        const equipos = await respuesta.json();
+
+        // Limpiamos el selector y lo llenamos con los equipos reales
+        selectEquipo.innerHTML = '<option value="">-- Selecciona el Equipo --</option>';
+        
+        equipos.forEach(equipo => {
+            const option = document.createElement('option');
+            option.value = equipo._id; // El ID de la base de datos
+            option.textContent = equipo.nombre; // El nombre que tú ves
+            selectEquipo.appendChild(option);
+        });
+
+    } catch (error) {
+        console.error("Error al cargar equipos:", error);
+        Swal.fire("Error", "No se pudieron cargar los equipos", "error");
+    }
 }
 
 // Función principal para el botón
