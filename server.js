@@ -88,6 +88,20 @@ const User = mongoose.model('User', new mongoose.Schema({
     rol: String, 
     equipo: String 
 }), 'users'); // <--- CORRECCIÓN CLAVE: En tu captura se llama 'users', NO 'usuarios'
+
+const teamSchema = new mongoose.Schema({
+    nombre: String,
+    liga: String, // 'femenil', 'varonil', etc.
+    // Configuración de la Fianza
+    fianzaTotal: { type: Number, default: 10000 },
+    totalAbonado: { type: Number, default: 0 },
+    historialPagos: [{
+        fecha: { type: Date, default: Date.now },
+        monto: Number,
+        folio: String
+    }]
+});
+const Team = mongoose.model('Team', teamSchema);
 // --- RUTAS ---
 
 app.post('/api/login', async (req, res) => {
@@ -252,6 +266,63 @@ app.put('/api/users/update-password', async (req, res) => {
 
 app.get('/api/dev/usuarios', async (req, res) => {
     res.json(await User.find());
+});
+const PDFDocument = require('pdfkit');
+
+app.post('/api/registrar-pago', async (req, res) => {
+    const { equipoId, montoAbono } = req.body;
+
+    try {
+        const equipo = await Team.findById(equipoId);
+        if (!equipo) return res.status(404).json({ error: "Equipo no encontrado" });
+
+        // Lógica de detección automática
+        equipo.totalAbonado += parseFloat(montoAbono);
+        const saldoPendiente = equipo.fianzaTotal - equipo.totalAbonado;
+        const folio = `F-${Date.now().toString().slice(-6)}`;
+
+        // Guardar en historial
+        equipo.historialPagos.push({ monto: montoAbono, folio: folio });
+        await equipo.save();
+
+        // Generar PDF en memoria
+        const doc = new PDFDocument({ size: 'A4', margin: 50 });
+        res.setHeader('Content-Type', 'application/json');
+
+        // --- Estructura del PDF ---
+        // (Aquí el servidor procesa la plantilla que te envié con los datos reales)
+        // Logo y Encabezado
+        doc.fontSize(20).text('LIGA LEY 57', { align: 'center' });
+        doc.fontSize(10).text('Comprobante Oficial de Fianza', { align: 'center' });
+        doc.moveDown();
+
+        // Datos del Pago
+        doc.fontSize(12).text(`Folio: ${folio} | Fecha: ${new RegExp().toLocaleDateString()}`);
+        doc.text(`Equipo: ${equipo.nombre}`);
+        doc.text(`Liga: ${equipo.liga.toUpperCase()}`);
+        doc.moveDown();
+
+        // Cuadro Financiero
+        doc.rect(50, doc.y, 500, 50).stroke();
+        doc.text(`Abono Recibido: $${montoAbono}`, 60, doc.y + 10);
+        doc.fillColor('red').text(`Saldo Restante: $${saldoPendiente}`, 300, doc.y);
+        doc.fillColor('black');
+        
+        doc.moveDown(4);
+        doc.text('__________________________          __________________________', { align: 'center' });
+        doc.text('Javier Yocupicio (Director)          Administración Ley 57', { align: 'center' });
+
+        // Enviar respuesta
+        res.json({ 
+            success: true, 
+            mensaje: "Pago guardado", 
+            saldo: saldoPendiente,
+            folio: folio 
+        });
+
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
 // Configuración y Utilidades
