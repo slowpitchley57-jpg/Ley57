@@ -1,7 +1,7 @@
 const CACHE_NAME = 'ley57-v1';
 const assets = [
   '/',
-  '/index_post.html',
+  '/index.html',
   '/logoalvnegro.jpeg',
 ];
 
