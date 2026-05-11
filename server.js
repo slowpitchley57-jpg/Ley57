@@ -288,65 +288,98 @@ app.post('/api/registrar-pago', async (req, res) => {
         const equipo = await Team.findById(equipoId);
         if (!equipo) return res.status(404).json({ success: false, error: "Equipo no encontrado" });
 
-        // Validar e inicializar campos para evitar el error de 'push'
+        // Inicialización de datos
         if (!equipo.historialPagos) equipo.historialPagos = [];
         if (!equipo.totalAbonado) equipo.totalAbonado = 0;
 
         const abonoLimpio = parseFloat(montoAbono);
         equipo.totalAbonado += abonoLimpio;
-        
-        // Asumiendo fianza de 10,000 si no existe el campo
         const metaFianza = equipo.fianzaTotal || 10000;
         const saldoPendiente = metaFianza - equipo.totalAbonado;
-        const folio = `F-${Date.now().toString().slice(-6)}`;
+        const folio = `INV-${Date.now().toString().slice(-6)}`;
 
         equipo.historialPagos.push({ monto: abonoLimpio, folio: folio, fecha: new Date() });
         await equipo.save();
 
-        // --- GENERACIÓN REAL DEL PDF ---
-        const fileName = `recibo_${folio}.pdf`;
+        // --- GENERACIÓN DE PDF PROFESIONAL ---
+        const fileName = `factura_${folio}.pdf`;
         const filePath = path.join(__dirname, 'public', 'recibos', fileName);
-        
-        // Asegúrate de tener la carpeta 'public/recibos' creada o usa este código:
-        if (!fs.existsSync(path.join(__dirname, 'public', 'recibos'))){
-            fs.mkdirSync(path.join(__dirname, 'public', 'recibos'), { recursive: true });
-        }
-
-        const doc = new PDFDocument({ size: 'A4', margin: 50 });
+        const doc = new PDFDocument({ size: 'A4', margin: 0 }); // Margen 0 para diseño total
         const stream = fs.createWriteStream(filePath);
         doc.pipe(stream);
 
-        // Contenido del PDF (Tu estructura)
-        doc.fontSize(20).text('LIGA LEY 57', { align: 'center' });
-        doc.fontSize(10).text('Comprobante Oficial de Fianza', { align: 'center' });
-        doc.moveDown();
-        doc.fontSize(12).text(`Folio: ${folio} | Fecha: ${new Date().toLocaleDateString()}`);
-        doc.text(`Equipo: ${equipo.nombre}`);
-        doc.text(`Liga: ${equipo.liga.toUpperCase()}`);
-        doc.moveDown();
-        doc.rect(50, doc.y, 500, 50).stroke();
-        doc.text(`Abono Recibido: $${abonoLimpio}`, 60, doc.y + 15);
-        doc.fillColor('red').text(`Saldo Restante: $${saldoPendiente}`, 300, doc.y);
-        doc.fillColor('black');
-        doc.moveDown(5);
-        doc.text('__________________________          __________________________', { align: 'center' });
-        doc.text('Javier Yocupicio (Director)          Administración Ley 57', { align: 'center' });
+        // --- ENCABEZADO CON COLOR (AZUL OSCURO) ---
+        doc.rect(0, 0, 600, 150).fill('#1e3a8a'); 
         
+        // Espacio para Logo (Si tienes el archivo, descomenta la línea de abajo)
+        doc.image('logoalvnegro.jpeg', 50, 30, { width: 80 });
+        
+        doc.fillColor('white')
+           .fontSize(25).text('LIGA LEY 57', 150, 45)
+           .fontSize(10).text('COMPROBANTE OFICIAL DE PAGO - FIANZA', 150, 75)
+           .fontSize(10).text('Hermosillo, Sonora, México', 150, 90);
+
+        // Cuadro de Folio (Derecha)
+        doc.rect(400, 40, 150, 70).stroke('white');
+        doc.fontSize(10).text('FOLIO DE FACTURA', 410, 55);
+        doc.fontSize(16).text(folio, 410, 75, { weight: 'bold' });
+
+        // --- CUERPO DE LA FACTURA ---
+        doc.fillColor('#1f2937').fontSize(14).text('DETALLES DEL CLIENTE / EQUIPO', 50, 180);
+        doc.rect(50, 195, 500, 2).fill('#e5e7eb'); // Línea divisoria
+
+        doc.fontSize(11).fillColor('black');
+        doc.text(`EQUIPO: ${equipo.nombre.toUpperCase()}`, 50, 210);
+        doc.text(`LIGA: ${equipo.liga.toUpperCase()}`, 50, 225);
+        doc.text(`FECHA DE EMISIÓN: ${new Date().toLocaleDateString()}`, 350, 210);
+
+        // --- TABLA DE CONCEPTOS ---
+        const tableTop = 280;
+        doc.rect(50, tableTop, 500, 25).fill('#f3f4f6');
+        doc.fillColor('#111827').fontSize(10);
+        doc.text('DESCRIPCIÓN', 60, tableTop + 8);
+        doc.text('MONTO ABONADO', 400, tableTop + 8);
+
+        // Fila de datos
+        doc.fillColor('black').text(`Abono a cuenta de fianza de temporada`, 60, tableTop + 40);
+        doc.fontSize(12).text(`$${abonoLimpio.toLocaleString()}`, 400, tableTop + 40, { weight: 'bold' });
+        doc.rect(50, tableTop + 60, 500, 1).fill('#f3f4f6');
+
+        // --- RESUMEN FINANCIERO (TOTALES) ---
+        const footerTop = 450;
+        doc.rect(300, footerTop, 250, 100).fill('#f9fafb');
+        
+        doc.fillColor('black').fontSize(10).text('Meta Total de Fianza:', 310, footerTop + 15);
+        doc.text(`$${metaFianza.toLocaleString()}`, 480, footerTop + 15);
+
+        doc.text('Total Acumulado:', 310, footerTop + 35);
+        doc.text(`$${equipo.totalAbonado.toLocaleString()}`, 480, footerTop + 35);
+
+        doc.fillColor('red').fontSize(12).text('SALDO PENDIENTE:', 310, footerTop + 65, { weight: 'bold' });
+        doc.text(`$${saldoPendiente.toLocaleString()}`, 460, footerTop + 65);
+
+        // --- PIE DE PÁGINA Y FIRMAS ---
+        doc.fillColor('black').fontSize(9).text('Este documento sirve como comprobante legal de ingreso para la participación en el torneo.', 50, 650, { align: 'center' });
+        
+        // Líneas de firma
+        doc.text('__________________________', 80, 750);
+        doc.text('Javier Yocupicio', 80, 765, { align: 'left', width: 150 });
+        doc.fontSize(7).text('Director General / Admin', 80, 775);
+
+        doc.text('__________________________', 350, 750);
+        doc.text('Representante del Equipo', 350, 765, { align: 'left', width: 150 });
+
         doc.end();
 
-        // Esperar a que el archivo se termine de escribir
         stream.on('finish', () => {
             res.json({ 
                 success: true, 
-                mensaje: "Pago guardado y PDF generado", 
-                saldo: saldoPendiente,
-                folio: folio,
-                pdfUrl: `https://ley57.onrender.com/recibos/${fileName}` // URL para descargar
+                pdfUrl: `https://ley57.onrender.com/recibos/${fileName}`,
+                saldo: saldoPendiente
             });
         });
 
     } catch (error) {
-        console.error(error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
