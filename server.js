@@ -374,7 +374,7 @@ app.post('/api/registrar-pago', async (req, res) => {
            .text('IMPORTE ABONADO', 410, tableTop + 10);
 
         doc.fillColor('#1e293b').font('Helvetica').fontSize(11)
-           .text('Abono a Fianza de Temporada 2026', 75, tableTop + 50)
+           .text('Abono a Fianza de Temporada 2026 - 1', 75, tableTop + 50)
            .text('Efectivo/Transf.', 260, tableTop + 50)
            .font('Helvetica-Bold').text(`$${abonoLimpio.toLocaleString('es-MX')}.00`, 410, tableTop + 50);
         
