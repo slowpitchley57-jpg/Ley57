@@ -89,19 +89,20 @@ const User = mongoose.model('User', new mongoose.Schema({
     rol: String, 
     equipo: String 
 }), 'users'); // <--- CORRECCIÓN CLAVE: En tu captura se llama 'users', NO 'usuarios'
-
 const teamSchema = new mongoose.Schema({
     nombre: String,
-    liga: String, // 'femenil', 'varonil', etc.
-    // Configuración de la Fianza
-    fianzaTotal: { type: Number, default: 10000 },
+    liga: String,
+    categoria: String,
+    // CAMPOS DE FINANZAS (Asegúrate de que estén así)
     totalAbonado: { type: Number, default: 0 },
+    fianzaTotal: { type: Number, default: 10000 },
     historialPagos: [{
-        fecha: { type: Date, default: Date.now },
         monto: Number,
-        folio: String
+        folio: String,
+        fecha: { type: Date, default: Date.now }
     }]
 });
+
 // --- RUTAS ---
 
 app.post('/api/login', async (req, res) => {
@@ -288,18 +289,34 @@ app.post('/api/registrar-pago', async (req, res) => {
         const equipo = await Team.findById(equipoId);
         if (!equipo) return res.status(404).json({ success: false, error: "Equipo no encontrado" });
 
-        // Inicialización de campos
-        if (!equipo.historialPagos) equipo.historialPagos = [];
-        if (!equipo.totalAbonado) equipo.totalAbonado = 0;
-
         const abonoLimpio = parseFloat(montoAbono);
+
+        // 1. Inicializar si es la primera vez (Evita que se quede en blanco)
+        if (isNaN(equipo.totalAbonado)) equipo.totalAbonado = 0;
+        if (!equipo.historialPagos) equipo.historialPagos = [];
+
+        // 2. Sumar el abono al total acumulado
         equipo.totalAbonado += abonoLimpio;
-        const metaFianza = equipo.fianzaTotal || 10000;
-        const saldoPendiente = metaFianza - equipo.totalAbonado;
+
         const folio = `F-${Date.now().toString().slice(-6)}`;
 
-        equipo.historialPagos.push({ monto: abonoLimpio, folio: folio, fecha: new Date() });
+        // 3. Agregar al historial
+        equipo.historialPagos.push({
+            monto: abonoLimpio,
+            folio: folio,
+            fecha: new Date()
+        });
+
+        // --- CRUCIAL: Notificar a Mongoose que el historial cambió ---
+        equipo.markModified('historialPagos');
+        equipo.markModified('totalAbonado');
+
+        // 4. Guardar en la base de datos
         await equipo.save();
+
+        // 5. Calcular saldo para el PDF y la respuesta
+        const metaFianza = 10000; 
+        const saldoPendiente = metaFianza - equipo.totalAbonado;
 
         // --- 1. CREACIÓN DEL DOCUMENTO (Esto faltaba) ---
         const fileName = `factura_${folio}.pdf`;
@@ -319,7 +336,7 @@ app.post('/api/registrar-pago', async (req, res) => {
         doc.rect(0, 0, 600, 150).fill('#1e3a8a'); 
         
         // Logo (Asegúrate de tener la ruta correcta o déjalo comentado)
-        // doc.image('public/img/logo_liga.png', 50, 30, { width: 80 });
+        doc.image('logoalvnegro.jpeg', 50, 30, { width: 80 });
         
         doc.fillColor('white')
            .fontSize(25).text('LIGA LEY 57', 150, 45)
@@ -372,16 +389,16 @@ app.post('/api/registrar-pago', async (req, res) => {
         // --- 3. RESPUESTA AL CLIENTE ---
         stream.on('finish', () => {
             res.json({ 
-                success: true, 
-                mensaje: "Pago guardado y PDF generado", 
-                saldo: saldoPendiente,
-                folio: folio,
-                pdfUrl: `https://ley57.onrender.com/recibos/${fileName}` 
-            });
+            success: true, 
+            saldo: saldoPendiente,
+            totalAbonado: equipo.totalAbonado,
+            folio: folio,
+            pdfUrl: `https://ley57.onrender.com/recibos/factura_${folio}.pdf`
+        });
         });
 
     } catch (error) {
-        console.error(error);
+        console.error("Error al guardar abono:", error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
