@@ -2,7 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
-
+const fs = require('fs'); // Necesario para guardar el archivo
+const path = require('path');
 const app = express();
 
 // --- CONFIGURACIÓN DE CORS (UNIFICADA) ---
@@ -285,56 +286,71 @@ app.post('/api/registrar-pago', async (req, res) => {
 
     try {
         const equipo = await Team.findById(equipoId);
-        if (!equipo) return res.status(404).json({ error: "Equipo no encontrado" });
+        if (!equipo) return res.status(404).json({ success: false, error: "Equipo no encontrado" });
 
-        // Lógica de detección automática
-        equipo.totalAbonado += parseFloat(montoAbono);
-        const saldoPendiente = equipo.fianzaTotal - equipo.totalAbonado;
+        // Validar e inicializar campos para evitar el error de 'push'
+        if (!equipo.historialPagos) equipo.historialPagos = [];
+        if (!equipo.totalAbonado) equipo.totalAbonado = 0;
+
+        const abonoLimpio = parseFloat(montoAbono);
+        equipo.totalAbonado += abonoLimpio;
+        
+        // Asumiendo fianza de 10,000 si no existe el campo
+        const metaFianza = equipo.fianzaTotal || 10000;
+        const saldoPendiente = metaFianza - equipo.totalAbonado;
         const folio = `F-${Date.now().toString().slice(-6)}`;
 
-        // Guardar en historial
-        equipo.historialPagos.push({ monto: montoAbono, folio: folio });
+        equipo.historialPagos.push({ monto: abonoLimpio, folio: folio, fecha: new Date() });
         await equipo.save();
 
-        // Generar PDF en memoria
-        const doc = new PDFDocument({ size: 'A4', margin: 50 });
-        res.setHeader('Content-Type', 'application/json');
+        // --- GENERACIÓN REAL DEL PDF ---
+        const fileName = `recibo_${folio}.pdf`;
+        const filePath = path.join(__dirname, 'public', 'recibos', fileName);
+        
+        // Asegúrate de tener la carpeta 'public/recibos' creada o usa este código:
+        if (!fs.existsSync(path.join(__dirname, 'public', 'recibos'))){
+            fs.mkdirSync(path.join(__dirname, 'public', 'recibos'), { recursive: true });
+        }
 
-        // --- Estructura del PDF ---
-        // (Aquí el servidor procesa la plantilla que te envié con los datos reales)
-        // Logo y Encabezado
+        const doc = new PDFDocument({ size: 'A4', margin: 50 });
+        const stream = fs.createWriteStream(filePath);
+        doc.pipe(stream);
+
+        // Contenido del PDF (Tu estructura)
         doc.fontSize(20).text('LIGA LEY 57', { align: 'center' });
         doc.fontSize(10).text('Comprobante Oficial de Fianza', { align: 'center' });
         doc.moveDown();
-
-        // Datos del Pago
-        doc.fontSize(12).text(`Folio: ${folio} | Fecha: ${new RegExp().toLocaleDateString()}`);
+        doc.fontSize(12).text(`Folio: ${folio} | Fecha: ${new Date().toLocaleDateString()}`);
         doc.text(`Equipo: ${equipo.nombre}`);
         doc.text(`Liga: ${equipo.liga.toUpperCase()}`);
         doc.moveDown();
-
-        // Cuadro Financiero
         doc.rect(50, doc.y, 500, 50).stroke();
-        doc.text(`Abono Recibido: $${montoAbono}`, 60, doc.y + 10);
+        doc.text(`Abono Recibido: $${abonoLimpio}`, 60, doc.y + 15);
         doc.fillColor('red').text(`Saldo Restante: $${saldoPendiente}`, 300, doc.y);
         doc.fillColor('black');
-        
-        doc.moveDown(4);
+        doc.moveDown(5);
         doc.text('__________________________          __________________________', { align: 'center' });
         doc.text('Javier Yocupicio (Director)          Administración Ley 57', { align: 'center' });
+        
+        doc.end();
 
-        // Enviar respuesta
-        res.json({ 
-            success: true, 
-            mensaje: "Pago guardado", 
-            saldo: saldoPendiente,
-            folio: folio 
+        // Esperar a que el archivo se termine de escribir
+        stream.on('finish', () => {
+            res.json({ 
+                success: true, 
+                mensaje: "Pago guardado y PDF generado", 
+                saldo: saldoPendiente,
+                folio: folio,
+                pdfUrl: `https://ley57.onrender.com/recibos/${fileName}` // URL para descargar
+            });
         });
 
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error(error);
+        res.status(500).json({ success: false, error: error.message });
     }
 });
+app.use('/recibos', express.static(path.join(__dirname, 'public/recibos')));
 
 // Configuración y Utilidades
 app.get('/api/config', async (req, res) => res.json(await Config.findOne() || { permitirAltas: true }));

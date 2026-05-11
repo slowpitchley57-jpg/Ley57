@@ -1477,11 +1477,10 @@ async function procesarPagoYFactura() {
                 cancelButtonText: "Descargar PDF",
                 cancelButtonColor: "#1e40af"
             }).then((result) => {
-                // Limpiar el campo de monto para el siguiente pago
-                montoInput.value = "";
-                
-                // Si el servidor genera un archivo, puedes manejar la descarga aquí
-                // Si por ahora solo guarda datos, con el mensaje basta
+                if (result.dismiss === Swal.DismissReason.cancel) {
+        // Esto abre el PDF en una pestaña nueva para imprimir
+        window.open(data.pdfUrl, '_blank');
+    }
             });
         } else {
             throw new Error(data.error || "Error en el servidor");
