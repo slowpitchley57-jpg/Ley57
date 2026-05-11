@@ -5,6 +5,7 @@
     <title>Master Admin - Multiliga Pro</title>
     <link rel="icon" type="image/png" href="logoley57icon.jpeg">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -1391,22 +1392,40 @@ async function procesarPagoYFactura() {
     const equipoId = document.getElementById('selEquipoFinanza').value;
     const monto = document.getElementById('montoInput').value;
 
-    if(!monto || monto <= 0) return Swal.fire("Error", "Ingresa un monto válido", "error");
+    if(!equipoId || !monto || monto <= 0) {
+        return Swal.fire("Atención", "Selecciona un equipo e ingresa un monto válido", "warning");
+    }
 
-    const res = await fetch(`${API}/api/registrar-pago`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ equipoId, montoAbono: monto })
+    // Mostrar mensaje de carga
+    Swal.fire({
+        title: 'Procesando pago...',
+        text: 'Generando factura oficial',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading() }
     });
 
-    const data = await res.json();
-    if(data.success) {
-        Swal.fire({
-            title: "¡Pago Registrado!",
-            text: `Saldo restante: $${data.saldo}. El PDF se ha generado.`,
-            icon: "success"
+    try {
+        const res = await fetch(`${API}/api/registrar-pago`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ equipoId, montoAbono: monto })
         });
-        // Aquí podrías disparar la descarga automática del PDF
+
+        if (res.ok) {
+            const data = await res.json();
+            
+            Swal.fire({
+                title: "¡Pago Registrado!",
+                html: `Se abonaron <b>$${monto}</b>.<br>Saldo pendiente: <span style="color:red">$${data.saldo}</span>`,
+                icon: "success",
+                confirmButtonText: "Descargar Recibo"
+            }).then(() => {
+                // Si el server responde con el PDF o una URL, aquí se descarga
+                if(data.pdfUrl) window.open(data.pdfUrl, '_blank');
+            });
+        }
+    } catch (error) {
+        Swal.fire("Error", "No se pudo conectar con el servidor", "error");
     }
 }
     // Funciones de utilidad restantes heredadas
