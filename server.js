@@ -280,6 +280,13 @@ app.put('/api/users/update-password', async (req, res) => {
 
 app.post('/api/registrar-pago', async (req, res) => {
     const { equipoId, montoAbono } = req.body;
+    const nombresLigas = {
+    'femenil': 'LEY 57 - FEMENIL',
+    'varonil': 'ALV SPORT - VARONIL',
+    'easy_femenil': 'EASY FEMENIL (LIBRE)',
+    'slow_mixto': 'SLOW MIXTO (LIBRE)'
+};
+const nombreLigaReal = nombresLigas[equipo.liga] || 'LIGA DE SOFTBALL';
 
     try {
         // 1. OBTENER Y VALIDAR EQUIPO
@@ -342,7 +349,7 @@ app.post('/api/registrar-pago', async (req, res) => {
         }
 
         doc.fillColor('white')
-           .font('Helvetica-Bold').fontSize(28).text('LIGA LEY 57', 160, 45)
+   .font('Helvetica-Bold').fontSize(28).text(nombreLigaReal, 160, 45)
            .fontSize(10).font('Helvetica').text('ADMINISTRACIÓN DE LIGAS DE SOFTBALL PROFESIONAL', 160, 80)
            .text('Hermosillo, Sonora | Unidad Deportiva Ley 57', 160, 95);
 
