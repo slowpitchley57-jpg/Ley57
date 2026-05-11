@@ -277,21 +277,22 @@ app.put('/api/users/update-password', async (req, res) => {
     await User.findOneAndUpdate({ correo }, { pass: nuevaPass });
     res.json({ ok: true });
 });
-
 app.post('/api/registrar-pago', async (req, res) => {
     const { equipoId, montoAbono } = req.body;
-    const nombresLigas = {
-    'femenil': 'LEY 57 - FEMENIL',
-    'varonil': 'ALV SPORT - VARONIL',
-    'easy_femenil': 'EASY FEMENIL (LIBRE)',
-    'slow_mixto': 'SLOW MIXTO (LIBRE)'
-};
-const nombreLigaReal = nombresLigas[equipo.liga] || 'LIGA DE SOFTBALL';
 
     try {
         // 1. OBTENER Y VALIDAR EQUIPO
         const equipo = await Team.findById(equipoId);
         if (!equipo) return res.status(404).json({ success: false, error: "Equipo no encontrado" });
+
+        // MAPEADO DE LIGAS (Para que el PDF diga el nombre correcto)
+        const nombresLigas = {
+            'femenil': 'LEY 57 - FEMENIL',
+            'varonil': 'ALV SPORT - VARONIL',
+            'easy_femenil': 'EASY FEMENIL (LIBRE)',
+            'slow_mixto': 'SLOW MIXTO (LIBRE)'
+        };
+        const nombreLigaReal = nombresLigas[equipo.liga] || 'LIGA LEY 57';
 
         const abonoLimpio = parseFloat(montoAbono);
         if (isNaN(abonoLimpio) || abonoLimpio <= 0) {
@@ -333,37 +334,30 @@ const nombreLigaReal = nombresLigas[equipo.liga] || 'LIGA DE SOFTBALL';
         doc.pipe(stream);
 
         // --- DISEÑO DE ÉLITE ---
+        doc.rect(0, 0, 600, 842).fill('#ffffff'); 
+        doc.rect(0, 0, 20, 842).fill('#1e3a8a'); 
 
-        // Fondo y Decoración Lateral
-        doc.rect(0, 0, 600, 842).fill('#ffffff'); // Fondo blanco
-        doc.rect(0, 0, 20, 842).fill('#1e3a8a'); // Barra lateral decorativa azul
-
-        // Encabezado Principal
         doc.rect(20, 0, 580, 150).fill('#1e3a8a');
         
-        // Logo (Asegúrate de que el archivo exista en la raíz)
         try {
             doc.image('logoalvnegro.jpeg', 50, 35, { width: 85 });
         } catch (e) {
-            console.log("Aviso: Logo no encontrado, continuando sin imagen.");
+            console.log("Aviso: Logo no encontrado.");
         }
 
         doc.fillColor('white')
-   .font('Helvetica-Bold').fontSize(28).text(nombreLigaReal, 160, 45)
+           .font('Helvetica-Bold').fontSize(24).text(nombreLigaReal, 160, 45)
            .fontSize(10).font('Helvetica').text('ADMINISTRACIÓN DE LIGAS DE SOFTBALL PROFESIONAL', 160, 80)
            .text('Hermosillo, Sonora | Unidad Deportiva Ley 57', 160, 95);
 
-        // Badge de Folio
         doc.rect(420, 40, 140, 70).lineWidth(2).stroke('white');
         doc.fontSize(9).text('FOLIO DE RECIBO', 430, 55, { align: 'center', width: 120 });
         doc.fontSize(16).font('Helvetica-Bold').text(folio, 430, 75, { align: 'center', width: 120 });
 
-        // Marca de Agua Central (Sutil)
         doc.fillColor('#f1f5f9').fontSize(100).opacity(0.1)
            .text('LEY 57', 100, 350, { rotation: -45 });
-        doc.opacity(1); // Reset de opacidad
+        doc.opacity(1);
 
-        // Información del Equipo
         doc.fillColor('#1e3a8a').fontSize(14).font('Helvetica-Bold').text('INFORMACIÓN DEL EQUIPO', 60, 190);
         doc.rect(60, 208, 480, 1).fill('#cbd5e1');
 
@@ -372,7 +366,6 @@ const nombreLigaReal = nombresLigas[equipo.liga] || 'LIGA DE SOFTBALL';
            .font('Helvetica').text(`LIGA:`, 60, 245).font('Helvetica-Bold').text(equipo.liga.toUpperCase(), 120, 245)
            .font('Helvetica').text(`FECHA:`, 380, 225).font('Helvetica-Bold').text(new Date().toLocaleDateString(), 430, 225);
 
-        // Tabla de Pagos
         const tableTop = 320;
         doc.rect(60, tableTop, 480, 30).fill('#1e3a8a');
         doc.fillColor('white').font('Helvetica-Bold').fontSize(10)
@@ -387,10 +380,8 @@ const nombreLigaReal = nombresLigas[equipo.liga] || 'LIGA DE SOFTBALL';
         
         doc.rect(60, tableTop + 75, 480, 1).fill('#e2e8f0');
 
-        // Cuadro de Resumen (Corte de Caja)
         const summaryTop = 500;
         doc.rect(330, summaryTop, 210, 120).fill('#f8fafc').lineWidth(1).stroke('#cbd5e1');
-        
         doc.fillColor('#64748b').fontSize(9).font('Helvetica')
            .text('TOTAL FIANZA:', 345, summaryTop + 20)
            .text('TOTAL ACUMULADO:', 345, summaryTop + 45);
@@ -400,12 +391,10 @@ const nombreLigaReal = nombresLigas[equipo.liga] || 'LIGA DE SOFTBALL';
            .text(`$${equipo.totalAbonado.toLocaleString('es-MX')}.00`, 450, summaryTop + 45);
 
         doc.rect(345, summaryTop + 70, 180, 1).fill('#cbd5e1');
-        
         doc.fillColor('#dc2626').fontSize(12)
            .text('SALDO RESTANTE:', 345, summaryTop + 85)
            .text(`$${saldoPendiente.toLocaleString('es-MX')}.00`, 450, summaryTop + 85);
 
-        // Pie de Página y Firmas
         const footerY = 720;
         doc.fillColor('#1e3a8a').rect(80, footerY, 160, 1).fill();
         doc.rect(360, footerY, 160, 1).fill();
@@ -416,12 +405,8 @@ const nombreLigaReal = nombresLigas[equipo.liga] || 'LIGA DE SOFTBALL';
            .text('REPRESENTANTE', 360, footerY + 10, { width: 160, align: 'center' })
            .text('FIRMA DE CONFORMIDAD', 360, footerY + 22, { width: 160, align: 'center' });
 
-        doc.fontSize(8).fillColor('#94a3b8')
-           .text('Este documento es un comprobante oficial. El saldo pendiente debe cubrirse según el reglamento.', 20, 800, { align: 'center', width: 580 });
-
         doc.end();
 
-        // 4. ENVÍO DE RESPUESTA CUANDO EL PDF ESTÉ LISTO
         stream.on('finish', () => {
             res.json({ 
                 success: true, 
@@ -437,6 +422,7 @@ const nombreLigaReal = nombresLigas[equipo.liga] || 'LIGA DE SOFTBALL';
         res.status(500).json({ success: false, error: error.message });
     }
 });
+
 app.use('/recibos', express.static(path.join(__dirname, 'public/recibos')));
 
 // Configuración y Utilidades
