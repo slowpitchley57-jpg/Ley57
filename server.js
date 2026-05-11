@@ -166,9 +166,8 @@ app.delete('/api/equipos/:id', async (req, res) => {
 // Ruta para obtener equipos filtrados por liga
 app.get('/teams', async (req, res) => {
     try {
-        const { liga } = req.query;
-        // Si mandas liga, filtra. Si no, manda todos.
-        const filtro = liga ? { liga: liga } : {};
+        const { liga } = req.query; // Captura lo que mandamos (?liga=femenil)
+        const filtro = liga ? { liga: liga } : {}; 
         const equipos = await Team.find(filtro);
         res.json(equipos);
     } catch (error) {
