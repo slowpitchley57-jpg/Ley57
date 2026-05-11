@@ -1401,7 +1401,7 @@ async function cargarEquiposPorLiga() {
     try {
         // MUY IMPORTANTE: Verifica que la variable API tenga tu URL de Render
         // const API = "https://ley57.onrender.com/api";
-        const res = await fetch(`https://ley57.onrender.com/teams?liga=${ligaSeleccionada}`);
+        const res = await fetch(`${API}/teams?liga=${ligaSeleccionada}`);
         
         if (!res.ok) throw new Error("Error en la respuesta del servidor");
         
@@ -1458,7 +1458,7 @@ async function procesarPagoYFactura() {
     try {
         // 3. Llamada al servidor (Render)
         // Asegúrate de que la variable API tenga la URL de tu backend
-        const res = await fetch(`${API}/api/registrar-pago`, {
+        const res = await fetch(`${API}/registrar-pago`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ equipoId, montoAbono: monto })

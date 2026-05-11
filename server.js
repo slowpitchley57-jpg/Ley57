@@ -174,6 +174,7 @@ app.get('/teams', async (req, res) => {
     }
 });
 
+
 // Jugadores
 app.get('/api/players', async (req, res) => {
     const { equipo, liga } = req.query;
