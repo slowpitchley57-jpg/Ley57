@@ -347,7 +347,7 @@ app.post('/api/registrar-pago', async (req, res) => {
 
         doc.fillColor('white')
            .font('Helvetica-Bold').fontSize(24).text(nombreLigaReal, 160, 45)
-           .fontSize(10).font('Helvetica').text('ADMINISTRACIÓN DE LIGAS DE SOFTBALL PROFESIONAL', 160, 80)
+           .fontSize(10).font('Helvetica').text('ADMIN. DE LIGAS DE SOFTBALL PROFESIONAL', 160, 80)
            .text('Hermosillo, Sonora | Unidad Deportiva Ley 57', 160, 95);
 
         doc.rect(420, 40, 140, 70).lineWidth(2).stroke('white');
@@ -392,7 +392,7 @@ app.post('/api/registrar-pago', async (req, res) => {
 
         doc.rect(345, summaryTop + 70, 180, 1).fill('#cbd5e1');
         doc.fillColor('#dc2626').fontSize(12)
-           .text('SALDO RESTANTE:', 345, summaryTop + 85)
+           .text('SALDO REST:', 345, summaryTop + 85)
            .text(`$${saldoPendiente.toLocaleString('es-MX')}.00`, 450, summaryTop + 85);
 
         const footerY = 720;
