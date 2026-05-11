@@ -1401,7 +1401,7 @@ async function cargarEquiposPorLiga() {
     try {
         // MUY IMPORTANTE: Verifica que la variable API tenga tu URL de Render
         // const API = "https://ley57.onrender.com/api";
-        const res = await fetch(`${API}/teams?liga=${ligaSeleccionada}`);
+        const res = await fetch(`https://ley57.onrender.com/teams?liga=${ligaSeleccionada}`);
         
         if (!res.ok) throw new Error("Error en la respuesta del servidor");
         
