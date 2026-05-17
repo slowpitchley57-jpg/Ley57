@@ -3,33 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STADIUM ACCESS - ALV SPORT</title>
+    <title>ACCESO - ALV SPORT</title>
     <link rel="icon" type="image/png" href="logoalvnegro.jpeg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;900&family=Oswald:wght@700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Oswald:wght@700&display=swap');
 
-        body { font-family: 'Inter', sans-serif; background-color: #050505; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #030712; 
+        }
         .font-oswald { font-family: 'Oswald', sans-serif; }
 
-        /* Fondo estilo ESPN (Cortes Diagonales) */
+        /* Fondo de alta fricción con textura y atmósfera de estadio */
         .bg-stadium {
             background: 
-                linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(10,10,10,0.9) 100%),
+                radial-gradient(circle at 50% 0%, #1e1b4b 0%, #030712 100%),
                 url('https://www.transparenttextures.com/patterns/asfalt-dark.png');
-            position: relative;
-            overflow: hidden;
         }
 
-        /* Luces de Transmisión */
+        /* Línea de escaneo láser estética */
         .scanner-line {
             position: absolute;
             width: 100%;
             height: 2px;
-            background: linear-gradient(90deg, transparent, #ef4444, transparent);
-            animation: scan 4s linear infinite;
-            opacity: 0.3;
+            background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+            animation: scan 6s linear infinite;
+            opacity: 0.2;
         }
 
         @keyframes scan {
@@ -37,126 +38,127 @@
             100% { top: 110%; }
         }
 
-        /* Marco de Tarjeta con Corte Diagonal */
+        /* Contenedor Glassmorphism Robusto y Deportivo */
         .frame-stadium {
-            background: #0f172a;
-            border: 1px solid rgba(255,255,255,0.05);
-            clip-path: polygon(0 0, 95% 0, 100% 5%, 100% 100%, 5% 100%, 0 95%);
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             position: relative;
         }
 
-        .frame-stadium::after {
-            content: "";
-            position: absolute;
-            top: 0; right: 0;
-            width: 40px; height: 40px;
-            background: #ef4444;
-            clip-path: polygon(100% 0, 100% 100%, 0 0);
-        }
-
-        /* Botones de Rol Estilo Fox Sports */
+        /* Botones de selección de rol con cortes angulares */
         .role-btn {
-            background: #1e293b;
-            color: #64748b;
-            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(30, 41, 59, 0.5);
+            color: #94a3b8;
+            clip-path: polygon(8% 0, 100% 0, 92% 100%, 0 100%);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .role-btn.active-role {
-            background: #ef4444 !important;
+            background: #3b82f6 !important;
             color: white !important;
-            transform: scale(1.05);
-            box-shadow: 0 0 25px rgba(239, 68, 68, 0.4);
+            transform: scale(1.03) skewX(-2deg);
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4);
         }
 
         .input-stadium {
-            background: #020617;
-            border-bottom: 2px solid #334155;
-            transition: all 0.3s;
+            background: rgba(2, 6, 23, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.25s ease;
         }
 
         .input-stadium:focus {
-            border-bottom-color: #ef4444;
-            background: #0f172a;
+            border-color: #3b82f6;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
+            background: #020617;
         }
 
         .btn-action {
-            background: #ef4444;
-            clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%);
-            transition: all 0.3s;
+            background: #3b82f6;
+            clip-path: polygon(4% 0, 100% 0, 96% 100%, 0 100%);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .btn-action:hover {
+        .btn-action:hover:not(:disabled) {
             background: #ffffff;
-            color: #ef4444;
-            transform: skewX(-5deg);
+            color: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px -5px rgba(255, 255, 255, 0.2);
         }
     </style>
 </head>
-<body class="bg-stadium min-h-screen flex items-center justify-center p-4">
+<body class="bg-stadium min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
 
     <div class="scanner-line"></div>
 
-    <main class="relative z-10 w-full max-w-[450px]">
-        <!-- Decoración Superior -->
-        <div class="flex justify-between items-end mb-2 px-4">
-            <div class="text-[10px] font-black text-red-600 tracking-[0.5em] uppercase">Secure Login</div>
-            <div class="h-[1px] flex-1 bg-red-600/30 mx-4 mb-1"></div>
-            <div class="text-[10px] font-black text-slate-500 uppercase">Ver. 2.0</div>
+    <main class="relative z-10 w-full max-w-[440px] px-2">
+        
+        <div class="flex justify-between items-end mb-3 px-2">
+            <div class="text-[10px] font-bold text-blue-500 tracking-[0.4em] uppercase">GATE ACCESS CONTROL</div>
+            <div class="h-[1px] flex-1 bg-blue-500/20 mx-4 mb-1.5"></div>
+            <div class="text-[10px] font-bold text-slate-500 tracking-wider">SECURE SYSTEM</div>
         </div>
 
-        <div class="frame-stadium p-8 md:p-12 shadow-[0_0_80px_rgba(0,0,0,0.8)]">
+        <div class="frame-stadium p-6 md:p-10 rounded-[2rem] shadow-[0_30px_70px_-15px_rgba(0,0,0,0.8)]">
             
-            <!-- Logo y Header -->
-            <div class="flex flex-col items-center mb-10">
-                <div class="bg-white p-2 rounded-xl mb-6 skew-x-[-10deg] shadow-xl">
-                    <img src="logoalvnegro.jpeg" class="h-16 w-auto" alt="Logo">
+            <div class="flex flex-col items-center mb-8">
+                <div class="bg-white p-2.5 rounded-2xl mb-4 shadow-xl border border-white/20">
+                    <img src="logoalvnegro.jpeg" class="h-14 w-14 rounded-xl object-cover" alt="ALV Logo">
                 </div>
-                <h1 class="font-oswald text-4xl text-white uppercase italic tracking-tighter">
-                    MANAGEMENT <span class="text-red-600">SYSTEM</span>
+                <h1 class="font-oswald text-3xl md:text-4xl text-white uppercase tracking-tight italic">
+                    MANAGEMENT <span class="text-blue-500">SYSTEM</span>
                 </h1>
-                <div class="w-full h-[2px] bg-gradient-to-r from-transparent via-slate-700 to-transparent mt-4"></div>
+                <p class="text-[10px] text-gray-400 font-medium tracking-widest uppercase mt-1">ALV SPORT LEAGUES</p>
             </div>
 
-            <!-- Selector de Rol (Cortes Diagonales) -->
-            <div class="grid grid-cols-2 gap-0 mb-8 px-4">
-                <button onclick="setRole('manager')" id="btn-manager" class="role-btn py-3 font-black text-[11px] uppercase tracking-widest active-role">
-                    Manager
+            <div id="alert-box" class="hidden mb-6 p-4 rounded-xl text-xs font-bold uppercase tracking-wide border flex items-center gap-3 transition-all duration-300">
+                <i id="alert-icon" class="fa-solid"></i>
+                <span id="alert-text"></span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 mb-6">
+                <button type="button" onclick="setRole('manager')" id="btn-manager" class="role-btn py-3.5 font-black text-xs uppercase tracking-widest active-role rounded-lg">
+                    <i class="fa-solid fa-id-card-clip mr-1.5"></i> Manager
                 </button>
-                <button onclick="setRole('admin')" id="btn-admin" class="role-btn py-3 font-black text-[11px] uppercase tracking-widest">
-                    Staff Admin
+                <button type="button" onclick="setRole('admin')" id="btn-admin" class="role-btn py-3.5 font-black text-xs uppercase tracking-widest rounded-lg">
+                    <i class="fa-solid fa-user-shield mr-1.5"></i> Staff Admin
                 </button>
             </div>
 
-            <!-- Campos -->
-            <div class="space-y-6 mb-10">
-                <div class="relative">
-                    <label class="block text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1 ml-1">Identity Check</label>
-                    <input type="text" id="u" placeholder="USUARIO / CORREO" class="input-stadium w-full p-4 text-white font-bold text-xs outline-none uppercase italic">
+            <form onsubmit="event.preventDefault(); entrar();" class="space-y-5">
+                <div>
+                    <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Identity Check / E-mail</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-xs"><i class="fa-solid fa-user"></i></span>
+                        <input type="text" id="u" placeholder="usuario@correo.com" class="input-stadium w-full p-3.5 pl-10 rounded-xl text-white font-semibold text-xs outline-none tracking-wide" required>
+                    </div>
                 </div>
-                <div class="relative">
-                    <label class="block text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1 ml-1">Access Key</label>
-                    <input type="password" id="p" placeholder="••••••••" class="input-stadium w-full p-4 text-white font-bold text-xs outline-none italic">
+                
+                <div>
+                    <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Access Security Key</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-xs"><i class="fa-solid fa-lock"></i></span>
+                        <input type="password" id="p" placeholder="••••••••••••" class="input-stadium w-full p-3.5 pl-10 rounded-xl text-white font-semibold text-xs outline-none" required>
+                    </div>
                 </div>
-            </div>
-            
-            <!-- Botón Pro -->
-            <button onclick="entrar()" class="btn-action w-full py-5 text-white font-black text-sm uppercase italic tracking-[0.3em] shadow-2xl">
-                AUTH ACCESS <i class="fa fa-chevron-right ml-2 text-[10px]"></i>
-            </button>
 
-            <!-- Footer Branding -->
-            <div class="mt-12 flex items-center justify-center gap-4 opacity-40 grayscale hover:opacity-100 hover:grayscale-0 transition-all">
-                <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Powered by</span>
-                <img src="fv_digital_logo.png.webp" class="h-10" alt="FV">
+                <button type="submit" id="btn-submit" class="btn-action w-full py-4.5 mt-2 text-white font-black text-xs uppercase tracking-[0.25em] shadow-lg flex justify-center items-center gap-2">
+                    <span id="btn-text">AUTH ACCESS</span>
+                    <i id="btn-icon" class="fa-solid fa-chevron-right text-[10px]"></i>
+                </button>
+            </form>
+
+            <div class="mt-8 pt-6 border-t border-white/5 flex items-center justify-center gap-3 opacity-50 hover:opacity-100 transition-all duration-300">
+                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Powered by</span>
+                <img src="fv_digital_logo.png.webp" class="h-8 object-contain" alt="FV Digital">
             </div>
         </div>
 
-        <!-- Decoración Inferior -->
-        <div class="mt-6 flex justify-center gap-2">
-            <div class="w-2 h-2 bg-red-600 rotate-45 animate-pulse"></div>
-            <div class="w-2 h-2 bg-slate-800 rotate-45"></div>
-            <div class="w-2 h-2 bg-slate-800 rotate-45"></div>
+        <div class="mt-4 flex justify-center gap-2">
+            <div class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-ping"></div>
+            <div class="w-1.5 h-1.5 bg-slate-700 rounded-full"></div>
+            <div class="w-1.5 h-1.5 bg-slate-700 rounded-full"></div>
         </div>
     </main>
 
@@ -166,49 +168,95 @@
 
         function setRole(role) {
             selectedRole = role;
-            document.querySelectorAll('.role-btn').forEach(btn => {
-                btn.classList.remove('active-role');
-            });
+            document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active-role'));
             document.getElementById(`btn-${role}`).classList.add('active-role');
         }
 
-        async function entrar() {
-    const u = document.getElementById('u').value;
-    const p = document.getElementById('p').value;
-    
-    // Validación básica de campos vacíos
-    if(!u || !p) return alert("REQUIRED: INPUT CREDENTIALS");
+        function showAlert(text, type = 'error') {
+            const box = document.getElementById('alert-box');
+            const icon = document.getElementById('alert-icon');
+            const msg = document.getElementById('alert-text');
 
-    try {
-        const res = await fetch(`${API}/login`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ correo: u, pass: p })
-        });
+            msg.innerText = text;
+            box.classList.remove('hidden', 'bg-red-500/10', 'text-red-400', 'border-red-500/20', 'bg-yellow-500/10', 'text-yellow-400', 'border-yellow-500/20');
 
-        if(res.ok) {
-            const user = await res.json();
-            
-            // Lógica de Redirección según el Rol de la Base de Datos
-            if (user.rol === 'admin') {
-                // Si es admin, guardamos en la llave de admin y redirigimos
-                localStorage.setItem('userLogueado', JSON.stringify(user));
-                window.location.href = 'admin.html';
+            if(type === 'error') {
+                box.classList.add('bg-red-500/10', 'text-red-400', 'border-red-500/20');
+                icon.className = "fa-solid fa-triangle-exclamation";
             } else {
-                // Si es manager (o cualquier otro rol), guardamos en la llave de manager
-                localStorage.setItem('managerLogueado', JSON.stringify(user));
-                window.location.href = 'manager.html'; 
+                box.classList.add('bg-yellow-500/10', 'text-yellow-400', 'border-yellow-500/20');
+                icon.className = "fa-solid fa-shield-halved";
             }
-        } else {
-            // Manejo de error 401/404 desde el servidor
-            alert("ERROR: INVALID CREDENTIALS");
+            box.classList.remove('hidden');
         }
-    } catch (e) {
-        // Manejo de error 500 o caída de red
-        console.error("Error en login:", e);
-        alert("NETWORK ERROR: SERVER UNREACHABLE");
-    }
-}
+
+        async function entrar() {
+            const userInput = document.getElementById('u').value;
+            const passwordInput = document.getElementById('p').value;
+            const btnSubmit = document.getElementById('btn-submit');
+            const btnText = document.getElementById('btn-text');
+            const btnIcon = document.getElementById('btn-icon');
+            
+            // 1. LIMPIEZA Y CONVERSIÓN CRUCIAL A MINÚSCULAS DE FORMA INTERNA
+            const cleanUser = userInput.toLowerCase().trim();
+            const cleanPass = passwordInput.trim();
+
+            if(!cleanUser || !cleanPass) {
+                return showAlert("REQUIRED: COMPLETAR TODOS LOS CAMPOS");
+            }
+
+            // Bloquear interfaz visual durante el envío (Efecto de carga profesional)
+            btnSubmit.disabled = true;
+            btnText.innerText = "VERIFYING CREDENTIALS...";
+            btnIcon.className = "fa-solid fa-circle-notch animate-spin";
+
+            try {
+                const res = await fetch(`${API}/login`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ correo: cleanUser, pass: cleanPass })
+                });
+
+                if(res.ok) {
+                    const user = await res.json();
+                    
+                    // 2. VALIDACIÓN DE CRUCE DE ROLES SELECCIONADOS EN FRONTEND VS DATABASE
+                    if (user.rol === 'admin' && selectedRole !== 'admin') {
+                        throw new Error("ROLE_MISMATCH_ADMIN");
+                    }
+                    if (user.rol !== 'admin' && selectedRole === 'admin') {
+                        throw new Error("ROLE_MISMATCH_MANAGER");
+                    }
+
+                    // 3. RUTAS E INYECCIÓN DE LLAVES EN EL LOCALSTORAGE
+                    if (user.rol === 'admin') {
+                        localStorage.setItem('userLogueado', JSON.stringify(user));
+                        window.location.href = 'admin.html';
+                    } else {
+                        localStorage.setItem('managerLogueado', JSON.stringify(user));
+                        window.location.href = 'manager.html'; 
+                    }
+                } else {
+                    showAlert("ACCESO DENEGADO: CREDENCIALES INVÁLIDAS");
+                }
+            } catch (e) {
+                console.error("Error detectado en el login:", e);
+                
+                // Switch inteligente de errores personalizados
+                if (e.message === "ROLE_MISMATCH_ADMIN") {
+                    showAlert("ÁREA INCORRECTA: TU CUENTA PERTENECE A STAFF ADMIN", 'warning');
+                } else if (e.message === "ROLE_MISMATCH_MANAGER") {
+                    showAlert("ÁREA INCORRECTA: TU CUENTA PERTENECE A UN MANAGER", 'warning');
+                } else {
+                    showAlert("ERROR DE CONEXIÓN: SERVIDOR INALCANZABLE");
+                }
+            } finally {
+                // Restablecer el estado original del botón de acción
+                btnSubmit.disabled = false;
+                btnText.innerText = "AUTH ACCESS";
+                btnIcon.className = "fa-solid fa-chevron-right text-[10px]";
+            }
+        }
     </script>
 </body>
 </html>

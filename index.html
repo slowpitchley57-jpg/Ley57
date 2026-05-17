@@ -2,13 +2,14 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="description" content=" Resultados, equipos y calendario de la Liga Slowpitch Ley57 en Hermosillo, Sonora.">
-    <title>Liga Slowpitch Ley57 & ALV Sport – Hermosillo.</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ALV SPORT - Plataforma Oficial de Torneos de Alto Nivel. Resultados, Estadísticas y Highlights.">
+    <title>ALV SPORT LEAGUES</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <meta name="google-site-verification" content="kTlA6sW6q_8nCZLBSUb7OV8_hL3P8Py7S4lTmB982Nk"/>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;700;900&display=swap');
         
         body {
             font-family: 'Inter', sans-serif;
@@ -18,123 +19,114 @@
             overflow-x: hidden;
         }
 
-        .bg-glow {
+        /* Atmósfera energética de estadio con luces brillantes de fondo */
+        .stadium-bg {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 50% 50%, #1e1b4b 0%, #020617 100%);
+            background: 
+                radial-gradient(circle at 20% 10%, rgba(59, 130, 246, 0.25) 0%, transparent 40%),
+                radial-gradient(circle at 80% 10%, rgba(234, 179, 8, 0.2) 0%, transparent 40%),
+                radial-gradient(circle at 50% 30%, #1e1b4b 0%, #020617 100%);
+            z-index: -2;
+        }
+
+        /* Destellos de reflectores de estadio */
+        .stadium-lights {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(circle at 50% -20%, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
             z-index: -1;
+            pointer-events: none;
         }
 
-        .glass {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .font-sport { font-family: 'Orbitron', sans-serif; }
+
+        /* Efecto de inclinación para dar sensación de velocidad y movimiento */
+        .skew-sport { transform: skewX(-4deg); }
+
+        .fade-up { 
+            animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
         }
-
-        .counter-font { font-family: 'Orbitron', sans-serif; }
-
-        @keyframes pulse-blue {
-            0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.2); }
-            50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.5); }
-        }
-
-        .glow-active { animation: pulse-blue 3s infinite; }
-
-        .fade-up { animation: fadeUp 0.8s ease-out forwards; }
         @keyframes fadeUp {
             from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4 md:p-8">
+<body class="min-h-screen flex flex-col justify-between items-center p-4 md:p-8 relative selection:bg-yellow-500 selection:text-black">
 
-    <div class="bg-glow"></div>
+    <div class="stadium-bg"></div>
+    <div class="stadium-lights"></div>
 
-    <main id="espera" class="w-full max-w-5xl text-center fade-up">
-        
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-6 md:gap-10 mb-12">
-            <img src="fv_digital_logo.png.webp" alt="Ley 57" class="h-20 md:h-28 object-contain">
-            <div class="hidden sm:block h-12 w-px bg-white/20"></div>
-            <img src="logoalvnegro.jpeg" alt="ALV Sport" class="h-16 md:h-24 rounded-full border border-white/10 shadow-2xl">
-        </div>
-
-        <div class="space-y-4 mb-12">
-            <h2 class="text-blue-400 font-bold tracking-[0.3em] text-xs md:text-sm uppercase">VOLVEREMOS MUY PRONTO</h2>
-            <h1 class="text-4xl sm:text-6xl md:text-8xl font-black tracking-tighter leading-none">
-                ESTAMOS LISTOS <br> <span class="text-gray-400">PARA TI</span>
-            </h1>
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 max-w-3xl mx-auto">
-            <div class="glass p-5 md:p-8 rounded-3xl">
-                <span id="days" class="counter-font text-3xl md:text-6xl font-bold block">00</span>
-                <span class="text-[10px] md:text-xs text-gray-500 uppercase tracking-widest mt-2 block">Días</span>
-            </div>
-            <div class="glass p-5 md:p-8 rounded-3xl">
-                <span id="hours" class="counter-font text-3xl md:text-6xl font-bold block">00</span>
-                <span class="text-[10px] md:text-xs text-gray-500 uppercase tracking-widest mt-2 block">Horas</span>
-            </div>
-            <div class="glass p-5 md:p-8 rounded-3xl">
-                <span id="minutes" class="counter-font text-3xl md:text-6xl font-bold block">00</span>
-                <span class="text-[10px] md:text-xs text-gray-500 uppercase tracking-widest mt-2 block">Minutos</span>
-            </div>
-            <div class="glass p-5 md:p-8 rounded-3xl border-blue-500/40 glow-active">
-                <span id="seconds" class="counter-font text-3xl md:text-6xl font-bold block text-blue-500">00</span>
-                <span class="text-[10px] md:text-xs text-blue-400 uppercase tracking-widest mt-2 block font-bold italic">Segundos</span>
-            </div>
-        </div>
-
-        <footer class="mt-16 opacity-40">
-            <p class="text-xs tracking-[0.2em]">FV DIGITAL × ALV SPORT × LEY 57</p>
-        </footer>
-    </main>
-
-    <div id="revelacion" class="hidden w-full max-w-4xl text-center px-4">
-        <div class="mb-6 inline-block p-4 rounded-full bg-blue-500/10 fade-up">
-            <i class="fa-solid fa-check-double text-5xl md:text-7xl text-blue-500"></i>
-        </div>
-        <h1 class="text-5xl md:text-8xl font-black mb-6 tracking-tighter fade-up">¡SISTEMA <br> ACTIVADO!</h1>
-        <p class="text-lg md:text-2xl text-gray-400 mb-10 fade-up" style="animation-delay: 0.2s;">Bienvenido a la nueva era de la Liga Ley 57.</p>
-        
-        <div class="fade-up" style="animation-delay: 0.4s;">
-            <a href="index_post.html" class="inline-flex items-center justify-center gap-3 bg-white text-black px-10 py-5 rounded-full font-black text-xl md:text-2xl hover:bg-blue-500 hover:text-white transition-all transform hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
-                ENTRAR AL DIAMANTE <i class="fa-solid fa-arrow-right"></i>
-            </a>
-        </div>
+    <div class="hidden lg:flex fixed left-4 xl:left-12 top-1/2 -translate-y-1/2 flex-col items-center opacity-25 hover:opacity-60 transition-opacity duration-500 pointer-events:none select-none z-10">
+        <i class="fa-solid fa-baseball text-7xl text-white mb-2 filter drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]"></i>
+        <span class="text-[10px] uppercase tracking-[0.4em] font-sport font-black text-white/50">BASEBALL</span>
     </div>
 
-    <script>
-        // CONFIGURACIÓN: De hoy 10 al 12 de Mayo de 2026
-        const fechaLimite = new Date("May 11, 2026 19:30:00").getTime();
+    <div class="hidden lg:flex fixed right-4 xl:right-12 top-1/2 -translate-y-1/2 flex-col items-center opacity-25 hover:opacity-60 transition-opacity duration-500 pointer-events:none select-none z-10">
+        <i class="fa-solid fa-baseball text-7xl text-yellow-400 mb-2 filter drop-shadow-[0_0_25px_rgba(234,179,8,0.6)]"></i>
+        <span class="text-[10px] uppercase tracking-[0.4em] font-sport font-black text-yellow-400/60">SOFTBALL</span>
+    </div>
 
-        const x = setInterval(function() {
-            const ahora = new Date().getTime();
-            const distancia = fechaLimite - ahora;
+    <header class="w-full max-w-5xl flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-8 mb-4 fade-up">
+        <!-- <img src="fv_digital_logo.png.webp" alt="FV Digital" class="h-14 md:h-20 object-contain opacity-70"> -->
+        <!-- <div class="hidden sm:block h-8 w-px bg-white/20"></div> -->
+        <img src="logoalvnegro.jpeg" alt="ALV Tournament Badge" class="h-20 md:h-21 object-contain">
+    </header>
 
-            // Cálculos de tiempo
-            const d = Math.floor(distancia / (1000 * 60 * 60 * 24));
-            const h = Math.floor((distancia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const m = Math.floor((distancia % (1000 * 60 * 60)) / (1000 * 60));
-            const s = Math.floor((distancia % (1000 * 60)) / 1000);
+    <main class="w-full max-w-4xl text-center my-auto px-2 md:px-6 flex flex-col items-center justify-center fade-up" style="animation-delay: 0.1s;">
+        
+        <div class="space-y-4 md:space-y-6 skew-sport">
+            
+            <p class="text-blue-400 font-sport font-bold tracking-[0.3em] text-xs md:text-sm uppercase">
+                TODAS LAS LIGAS UN SOLO TORNEO
+            </p>
+            
+            <h1 class="text-6xl sm:text-8xl md:text-9xl font-sport font-black tracking-tighter leading-none text-white filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
+                ALV SPORT
+            </h1>
+            
+            <h2 class="text-2xl sm:text-4xl md:text-5xl font-sport font-black tracking-tight text-yellow-400 uppercase">
+                ALL LEAGUES
+            </h2>
+            
+            <p class="text-sm sm:text-base md:text-lg font-bold tracking-[0.25em] text-white/90 uppercase">
+                SLOW  FEMENIL <span class="text-blue-500 mx-2">| SLOW MIXTO |</span> BOLA PUESTA RAMA VARONIL <span class="text-yellow-400 mx-2">|</span> BOLA PUESTA RAMA FEMENIL
+            </p>
+            
+            <div class="pt-2 grid grid-cols-1 sm:grid-cols-3 gap-2 max-w-3xl mx-auto text-xs md:text-sm tracking-wider font-bold text-gray-300">
+                <div class="bg-black/40 border border-white/5 py-2 px-3 rounded-xl uppercase">TORNEOS DE ALTO NIVEL</div>
+                <div class="bg-black/40 border border-white/5 py-2 px-3 rounded-xl uppercase text-blue-400">RESULTADOS Y ESTADÍSTICAS</div>
+                <div class="bg-black/40 border border-white/5 py-2 px-3 rounded-xl uppercase">HIGHLIGHTS Y MEJORES JUGADAS</div>
+            </div>
 
-            // Mostrar resultados con ceros a la izquierda
-            document.getElementById("days").innerHTML = d.toString().padStart(2, '0');
-            document.getElementById("hours").innerHTML = h.toString().padStart(2, '0');
-            document.getElementById("minutes").innerHTML = m.toString().padStart(2, '0');
-            document.getElementById("seconds").innerHTML = s.toString().padStart(2, '0');
+            <div class="pt-4 space-y-1">
+                <p class="text-xs md:text-sm tracking-[0.2em] font-medium text-gray-400 uppercase">
+                    PASIÓN, RESPETO Y DEPORTE
+                </p>
+                <p class="text-sm md:text-base tracking-[0.3em] font-sport font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-yellow-200 to-white uppercase">
+                    DONDE NACEN LOS CAMPEONES
+                </p>
+            </div>
 
-            // Si el tiempo termina
-            if (distancia < 0) {
-                clearInterval(x);
-                document.getElementById("espera").classList.add("hidden");
-                const rev = document.getElementById("revelacion");
-                rev.classList.remove("hidden");
-                rev.classList.add("fade-up");
-                if ("vibrate" in navigator) navigator.vibrate(500);
-            }
-        }, 1000);
-    </script>
+        </div>
+
+        <div class="pt-8 md:pt-12 relative inline-block group z-20">
+            <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 via-yellow-500 to-indigo-600 rounded-full blur-xl opacity-40 group-hover:opacity-75 transition duration-300"></div>
+            
+            <a href="index_post.html" class="relative inline-flex items-center justify-center gap-3 bg-white text-black px-10 py-4 md:px-14 md:py-5 rounded-full font-sport font-black text-xl md:text-2xl hover:bg-blue-600 hover:text-white transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-2xl skew-sport">
+                BIENVENIDO <i class="fa-solid fa-circle-play text-lg md:text-xl group-hover:rotate-12 transition-transform"></i>
+            </a>
+        </div>
+
+    </main>
+
+    <footer class="w-full max-w-5xl text-center flex flex-col items-center justify-center gap-3 mt-6 fade-up" style="animation-delay: 0.2s;">
+        <div class="flex flex-col items-center gap-2 group">
+            <img src="fv_digital_logo.png.webp" alt="ALV Sport Logo" class="h-16 md:h-20 w-16 md:w-20 rounded-full border-2 border-yellow-400/40 shadow-[0_0_20px_rgba(234,179,8,0.2)] object-cover transition-transform group-hover:scale-105">
+            <span class="text-[9px] md:text-xs font-sport font-bold tracking-[0.4em] text-gray-500 uppercase">FV DIGITAL SOFTWARE</span>
+        </div>
+    </footer>
+
 </body>
 </html>
