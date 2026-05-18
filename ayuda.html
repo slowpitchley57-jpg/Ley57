@@ -2,10 +2,15 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Centro de Ayuda - Liga Ley 57</title>
-    <link rel="icon" type="image/png" href="logoley57icon.jpeg">
+    <link rel="icon" type="image/png" href="alv_sport_logo.png.jpeg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    
     <style>
         @keyframes gradientMove {
             0% { background-position: 0% 50%; }
@@ -14,102 +19,389 @@
         }
         body {
             margin: 0;
-            background: linear-gradient(-45deg, #0f172a, #1e3a8a, #0f172a, #831843);
+            background: linear-gradient(-45deg, #020617, #0f172a, #1e1b4b, #31102f);
             background-size: 400% 400%;
             animation: gradientMove 15s ease infinite;
             min-height: 100vh;
         }
-        .help-card {
-            background-color: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-top: 8px solid #ef4444;
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
         }
-        .btn-whatsapp {
-            background-color: #25d366;
+        .glass-card {
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .btn-whatsapp-sug {
+            background: linear-gradient(135deg, #25d366 0%, #075e54 100%);
             transition: all 0.3s ease;
         }
-        .btn-whatsapp:hover {
-            background-color: #128c7e;
+        .btn-whatsapp-sug:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+            box-shadow: 0 8px 20px rgba(37, 211, 102, 0.25);
+        }
+        .btn-pdf {
+            background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-pdf:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25);
+        }
+        .star-rating i {
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+        .star-rating i:hover {
+            transform: scale(1.3);
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-6 font-sans">
+<body class="flex items-center justify-center min-h-screen p-4 md:p-8 font-sans text-slate-100">
 
-    <div class="help-card p-8 rounded-[2.5rem] shadow-2xl w-full max-w-2xl animate-fade-in my-10 relative overflow-hidden">
-        
-        <div class="text-center mb-8">
-            <img src="logoley57icon.jpeg" alt="Logo" class="mx-auto mb-4 w-24 h-24 object-contain">
-            <h1 class="text-blue-900 text-3xl font-black italic uppercase tracking-tighter leading-none">Centro de Soporte</h1>
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] mt-2">Liga Slow Pitch Ley 57</p>
+    <div class="glass-panel p-6 md:p-8 rounded-[2.5rem] w-full max-w-2xl my-6 relative overflow-hidden">
+        <div class="absolute -top-10 -right-10 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-pink-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="text-center mb-8 relative z-10">
+            <div class="relative inline-block mb-3">
+                <img src="logoalvnegro.jpeg" alt="Logo Ley 57" class="mx-auto w-20 h-20 rounded-full object-contain border-2 border-blue-500/30 p-1 shadow-lg bg-slate-900">
+                <div class="absolute inset-0 rounded-full bg-blue-500/20 blur-md -z-10"></div>
+            </div>
+            <h1 class="text-white text-3xl font-black italic uppercase tracking-tighter leading-none bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">Centro de Soporte</h1>
+            <p class="text-[10px] font-black text-blue-400 uppercase tracking-[0.3em] mt-2">ALV SPORT LEAGUES</p>
         </div>
 
-        <div class="space-y-6">
-            <section class="bg-blue-50 p-6 rounded-3xl border border-blue-100">
-                <h2 class="text-blue-900 font-black text-xs uppercase mb-3 flex items-center gap-2 italic">
-                    <i class="fa fa-key text-red-600"></i> ¿Olvidaste tu contraseña?
+        <div class="space-y-6 relative z-10">
+            
+            <section class="glass-card p-5 rounded-3xl border-l-4 border-red-500">
+                <h2 class="text-white font-black text-xs uppercase mb-2 flex items-center gap-2 italic tracking-wide">
+                    <i class="fa fa-key text-red-400"></i> ¿Olvidaste tu contraseña?
                 </h2>
-                <p class="text-[11px] text-slate-600 leading-relaxed mb-4">
-                    Por motivos de seguridad, las contraseñas solo pueden ser restablecidas por el administrador. Envía un correo con los siguientes datos:
+                <p class="text-[11px] text-slate-300 leading-relaxed mb-4">
+                    Las credenciales del sistema solo pueden ser restablecidas de manera directa por los administradores. Envía un correo con la siguiente plantilla estructurada:
                 </p>
-                <div class="bg-white p-4 rounded-xl border border-blue-200 font-mono text-[10px] text-blue-800 shadow-sm">
-                    <strong>Para:</strong> slowpitch.ley57@gmail.com<br>
-                    <strong>Asunto:</strong> Recuperación de contraseña - [Equipo]<br>
-                    <strong>Cuerpo:</strong> Nombre de la Manager y Categoría.
+                <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 font-mono text-[10px] text-blue-400 shadow-inner">
+                    <span class="text-slate-500">Para:</span> slowpitch.ley57@gmail.com<br>
+                    <span class="text-slate-500">Asunto:</span> Recuperación de contraseña - [Equipo]<br>
+                    <span class="text-slate-500">Cuerpo:</span> Nombre de la Manager, Categoría y Teléfono.
                 </div>
             </section>
 
-            <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center gap-4">
-                    <div class="w-10 h-10 bg-blue-900 rounded-full flex items-center justify-center text-white text-sm shadow-md">
+            <section class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="glass-card p-4 rounded-2xl flex items-center gap-4">
+                    <div class="w-10 h-10 bg-blue-600/20 text-blue-400 rounded-xl flex items-center justify-center text-sm border border-blue-500/30">
                         <i class="fa fa-envelope"></i>
                     </div>
-                    <div>
+                    <div class="overflow-hidden">
                         <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Correo Oficial</p>
-                        <p class="text-[11px] font-bold text-blue-900">slowpitch.ley57@gmail.com</p>
+                        <p class="text-[11px] font-bold text-slate-200 truncate">slowpitch.ley57@gmail.com</p>
                     </div>
                 </div>
-                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center gap-4">
-                    <div class="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white text-sm shadow-md">
+                <div class="glass-card p-4 rounded-2xl flex items-center gap-4">
+                    <div class="w-10 h-10 bg-emerald-600/20 text-emerald-400 rounded-xl flex items-center justify-center text-sm border border-emerald-500/30">
                         <i class="fa fa-phone"></i>
                     </div>
                     <div>
-                        <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Teléfono / WhatsApp</p>
-                        <p class="text-[11px] font-bold text-blue-900">+52 662 537 4491</p>
+                        <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Teléfono Directo</p>
+                        <p class="text-[11px] font-bold text-slate-200">+52 662 537 4491</p>
                     </div>
                 </div>
+            </section>
+
+            <section class="glass-card p-5 rounded-3xl border border-slate-800">
+                <h2 class="text-white font-black text-xs uppercase mb-3 flex items-center gap-2 italic tracking-wide">
+                    <i class="fa fa-star text-amber-400 animate-pulse"></i> Sistema de Sugerencias y Evaluación
+                </h2>
+                
+                <form id="feedbackForm" onsubmit="event.preventDefault();" class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <input type="text" id="managerName" placeholder="Nombre de la Manager" required
+                            class="w-full bg-slate-950/60 border border-slate-800 rounded-xl p-3 text-[11px] text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors">
+                        <input type="text" id="teamName" placeholder="Nombre del Equipo / Categoría" required
+                            class="w-full bg-slate-950/60 border border-slate-800 rounded-xl p-3 text-[11px] text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors">
+                    </div>
+
+                    <textarea id="sugerenciaTexto" rows="3" placeholder="Escribe tus comentarios, dudas, aportes o inconformidades de la plataforma aquí..." required
+                        class="w-full bg-slate-950/60 border border-slate-800 rounded-xl p-3 text-[11px] text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors resize-none"></textarea>
+
+                    <div class="bg-slate-950/40 p-3 rounded-xl border border-slate-900 text-center">
+                        <p class="text-[10px] text-slate-400 uppercase tracking-wider mb-1 font-bold">Calificación del Portal</p>
+                        <div class="flex justify-center gap-2 star-rating text-xl">
+                            <i class="fa-regular fa-star text-slate-500 cursor-pointer" onclick="seleccionarEstrellas(1)" onmouseover="iluminarEstrellas(1)" onmouseout="restablecerEstrellas()"></i>
+                            <i class="fa-regular fa-star text-slate-500 cursor-pointer" onclick="seleccionarEstrellas(2)" onmouseover="iluminarEstrellas(2)" onmouseout="restablecerEstrellas()"></i>
+                            <i class="fa-regular fa-star text-slate-500 cursor-pointer" onclick="seleccionarEstrellas(3)" onmouseover="iluminarEstrellas(3)" onmouseout="restablecerEstrellas()"></i>
+                            <i class="fa-regular fa-star text-slate-500 cursor-pointer" onclick="seleccionarEstrellas(4)" onmouseover="iluminarEstrellas(4)" onmouseout="restablecerEstrellas()"></i>
+                            <i class="fa-regular fa-star text-slate-500 cursor-pointer" onclick="seleccionarEstrellas(5)" onmouseover="iluminarEstrellas(5)" onmouseout="restablecerEstrellas()"></i>
+                        </div>
+                        <p id="starMessage" class="text-[9px] font-black text-amber-400 mt-1 uppercase tracking-widest h-3"></p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                        <button type="button" onclick="enviarSugerenciaWhatsApp()" class="btn-whatsapp-sug text-white font-black py-3 rounded-xl uppercase tracking-wider text-[10px] flex items-center justify-center gap-2 shadow-md">
+                            <i class="fab fa-whatsapp text-sm"></i> Enviar a WhatsApp
+                        </button>
+                        <button type="button" onclick="generarReportePDF()" class="btn-pdf text-white font-black py-3 rounded-xl uppercase tracking-wider text-[10px] flex items-center justify-center gap-2 shadow-md">
+                            <i class="fa fa-file-pdf text-sm"></i> Descargar Reporte PDF
+                        </button>
+                    </div>
+                </form>
             </section>
 
             <section>
-                <h2 class="text-slate-800 font-black text-xs uppercase mb-4 px-2 italic flex items-center gap-2">
-                    <i class="fa fa-comments text-blue-600"></i> Preguntas Frecuentes
+                <h2 class="text-white font-black text-xs uppercase mb-3 px-2 italic flex items-center gap-2">
+                    <i class="fa fa-comments text-blue-400"></i> Preguntas Frecuentes
                 </h2>
-                <div class="space-y-3 text-[11px]">
-                    <div class="p-4 bg-white rounded-2xl shadow-sm border border-slate-100 hover:border-blue-200 transition-colors">
-                        <p class="font-black text-blue-900 mb-1 italic">¿Por qué no puedo dar de alta jugadoras?</p>
-                        <p class="text-slate-500 text-[10px]">El sistema de registros tiene un <strong>cierre semanal</strong>. Deberás contactar al Admin para altas extemporáneas.</p>
-                    </div>
-                    <div class="p-4 bg-white rounded-2xl shadow-sm border border-slate-100 hover:border-blue-200 transition-colors">
-                        <p class="font-black text-blue-900 mb-1 italic">¿Cuándo se actualizan las estadísticas?</p>
-                        <p class="text-slate-500 text-[10px]">Se actualizan en el momento exacto en que el Admin finaliza el juego con la hoja de anotación oficial.</p>
-                    </div>
-                </div>
-            </section>
+                <div id="faqContainer" class="space-y-3 text-[11px]">
+    <div class="p-4 glass-card rounded-2xl hover:border-blue-500/20 transition-all">
+        <p class="font-black text-blue-400 mb-1 italic">
+            <i class="fab fa-facebook text-blue-500 mr-1 text-xs"></i> ¿Dónde transmiten los juegos en vivo?
+        </p>
+        <p class="text-slate-400 text-[10px] leading-relaxed">
+            Los juegos más destacados de cada jornada se transmiten en vivo a través de nuestra página oficial de Facebook <strong class="text-slate-200">"ALV SPORTS"</strong>. En los roles de juego públicos encontrarás el enlace directo cuando la transmisión esté activa.
+        </p>
+    </div>
 
-            <div class="pt-4">
-                <a href="https://wa.me/526625374491?text=Hola,%20necesito%20ayuda%20con%20el%20portal%20de%20la%20Liga%20Ley%2057" target="_blank" class="btn-whatsapp w-full flex items-center justify-center gap-3 text-white font-black py-4 rounded-2xl uppercase tracking-[0.2em] text-xs shadow-lg">
-                    <i class="fab fa-whatsapp text-xl"></i> Contactar por WhatsApp
-                </a>
-            </div>
+    <div class="p-4 glass-card rounded-2xl hover:border-blue-500/20 transition-all">
+        <p class="font-black text-blue-400 mb-1 italic">¿Hasta qué momento puedo modificar mi line-up antes del juego?</p>
+        <p class="text-slate-400 text-[10px] leading-relaxed">
+            Puedes realizar modificaciones físicas con el ampayeur principal e incorporar jugadoras registradas en el roster oficial hasta antes del lanzamiento inaugural del encuentro. No se permiten jugadoras que no aparezcan validadas en el portal.
+        </p>
+    </div>
+
+    <div class="p-4 glass-card rounded-2xl hover:border-blue-500/20 transition-all">
+        <p class="font-black text-blue-400 mb-1 italic">¿Qué pasa si un juego se suspende por condiciones climáticas o lluvia?</p>
+        <p class="text-slate-400 text-[10px] leading-relaxed">
+            La mesa directiva evalúa el estado del terreno en la Unidad Deportiva Ley 57. El estatus del juego cambiará a <strong class="text-amber-400">"Suspendido"</strong> en el portal en tiempo real y el aviso oficial se publicará en los grupos de comunicación de los managers.
+        </p>
+    </div>
+
+    <div class="p-4 glass-card rounded-2xl hover:border-blue-500/20 transition-all">
+        <p class="font-black text-blue-400 mb-1 italic">¿Dónde puedo revisar las tablas de posiciones y standing por rama?</p>
+        <p class="text-slate-400 text-[10px] leading-relaxed">
+            Al regresar a la página principal desde el botón inferior, verás los botones directos de <strong class="text-slate-200">"Ver Standing"</strong> para cada una de las categorías (Femenil Bola Puesta, Varonil ALV Sport y Mixto). Las tablas se recalculan inmediatamente al capturar las hojas de anotación.
+        </p>
+    </div>
+</div>
+            </section>
         </div>
 
-        <div class="mt-8 text-center pt-6 border-t border-slate-100">
-            <a href="index_post.html" class="inline-flex items-center gap-2 text-slate-400 hover:text-red-600 font-black text-[10px] uppercase tracking-widest transition-colors italic">
-                <i class="fa fa-arrow-left"></i> Volver al Inicio de Sesión
+        <div class="mt-8 text-center pt-5 border-t border-slate-800/60">
+            <a href="index_post.html" class="inline-flex items-center gap-2 text-slate-500 hover:text-red-400 font-black text-[10px] uppercase tracking-widest transition-colors italic group">
+                <i class="fa fa-arrow-left group-hover:-translate-x-1 transition-transform"></i> Volver a la página de inicio
             </a>
         </div>
     </div>
 
+    <script>
+        let ratingSeleccionado = 0;
+        const mensajesEstrellas = ["", "Muy Insatisfecho 😡", "Insatisfecho 🙁", "Regular / Aceptable 😐", "Muy Bueno 👍", "Excelente Servicio ¡Es de Élite! ⚾💎"];
+
+        function iluminarEstrellas(num) {
+            const estrellas = document.querySelectorAll('.star-rating i');
+            estrellas.forEach((star, index) => {
+                if (index < num) {
+                    star.className = 'fa-solid fa-star text-amber-400';
+                } else {
+                    star.className = 'fa-regular fa-star text-slate-500';
+                }
+            });
+            document.getElementById('starMessage').textContent = mensajesEstrellas[num];
+        }
+
+        function restablecerEstrellas() {
+            iluminarEstrellas(ratingSeleccionado);
+        }
+
+        function seleccionarEstrellas(num) {
+            ratingSeleccionado = num;
+            iluminarEstrellas(num);
+        }
+
+        function obtenerFechaHoraActual() {
+            const ahora = new Date();
+            return ahora.toLocaleDateString('es-MX', {
+                day: '2-digit', month: '2-digit', year: 'numeric'
+            }) + " | " + ahora.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
+
+        function enviarSugerenciaWhatsApp() {
+            const manager = document.getElementById('managerName').value.trim();
+            const equipo = document.getElementById('teamName').value.trim();
+            const sugerencia = document.getElementById('sugerenciaTexto').value.trim();
+            const timestamp = obtenerFechaHoraActual();
+
+            if (!manager || !equipo || !sugerencia) {
+                alert('Por favor, rellene todos los campos del formulario antes de proceder al envío.');
+                return;
+            }
+            if (ratingSeleccionado === 0) {
+                alert('Por favor, seleccione una calificación con estrellas en el módulo inferior.');
+                return;
+            }
+
+            const estrellasTxt = "⭐".repeat(ratingSeleccionado);
+            const mensajeFinal = `*REPORTE OFICIAL DE SOPORTE - ALV SPORT*\n` +
+                                 `----------------------------------------\n` +
+                                 `📅 *Fecha/Hora:* ${timestamp}\n` +
+                                 `👤 *Manager:* ${manager}\n` +
+                                 `🥎 *Equipo:* ${equipo}\n` +
+                                 `⭐ *Calificación:* ${estrellasTxt} (${ratingSeleccionado}/5)\n\n` +
+                                 `📝 *Duda o Sugerencia:*\n"${sugerencia}"`;
+
+            const telefono = "526625374491";
+            window.open(`https://wa.me/${telefono}?text=${encodeURIComponent(mensajeFinal)}`, '_blank');
+        }
+
+        // GENERACIÓN DEL REPORTE PROFESIONAL PDF (BLINDADO GLOBALMENTE)
+        // GENERACIÓN DEL REPORTE PROFESIONAL PDF (TEXTO FORMAL CORREGIDO)
+function generarReportePDF() {
+    const manager = document.getElementById('managerName').value.trim();
+    const equipo = document.getElementById('teamName').value.trim();
+    const sugerencia = document.getElementById('sugerenciaTexto').value.trim();
+    const timestamp = obtenerFechaHoraActual();
+
+    if (!manager || !equipo || !sugerencia) {
+        alert('Rellene por completo la información solicitada para estructurar el PDF oficial.');
+        return;
+    }
+    if (ratingSeleccionado === 0) {
+        alert('Asigne una calificación con las estrellas antes de exportar el reporte.');
+        return;
+    }
+
+    // Instanciamos jsPDF desde el espacio global de nombres de la librería v2.x
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+
+    // ENLACE FORZADO DEL PLUGIN: Si el plugin falló en acoplarse automáticamente, lo inyectamos a mano
+    if (typeof doc.autoTable !== 'function' && typeof window.jspdfAutotable === 'function') {
+        window.jspdfAutotable(doc);
+    } else if (typeof doc.autoTable !== 'function' && window.jsPDF && window.jsPDF.API && typeof window.jsPDF.API.autoTable === 'function') {
+        doc.autoTable = window.jsPDF.API.autoTable;
+    }
+
+    // Verificación crítica secundaria de seguridad
+    if (typeof doc.autoTable !== 'function') {
+        alert("Error de dependencias: El componente de tablas internas no pudo inicializarse. Intente refrescar el navegador.");
+        return;
+    }
+
+    // 1. Encabezado Institucional
+    doc.setFillColor(15, 23, 42); 
+    doc.rect(0, 0, 210, 38, 'F');
+
+    doc.setFillColor(239, 68, 68); 
+    doc.rect(0, 38, 210, 2, 'F');
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.text("ALV SPORT", 14, 16);
+    
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(10);
+    doc.setTextColor(156, 163, 175);
+    doc.text("Portal de Rendimiento Deportivo - Reporte de Satisfacción y Soporte Técnico", 14, 23);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(255, 255, 255);
+    doc.text(`CÓDIGO DE CONTROL: L57-SR-${Math.floor(Math.random() * 90000) + 10000}`, 145, 32);
+
+    // 2. Cuerpo del Reporte
+    doc.setTextColor(30, 41, 59);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text("REPORTE OFICIAL DE APORTE Y SATISFACCIÓN", 14, 52);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(71, 85, 105);
+    doc.text("El presente documento valida la recepción de una sugerencia, duda o evaluación del funcionamiento", 14, 58);
+    doc.text("del ecosistema digital de ALV SPORT, emitido directamente por el representante de equipo.", 14, 63);
+
+    // --- CORRECCIÓN CRÍTICA DE ESTRELLAS A TEXTO FORMAL ---
+    // Quitamos los emojis que causan conflicto y los transformamos en texto limpio
+    const textosEvaluacion = ["", "1 de 5 Estrellas (Muy Insatisfecho)", "2 de 5 Estrellas (Insatisfecho)", "3 de 5 Estrellas (Regular / Aceptable)", "4 de 5 Estrellas (Muy Bueno)", "5 de 5 Estrellas (Excelente Servicio)"];
+    const calificacionFormateadaTexto = textosEvaluacion[ratingSeleccionado];
+
+    // 3. Tabla de Metadatos 
+    const tablaDatos = [
+        ["CONCEPTO", "DETALLES RECOLECTADOS EN SISTEMA"],
+        ["Fecha y Hora de Emisión", timestamp],
+        ["Representante / Manager", manager],
+        ["Escuadra / Categoría", equipo],
+        ["Grado de Satisfacción Portal", calificacionFormateadaTexto]
+    ];
+
+    doc.autoTable({
+        startY: 70,
+        head: [tablaDatos[0]],
+        body: tablaDatos.slice(1),
+        theme: 'striped',
+        headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 10 },
+        bodyStyles: { textColor: [51, 65, 85], fontSize: 10, cellPadding: 4 },
+        columnStyles: { 0: { fontStyle: 'bold', width: 50 } }
+    });
+
+    // Rescate seguro de la coordenada Y para pintar el bloque inferior
+    let finalYXT = 110;
+    if (doc.autoTable && doc.autoTable.previous && doc.autoTable.previous.finalY) {
+        finalYXT = doc.autoTable.previous.finalY;
+    } else if (doc.lastAutoTable && doc.lastAutoTable.finalY) {
+        finalYXT = doc.lastAutoTable.finalY;
+    }
+
+    // 4. Bloque de Exposición del Aporte o Duda
+    let currentY = finalYXT + 12;
+    doc.setTextColor(15, 23, 42);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.text("EXPOSICIÓN DE LA DUDA, SUGERENCIA O COMENTARIO:", 14, currentY);
+
+    currentY += 4;
+    doc.setFillColor(248, 250, 252); 
+    doc.setDrawColor(226, 232, 240); 
+    
+    const textoLineas = doc.splitTextToSize(sugerencia, 172);
+    const altoCaja = (textoLineas.length * 5) + 8;
+    doc.rect(14, currentY, 182, altoCaja, 'DF');
+
+    doc.setTextColor(51, 65, 85);
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(10);
+    doc.text(textoLineas, 19, currentY + 6);
+
+    // 5. Apartado Formal de Firmas
+    currentY += altoCaja + 35;
+    doc.setDrawColor(148, 163, 184);
+    doc.setLineWidth(0.3);
+    
+    doc.line(25, currentY, 85, currentY);
+    doc.line(125, currentY, 185, currentY);
+
+    currentY += 5;
+    doc.setTextColor(71, 85, 105);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.text(manager, 55, currentY, { align: "center" });
+    doc.text("Javier Yocupicio", 155, currentY, { align: "center" });
+
+    currentY += 4;
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(148, 163, 184);
+    doc.text("Firma de Manager Solicitante", 55, currentY, { align: "center" });
+    doc.text("Director Administrativo ALV SPORT", 155, currentY, { align: "center" });
+
+    doc.setFontSize(8);
+    doc.text("Este reporte impreso constituye un comprobante formal de atención digital dentro del portal de la liga.", 105, 285, { align: "center" });
+
+    const nombreArchivo = `Reporte_Soporte_${equipo.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`;
+    doc.save(nombreArchivo);
+}
+    </script>
 </body>
 </html>

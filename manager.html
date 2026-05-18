@@ -66,6 +66,9 @@
             <a href="#" class="sidebar-link active block p-4 rounded-2xl flex items-center gap-4 bg-white/5 font-bold italic uppercase text-xs">
                 <i class="fa fa-users text-red-500"></i> Mi Roster & Stats
             </a>
+            <a href="ayuda.html" class="w-full text-left sidebar-link block p-4 rounded-2xl flex items-center gap-4 text-slate-400 font-bold italic uppercase text-xs hover:text-white mt-1">
+    <i class="fa fa-question-circle text-emerald-400"></i> Ayuda
+</a>
             <a id="btnLinkEstadisticas" class="sidebar-link block p-4 rounded-2xl flex items-center gap-4 text-slate-400 font-bold italic uppercase text-xs hover:text-white">
                 <i class="fa fa-chart-line"></i> Tabla General
             </a>
@@ -74,6 +77,15 @@
             <button onclick="toggleModalPassword()" class="w-full text-left sidebar-link block p-4 rounded-2xl flex items-center gap-4 text-slate-400 font-bold italic uppercase text-xs hover:text-white">
                 <i class="fa fa-fingerprint text-blue-400"></i> Seguridad
             </button>
+            <button onclick="openTutorialModal()" class="w-full text-left sidebar-link block p-4 rounded-2xl flex items-center gap-4 text-slate-400 font-bold italic uppercase text-xs hover:text-white mt-1">
+    <i class="fa fa-book-open text-amber-400"></i> Guía del Manager
+</button>
+  <p class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 ml-2 mt-10">Finanzas</p>
+
+<a href="fianzas_manager.html" class="w-full text-left sidebar-link block p-4 rounded-2xl flex items-center gap-4 text-slate-400 font-bold italic uppercase text-xs hover:text-white">
+    <i class="fa fa-wallet text-emerald-400"></i> Estado de Fianza
+</a>
+            
         </nav>
 
         <div class="mt-auto pt-10">
@@ -178,6 +190,159 @@
             </section>
         </div>
     </main>
+
+<!-- MODAL TUTORIAL MANAGER -->
+    <div id="tutorialModal" class="fixed inset-0 bg-slate-950/80 backdrop-filter backdrop-blur-md hidden items-center justify-center z-50 p-4 transition-all duration-300 opacity-0">
+    
+    <div class="bg-slate-900/90 border border-slate-800 rounded-[2.5rem] w-full max-w-3xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden relative">
+        <div class="absolute -top-20 -right-20 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-20 -left-20 w-48 h-48 bg-pink-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="p-6 border-b border-slate-800 flex items-center justify-between relative z-10 bg-slate-900/50">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-amber-500/20 text-amber-400 rounded-xl flex items-center justify-center border border-amber-500/30">
+                    <i class="fa fa-graduation-cap text-lg"></i>
+                </div>
+                <div>
+                    <h2 class="text-white text-lg font-black italic uppercase tracking-tight">Manual Operativo del Manager</h2>
+                    <p class="text-[9px] font-black text-blue-400 uppercase tracking-widest">Liga Slow Pitch Ley 57 & ALV Sport</p>
+                </div>
+            </div>
+            <button onclick="closeTutorialModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-red-600 text-slate-400 hover:text-white flex items-center justify-center transition-colors shadow">
+                <i class="fa fa-times text-sm"></i>
+            </button>
+        </div>
+
+        <div class="flex border-b border-slate-800/60 bg-slate-950/50 p-2 gap-1 overflow-x-auto scrollbar-none relative z-10 text-[10px] font-black uppercase tracking-wider">
+            <button onclick="switchTab('tab-inicio')" id="btn-tab-inicio" class="tab-btn px-4 py-2 rounded-xl transition-all duration-200 bg-indigo-600 text-white italic">
+                <i class="fa fa-star mr-1"></i> Inicio
+            </button>
+            <button onclick="switchTab('tab-roster')" id="btn-tab-roster" class="tab-btn px-4 py-2 rounded-xl transition-all duration-200 text-slate-400 hover:text-slate-200">
+                <i class="fa fa-users mr-1"></i> Rosters y Altas
+            </button>
+            <button onclick="switchTab('tab-juegos')" id="btn-tab-juegos" class="tab-btn px-4 py-2 rounded-xl transition-all duration-200 text-slate-400 hover:text-slate-200">
+                <i class="fa fa-file-signature mr-1"></i> Line-ups
+            </button>
+            <button onclick="switchTab('tab-fianzas')" id="btn-tab-fianzas" class="tab-btn px-4 py-2 rounded-xl transition-all duration-200 text-slate-400 hover:text-slate-200">
+                <i class="fa fa-wallet mr-1"></i> Fianzas
+            </button>
+            <button onclick="switchTab('tab-ia')" id="btn-tab-ia" class="tab-btn px-4 py-2 rounded-xl transition-all duration-200 text-slate-400 hover:text-slate-200">
+                <i class="fa fa-robot mr-1"></i> Inteligencia IA
+            </button>
+        </div>
+
+        <div class="p-6 overflow-y-auto space-y-4 text-slate-300 text-[11px] leading-relaxed relative z-10 flex-1">
+            
+            <div id="tab-inicio" class="tab-content space-y-3">
+                <div class="bg-gradient-to-r from-blue-900/30 to-indigo-900/30 border border-blue-500/20 p-4 rounded-2xl">
+                    <p class="font-black text-white text-xs uppercase italic mb-1 text-blue-400">¡Bienvenido al Panel de Comandos, Manager!</p>
+                    <p class="text-slate-300">Este ecosistema digital avanzado permite dar un seguimiento profesional a tu escuadra. Controla la logística, revisa el standing y mantén al día tus finanzas en las ramas <span class="text-pink-400 font-bold">Femenil</span>, <span class="text-blue-400 font-bold">Varonil</span> o <span class="text-emerald-400 font-bold">Mixto</span>.</p>
+                </div>
+                <h3 class="font-black text-white text-xs uppercase italic tracking-wider pt-2 flex items-center gap-2">
+                    <i class="fa fa-check-circle text-emerald-400"></i> Puntos Clave de la Temporada:
+                </h3>
+                <ul class="space-y-2 pl-2">
+                    <li class="flex items-start gap-2"><i class="fa fa-caret-right text-indigo-400 mt-1"></i> <span><strong>Cierre de Altas:</strong> Tienes hasta la Jornada 6 para registrar jugadores nuevos.</span></li>
+                    <li class="flex items-start gap-2"><i class="fa fa-caret-right text-indigo-400 mt-1"></i> <span><strong>Play-offs:</strong> Solo participan jugadores con mínimo 5 juegos jugados.</span></li>
+                    <li class="flex items-start gap-2"><i class="fa fa-caret-right text-indigo-400 mt-1"></i> <span><strong>Line-up:</strong> Entrega obligatoria 10 minutos antes del lanzamiento inicial.</span></li>
+                </ul>
+            </div>
+
+            <div id="tab-roster" class="tab-content hidden space-y-3">
+                <h3 class="font-black text-white text-xs uppercase italic tracking-wider border-b border-slate-800 pb-2 text-indigo-400">Gestión de Roster Oficial</h3>
+                <p>Usa el menú desplegable para cargar tu listado de jugadoras. Es vital que cada jugador aparezca correctamente registrado en el portal para evitar forfits técnicos.</p>
+                
+                <div class="bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80 space-y-3">
+                    <div class="flex items-center gap-3">
+                        <i class="fa fa-calendar-times text-red-500 text-lg"></i>
+                        <p class="font-bold text-white text-[10px] uppercase tracking-wide">Límite de Altas: Jornada 6</p>
+                    </div>
+                    <p class="text-slate-400 text-[10px]">El sistema permitirá la incorporación de nuevos peloteros únicamente hasta finalizar la <span class="text-white font-bold">6ta Jornada</span> del torneo regular. Después de esta fecha, el roster queda bloqueado permanentemente.</p>
+                    
+                    <div class="flex items-center gap-3 pt-2 border-t border-slate-800">
+                        <i class="fa fa-trophy text-amber-400 text-lg"></i>
+                        <p class="font-bold text-white text-[10px] uppercase tracking-wide">Regla de Play-offs (5 Juegos)</p>
+                    </div>
+                    <p class="text-slate-400 text-[10px]">Para que un jugador(a) sea elegible en postemporada, deberá haber participado físicamente en al menos <span class="text-white font-bold">5 encuentros jugados</span> registrados en las hojas de anotación oficial durante la temporada regular.</p>
+                </div>
+            </div>
+
+            <div id="tab-juegos" class="tab-content hidden space-y-3">
+                <h3 class="font-black text-white text-xs uppercase italic tracking-wider border-b border-slate-800 pb-2 text-indigo-400">Preparación del Line-up</h3>
+                <p>La puntualidad es fundamental para mantener el rol de juegos de la unidad deportiva Ley 57. Sigue estas directrices para la entrega de tu orden al bat:</p>
+                
+                <div class="bg-indigo-950/30 p-5 rounded-3xl border border-indigo-500/20 space-y-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-indigo-600/20 text-indigo-400 rounded-full flex items-center justify-center text-xl shadow-lg border border-indigo-500/30">
+                            <i class="fa fa-stopwatch"></i>
+                        </div>
+                        <div>
+                            <p class="text-white font-black uppercase text-xs">Regla de los 10 Minutos</p>
+                            <p class="text-slate-400 text-[10px]">El line-up debe ser entregado al anotador oficial de mesa <strong class="text-white">10 minutos antes</strong> de la hora marcada para el inicio de tu juego.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-slate-800/50 text-slate-400 rounded-full flex items-center justify-center text-xl border border-slate-700">
+                            <i class="fa fa-file-invoice"></i>
+                        </div>
+                        <div>
+                            <p class="text-white font-black uppercase text-xs">Formato de Entrega</p>
+                            <p class="text-slate-400 text-[10px]">Por el momento, la entrega sigue siendo en el formato físico tradicional. Asegúrate de que los números de jersey coincidan con los registrados en el portal.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-slate-400 text-[10px] italic"><i class="fa fa-info-circle text-blue-400 mr-1"></i> Nota: El incumplimiento en el tiempo de entrega puede causar la pérdida de la fianza de puntualidad o amonestaciones según el reglamento interno.</p>
+            </div>
+
+            <div id="tab-fianzas" class="tab-content hidden space-y-3">
+                <h3 class="font-black text-white text-xs uppercase italic tracking-wider border-b border-slate-800 pb-2 text-indigo-400">Control Financiero de Fianzas</h3>
+                <p>Cada equipo debe cubrir un fondo base obligatorio de fianza de <span class="text-emerald-400 font-bold">$10,000 MXN</span> al inicio del torneo.</p>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+                    <div class="bg-slate-950 p-3 rounded-xl text-center border border-slate-800">
+                        <p class="text-[8px] font-black text-slate-500 uppercase tracking-widest">Fondo Requerido</p>
+                        <p class="text-xs font-bold text-white mt-1">$10,000.00</p>
+                    </div>
+                    <div class="bg-slate-950 p-3 rounded-xl text-center border border-slate-800">
+                        <p class="text-[8px] font-black text-slate-500 uppercase tracking-widest">Abonos Procesados</p>
+                        <p class="text-xs font-bold text-emerald-400 mt-1">Suma del Panel</p>
+                    </div>
+                    <div class="bg-slate-950 p-3 rounded-xl text-center border border-slate-800">
+                        <p class="text-[8px] font-black text-slate-500 uppercase tracking-widest">Saldo Pendiente</p>
+                        <p class="text-xs font-bold text-red-400 mt-1">Cálculo Automático</p>
+                    </div>
+                </div>
+
+                <p class="pt-2"><i class="fa fa-file-invoice-dollar text-amber-400 mr-1"></i> Al realizar un abono físico, el administrador lo registrará y podrás descargar tu <strong>Recibo Oficial Digital PDF</strong> firmado por el directivo Javier Yocupicio desde este panel.</p>
+            </div>
+
+            <div id="tab-ia" class="tab-content hidden space-y-3">
+                <h3 class="font-black text-white text-xs uppercase italic tracking-wider border-b border-slate-800 pb-2 text-pink-400">Módulo de Analítica con IA</h3>
+                <p>Nuestra plataforma cuenta con un cerebro artificial de análisis deportivo. Úsalo para entender el rendimiento de tu equipo:</p>
+                
+                <div class="p-4 bg-slate-950/80 border border-pink-500/20 rounded-2xl flex gap-4">
+                    <div class="w-12 h-12 bg-pink-500/10 text-pink-400 rounded-xl flex items-center justify-center border border-pink-500/20 text-lg shadow-inner shrink-0">
+                        <i class="fa fa-robot"></i>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="font-bold text-white text-xs italic">Resumen de Jornada Automatizado</p>
+                        <p class="text-slate-400 text-[10px] leading-relaxed">Al concluir los encuentros del Domingo, presiona el botón de la IA. El sistema escaneará las estadísticas de la semana y redactará quiénes fueron tus jugadoras clave y líderes de pitcheo.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="p-4 bg-slate-950/60 border-t border-slate-800/80 flex justify-between items-center text-[10px]">
+            <span class="text-slate-500 font-bold uppercase tracking-wider">Soporte Técnico FV Digital © 2026</span>
+            <button onclick="closeTutorialModal()" class="bg-slate-800 hover:bg-slate-700 text-white font-black px-4 py-2 rounded-xl uppercase tracking-wider">
+                Entendido, Cerrar Guía
+            </button>
+        </div>
+    </div>
+</div>
 
     <!-- MODAL SEGURIDAD -->
     <div id="modalPassword" class="modal-bg hidden">
@@ -415,6 +580,51 @@
         localStorage.clear(); 
         window.location.href = 'index.html'; 
     }
+    // FUNCIONES DE CONTROL DE LA MEGAGUÍA DE MANAGERS
+function openTutorialModal() {
+    const modal = document.getElementById('tutorialModal');
+    modal.style.display = 'flex';
+    // Forzamos un micro-timeout para activar la transición suave de Tailwind
+    setTimeout(() => {
+        modal.classList.remove('opacity-0', 'hidden');
+        modal.classList.add('opacity-100');
+    }, 20);
+}
+
+function closeTutorialModal() {
+    const modal = document.getElementById('tutorialModal');
+    modal.classList.remove('opacity-100');
+    modal.classList.add('opacity-0');
+    // Esperamos a que termine la animación antes de ocultar el bloque
+    setTimeout(() => {
+        modal.style.display = 'none';
+    }, 300);
+}
+
+function switchTab(tabId) {
+    // 1. Ocultar todos los contenidos de las pestañas
+    const contents = document.querySelectorAll('.tab-content');
+    contents.forEach(content => content.classList.add('hidden'));
+
+    // 2. Mostrar el contenido de la pestaña seleccionada
+    document.getElementById(tabId).classList.remove('hidden');
+
+    // 3. Remover estilos activos de todos los botones de pestañas
+    const buttons = document.querySelectorAll('.tab-btn');
+    buttons.forEach(btn => {
+        btn.className = "tab-btn px-4 py-2 rounded-xl transition-all duration-200 text-slate-400 hover:text-slate-200";
+    });
+
+    // 4. Asignar estilo premium activo al botón presionado
+    const activeBtn = document.getElementById(`btn-${tabId}`);
+    if (tabId === 'tab-ia') {
+        // Estilo rosa futurista especial para la pestaña de la IA
+        activeBtn.className = "tab-btn px-4 py-2 rounded-xl transition-all duration-200 bg-pink-600 text-white font-bold italic";
+    } else {
+        // Estilo azul/indigo corporativo para las demás pestañas
+        activeBtn.className = "tab-btn px-4 py-2 rounded-xl transition-all duration-200 bg-indigo-600 text-white font-bold italic";
+    }
+}
 
     // Iniciar el sistema
     document.addEventListener('DOMContentLoaded', revisarSesion);

@@ -80,6 +80,20 @@ const Player = mongoose.model('Player', new mongoose.Schema({
     blq: { type: Number, default: 0 }
 }), 'players'); // <--- Coincide con tu carpeta 'players'
 
+// 1. DEFINICIÓN DEL MODELO DE FIANZAS (Nueva colección en MongoDB)
+const fianzaSchema = new mongoose.Schema({
+    folio: { type: String, unique: true, required: true },
+    teamName: { type: String, required: true },
+    liga: { type: String, required: true }, // easy_femenil, varonil, mixto
+    montoAbonado: { type: Number, required: true },
+    saldoRestante: { type: Number, required: true },
+    fechaHora: { type: String, required: true },
+    capturadoPor: { type: String, default: 'Javier Yocupicio' }
+});
+
+const Fianza = mongoose.model('Fianza', fianzaSchema);
+
+
 const Config = mongoose.model('Config', new mongoose.Schema({ 
     permitirAltas: Boolean 
 }), 'configs'); // <--- Coincide con tu carpeta 'configs'
@@ -105,6 +119,81 @@ const teamSchema = new mongoose.Schema({
 });
 
 // --- RUTAS ---
+
+app.post('/api/fianzas/registrar', async (req, res) => {
+    try {
+        const { teamName, liga, montoAbonado } = req.body;
+
+        if (!teamName || !liga || !montoAbonado) {
+            return res.status(400).json({ error: "Todos los campos son obligatorios." });
+        }
+
+        // Buscamos el último abono de este equipo para calcular cuánto le falta restando desde los $10,000 iniciales
+        const ultimoPago = await Fianza.findOne({ teamName, liga }).sort({ _id: -1 });
+        const saldoAnterior = ultimoPago ? ultimoPago.saldoRestante : 10000;
+        const nuevoSaldoRestante = saldoAnterior - Number(montoAbonado);
+
+        // Generamos un número de folio único incremental o aleatorio formal
+        const nuevoFolio = `L57-FN-${Math.floor(100000 + Math.random() * 900000)}`;
+
+        // Formateamos la fecha y hora actual de la transacción
+        const ahora = new Date();
+        const fechaHoraActual = ahora.toLocaleDateString('es-MX') + ' | ' + ahora.toLocaleTimeString('es-MX');
+
+        // Guardamos el documento en la carpeta (colección) Fianza
+        const nuevoAbono = new Fianza({
+            folio: nuevoFolio,
+            teamName,
+            liga,
+            montoAbonado: Number(montoAbonado),
+            saldoRestante: nuevoSaldoRestante,
+            fechaHora: fechaHoraActual
+        });
+
+        await nuevoAbono.save();
+
+        // Respondemos al Administrador con los datos listos para que pinte su PDF de inmediato
+        res.status(201).json({
+            success: true,
+            message: "Abono guardado en la base de datos con éxito.",
+            datosPago: nuevoAbono
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Error en el servidor al procesar el abono de fianza." });
+    }
+});
+
+// ==========================================
+// 3. RUTA PARA QUE EL MANAGER CONSULTE SU HISTORIAL
+// ==========================================
+app.get('/api/fianzas/historial', async (req, res) => {
+    try {
+        const { teamName, liga } = req.query;
+        // Busca todos los registros de la carpeta de fianzas que coincidan con el equipo
+        const historial = await Fianza.find({ teamName, liga }).sort({ _id: -1 });
+        res.json(historial);
+    } catch (error) {
+        res.status(500).json({ error: "Error al jalar los folios de la fianza." });
+    }
+});
+// NUEVA RUTA: Buscar abono de fianza por su Folio único
+app.get('/api/fianzas/buscar/:folio', async (req, res) => {
+    try {
+        const { folio } = req.params;
+        // Busca el folio exacto en la carpeta (colección) Fianza de MongoDB
+        const pago = await Fianza.findOne({ folio: folio.trim() });
+        
+        if (!pago) {
+            return res.status(404).json({ found: false, error: "El folio ingresado no existe en el sistema de la liga." });
+        }
+        
+        res.json({ found: true, pago });
+    } catch (error) {
+        res.status(500).json({ error: "Error interno al consultar el folio de la fianza." });
+    }
+});
 
 app.post('/api/login', async (req, res) => {
     try {

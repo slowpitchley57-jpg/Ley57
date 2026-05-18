@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Fianzas - ALV Sport Leagues</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #020617; min-height: 100vh; font-family: sans-serif; }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 text-slate-100">
+
+    <div class="max-w-4xl mx-auto space-y-6">
+        
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center border border-emerald-500/30">
+                    <i class="fa fa-wallet text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-black italic uppercase tracking-tight text-white">Rastreador Financiero</h1>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Validación de Folios y Recibos Oficiales</p>
+                </div>
+            </div>
+            <button onclick="location.href='index_post.html'" class="text-[10px] font-black uppercase bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-xl transition-all italic">
+                <i class="fa fa-arrow-left mr-1"></i> Panel
+            </button>
+        </div>
+
+        <div class="glass-panel p-6 rounded-3xl border border-slate-800 space-y-3">
+            <h2 class="text-xs font-black uppercase italic text-slate-300 tracking-wider">
+                <i class="fa fa-search text-emerald-400 mr-1"></i> Ingrese el folio del recibo de caja
+            </h2>
+            <form onsubmit="rastrearFolioFianza(event)" class="flex flex-col sm:flex-row gap-3">
+                <div class="relative flex-1">
+                    <i class="fa fa-barcode absolute left-4 top-3.5 text-slate-500 text-sm"></i>
+                    <input type="text" id="inputFolioBusqueda" placeholder="Ej: L57-FN-123456" required
+                        class="w-full bg-slate-950/60 border border-slate-800 rounded-xl py-3 pl-11 pr-4 text-xs font-mono text-emerald-400 placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition-colors uppercase">
+                </div>
+                <button type="submit" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black px-6 py-3 rounded-xl uppercase tracking-wider text-[10px] transition-all shadow-md flex items-center justify-center gap-2">
+                    <i class="fa fa-magnifying-glass text-xs"></i> Rastrear Transmisión
+                </button>
+            </form>
+        </div>
+
+        <div id="wrapperResultados" class="hidden space-y-6 animate-fade-in">
+            
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="glass-panel p-5 rounded-2xl border border-slate-800 text-center">
+                    <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Fondo Total Obligatorio</p>
+                    <p class="text-xl font-black text-white mt-1">$10,000.00</p>
+                    <span class="text-[8px] text-slate-400">Reglamento Interno Regular</span>
+                </div>
+                <div class="glass-panel p-5 rounded-2xl border border-slate-800 text-center">
+                    <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Monto Abonado en Folio</p>
+                    <p id="txtTotalAbonado" class="text-xl font-black text-emerald-400 mt-1">$0.00</p>
+                    <span class="text-[8px] text-emerald-500/80 font-bold uppercase tracking-wider">Ingreso de Caja Validado</span>
+                </div>
+                <div class="glass-panel p-5 rounded-2xl border border-slate-800 text-center">
+                    <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Saldo Restante de la Escuadra</p>
+                    <p id="txtSaldoRestante" class="text-xl font-black text-red-400 mt-1">$10,000.00</p>
+                    <span id="txtEstatusLiquidacion" class="text-[8px] text-red-500 font-bold uppercase tracking-wider">Cuenta Pendiente</span>
+                </div>
+            </div>
+
+            <div class="glass-panel rounded-3xl border border-slate-800 overflow-hidden">
+                <div class="p-4 bg-slate-900/50 border-b border-slate-800 flex items-center justify-between">
+                    <h2 class="text-xs font-black uppercase italic text-slate-300 tracking-wider flex items-center gap-2">
+                        <i class="fa fa-receipt text-blue-400"></i> Metadatos de Operación Registrada
+                    </h2>
+                    <span id="teamBadge" class="text-[9px] font-black bg-blue-600/20 text-blue-400 px-3 py-1 rounded-full uppercase tracking-wider">PROMAQ</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-[11px]">
+                        <thead>
+                            <tr class="bg-slate-950 text-slate-400 font-bold uppercase tracking-wider border-b border-slate-800">
+                                <th class="p-4">Folio de Recibo</th>
+                                <th class="p-4">Fecha y Hora</th>
+                                <th class="p-4 text-right">Monto Abonado</th>
+                                <th class="p-4 text-right">Saldo en Fecha</th>
+                                <th class="p-4 text-center">Validación</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaFianzasBody" class="divide-y divide-slate-800/60 text-slate-300">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+            
+        </div>
+
+    </div>
+
+    <script>
+        const API_URL = "https://tu-servidor-en-render.com/api"; // Cambia por tu URL real de backend
+
+        async function rastrearFolioFianza(event) {
+            event.preventDefault();
+            const folio = document.getElementById('inputFolioBusqueda').value.trim();
+
+            if(!folio) return;
+
+            try {
+                // Hacemos la consulta al nuevo endpoint pasándole el folio
+                const response = await fetch(`${API_URL}/fianzas/buscar/${folio}`);
+                const resultado = await response.json();
+
+                const wrapper = document.getElementById('wrapperResultados');
+
+                if (resultado.found) {
+                    const pago = resultado.pago;
+
+                    // Mostramos el contenedor oculto de resultados
+                    wrapper.classList.remove('hidden');
+
+                    // Seteamos las etiquetas y tarjetas superiores
+                    document.getElementById('teamBadge').textContent = `${pago.teamName} · ${pago.liga.toUpperCase()}`;
+                    document.getElementById('txtTotalAbonado').textContent = `$${pago.montoAbonado.toFixed(2)}`;
+                    document.getElementById('txtSaldoRestante').textContent = `$${pago.saldoRestante.toFixed(2)}`;
+
+                    // Validar estatus de liquidación total
+                    const est = document.getElementById('txtEstatusLiquidacion');
+                    if (pago.saldoRestante <= 0) {
+                        est.textContent = "Cuenta Liquidada";
+                        est.className = "text-[8px] text-emerald-400 font-bold uppercase tracking-wider";
+                    } else {
+                        est.textContent = "Cuenta Pendiente";
+                        est.className = "text-[8px] text-red-500 font-bold uppercase tracking-wider";
+                    }
+
+                    // Inyectamos la fila con los detalles del folio en la tabla
+                    const tbody = document.getElementById('tablaFianzasBody');
+                    tbody.innerHTML = `
+                        <tr class="bg-slate-900/20">
+                            <td class="p-4 font-mono text-blue-400 font-bold">${pago.folio}</td>
+                            <td class="p-4 text-slate-400">${pago.fechaHora}</td>
+                            <td class="p-4 text-right text-emerald-400 font-bold">+$${pago.montoAbonado.toFixed(2)}</td>
+                            <td class="p-4 text-right text-slate-400">$${pago.saldoRestante.toFixed(2)}</td>
+                            <td class="p-4 text-center">
+                                <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">
+                                    <i class="fa fa-check-double mr-1"></i> Autorizado por Admin
+                                </span>
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    wrapper.classList.add('hidden');
+                    alert(resultado.error || 'El folio no fue encontrado.');
+                }
+
+            } catch (error) {
+                console.error(error);
+                alert('Ocurrió un error crítico al conectar con el servidor de la liga.');
+            }
+        }
+    </script>
+</body>
+</html>

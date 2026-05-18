@@ -45,6 +45,9 @@
 
         <nav class="space-y-3 flex-1 overflow-y-auto pr-2 custom-scroll">
             <hr class="opacity-20 mb-4">
+            <button onclick="location.href='anotador_pro.html'" class="w-full text-left p-3 bg-indigo-600 rounded-xl font-bold text-xs flex items-center gap-3 shadow-lg">
+    <i class="fa fa-file-signature"></i> Hoja Anotación
+</button>
             <button onclick="location.href='alta_jugadores.html'" class="w-full text-left p-3 bg-indigo-600 rounded-xl font-bold text-xs flex items-center gap-3 shadow-lg"><i class="fa fa-users-cog"></i> Alta Maestra</button>
             <button onclick="toggleModal('modalEquipo')" class="w-full text-left p-3 bg-emerald-600 rounded-xl font-bold text-xs flex items-center gap-3 shadow-lg"><i class="fa fa-plus-circle"></i> Nuevo Equipo</button>
             <button onclick="toggleModal('modalRosters')" class="w-full text-left p-3 bg-amber-500 rounded-xl font-bold text-xs flex items-center gap-3 shadow-lg"><i class="fa fa-user-edit"></i> Roster / Stats Bat</button>
@@ -1427,8 +1430,110 @@ async function cargarEquiposPorLiga() {
         Swal.fire("Error", "No se pudieron cargar los equipos. Verifica la conexión con el servidor.", "error");
     }
 }
+// FUNCIÓN DEL ADMINISTRADOR PARA REGISTRAR EN MONGO Y CREAR EL PDF
+async function procesarCobroFianza() {
+    const ligaSeleccionada = document.getElementById('selectLigaAdmin').value; // Tu input de liga
+    const equipoSeleccionado = document.getElementById('selectEquipoAdmin').value; // Tu input de equipo
+    const monto = document.getElementById('inputMontoAbono').value.trim(); // Tu input de cantidad a abonar
 
-// Función principal para el botón
+    if (!ligaSeleccionada || !equipoSeleccionado || !monto) {
+        alert('Por favor, selecciona la liga, el equipo e ingresa el monto del abono.');
+        return;
+    }
+
+    try {
+        // 1. Mandamos el cobro a la base de datos
+        const response = await fetch('/api/fianzas/registrar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                liga: ligaSeleccionada,
+                teamName: equipoSeleccionado,
+                montoAbonado: monto
+            })
+        });
+
+        const resultado = await response.json();
+
+        if (resultado.success) {
+            alert(`¡Abono registrado! Folio generado: ${resultado.datosPago.folio}`);
+            
+            // 2. ENLACE AUTOMÁTICO: Disparamos tu generador de PDF pasándole los datos reales guardados en Mongo
+            generarFacturaPDFOficial(resultado.datosPago);
+            
+        } else {
+            alert('No se pudo registrar el pago: ' + resultado.error);
+        }
+
+    } catch (error) {
+        console.error(error);
+        alert('Error crítico de conexión al intentar guardar la fianza en el servidor.');
+    }
+}
+
+// TU GENERADOR DE PDF INTEGRADO CON LA RESPUESTA DE MONGO
+function generarFacturaPDFOficial(datos) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+
+    // Encabezado institucional de la Liga Ley 57 & ALV Sport
+    doc.setFillColor(15, 23, 42); 
+    doc.rect(0, 0, 210, 38, 'F');
+    doc.setFillColor(239, 68, 68); 
+    doc.rect(0, 38, 210, 2, 'F');
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.text("LIGA DE SLOW PITCH LEY 57 & ALV SPORT", 14, 16);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(156, 163, 175);
+    doc.text("Recibo Oficial de Control Financiero - Comprobante de Caja", 14, 23);
+    doc.text(`FOLIO DE CONTROL: ${datos.folio}`, 14, 30); // Usamos el folio real de Mongo
+
+    // Datos del abono estructurados en formato ejecutivo
+    doc.setTextColor(30, 41, 59);
+    doc.setFontSize(14);
+    doc.text("COMPROBANTE DE ABONO DE FIANZA", 14, 52);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    doc.text(`Fecha de Registro: ${datos.fechaHora}`, 14, 62);
+    doc.text(`Escuadra Deportiva: ${datos.teamName}`, 14, 70);
+    doc.text(`Categoría / Identificador: ${datos.liga.toUpperCase()}`, 14, 78);
+
+    // Tabla de balances monetarios
+    doc.autoTable({
+        startY: 86,
+        head: [['CONCEPTO OPERATIVO', 'MONTOS EN MONEDA NACIONAL']],
+        body: [
+            ['Fondo Obligatorio de Liga', '$10,000.00 MXN'],
+            ['Cantidad Abonada en esta Fecha', `$${datos.montoAbonado.toFixed(2)} MXN`],
+            ['Saldo Restante Pendiente', `$${datos.saldoRestante.toFixed(2)} MXN`]
+        ],
+        theme: 'grid',
+        headStyles: { fillColor: [15, 23, 42] }
+    });
+
+    // Sección formal para las firmas autorizadas de Javier Yocupicio
+    let currentY = doc.previousAutoTable.finalY + 35;
+    doc.setDrawColor(148, 163, 184);
+    doc.line(65, currentY, 145, currentY);
+    
+    currentY += 5;
+    doc.setFont("helvetica", "bold");
+    doc.text("Javier Yocupicio", 105, currentY, { align: "center" });
+    currentY += 4;
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(148, 163, 184);
+    doc.text("Director General - Encargado de Grupo Administrativo", 105, currentY, { align: "center" });
+
+    // Descarga automática del archivo firmado
+    doc.save(`Recibo_Fianza_${datos.folio}_${datos.teamName}.pdf`);
+}
+
+/* Función principal para el botón
 async function procesarPagoYFactura() {
     const selectorEquipo = document.getElementById('selEquipoFinanza');
     const equipoId = selectorEquipo.value;
@@ -1492,7 +1597,7 @@ async function procesarPagoYFactura() {
         console.error("Error:", error);
         Swal.fire("Error", "No se pudo registrar el pago: " + error.message, "error");
     }
-}
+}*/
     // Funciones de utilidad restantes heredadas
     function toggleModal(id) { document.getElementById(id).classList.toggle('active'); }
     function gestionarSesion() { const s = JSON.parse(localStorage.getItem('userLogueado')); if(s) document.getElementById('nombreUsuarioActivo').innerText = s.correo.split('@')[0].toUpperCase(); else window.location.href = 'index.html'; }
