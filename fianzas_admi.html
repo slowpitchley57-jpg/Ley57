@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control Financiero - Liga Ley 57</title>
+    <link rel="icon" type="image/png" href="alv_sport_logo.png.jpeg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        body { background-color: #020617; min-height: 100vh; font-family: sans-serif; }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 text-slate-100">
+
+    <div class="max-w-6xl mx-auto space-y-6">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-800 pb-4 gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-blue-600/20 text-blue-400 rounded-xl flex items-center justify-center border border-blue-500/30 shadow-inner">
+                    <i class="fa fa-vault text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black italic uppercase tracking-tight text-white">Consola de Caja Directiva</h1>
+                    <p class="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Administración de Fianzas · Hola Javier Yocupicio</p>
+                </div>
+            </div>
+            <button onclick="location.href='admin.html'" class="text-[10px] font-black uppercase bg-slate-800 hover:bg-slate-700 px-5 py-3 rounded-xl transition-all italic tracking-wider flex items-center gap-2 self-start sm:self-center">
+                <i class="fa fa-arrow-left"></i> Volver al Panel de Admin
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <div class="glass-panel p-6 rounded-3xl border border-slate-800 space-y-4 h-fit">
+                <h2 class="text-xs font-black uppercase italic text-emerald-400 tracking-wider flex items-center gap-2">
+                    <i class="fa fa-cash-register"></i> Ingresar Nuevo Abono
+                </h2>
+                <form id="registroAbonoForm" onsubmit="registrarAbonoAdmin(event)" class="space-y-3.5">
+                    <div>
+                        <label class="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-1">1. Seleccionar Categoría:</label>
+                        <select id="regLiga" onchange="actualizarEquiposAdmin()" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white outline-none focus:border-blue-500">
+                            <option value="">-- Elige la Liga --</option>
+                            <option value="femenil">Ley 57 Femenil</option>
+                            <option value="varonil">ALV Sport Varonil</option>
+                            <option value="easy_femenil">Easy Femenil</option>
+                            <option value="slow_mixto">Slow Mixto</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-1">2. Seleccionar Escuadra:</label>
+                        <select id="regEquipo" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white outline-none focus:border-blue-500">
+                            <option value="">-- Elige un Equipo --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-1">3. Folio del Recibo:</label>
+                        <input type="text" id="regFolio" placeholder="Ej: REC-928932" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono text-emerald-400 placeholder-slate-700 outline-none focus:border-emerald-500 uppercase">
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-1">4. Cantidad a Depositar ($):</label>
+                        <input type="number" id="regMonto" placeholder="Monto en pesos" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white outline-none focus:border-green-500">
+                    </div>
+                    <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black py-3 rounded-xl uppercase tracking-wider text-[10px] shadow-md transition-all pt-3.5">
+                        Procesar y Emitir Comprobante
+                    </button>
+                </form>
+            </div>
+
+            <div class="lg:col-span-2 space-y-6">
+                
+                <div class="glass-panel p-6 rounded-3xl border border-slate-800 space-y-4">
+                    <h2 class="text-xs font-black uppercase italic text-slate-300 tracking-wider">
+                        <i class="fa fa-sliders text-blue-400 mr-1"></i> Panel de Rastreo e Ingesta de Datos
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="space-y-1.5">
+                            <label class="text-[9px] font-black text-slate-500 uppercase tracking-wider">Buscar Folio Único:</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="searchFolio" placeholder="REC-928932" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-emerald-400 font-mono focus:outline-none focus:border-emerald-500 uppercase">
+                                <button onclick="buscarPorFolioAdmin()" class="bg-slate-800 hover:bg-slate-700 text-white font-black text-[10px] px-4 rounded-xl uppercase tracking-wider transition-colors">Buscar</button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="text-[9px] font-black text-slate-500 uppercase tracking-wider">Filtrar por Historial Completo:</label>
+                            <div class="flex gap-2">
+                                <select id="filterLiga" onchange="cargarEquiposFiltro()" class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none flex-1">
+                                    <option value="">Liga...</option>
+                                    <option value="femenil">Femenil</option>
+                                    <option value="varonil">Varonil</option>
+                                    <option value="easy_femenil">Easy</option>
+                                    <option value="slow_mixto">Mixto</option>
+                                </select>
+                                <select id="filterEquipo" class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none flex-1">
+                                    <option value="">Equipo...</option>
+                                </select>
+                                <button onclick="buscarHistorialEquipoAdmin()" class="bg-blue-600 hover:bg-blue-500 text-white font-black text-[10px] px-4 rounded-xl uppercase tracking-wider transition-colors">Filtrar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel rounded-3xl border border-slate-800 overflow-hidden">
+                    <div class="p-4 bg-slate-900/50 border-b border-slate-800 flex items-center justify-between">
+                        <h3 class="text-xs font-black uppercase italic text-slate-300 tracking-wider flex items-center gap-2">
+                            <i class="fa fa-list-check text-indigo-400"></i> Registro de Auditoría de Transacciones
+                        </h3>
+                        <span id="resultCount" class="text-[9px] font-black bg-slate-800 text-slate-400 px-2.5 py-0.5 rounded-full uppercase">0 Operaciones</span>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-[11px]">
+                            <thead>
+                                <tr class="bg-slate-950 text-slate-400 font-bold uppercase tracking-wider border-b border-slate-800">
+                                    <th class="p-4">Folio</th>
+                                    <th class="p-4">Equipo / Liga</th>
+                                    <th class="p-4">Fecha y Hora</th>
+                                    <th class="p-4 text-right">Abonado</th>
+                                    <th class="p-4 text-right">Saldo Restante</th>
+                                    <th class="p-4 text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaAdminBody" class="divide-y divide-slate-800/60 text-slate-300">
+                                <tr>
+                                    <td colspan="6" class="p-8 text-center text-slate-500 italic">Use los filtros superiores para desplegar las auditorías del servidor central.</td>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin + "/api";
+
+        // Mapeo de equipos simulado (Conéctalo aquí con tus funciones dinámicas reales de la app)
+        const dEquipo = {
+            femenil: ["ACABALADAS", "CAMPESINAS", "CACHORRAS"],
+            varonil: ["PROMAQ", "ALV TEAM", "MINEROS"],
+            easy_femenil: ["LOBAS DE LA H", "VIKINGS"],
+            slow_mixto: ["BLUE HEELERS", "LA PLEBADA"]
+        };
+
+        function actualizarEquiposAdmin() {
+            const liga = document.getElementById('regLiga').value;
+            const select = document.getElementById('regEquipo');
+            select.innerHTML = '<option value="">-- Elige un Equipo --</option>';
+            if(liga && dEquipo[liga]) {
+                dEquipo[liga].forEach(eq => {
+                    select.innerHTML += `<option value="${eq}">${eq}</option>`;
+                });
+            }
+        }
+
+        function cargarEquiposFiltro() {
+            const liga = document.getElementById('filterLiga').value;
+            const select = document.getElementById('filterEquipo');
+            select.innerHTML = '<option value="">Equipo...</option>';
+            if(liga && dEquipo[liga]) {
+                dEquipo[liga].forEach(eq => {
+                    select.innerHTML += `<option value="${eq}">${eq}</option>`;
+                });
+            }
+        }
+
+        // ACCIÓN A: ENVIAR EL ABONO A MONGO DESDE EL FORMULARIO INTEGRADO
+        async function registrarAbonoAdmin(event) {
+            event.preventDefault();
+            const liga = document.getElementById('regLiga').value;
+            const teamName = document.getElementById('regEquipo').value;
+            const folio = document.getElementById('regFolio').value.trim();
+            const montoAbonado = document.getElementById('regMonto').value.trim();
+
+            try {
+                const response = await fetch(`${API_URL}/fianzas/registrar`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ liga, teamName, folio, montoAbonado })
+                });
+                const resultado = await response.json();
+
+                if (resultado.success) {
+                    alert(`¡Pago de fianza insertado en MongoDB!\nFolio: ${resultado.datosPago.folio}`);
+                    generarFacturaPDFOficial(resultado.datosPago); // Descarga el comprobante
+                    document.getElementById('registroAbonoForm').reset();
+                } else {
+                    alert('Error en el ingreso de caja: ' + resultado.error);
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Error crítico de comunicación con el clúster de base de datos.');
+            }
+        }
+
+        // ACCIÓN B: BUSCAR UN SOLO FOLIO MANUAL DIRECTO
+        async function buscarPorFolioAdmin() {
+            const folio = document.getElementById('searchFolio').value.trim();
+            if(!folio) return alert('Escriba un folio antes de auditar.');
+
+            try {
+                const response = await fetch(`${API_URL}/fianzas/buscar/${encodeURIComponent(folio)}`);
+                if (!response.ok) return alert('El folio no arrojó coincidencias.');
+
+                const resultado = await response.json();
+                if(resultado.found) {
+                    pintarFilasAuditoria([resultado.pago]);
+                }
+            } catch (error) {
+                alert('Error al jalar la información del folio.');
+            }
+        }
+
+        // ACCIÓN C: CONSULTAR EL HISTORIAL COMPLETO DE UN EQUIPO
+        async function buscarHistorialEquipoAdmin() {
+            const liga = document.getElementById('filterLiga').value;
+            const equipo = document.getElementById('filterEquipo').value;
+
+            if(!liga || !equipo) return alert('Seleccione la liga y el equipo para auditar.');
+
+            try {
+                const response = await fetch(`${API_URL}/fianzas/historial?teamName=${encodeURIComponent(equipo)}&liga=${liga}`);
+                const abonos = await response.json();
+                pintarFilasAuditoria(abonos);
+            } catch (error) {
+                alert('Error al conectar con la base de datos de auditorías.');
+            }
+        }
+
+        // RENDERIZAR FILAS EN LA TABLA DE AUDITORÍA
+        function pintarFilasAuditoria(lista) {
+            const tbody = document.getElementById('tablaAdminBody');
+            document.getElementById('resultCount').textContent = `${lista.length} Operaciones`;
+            tbody.innerHTML = "";
+
+            if(lista.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-500 italic">No se encontraron folios registrados bajo este criterio.</td></tr>`;
+                return;
+            }
+
+            lista.forEach(pago => {
+                const fila = document.createElement('tr');
+                fila.className = "hover:bg-slate-900/30 transition-colors";
+                fila.innerHTML = `
+                    <td class="p-4 font-mono font-bold text-blue-400 uppercase">${pago.folio}</td>
+                    <td class="p-4"><p class="font-bold text-slate-200">${pago.teamName}</p><p class="text-[9px] text-slate-500 uppercase">${pago.liga}</p></td>
+                    <td class="p-4 text-slate-400">${pago.fechaHora}</td>
+                    <td class="p-4 text-right text-emerald-400 font-bold">+$${Number(pago.montoAbonado).toFixed(2)}</td>
+                    <td class="p-4 text-right text-slate-400">$${Number(pago.saldoRestante).toFixed(2)}</td>
+                    <td class="p-4 text-center">
+                        <button onclick='reimprimirPDF(${JSON.stringify(pago)})' class="bg-slate-800 hover:bg-red-600/30 text-slate-300 hover:text-red-400 border border-slate-700 hover:border-red-500/30 text-[9px] font-black uppercase px-3 py-1.5 rounded-lg transition-all flex items-center gap-1 mx-auto">
+                            <i class="fa fa-print"></i> Duplicado
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(fila);
+            });
+        }
+
+        function reimprimirPDF(pago) {
+            alert(`Re-generando duplicado oficial del Folio: ${pago.folio}`);
+            generarFacturaPDFOficial(pago);
+        }
+
+        // GENERADOR OFICIAL COMPARTIDO DE RECIBOS PDF
+        function generarFacturaPDFOficial(datos) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+
+            if (typeof doc.autoTable !== 'function' && typeof window.jspdfAutotable === 'function') {
+                window.jspdfAutotable(doc);
+            } else if (typeof doc.autoTable !== 'function' && window.jsPDF && window.jsPDF.API && typeof window.jsPDF.API.autoTable === 'function') {
+                doc.autoTable = window.jsPDF.API.autoTable;
+            }
+
+            // Encabezado Institucional
+            doc.setFillColor(15, 23, 42); doc.rect(0, 0, 210, 38, 'F');
+            doc.setFillColor(239, 68, 68); doc.rect(0, 38, 210, 2, 'F');
+
+            doc.setTextColor(255, 255, 255);
+            doc.setFont("helvetica", "bold"); doc.setFontSize(18);
+            doc.text("LIGA DE SLOW PITCH LEY 57 & ALV SPORT", 14, 16);
+            
+            doc.setFontSize(10); doc.setTextColor(156, 163, 175);
+            doc.text("Recibo Oficial de Control Financiero - Comprobante de Caja", 14, 23);
+            doc.text(`FOLIO DE CONTROL: ${datos.folio}`, 14, 30); 
+
+            doc.setTextColor(30, 41, 59); doc.setFontSize(14);
+            doc.text("COMPROBANTE DE ABONO DE FIANZA", 14, 52);
+
+            doc.setFont("helvetica", "normal"); doc.setFontSize(11);
+            doc.text(`Fecha de Registro: ${datos.fechaHora}`, 14, 62);
+            doc.text(`Escuadra Deportiva: ${datos.teamName}`, 14, 70);
+            doc.text(`Categoría / Identificador: ${datos.liga.toUpperCase()}`, 14, 78);
+
+            doc.autoTable({
+                startY: 86,
+                head: [['CONCEPTO OPERATIVO', 'MONTOS EN MONEDA NACIONAL']],
+                body: [
+                    ['Fondo Obligatorio de Liga', '$10,000.00 MXN'],
+                    ['Cantidad Abonada en esta Fecha', `$${Number(datos.montoAbonado).toFixed(2)} MXN`],
+                    ['Saldo Restante Pendiente', `$${Number(datos.saldoRestante).toFixed(2)} MXN`]
+                ],
+                theme: 'grid',
+                headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255] }
+            });
+
+            let finalYXT = 120;
+            if (doc.autoTable && doc.autoTable.previous && doc.autoTable.previous.finalY) {
+                finalYXT = doc.autoTable.previous.finalY;
+            } else if (doc.lastAutoTable && doc.lastAutoTable.finalY) {
+                finalYXT = doc.lastAutoTable.finalY;
+            }
+
+            let currentY = finalYXT + 35;
+            doc.setDrawColor(148, 163, 184); doc.line(65, currentY, 145, currentY);
+            
+            currentY += 5; doc.setFont("helvetica", "bold");
+            doc.text("Javier Yocupicio", 105, currentY, { align: "center" });
+            currentY += 4; doc.setFont("helvetica", "normal"); doc.setTextColor(148, 163, 184);
+            doc.text("Director General - Encargado de Grupo Administrativo", 105, currentY, { align: "center" });
+
+            doc.save(`Recibo_Fianza_${datos.folio}_${datos.teamName.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`);
+        }
+    </script>
+</body>
+</html>
