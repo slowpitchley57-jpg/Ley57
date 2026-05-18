@@ -6,6 +6,7 @@ const app = express();
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
+const router = express.Router();
 
 // --- CONFIGURACIÓN DE CORS (UNIFICADA) ---
 app.use(cors()); // Esto permite conexiones desde cualquier origen, ideal para arreglar errores de acceso
@@ -80,19 +81,17 @@ const Player = mongoose.model('Player', new mongoose.Schema({
     blq: { type: Number, default: 0 }
 }), 'players'); // <--- Coincide con tu carpeta 'players'
 
-// 1. DEFINICIÓN DEL MODELO DE FIANZAS (Nueva colección en MongoDB)
-const fianzaSchema = new mongoose.Schema({
-    folio: { type: String, unique: true, required: true },
+// 1. MODELO DE DATOS: Colección Independiente de Fianzas
+const FianzaSchema = new mongoose.Schema({
+    folio: { type: String, required: true, unique: true, uppercase: true },
+    liga: { type: String, required: true },
     teamName: { type: String, required: true },
-    liga: { type: String, required: true }, // easy_femenil, varonil, mixto
     montoAbonado: { type: Number, required: true },
     saldoRestante: { type: Number, required: true },
-    fechaHora: { type: String, required: true },
-    capturadoPor: { type: String, default: 'Javier Yocupicio' }
+    fechaHora: { type: Date, default: Date.now }
 });
 
-const Fianza = mongoose.model('Fianza', fianzaSchema);
-
+const Fianza = mongoose.model('Fianza', FianzaSchema);
 
 const Config = mongoose.model('Config', new mongoose.Schema({ 
     permitirAltas: Boolean 
@@ -119,87 +118,94 @@ const teamSchema = new mongoose.Schema({
 });
 
 // --- RUTAS ---
-
-app.post('/api/fianzas/registrar', async (req, res) => {
+// A: Registrar Abono y Calcular automáticamente lo que falta
+router.post('/registrar', async (req, res) => {
     try {
-        const { teamName, liga, montoAbonado, folio } = req.body;
+        const { liga, teamName, montoAbonado, autoFolio } = req.body;
+        let { folio } = req.body;
 
-        if (!teamName || !liga || !montoAbonado) {
-            return res.status(400).json({ error: "Todos los campos son obligatorios." });
+        if (!liga || !teamName || !montoAbonado) {
+            return res.status(400).json({ success: false, error: 'Faltan campos requeridos.' });
         }
 
-        // Buscamos el último abono de este equipo para calcular cuánto le falta restando desde los $10,000 iniciales
-        const ultimoPago = await Fianza.findOne({ teamName, liga }).sort({ _id: -1 });
-        const saldoAnterior = ultimoPago ? ultimoPago.saldoRestante : 10000;
-        const nuevoSaldoRestante = saldoAnterior - Number(montoAbonado);
+        // Generación de Folio Automático si aplica
+        if (autoFolio) {
+            const aleatorio = Math.floor(100000 + Math.random() * 900000);
+            folio = `REC-${aleatorio}`;
+        }
 
-        // Generamos un número de folio único incremental o aleatorio formal
-        const nuevoFolio = `L57-FN-${Math.floor(100000 + Math.random() * 900000)}`;
+        // Validar si el folio ya existe para evitar colisiones
+        const existeFolio = await Fianza.findOne({ folio: folio.toUpperCase() });
+        if (existeFolio) {
+            return res.status(400).json({ success: false, error: 'El número de folio ya se encuentra registrado.' });
+        }
 
-        // Formateamos la fecha y hora actual de la transacción
-        const ahora = new Date();
-        const fechaHoraActual = ahora.toLocaleDateString('es-MX') + ' | ' + ahora.toLocaleTimeString('es-MX');
+        // Calcular cuánto ha pagado este equipo históricamente en esta liga
+        const historialPagos = await Fianza.find({ liga, teamName });
+        const totalAbonadoPrevio = historialPagos.reduce((acc, pago) => acc + pago.montoAbonado, 0);
 
-        // Guardamos el documento en la carpeta (colección) Fianza
-       const nuevoAbono = new Fianza({
-    folio: folio.trim(), // Usa el tuyo (REC-928932)
-    teamName,
-    liga,
-    montoAbonado: Number(montoAbonado),
-    saldoRestante: nuevoSaldoRestante,
-    fechaHora: fechaHoraActual
+        // Fianza total base: $10,000
+        const fianzaBase = 10000;
+        const nuevoSaldoRestante = fianzaBase - (totalAbonadoPrevio + parseFloat(montoAbonado));
+
+        // Crear registro en MongoDB
+        const nuevoPago = new Fianza({
+            folio: folio.toUpperCase(),
+            liga,
+            teamName,
+            montoAbonado: parseFloat(montoAbonado),
+            saldoRestante: nuevoSaldoRestante < 0 ? 0 : nuevoSaldoRestante // Evitar números negativos
         });
 
-        await nuevoAbono.save();
+        await nuevoPago.save();
 
-        // Respondemos al Administrador con los datos listos para que pinte su PDF de inmediato
-        res.status(201).json({
+        res.json({
             success: true,
-            message: "Abono guardado en la base de datos con éxito.",
-            datosPago: nuevoAbono
+            datosPago: nuevoPago
         });
 
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Error en el servidor al procesar el abono de fianza." });
+        console.error("Error en caja fianza:", error);
+        res.status(500).json({ success: false, error: 'Error en base de datos al computar transacción.' });
     }
 });
 
-// ==========================================
-// 3. RUTA PARA QUE EL MANAGER CONSULTE SU HISTORIAL
-// ==========================================
-app.get('/api/fianzas/historial', async (req, res) => {
+// B: Rastrear / Buscar cualquier Folio Único sin importar estructura
+router.get('/buscar/:folio', async (req, res) => {
+    try {
+        const folioBusqueda = req.params.folio.toUpperCase();
+        const pago = await Fianza.findOne({ folio: folioBusqueda });
+
+        if (!pago) {
+            return res.status(404).json({ success: false, error: 'Folio no encontrado en el sistema contable.' });
+        }
+
+        res.json({ success: true, pago });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Error al consultar folio.' });
+    }
+});
+
+// C: Consultar Historial Completo de un Equipo
+router.get('/historial', async (req, res) => {
     try {
         const { teamName, liga } = req.query;
-        // Busca todos los registros de la carpeta de fianzas que coincidan con el equipo
-        const historial = await Fianza.find({ teamName, liga }).sort({ _id: -1 });
-        res.json(historial);
+        if (!teamName || !liga) {
+            return res.status(400).json({ success: false, error: 'Parámetros insuficientes.' });
+        }
+
+        const historial = await Fianza.find({ teamName, liga }).sort({ fechaHora: -1 });
+        res.json({ success: true, historial });
     } catch (error) {
-        res.status(500).json({ error: "Error al jalar los folios de la fianza." });
+        res.status(500).json({ success: false, error: 'Error al consultar historial.' });
     }
 });
 
-// BUSCADOR GENERAL DE FIANZAS POR FOLIO (Cualquier formato)
-app.get('/api/fianzas/buscar/:folio', async (req, res) => {
-    try {
-        // .trim() elimina espacios y .toUpperCase() asegura que no falle por mayúsculas/minúsculas
-        const folioBusqueda = req.params.folio.trim();
-        
-        // Buscamos en la colección Fianza de MongoDB
-        const pago = await Fianza.findOne({ 
-            folio: { $regex: new RegExp("^" + folioBusqueda + "$", "i") } 
-        });
-        
-        if (!pago) {
-            return res.status(404).json({ found: false, error: "El folio ingresado no se encuentra registrado." });
-        }
-        
-        res.json({ found: true, pago });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Error en el servidor al consultar la fianza." });
-    }
-});
+// No olvides montar esta ruta en tu server.js principal usando: app.use('/api/fianzas', fianzaRoutes);
+module.exports = router;
+
+
+
 
 app.post('/api/login', async (req, res) => {
     try {

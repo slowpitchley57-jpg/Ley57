@@ -45,7 +45,7 @@
                 </h2>
                 <form id="registroAbonoForm" onsubmit="registrarAbonoAdmin(event)" class="space-y-3.5">
                     <div>
-                        <label class="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-1">1. Seleccionar Categoría:</label>
+                        <label class="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-1">1. Seleccionar Categoría (Liga):</label>
                         <select id="regLiga" onchange="actualizarEquiposAdmin()" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white outline-none focus:border-blue-500">
                             <option value="">-- Elige la Liga --</option>
                             <option value="femenil">Ley 57 Femenil</option>
@@ -60,13 +60,21 @@
                             <option value="">-- Elige un Equipo --</option>
                         </select>
                     </div>
+                    
                     <div>
-                        <label class="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-1">3. Folio del Recibo:</label>
-                        <input type="text" id="regFolio" placeholder="Ej: REC-928932" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono text-emerald-400 placeholder-slate-700 outline-none focus:border-emerald-500 uppercase">
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="text-[9px] font-black text-slate-400 uppercase tracking-wider">3. Folio del Recibo:</label>
+                            <label class="inline-flex items-center gap-1 cursor-pointer">
+                                <input type="checkbox" id="chkFolioAuto" checked onchange="toggleFolioManual()" class="rounded bg-slate-950 border-slate-800 text-blue-600 focus:ring-0 w-3 h-3">
+                                <span class="text-[9px] font-bold text-blue-400 uppercase">Automático</span>
+                            </label>
+                        </div>
+                        <input type="text" id="regFolio" placeholder="Auto-generado por sistema" disabled class="w-full bg-slate-900/50 border border-slate-800 rounded-xl p-3 text-xs font-mono text-emerald-500 placeholder-slate-600 outline-none focus:border-emerald-500 uppercase">
                     </div>
+
                     <div>
                         <label class="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-1">4. Cantidad a Depositar ($):</label>
-                        <input type="number" id="regMonto" placeholder="Monto en pesos" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white outline-none focus:border-green-500">
+                        <input type="number" id="regMonto" placeholder="Monto en pesos" required min="1" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white outline-none focus:border-green-500">
                     </div>
                     <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black py-3 rounded-xl uppercase tracking-wider text-[10px] shadow-md transition-all pt-3.5">
                         Procesar y Emitir Comprobante
@@ -85,7 +93,7 @@
                         <div class="space-y-1.5">
                             <label class="text-[9px] font-black text-slate-500 uppercase tracking-wider">Buscar Folio Único:</label>
                             <div class="flex gap-2">
-                                <input type="text" id="searchFolio" placeholder="REC-928932" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-emerald-400 font-mono focus:outline-none focus:border-emerald-500 uppercase">
+                                <input type="text" id="searchFolio" placeholder="REC-XXXXXX" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-emerald-400 font-mono focus:outline-none focus:border-emerald-500 uppercase">
                                 <button onclick="buscarPorFolioAdmin()" class="bg-slate-800 hover:bg-slate-700 text-white font-black text-[10px] px-4 rounded-xl uppercase tracking-wider transition-colors">Buscar</button>
                             </div>
                         </div>
@@ -132,7 +140,7 @@
                             <tbody id="tablaAdminBody" class="divide-y divide-slate-800/60 text-slate-300">
                                 <tr>
                                     <td colspan="6" class="p-8 text-center text-slate-500 italic">Use los filtros superiores para desplegar las auditorías del servidor central.</td>
-                                }
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -145,7 +153,7 @@
     <script>
         const API_URL = window.location.origin + "/api";
 
-        // Mapeo de equipos simulado (Conéctalo aquí con tus funciones dinámicas reales de la app)
+        // Mapeo de equipos sincronizado localmente (puedes poblarlo desde tu endpoint de equipos si lo requieres)
         const dEquipo = {
             femenil: ["ACABALADAS", "CAMPESINAS", "CACHORRAS"],
             varonil: ["PROMAQ", "ALV TEAM", "MINEROS"],
@@ -175,54 +183,78 @@
             }
         }
 
-        // ACCIÓN A: ENVIAR EL ABONO A MONGO DESDE EL FORMULARIO INTEGRADO
+        function toggleFolioManual() {
+            const isAuto = document.getElementById('chkFolioAuto').checked;
+            const inputFolio = document.getElementById('regFolio');
+            if (isAuto) {
+                inputFolio.disabled = true;
+                inputFolio.value = "";
+                inputFolio.placeholder = "Auto-generado por sistema";
+                inputFolio.classList.replace("bg-slate-950", "bg-slate-900/50");
+            } else {
+                inputFolio.disabled = false;
+                inputFolio.placeholder = "Ej: REC-1025";
+                inputFolio.classList.replace("bg-slate-900/50", "bg-slate-950");
+                inputFolio.focus();
+            }
+        }
+
+        // ACCIÓN A: ENVIAR EL ABONO A MONGO
         async function registrarAbonoAdmin(event) {
             event.preventDefault();
             const liga = document.getElementById('regLiga').value;
             const teamName = document.getElementById('regEquipo').value;
-            const folio = document.getElementById('regFolio').value.trim();
-            const montoAbonado = document.getElementById('regMonto').value.trim();
+            const isAuto = document.getElementById('chkFolioAuto').checked;
+            let folio = document.getElementById('regFolio').value.trim();
+            const montoAbonado = parseFloat(document.getElementById('regMonto').value);
+
+            if(!isAuto && !folio) {
+                return alert("Por favor, ingresa un número de folio manual.");
+            }
 
             try {
                 const response = await fetch(`${API_URL}/fianzas/registrar`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ liga, teamName, folio, montoAbonado })
+                    body: JSON.stringify({ liga, teamName, folio, montoAbonado, autoFolio: isAuto })
                 });
                 const resultado = await response.json();
 
                 if (resultado.success) {
-                    alert(`¡Pago de fianza insertado en MongoDB!\nFolio: ${resultado.datosPago.folio}`);
-                    generarFacturaPDFOficial(resultado.datosPago); // Descarga el comprobante
+                    alert(`¡Pago de fianza insertado con éxito!\nFolio: ${resultado.datosPago.folio}\nSaldo Restante: $${resultado.datosPago.saldoRestante}`);
+                    generarFacturaPDFOficial(resultado.datosPago); 
                     document.getElementById('registroAbonoForm').reset();
+                    toggleFolioManual(); // resetear estado por defecto
                 } else {
                     alert('Error en el ingreso de caja: ' + resultado.error);
                 }
             } catch (error) {
                 console.error(error);
-                alert('Error crítico de comunicación con el clúster de base de datos.');
+                alert('Error crítico de comunicación con el servidor central.');
             }
         }
 
-        // ACCIÓN B: BUSCAR UN SOLO FOLIO MANUAL DIRECTO
+        // ACCIÓN B: BUSCAR CUALQUIER FOLIO ÚNICO
         async function buscarPorFolioAdmin() {
             const folio = document.getElementById('searchFolio').value.trim();
             if(!folio) return alert('Escriba un folio antes de auditar.');
 
             try {
                 const response = await fetch(`${API_URL}/fianzas/buscar/${encodeURIComponent(folio)}`);
-                if (!response.ok) return alert('El folio no arrojó coincidencias.');
-
                 const resultado = await response.json();
-                if(resultado.found) {
+                
+                if(resultado.success && resultado.pago) {
                     pintarFilasAuditoria([resultado.pago]);
+                } else {
+                    alert(resultado.error || 'El folio no arrojó coincidencias.');
+                    pintarFilasAuditoria([]);
                 }
             } catch (error) {
                 alert('Error al jalar la información del folio.');
             }
         }
 
-        // ACCIÓN C: CONSULTAR EL HISTORIAL COMPLETO DE UN EQUIPO
+        // ACCIÓN C: CONSULTAR EL HISTORIAL COMPLETO
         async function buscarHistorialEquipoAdmin() {
             const liga = document.getElementById('filterLiga').value;
             const equipo = document.getElementById('filterEquipo').value;
@@ -231,14 +263,17 @@
 
             try {
                 const response = await fetch(`${API_URL}/fianzas/historial?teamName=${encodeURIComponent(equipo)}&liga=${liga}`);
-                const abonos = await response.json();
-                pintarFilasAuditoria(abonos);
+                const resultado = await response.json();
+                if(resultado.success) {
+                    pintarFilasAuditoria(resultado.historial);
+                } else {
+                    alert('Error en consulta: ' + resultado.error);
+                }
             } catch (error) {
                 alert('Error al conectar con la base de datos de auditorías.');
             }
         }
 
-        // RENDERIZAR FILAS EN LA TABLA DE AUDITORÍA
         function pintarFilasAuditoria(lista) {
             const tbody = document.getElementById('tablaAdminBody');
             document.getElementById('resultCount').textContent = `${lista.length} Operaciones`;
@@ -250,17 +285,18 @@
             }
 
             lista.forEach(pago => {
+                const dateParsed = new Date(pago.fechaHora).toLocaleString('es-MX');
                 const fila = document.createElement('tr');
                 fila.className = "hover:bg-slate-900/30 transition-colors";
                 fila.innerHTML = `
                     <td class="p-4 font-mono font-bold text-blue-400 uppercase">${pago.folio}</td>
                     <td class="p-4"><p class="font-bold text-slate-200">${pago.teamName}</p><p class="text-[9px] text-slate-500 uppercase">${pago.liga}</p></td>
-                    <td class="p-4 text-slate-400">${pago.fechaHora}</td>
+                    <td class="p-4 text-slate-400">${dateParsed}</td>
                     <td class="p-4 text-right text-emerald-400 font-bold">+$${Number(pago.montoAbonado).toFixed(2)}</td>
                     <td class="p-4 text-right text-slate-400">$${Number(pago.saldoRestante).toFixed(2)}</td>
                     <td class="p-4 text-center">
                         <button onclick='reimprimirPDF(${JSON.stringify(pago)})' class="bg-slate-800 hover:bg-red-600/30 text-slate-300 hover:text-red-400 border border-slate-700 hover:border-red-500/30 text-[9px] font-black uppercase px-3 py-1.5 rounded-lg transition-all flex items-center gap-1 mx-auto">
-                            <i class="fa fa-print"></i> Duplicado
+                            <i class="fa fa-print"></i> PDF
                         </button>
                     </td>
                 `;
@@ -269,69 +305,56 @@
         }
 
         function reimprimirPDF(pago) {
-            alert(`Re-generando duplicado oficial del Folio: ${pago.folio}`);
             generarFacturaPDFOficial(pago);
         }
 
-        // GENERADOR OFICIAL COMPARTIDO DE RECIBOS PDF
         function generarFacturaPDFOficial(datos) {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
 
-            if (typeof doc.autoTable !== 'function' && typeof window.jspdfAutotable === 'function') {
-                window.jspdfAutotable(doc);
-            } else if (typeof doc.autoTable !== 'function' && window.jsPDF && window.jsPDF.API && typeof window.jsPDF.API.autoTable === 'function') {
-                doc.autoTable = window.jsPDF.API.autoTable;
-            }
-
-            // Encabezado Institucional
+            // Encabezado institucional
             doc.setFillColor(15, 23, 42); doc.rect(0, 0, 210, 38, 'F');
             doc.setFillColor(239, 68, 68); doc.rect(0, 38, 210, 2, 'F');
 
             doc.setTextColor(255, 255, 255);
-            doc.setFont("helvetica", "bold"); doc.setFontSize(18);
+            doc.setFont("helvetica", "bold"); doc.setFontSize(16);
             doc.text("LIGA DE SLOW PITCH LEY 57 & ALV SPORT", 14, 16);
             
             doc.setFontSize(10); doc.setTextColor(156, 163, 175);
             doc.text("Recibo Oficial de Control Financiero - Comprobante de Caja", 14, 23);
             doc.text(`FOLIO DE CONTROL: ${datos.folio}`, 14, 30); 
 
-            doc.setTextColor(30, 41, 59); doc.setFontSize(14);
+            doc.setTextColor(30, 41, 59); doc.setFontSize(13);
             doc.text("COMPROBANTE DE ABONO DE FIANZA", 14, 52);
 
-            doc.setFont("helvetica", "normal"); doc.setFontSize(11);
-            doc.text(`Fecha de Registro: ${datos.fechaHora}`, 14, 62);
-            doc.text(`Escuadra Deportiva: ${datos.teamName}`, 14, 70);
-            doc.text(`Categoría / Identificador: ${datos.liga.toUpperCase()}`, 14, 78);
+            doc.setFont("helvetica", "normal"); doc.setFontSize(10);
+            doc.text(`Fecha de Registro: ${new Date(datos.fechaHora).toLocaleString('es-MX')}`, 14, 62);
+            doc.text(`Escuadra Deportiva: ${datos.teamName}`, 14, 68);
+            doc.text(`Categoría / Identificador: ${datos.liga.toUpperCase()}`, 14, 74);
 
             doc.autoTable({
-                startY: 86,
+                startY: 82,
                 head: [['CONCEPTO OPERATIVO', 'MONTOS EN MONEDA NACIONAL']],
                 body: [
-                    ['Fondo Obligatorio de Liga', '$10,000.00 MXN'],
-                    ['Cantidad Abonada en esta Fecha', `$${Number(datos.montoAbonado).toFixed(2)} MXN`],
+                    ['Fondo Obligatorio Total de Liga', '$10,000.00 MXN'],
+                    ['Cantidad Abonada en esta Transacción', `$${Number(datos.montoAbonado).toFixed(2)} MXN`],
                     ['Saldo Restante Pendiente', `$${Number(datos.saldoRestante).toFixed(2)} MXN`]
                 ],
                 theme: 'grid',
                 headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255] }
             });
 
-            let finalYXT = 120;
-            if (doc.autoTable && doc.autoTable.previous && doc.autoTable.previous.finalY) {
-                finalYXT = doc.autoTable.previous.finalY;
-            } else if (doc.lastAutoTable && doc.lastAutoTable.finalY) {
-                finalYXT = doc.lastAutoTable.finalY;
-            }
-
-            let currentY = finalYXT + 35;
-            doc.setDrawColor(148, 163, 184); doc.line(65, currentY, 145, currentY);
+            let finalY = doc.lastAutoTable.finalY || 120;
+            let currentY = finalY + 30;
             
-            currentY += 5; doc.setFont("helvetica", "bold");
+            doc.setDrawColor(148, 163, 184); doc.line(45, currentY, 165, currentY);
+            
+            currentY += 5; doc.setFont("helvetica", "bold"); doc.setTextColor(15, 23, 42);
             doc.text("Javier Yocupicio", 105, currentY, { align: "center" });
-            currentY += 4; doc.setFont("helvetica", "normal"); doc.setTextColor(148, 163, 184);
+            currentY += 4; doc.setFont("helvetica", "normal"); doc.setTextColor(100, 116, 139); doc.setFontSize(9);
             doc.text("Director General - Encargado de Grupo Administrativo", 105, currentY, { align: "center" });
 
-            doc.save(`Recibo_Fianza_${datos.folio}_${datos.teamName.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`);
+            doc.save(`Recibo_Fianza_${datos.folio}.pdf`);
         }
     </script>
 </body>
