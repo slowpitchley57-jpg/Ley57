@@ -13,6 +13,13 @@
             backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body class="p-4 md:p-8 text-slate-100">
@@ -41,7 +48,7 @@
             <form onsubmit="rastrearFolioFianza(event)" class="flex flex-col sm:flex-row gap-3">
                 <div class="relative flex-1">
                     <i class="fa fa-barcode absolute left-4 top-3.5 text-slate-500 text-sm"></i>
-                    <input type="text" id="inputFolioBusqueda" placeholder="Ej: L57-FN-123456" required
+                    <input type="text" id="inputFolioBusqueda" placeholder="Ej: REC-928932" required
                         class="w-full bg-slate-950/60 border border-slate-800 rounded-xl py-3 pl-11 pr-4 text-xs font-mono text-emerald-400 placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition-colors uppercase">
                 </div>
                 <button type="submit" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black px-6 py-3 rounded-xl uppercase tracking-wider text-[10px] transition-all shadow-md flex items-center justify-center gap-2">
@@ -75,7 +82,7 @@
                     <h2 class="text-xs font-black uppercase italic text-slate-300 tracking-wider flex items-center gap-2">
                         <i class="fa fa-receipt text-blue-400"></i> Metadatos de Operación Registrada
                     </h2>
-                    <span id="teamBadge" class="text-[9px] font-black bg-blue-600/20 text-blue-400 px-3 py-1 rounded-full uppercase tracking-wider">PROMAQ</span>
+                    <span id="teamBadge" class="text-[9px] font-black bg-blue-600/20 text-blue-400 px-3 py-1 rounded-full uppercase tracking-wider">---</span>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -100,33 +107,40 @@
     </div>
 
     <script>
-        const API_URL = "https://ley57.onrender.com/api"; // Cambia por tu URL real de backend
-
+        // Al usar '/api' relativo, el navegador automáticamente le pega el dominio de tu servidor Render
+        const API_URL = window.location.origin + "/api"; 
+const API = "https://ley57.onrender.com/api";
         async function rastrearFolioFianza(event) {
             event.preventDefault();
-            const folio = document.getElementById('inputFolioBusqueda').value.trim();
+            const folioInput = document.getElementById('inputFolioBusqueda').value.trim();
 
-            if(!folio) return;
+            if(!folioInput) return;
 
             try {
-                // Hacemos la consulta al nuevo endpoint pasándole el folio
-                const response = await fetch(`${API_URL}/fianzas/buscar/${folio}`);
-                const resultado = await response.json();
+                // Petición directa al servidor de Render usando el folio ingresado
+                const response = await fetch(`${API_URL}/fianzas/buscar/${encodeURIComponent(folioInput)}`);
+                
+                if (!response.ok) {
+                    const errData = await response.json();
+                    document.getElementById('wrapperResultados').classList.add('hidden');
+                    alert(errData.error || 'No se encontró el folio o hubo un problema en la respuesta.');
+                    return;
+                }
 
+                const resultado = await response.json();
                 const wrapper = document.getElementById('wrapperResultados');
 
-                if (resultado.found) {
+                if (resultado.found && resultado.pago) {
                     const pago = resultado.pago;
 
-                    // Mostramos el contenedor oculto de resultados
+                    // Desbloqueamos el panel visual
                     wrapper.classList.remove('hidden');
 
-                    // Seteamos las etiquetas y tarjetas superiores
+                    // Pintamos las tarjetas con los datos reales de la base de datos
                     document.getElementById('teamBadge').textContent = `${pago.teamName} · ${pago.liga.toUpperCase()}`;
-                    document.getElementById('txtTotalAbonado').textContent = `$${pago.montoAbonado.toFixed(2)}`;
-                    document.getElementById('txtSaldoRestante').textContent = `$${pago.saldoRestante.toFixed(2)}`;
+                    document.getElementById('txtTotalAbonado').textContent = `$${Number(pago.montoAbonado).toFixed(2)}`;
+                    document.getElementById('txtSaldoRestante').textContent = `$${Number(pago.saldoRestante).toFixed(2)}`;
 
-                    // Validar estatus de liquidación total
                     const est = document.getElementById('txtEstatusLiquidacion');
                     if (pago.saldoRestante <= 0) {
                         est.textContent = "Cuenta Liquidada";
@@ -136,29 +150,29 @@
                         est.className = "text-[8px] text-red-500 font-bold uppercase tracking-wider";
                     }
 
-                    // Inyectamos la fila con los detalles del folio en la tabla
+                    // Insertamos la información exacta en la sábana de la tabla
                     const tbody = document.getElementById('tablaFianzasBody');
                     tbody.innerHTML = `
                         <tr class="bg-slate-900/20">
-                            <td class="p-4 font-mono text-blue-400 font-bold">${pago.folio}</td>
+                            <td class="p-4 font-mono text-blue-400 font-bold uppercase">${pago.folio}</td>
                             <td class="p-4 text-slate-400">${pago.fechaHora}</td>
-                            <td class="p-4 text-right text-emerald-400 font-bold">+$${pago.montoAbonado.toFixed(2)}</td>
-                            <td class="p-4 text-right text-slate-400">$${pago.saldoRestante.toFixed(2)}</td>
+                            <td class="p-4 text-right text-emerald-400 font-bold">+$${Number(pago.montoAbonado).toFixed(2)}</td>
+                            <td class="p-4 text-right text-slate-400">$${Number(pago.saldoRestante).toFixed(2)}</td>
                             <td class="p-4 text-center">
                                 <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">
-                                    <i class="fa fa-check-double mr-1"></i> Autorizado por Admin
+                                    <i class="fa fa-check-double mr-1"></i> Verificado por Caja
                                 </span>
                             </td>
                         </tr>
                     `;
                 } else {
                     wrapper.classList.add('hidden');
-                    alert(resultado.error || 'El folio no fue encontrado.');
+                    alert('El folio no arrojó coincidencias en los archivos de la liga.');
                 }
 
             } catch (error) {
-                console.error(error);
-                alert('Ocurrió un error crítico al conectar con el servidor de la liga.');
+                console.error("Error detectado en el rastreo:", error);
+                alert('Error en el sistema: No se pudo conectar con el servidor central de Render. Revisa tu consola (F12).');
             }
         }
     </script>

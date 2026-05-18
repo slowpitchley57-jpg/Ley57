@@ -122,7 +122,7 @@ const teamSchema = new mongoose.Schema({
 
 app.post('/api/fianzas/registrar', async (req, res) => {
     try {
-        const { teamName, liga, montoAbonado } = req.body;
+        const { teamName, liga, montoAbonado, folio } = req.body;
 
         if (!teamName || !liga || !montoAbonado) {
             return res.status(400).json({ error: "Todos los campos son obligatorios." });
@@ -141,13 +141,13 @@ app.post('/api/fianzas/registrar', async (req, res) => {
         const fechaHoraActual = ahora.toLocaleDateString('es-MX') + ' | ' + ahora.toLocaleTimeString('es-MX');
 
         // Guardamos el documento en la carpeta (colección) Fianza
-        const nuevoAbono = new Fianza({
-            folio: nuevoFolio,
-            teamName,
-            liga,
-            montoAbonado: Number(montoAbonado),
-            saldoRestante: nuevoSaldoRestante,
-            fechaHora: fechaHoraActual
+       const nuevoAbono = new Fianza({
+    folio: folio.trim(), // Usa el tuyo (REC-928932)
+    teamName,
+    liga,
+    montoAbonado: Number(montoAbonado),
+    saldoRestante: nuevoSaldoRestante,
+    fechaHora: fechaHoraActual
         });
 
         await nuevoAbono.save();
@@ -178,20 +178,26 @@ app.get('/api/fianzas/historial', async (req, res) => {
         res.status(500).json({ error: "Error al jalar los folios de la fianza." });
     }
 });
-// NUEVA RUTA: Buscar abono de fianza por su Folio único
+
+// BUSCADOR GENERAL DE FIANZAS POR FOLIO (Cualquier formato)
 app.get('/api/fianzas/buscar/:folio', async (req, res) => {
     try {
-        const { folio } = req.params;
-        // Busca el folio exacto en la carpeta (colección) Fianza de MongoDB
-        const pago = await Fianza.findOne({ folio: folio.trim() });
+        // .trim() elimina espacios y .toUpperCase() asegura que no falle por mayúsculas/minúsculas
+        const folioBusqueda = req.params.folio.trim();
+        
+        // Buscamos en la colección Fianza de MongoDB
+        const pago = await Fianza.findOne({ 
+            folio: { $regex: new RegExp("^" + folioBusqueda + "$", "i") } 
+        });
         
         if (!pago) {
-            return res.status(404).json({ found: false, error: "El folio ingresado no existe en el sistema de la liga." });
+            return res.status(404).json({ found: false, error: "El folio ingresado no se encuentra registrado." });
         }
         
         res.json({ found: true, pago });
     } catch (error) {
-        res.status(500).json({ error: "Error interno al consultar el folio de la fianza." });
+        console.error(error);
+        res.status(500).json({ error: "Error en el servidor al consultar la fianza." });
     }
 });
 

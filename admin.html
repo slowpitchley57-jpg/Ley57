@@ -342,7 +342,7 @@
         
         <h2 class="text-3xl font-bold text-blue-400 mb-6 text-center">Gestión de Fianzas (Pagos)</h2>
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div class="flex flex-col">
                 <label class="text-white text-xs font-bold uppercase mb-2">1. Seleccionar Liga:</label>
                 <select id="selLigaFinanza" onchange="cargarEquiposPorLiga()" class="bg-slate-900 text-white p-3 rounded-xl border border-blue-500/50 outline-none focus:ring-2 ring-blue-500">
@@ -362,8 +362,13 @@
             </div>
 
             <div class="flex flex-col">
-                <label class="text-white text-xs font-bold uppercase mb-2">3. Monto a Abonar ($):</label>
-                <input type="number" id="montoInput" class="bg-slate-900 text-white p-3 rounded-xl border border-green-500/50 outline-none focus:ring-2 ring-green-500" placeholder="Ej: 2000">
+                <label class="text-white text-xs font-bold uppercase mb-2">3. Folio de Recibo:</label>
+                <input type="text" id="folioInput" class="bg-slate-900 text-white p-3 rounded-xl border border-blue-500/50 outline-none focus:ring-2 ring-blue-500 font-mono text-emerald-400 placeholder-slate-600 uppercase" placeholder="Ej: REC-928932" required>
+            </div>
+
+            <div class="flex flex-col">
+                <label class="text-white text-xs font-bold uppercase mb-2">4. Monto a Abonar ($):</label>
+                <input type="number" id="montoInput" class="bg-slate-900 text-white p-3 rounded-xl border border-green-500/50 outline-none focus:ring-2 ring-green-500" placeholder="Ej: 2000" required>
             </div>
         </div>
 
@@ -1430,19 +1435,21 @@ async function cargarEquiposPorLiga() {
         Swal.fire("Error", "No se pudieron cargar los equipos. Verifica la conexión con el servidor.", "error");
     }
 }
-// FUNCIÓN DEL ADMINISTRADOR PARA REGISTRAR EN MONGO Y CREAR EL PDF
-async function procesarCobroFianza() {
-    const ligaSeleccionada = document.getElementById('selectLigaAdmin').value; // Tu input de liga
-    const equipoSeleccionado = document.getElementById('selectEquipoAdmin').value; // Tu input de equipo
-    const monto = document.getElementById('inputMontoAbono').value.trim(); // Tu input de cantidad a abonar
+// FUNCIÓN DEL ADMINISTRADOR PARA REGISTRAR EN MONGO Y CREAR EL PDF (UNIFICADA Y CORREGIDA)
+async function procesarPagoYFactura() {
+    // 1. Sincronizamos los IDs correctos que usas en el Modal HTML
+    const ligaSeleccionada = document.getElementById('selLigaFinanza').value; 
+    const equipoSeleccionado = document.getElementById('selEquipoFinanza').value; 
+    const monto = document.getElementById('montoInput').value.trim(); 
 
+    // Validación de campos llenos
     if (!ligaSeleccionada || !equipoSeleccionado || !monto) {
         alert('Por favor, selecciona la liga, el equipo e ingresa el monto del abono.');
         return;
     }
 
     try {
-        // 1. Mandamos el cobro a la base de datos
+        // 2. Mandamos el cobro de forma asíncrona a la base de datos en Render
         const response = await fetch('/api/fianzas/registrar', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1456,27 +1463,37 @@ async function procesarCobroFianza() {
         const resultado = await response.json();
 
         if (resultado.success) {
-            alert(`¡Abono registrado! Folio generado: ${resultado.datosPago.folio}`);
+            alert(`¡Abono registrado en MongoDB con éxito!\nFolio guardado: ${resultado.datosPago.folio}`);
             
-            // 2. ENLACE AUTOMÁTICO: Disparamos tu generador de PDF pasándole los datos reales guardados en Mongo
+            // 3. ENLACE AUTOMÁTICO: Disparamos el PDF pasándole los datos reales que regresó el servidor
             generarFacturaPDFOficial(resultado.datosPago);
             
+            // Limpiamos el campo del monto e n el modal por seguridad
+            document.getElementById('montoInput').value = "";
+            
         } else {
-            alert('No se pudo registrar el pago: ' + resultado.error);
+            alert('No se pudo registrar el pago en la base de datos: ' + resultado.error);
         }
 
     } catch (error) {
-        console.error(error);
-        alert('Error crítico de conexión al intentar guardar la fianza en el servidor.');
+        console.error("Error al registrar fianza:", error);
+        alert('Error crítico de conexión: No se pudo comunicar con el servidor para guardar el pago.');
     }
 }
 
-// TU GENERADOR DE PDF INTEGRADO CON LA RESPUESTA DE MONGO
+// TU GENERADOR DE PDF INTEGRADO Y BLINDADO CONTRA ERRORES DE LIBRERÍA
 function generarFacturaPDFOficial(datos) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
 
-    // Encabezado institucional de la Liga Ley 57 & ALV Sport
+    // Enlace forzado del plugin autotable por seguridad de carga
+    if (typeof doc.autoTable !== 'function' && typeof window.jspdfAutotable === 'function') {
+        window.jspdfAutotable(doc);
+    } else if (typeof doc.autoTable !== 'function' && window.jsPDF && window.jsPDF.API && typeof window.jsPDF.API.autoTable === 'function') {
+        doc.autoTable = window.jsPDF.API.autoTable;
+    }
+
+    // 1. Encabezado institucional de la Liga Ley 57 & ALV Sport
     doc.setFillColor(15, 23, 42); 
     doc.rect(0, 0, 210, 38, 'F');
     doc.setFillColor(239, 68, 68); 
@@ -1490,9 +1507,9 @@ function generarFacturaPDFOficial(datos) {
     doc.setFontSize(10);
     doc.setTextColor(156, 163, 175);
     doc.text("Recibo Oficial de Control Financiero - Comprobante de Caja", 14, 23);
-    doc.text(`FOLIO DE CONTROL: ${datos.folio}`, 14, 30); // Usamos el folio real de Mongo
+    doc.text(`FOLIO DE CONTROL: ${datos.folio}`, 14, 30); 
 
-    // Datos del abono estructurados en formato ejecutivo
+    // 2. Datos del abono estructurados en formato ejecutivo
     doc.setTextColor(30, 41, 59);
     doc.setFontSize(14);
     doc.text("COMPROBANTE DE ABONO DE FIANZA", 14, 52);
@@ -1503,21 +1520,30 @@ function generarFacturaPDFOficial(datos) {
     doc.text(`Escuadra Deportiva: ${datos.teamName}`, 14, 70);
     doc.text(`Categoría / Identificador: ${datos.liga.toUpperCase()}`, 14, 78);
 
-    // Tabla de balances monetarios
+    // 3. Tabla de balances monetarios
     doc.autoTable({
         startY: 86,
         head: [['CONCEPTO OPERATIVO', 'MONTOS EN MONEDA NACIONAL']],
         body: [
             ['Fondo Obligatorio de Liga', '$10,000.00 MXN'],
-            ['Cantidad Abonada en esta Fecha', `$${datos.montoAbonado.toFixed(2)} MXN`],
-            ['Saldo Restante Pendiente', `$${datos.saldoRestante.toFixed(2)} MXN`]
+            ['Cantidad Abonada en esta Fecha', `$${Number(datos.montoAbonado).toFixed(2)} MXN`],
+            ['Saldo Restante Pendiente', `$${Number(datos.saldoRestante).toFixed(2)} MXN`]
         ],
         theme: 'grid',
-        headStyles: { fillColor: [15, 23, 42] }
+        headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255] },
+        bodyStyles: { fontSize: 10 }
     });
 
-    // Sección formal para las firmas autorizadas de Javier Yocupicio
-    let currentY = doc.previousAutoTable.finalY + 35;
+    // 4. Rescate seguro de la posición Y final de la tabla (Evita errores de versión)
+    let finalYXT = 120;
+    if (doc.autoTable && doc.autoTable.previous && doc.autoTable.previous.finalY) {
+        finalYXT = doc.autoTable.previous.finalY;
+    } else if (doc.lastAutoTable && doc.lastAutoTable.finalY) {
+        finalYXT = doc.lastAutoTable.finalY;
+    }
+
+    // 5. Apartado Formal para Firmas
+    let currentY = finalYXT + 35;
     doc.setDrawColor(148, 163, 184);
     doc.line(65, currentY, 145, currentY);
     
@@ -1529,8 +1555,8 @@ function generarFacturaPDFOficial(datos) {
     doc.setTextColor(148, 163, 184);
     doc.text("Director General - Encargado de Grupo Administrativo", 105, currentY, { align: "center" });
 
-    // Descarga automática del archivo firmado
-    doc.save(`Recibo_Fianza_${datos.folio}_${datos.teamName}.pdf`);
+    // Descarga automática del archivo
+    doc.save(`Recibo_Fianza_${datos.folio}_${datos.teamName.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`);
 }
 
 /* Función principal para el botón
