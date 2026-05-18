@@ -57,7 +57,7 @@
                     <div>
                         <label class="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-1">2. Seleccionar Escuadra:</label>
                         <select id="regEquipo" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white outline-none focus:border-blue-500">
-                            <option value="">-- Elige un Equipo --</option>
+                            <option value="">-- Elige la Liga primero --</option>
                         </select>
                     </div>
                     
@@ -151,36 +151,52 @@
     </div>
 
     <script>
-        const API_URL = window.location.origin + "/api";
+        // CONFIGURACIÓN DE TU API REAL EN RENDER
+        const API_URL = "https://ley57.onrender.com/api";
 
-        // Mapeo de equipos sincronizado localmente (puedes poblarlo desde tu endpoint de equipos si lo requieres)
-        const dEquipo = {
-            femenil: ["ACABALADAS", "CAMPESINAS", "CACHORRAS"],
-            varonil: ["PROMAQ", "ALV TEAM", "MINEROS"],
-            easy_femenil: ["LOBAS DE LA H", "VIKINGS"],
-            slow_mixto: ["BLUE HEELERS", "LA PLEBADA"]
-        };
-
-        function actualizarEquiposAdmin() {
-            const liga = document.getElementById('regLiga').value;
-            const select = document.getElementById('regEquipo');
-            select.innerHTML = '<option value="">-- Elige un Equipo --</option>';
-            if(liga && dEquipo[liga]) {
-                dEquipo[liga].forEach(eq => {
-                    select.innerHTML += `<option value="${eq}">${eq}</option>`;
-                });
+        // Función reutilizable para jalar los equipos reales del Servidor en Render
+        async function obtenerEquiposDesdeServidor(ligaSeleccionada, selectElement) {
+            if (!ligaSeleccionada) {
+                selectElement.innerHTML = '<option value="">-- Elige un Equipo --</option>';
+                return;
+            }
+            
+            selectElement.innerHTML = '<option value="">Cargando escuadras...</option>';
+            
+            try {
+                // Hacemos el fetch a tu ruta existente de equipos filtrados por liga
+                const response = await fetch(`${API_URL}/teams?liga=${ligaSeleccionada}`);
+                const equipos = await response.json();
+                
+                selectElement.innerHTML = '<option value="">-- Elige un Equipo --</option>';
+                
+                if (equipos && equipos.length > 0) {
+                    equipos.forEach(eq => {
+                        // Se usa eq.name o eq.teamName dependiendo de cómo esté guardado en tu base de datos de MongoDB
+                        const nombreEquipo = eq.name || eq.teamName;
+                        selectElement.innerHTML += `<option value="${nombreEquipo}">${nombreEquipo}</option>`;
+                    });
+                } else {
+                    selectElement.innerHTML = '<option value="">No se encontraron equipos</option>';
+                }
+            } catch (error) {
+                console.error("Error al sincronizar equipos de Render:", error);
+                selectElement.innerHTML = '<option value="">Error al cargar datos</option>';
             }
         }
 
-        function cargarEquiposFiltro() {
+        // Ejecución al cambiar categoría en el Formulario
+        async function actualizarEquiposAdmin() {
+            const liga = document.getElementById('regLiga').value;
+            const select = document.getElementById('regEquipo');
+            await obtenerEquiposDesdeServidor(liga, select);
+        }
+
+        // Ejecución al cambiar categoría en el Filtro de Rastreo
+        async function cargarEquiposFiltro() {
             const liga = document.getElementById('filterLiga').value;
             const select = document.getElementById('filterEquipo');
-            select.innerHTML = '<option value="">Equipo...</option>';
-            if(liga && dEquipo[liga]) {
-                dEquipo[liga].forEach(eq => {
-                    select.innerHTML += `<option value="${eq}">${eq}</option>`;
-                });
-            }
+            await obtenerEquiposDesdeServidor(liga, select);
         }
 
         function toggleFolioManual() {
@@ -199,7 +215,7 @@
             }
         }
 
-        // ACCIÓN A: ENVIAR EL ABONO A MONGO
+        // ENVIAR EL ABONO A MONGO (RENDER)
         async function registrarAbonoAdmin(event) {
             event.preventDefault();
             const liga = document.getElementById('regLiga').value;
@@ -224,17 +240,17 @@
                     alert(`¡Pago de fianza insertado con éxito!\nFolio: ${resultado.datosPago.folio}\nSaldo Restante: $${resultado.datosPago.saldoRestante}`);
                     generarFacturaPDFOficial(resultado.datosPago); 
                     document.getElementById('registroAbonoForm').reset();
-                    toggleFolioManual(); // resetear estado por defecto
+                    toggleFolioManual();
                 } else {
                     alert('Error en el ingreso de caja: ' + resultado.error);
                 }
             } catch (error) {
                 console.error(error);
-                alert('Error crítico de comunicación con el servidor central.');
+                alert('Error crítico de comunicación con el servidor central de Render.');
             }
         }
 
-        // ACCIÓN B: BUSCAR CUALQUIER FOLIO ÚNICO
+        // BUSCAR CUALQUIER FOLIO ÚNICO
         async function buscarPorFolioAdmin() {
             const folio = document.getElementById('searchFolio').value.trim();
             if(!folio) return alert('Escriba un folio antes de auditar.');
@@ -254,7 +270,7 @@
             }
         }
 
-        // ACCIÓN C: CONSULTAR EL HISTORIAL COMPLETO
+        // CONSULTAR EL HISTORIAL COMPLETO
         async function buscarHistorialEquipoAdmin() {
             const liga = document.getElementById('filterLiga').value;
             const equipo = document.getElementById('filterEquipo').value;
@@ -312,7 +328,6 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
 
-            // Encabezado institucional
             doc.setFillColor(15, 23, 42); doc.rect(0, 0, 210, 38, 'F');
             doc.setFillColor(239, 68, 68); doc.rect(0, 38, 210, 2, 'F');
 

@@ -57,11 +57,11 @@
             <h2 class="font-black uppercase text-xl italic text-blue-900 text-center mb-6 mt-4">Lineup: <span id="txtTeamSetup" class="text-red-600">--</span></h2>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div class="bg-slate-50 p-5 rounded-3xl border">
-                    <h3 class="text-[10px] font-black uppercase mb-4 text-slate-400 italic">Jugadoras Disponibles</h3>
+                    <h3 class="text-[10px] font-black uppercase mb-4 text-slate-400 italic">Jugadores Disponibles (Banca/Suplentes)</h3>
                     <div id="poolPlayers" class="space-y-2 max-h-96 overflow-y-auto pr-2"></div>
                 </div>
                 <div class="bg-blue-50 p-5 rounded-3xl border border-blue-100 shadow-inner">
-                    <h3 class="text-[10px] font-black uppercase mb-4 text-blue-900 italic">Orden al Bat (Confirmado)</h3>
+                    <h3 class="text-[10px] font-black uppercase mb-4 text-blue-900 italic">Orden al Bat (Confirmado/Editar)</h3>
                     <div id="confirmedLineup" class="space-y-2"></div>
                     <button onclick="confirmTeamLineup()" class="w-full mt-6 bg-blue-900 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Confirmar Bando</button>
                 </div>
@@ -69,7 +69,7 @@
         </div>
     </div>
 
-    <div id="fase3" class="hidden flex flex-col gap-6 p-4 md:p-6 animate-pop">
+    <div id="fase3" class="hidden flex flex-col gap-6 p-4 md:p-6">
         <header class="bg-blue-900 text-white p-6 rounded-[3rem] shadow-2xl flex flex-col xl:flex-row items-center gap-8 border-b-8 border-red-600">
             <div class="stadium-container">
                 <div id="f2" class="base-spot b-2"></div><div id="t2" class="runner-tag tag-2">--</div>
@@ -107,7 +107,7 @@
                         <option value="local">LINEUP LOCAL</option>
                         <option value="visita">LINEUP VISITANTE</option>
                     </select>
-                    <button onclick="finalizarPartido()" class="bg-emerald-500 text-white text-xs font-black px-8 py-4 rounded-2xl shadow-xl uppercase hover:bg-black transition-all">Finalizar Juego</button>
+                    <button onclick="finalizarPartido()" class="bg-emerald-500 text-white text-xs font-black px-8 py-4 rounded-2xl shadow-xl uppercase hover:bg-black transition-all">Finalizar e Imprimir en BD</button>
                     <button onclick="cancelarJuego()" class="bg-red-600 text-white text-xs font-black px-8 py-4 rounded-2xl shadow-xl uppercase hover:bg-slate-900 transition-all">Cancelar y Salir</button>
                 </div>
             </div>
@@ -143,73 +143,96 @@
                 <button onclick="record('C')" class="bg-red-100 text-red-600 p-4 rounded-2xl font-black text-[10px] border-2 border-red-200 uppercase italic">Carrera (C)</button>
                 <button onclick="ghostRunner()" class="bg-purple-100 text-purple-700 p-4 rounded-2xl font-black text-[10px] border-2 border-purple-200 uppercase italic">Fantasma (2da)</button>
             </div>
-            <button onclick="closeModal()" class="w-full mt-6 text-[10px] font-black text-slate-300 uppercase italic">Cerrar</button>
+            <button onclick="closeModal()" class="w-full mt-6 text-[10px] font-black text-slate-400 uppercase italic tracking-wider">Cerrar Ventana</button>
         </div>
     </div>
 
     <script>
         const API = "https://ley57.onrender.com/api";
-        let match = null; let rosters = { local: [], visita: [] };
+        let match = null; 
+        let rosters = { local: [], visita: [] };
         let lineups = { local: [], visita: [] };
         let sessionStats = {}; 
         let bases = [null, null, null]; 
         let score = { L: 0, V: 0 };
-        let outs = 0; let inning = 1; let totalInnings = 10;
+        let outs = 0; let inning = 1; let totalInnings = 7;
         let selectedAction = null;
 
-        // FASE 1
+        // FASE 1: CONTROLADORES
         async function fetchGames() {
             const liga = document.getElementById('selLiga').value;
+            if(!liga) return;
             const res = await fetch(`${API}/games?liga=${liga}&status=pendiente`);
             const data = await res.json();
-            // CORRECCIÓN: Mostrar fecha y hora para identificar bien el juego
-            document.getElementById('selJuego').innerHTML = data.map(g => `<option value="${g._id}" data-loc="${g.local}" data-vis="${g.visita}">${g.local} VS ${g.visita} (${g.fecha || ''} ${g.hora || ''})</option>`).join('');
+            document.getElementById('selJuego').innerHTML = data.map(g => `
+                <option value="${g._id}" data-loc="${g.local}" data-vis="${g.visita}">
+                    ${g.local} VS ${g.visita} (${g.fecha || 'Sin fecha'})
+                </option>`).join('');
+            if(data.length === 0) {
+                document.getElementById('selJuego').innerHTML = '<option value="">NO HAY JUEGOS PENDIENTES</option>';
+            }
         }
 
         async function startSetup() {
             const sel = document.getElementById('selJuego');
-            if(!sel.value) return alert("Selecciona un juego");
+            if(!sel.value) return alert("Por favor selecciona un juego válido.");
             const opt = sel.options[sel.selectedIndex];
-            match = { id: sel.value, local: opt.getAttribute('data-loc'), visita: opt.getAttribute('data-vis'), liga: document.getElementById('selLiga').value };
+            match = { 
+                id: sel.value, 
+                local: opt.getAttribute('data-loc'), 
+                visita: opt.getAttribute('data-vis'), 
+                liga: document.getElementById('selLiga').value 
+            };
             
+            // Cargar de forma automática los dos rosters en paralelo
             const [rL, rV] = await Promise.all([
                 fetch(`${API}/players?equipo=${encodeURIComponent(match.local)}`),
                 fetch(`${API}/players?equipo=${encodeURIComponent(match.visita)}`)
             ]);
-            rosters.local = await rL.json(); rosters.visita = await rV.json();
+            rosters.local = await rL.json(); 
+            rosters.visita = await rV.json();
             
             document.getElementById('fase1').classList.add('hidden');
             document.getElementById('fase2').classList.remove('hidden');
             setupTeamLineup('local');
         }
 
-        // --- FUNCIONES DE NAVEGACIÓN ---
-        function regresarAFase1() {
-            if(confirm("¿Seguro que quieres cambiar de juego? Se perderá el lineup actual.")) {
-                document.getElementById('fase2').classList.add('hidden');
-                document.getElementById('fase1').classList.remove('hidden');
-            }
-        }
+        // FASE 2: PRECARGA INTELIGENTE Y RELLENO AUTOMÁTICO
+        let currentSetup = 'local'; 
+        let tempLineup = [];
 
-        function cancelarJuego() {
-            if(confirm("¿Estás seguro de cancelar la anotación? Todo el progreso se perderá y volverás al inicio.")) {
-                location.reload();
-            }
-        }
-
-        // FASE 2
-        let currentSetup = 'local'; let tempLineup = [];
         function setupTeamLineup(team) {
-            currentSetup = team; tempLineup = [];
+            currentSetup = team;
             document.getElementById('txtTeamSetup').innerText = match[team].toUpperCase();
-            document.getElementById('poolPlayers').innerHTML = rosters[team].map(p => `<button onclick="addToLineup('${p._id}', '${p.nombre}')" class="w-full text-left p-3 bg-white border rounded-2xl font-bold uppercase text-[10px] hover:bg-blue-50">+ ${p.nombre}</button>`).join('');
+            
+            // AUTOMATIZACIÓN: Rellenamos por defecto el lineup con todo el roster para evitar añadir a mano
+            tempLineup = rosters[team].map((p, idx) => ({ _id: p._id, nombre: p.nombre, pos: (idx + 1).toString() }));
+            
+            // La banca inicialmente se queda vacía (pueden removerse del lineup y caer aquí)
+            updatePoolView();
             updateSetupView();
+        }
+
+        function updatePoolView() {
+            const pool = rosters[currentSetup].filter(p => !tempLineup.find(l => l._id === p._id));
+            document.getElementById('poolPlayers').innerHTML = pool.map(p => `
+                <button onclick="addToLineup('${p._id}', '${p.nombre}')" class="w-full text-left p-3 bg-white border rounded-2xl font-bold uppercase text-[10px] hover:bg-blue-50">
+                    <i class="fa fa-plus text-emerald-500 mr-2"></i> ${p.nombre}
+                </button>`).join('');
+            if(pool.length === 0) document.getElementById('poolPlayers').innerHTML = '<p class="text-xs text-slate-400 p-2">Todo el roster está integrado en el Lineup.</p>';
         }
 
         function addToLineup(id, nombre) {
             if(tempLineup.find(p => p._id === id)) return;
-            tempLineup.push({ _id: id, nombre, pos: '' });
+            tempLineup.push({ _id: id, nombre, pos: (tempLineup.length + 1).toString() });
             updateSetupView();
+            updatePoolView();
+        }
+
+        function removeLineup(id) {
+            tempLineup = tempLineup.filter(p => p._id !== id);
+            updateSetupView();
+            updatePoolView();
         }
 
         function updateSetupView() {
@@ -217,20 +240,25 @@
                 <div class="flex items-center gap-2 bg-white p-3 rounded-2xl shadow-sm border-l-8 border-blue-900">
                     <span class="font-black text-blue-900 w-4">${i+1}</span>
                     <span class="text-[10px] font-black uppercase flex-1">${p.nombre}</span>
-                    <input type="text" placeholder="POS" onchange="setPos('${p._id}', this.value)" class="w-10 border rounded text-[10px] text-center font-black" value="${p.pos}">
-                    <button onclick="removeLineup('${p._id}')" class="text-red-500 px-2 font-bold">×</button>
+                    <input type="text" placeholder="POS" onchange="setPos('${p._id}', this.value)" class="w-12 border rounded p-1 text-[10px] text-center font-black" value="${p.pos}">
+                    <button onclick="removeLineup('${p._id}')" class="text-red-500 px-2 font-black text-sm">×</button>
                 </div>`).join('');
         }
 
-        function setPos(id, val) { const p = tempLineup.find(x => x._id === id); if(p) p.pos = val; }
-        function removeLineup(id) { tempLineup = tempLineup.filter(p => p._id !== id); updateSetupView(); }
+        function setPos(id, val) { 
+            const p = tempLineup.find(x => x._id === id); 
+            if(p) p.pos = val; 
+        }
 
         function confirmTeamLineup() {
             lineups[currentSetup] = [...tempLineup];
             if(currentSetup === 'local') {
                 setupTeamLineup('visita');
             } else {
-                [...lineups.local, ...lineups.visita].forEach(p => sessionStats[p._id] = { ab: 0, h: 0, hr: 0, cels: Array(25).fill('') });
+                // Inicializar matriz vacía para las estadísticas de la sesión
+                [...lineups.local, ...lineups.visita].forEach(p => {
+                    sessionStats[p._id] = { ab: 0, h: 0, hr: 0, cels: Array(30).fill('') };
+                });
                 document.getElementById('fase2').classList.add('hidden');
                 document.getElementById('fase3').classList.remove('hidden');
                 document.getElementById('headerVs').innerText = `${match.local} VS ${match.visita}`;
@@ -238,7 +266,20 @@
             }
         }
 
-        // FASE 3
+        // RE-NAVEGACIÓN
+        function regresarAFase1() {
+            if(confirm("¿Seguro que deseas cambiar de juego? Se perderán las listas configuradas.")) {
+                document.getElementById('fase2').classList.add('hidden');
+                document.getElementById('fase1').classList.remove('hidden');
+            }
+        }
+        function cancelarJuego() {
+            if(confirm("¿Deseas cancelar la sesión? No se guardará nada en el servidor.")) {
+                location.reload();
+            }
+        }
+
+        // FASE 3: LÓGICA DE JUEGO Y REPRODUCCIÓN DE HOJA
         function renderSheet() {
             const bando = document.getElementById('switchView').value;
             const players = lineups[bando];
@@ -246,7 +287,7 @@
 
             document.getElementById('tableHeader').innerHTML = `
                 <th class="p-4 border-r w-12 text-slate-400">#</th>
-                <th class="p-4 border-r text-left w-64">JUGADORA</th>
+                <th class="p-4 border-r text-left w-64">JUGADOR / JUGADORA</th>
                 <th class="p-4 border-r w-12 text-red-600">POS</th>
                 ${Array.from({length: totalInnings}, (_, i) => `<th class="p-4 border-r w-14">${i+1}</th>`).join('')}
                 <th class="p-4 bg-blue-50 w-12 text-blue-900">VB</th>
@@ -273,16 +314,16 @@
 
         function realizarCambio(idAnterior, bando) {
             const banca = rosters[bando].filter(p => !lineups[bando].find(l => l._id === p._id));
-            if(banca.length === 0) return alert("Banca vacía.");
+            if(banca.length === 0) return alert("No hay jugadores en la banca para efectuar un cambio.");
             const lista = banca.map((p, i) => `${i+1}. ${p.nombre}`).join('\n');
-            const seleccion = prompt(`Cambio para ${lineups[bando].find(p=>p._id===idAnterior).nombre}:\n\n${lista}\n\nNúmero de jugadora que entra:`);
+            const seleccion = prompt(`Cambio para ${lineups[bando].find(p=>p._id===idAnterior).nombre}:\n\n${lista}\n\nEscribe el número del relevo:`);
             if(seleccion) {
                 const idx = parseInt(seleccion) - 1;
                 if(banca[idx]) {
                     const nueva = banca[idx];
                     const lineupIdx = lineups[bando].findIndex(p => p._id === idAnterior);
                     lineups[bando][lineupIdx] = { _id: nueva._id, nombre: nueva.nombre, pos: lineups[bando][lineupIdx].pos };
-                    if(!sessionStats[nueva._id]) sessionStats[nueva._id] = { ab: 0, h: 0, hr: 0, cels: Array(25).fill('') };
+                    if(!sessionStats[nueva._id]) sessionStats[nueva._id] = { ab: 0, h: 0, hr: 0, cels: Array(30).fill('') };
                     renderSheet();
                 }
             }
@@ -296,29 +337,46 @@
 
         function closeModal() { document.getElementById('actionModal').classList.add('hidden'); }
 
+        // ADMINISTRACIÓN DE BOTONES Y REGISTROS INTELIGENTES
         function record(tipo) {
             const { pid, inn } = selectedAction;
             const nombre = document.getElementById('batterTarget').innerText;
+            
             if(tipo === 'C') {
+                // Registra carrera anotada
                 sessionStats[pid].cels[inn] = sessionStats[pid].cels[inn] ? sessionStats[pid].cels[inn] + '/C' : 'C';
                 runScored();
             } else {
                 sessionStats[pid].cels[inn] = tipo;
                 if(['H','2B','3B','HR'].includes(tipo)) {
-                    sessionStats[pid].ab++; sessionStats[pid].h++;
+                    sessionStats[pid].ab++; 
+                    sessionStats[pid].h++;
                     if(tipo === 'HR') sessionStats[pid].hr++;
                     moverBases(tipo, nombre);
                 } else if(['OUT','K'].includes(tipo)) {
-                    sessionStats[pid].ab++; outs++;
-                    if(outs >= 3) { alert("CAMBIO DE INNING"); outs = 0; bases = [null,null,null]; inning++; }
-                } else { moverBases('H', nombre); }
+                    sessionStats[pid].ab++; 
+                    outs++;
+                    if(outs >= 3) { 
+                        alert("¡3 OUTS! Cambio de bando o Inning."); 
+                        outs = 0; 
+                        bases = [null, null, null]; 
+                        inning++; 
+                    }
+                } else { 
+                    // BB, E, FC avanzan corredores por defecto
+                    moverBases('H', nombre); 
+                }
             }
-            updateUI(); closeModal(); renderSheet();
+            updateUI(); 
+            closeModal(); 
+            renderSheet();
         }
 
         function ghostRunner() {
             const nombre = document.getElementById('batterTarget').innerText;
-            bases[1] = nombre; updateUI(); closeModal();
+            bases[1] = nombre; // Poner corredor fantasma directo en segunda base
+            updateUI(); 
+            closeModal();
         }
 
         function moverBases(tipo, nombre) {
@@ -332,8 +390,9 @@
                 bases.forEach(b => { if(b) runScored(); });
                 bases = [null, null, nombre];
             } else if (tipo === 'HR') {
-                let r = 1; bases.forEach(b => { if(b) r++; });
-                for(let i=0; i<r; i++) runScored();
+                let runs = 1; 
+                bases.forEach(b => { if(b) runs++; });
+                for(let i=0; i<runs; i++) runScored();
                 bases = [null, null, null];
             }
             updateUI();
@@ -354,31 +413,65 @@
             for(let i=0; i<3; i++) {
                 const spot = document.getElementById(`f${i+1}`);
                 const tag = document.getElementById(`t${i+1}`);
-                if(bases[i]) { spot.classList.add('on'); tag.innerText = bases[i].split(' ')[0]; }
-                else { spot.classList.remove('on'); }
+                if(bases[i]) { 
+                    spot.classList.add('on'); 
+                    tag.innerText = bases[i].split(' ')[0]; 
+                } else { 
+                    spot.classList.remove('on'); 
+                }
             }
         }
 
+        // GUARDADO DE EXTREMO A EXTREMO EN MONGO (SINCRONIZACIÓN TOTAL)
         async function finalizarPartido() {
-            if(!confirm("¿Finalizar encuentro?")) return;
-            for(let id in sessionStats) {
-                const s = sessionStats[id];
-                if(s.ab > 0) {
-                    const p = await (await fetch(`${API}/players/${id}`)).json();
-                    const nVB = (p.vb || 0)+s.ab, nH = (p.h || 0)+s.h;
-                    await fetch(`${API}/players/${id}`, {
-                        method: 'PUT',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ jj: (p.jj || 0)+1, vb: nVB, h: nH, hr: (p.hr || 0)+s.hr, avg: nVB > 0 ? nH/nVB : 0 })
-                    });
+            if(!confirm(`¿Finalizar el encuentro de forma definitiva?\nMarcador final: ${score.L} - ${score.V}`)) return;
+            
+            try {
+                // 1. Sincronizar estadísticas individuales de cada jugadora/jugador
+                for(let id in sessionStats) {
+                    const s = sessionStats[id];
+                    if(s.ab > 0) {
+                        const p = await (await fetch(`${API}/players/${id}`)).json();
+                        const nVB = (p.vb || 0) + s.ab;
+                        const nH = (p.h || 0) + s.h;
+                        
+                        await fetch(`${API}/players/${id}`, {
+                            method: 'PUT',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ 
+                                jj: (p.jj || 0) + 1, 
+                                vb: nVB, 
+                                h: nH, 
+                                hr: (p.hr || 0) + s.hr, 
+                                avg: nVB > 0 ? Number((nH / nVB).toFixed(3)) : 0 
+                            })
+                        });
+                    }
                 }
+                
+                // 2. Cambiar estatus de juego a 'finalizado' y estampar el score oficial
+                const ganador = score.L > score.V ? match.local : match.visita;
+                const perdedor = score.L > score.V ? match.visita : match.local;
+                
+                await fetch(`${API}/games/resultado`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ 
+                        id: match.id, 
+                        sL: score.L, 
+                        sV: score.V, 
+                        ganador, 
+                        perdedor, 
+                        status: "finalizado" 
+                    })
+                });
+                
+                alert("⚾ ¡Encuentro y estadísticas guardadas con éxito en Render/MongoDB! Volviendo al inicio."); 
+                location.reload();
+            } catch (err) {
+                console.error(err);
+                alert("Ocurrió un inconveniente al conectar con el servidor, reintenta.");
             }
-            await fetch(`${API}/games/resultado`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ id: match.id, sL: score.L, sV: score.V, ganador: score.L>score.V?match.local:match.visita, perdedor: score.L>score.V?match.visita:match.local, status: "finalizado" })
-            });
-            alert("Juego Guardado."); location.reload();
         }
     </script>
 </body>

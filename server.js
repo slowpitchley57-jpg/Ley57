@@ -8,6 +8,7 @@ const fs = require('fs');
 const path = require('path');
 const router = express.Router();
 
+
 // --- CONFIGURACIÓN DE CORS (UNIFICADA) ---
 app.use(cors()); // Esto permite conexiones desde cualquier origen, ideal para arreglar errores de acceso
 app.use(express.json());

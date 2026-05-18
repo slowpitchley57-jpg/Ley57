@@ -108,40 +108,33 @@
     </div>
 
     <script>
-        // Al usar '/api' relativo, el navegador automáticamente le pega el dominio de tu servidor Render
-        const API_URL = window.location.origin + "/api"; 
-const API = "https://ley57.onrender.com/api";
+        // URL UNIFICADA HACIA TU SERVIDOR CENTRAL EN RENDER
+        const API_URL = "https://ley57.onrender.com/api";
+
         async function rastrearFolioFianza(event) {
             event.preventDefault();
             const folioInput = document.getElementById('inputFolioBusqueda').value.trim();
+            const wrapper = document.getElementById('wrapperResultados');
 
             if(!folioInput) return;
 
             try {
-                // Petición directa al servidor de Render usando el folio ingresado
+                // Petición directa al servidor de Render con el folio sanitizado
                 const response = await fetch(`${API_URL}/fianzas/buscar/${encodeURIComponent(folioInput)}`);
-                
-                if (!response.ok) {
-                    const errData = await response.json();
-                    document.getElementById('wrapperResultados').classList.add('hidden');
-                    alert(errData.error || 'No se encontró el folio o hubo un problema en la respuesta.');
-                    return;
-                }
-
                 const resultado = await response.json();
-                const wrapper = document.getElementById('wrapperResultados');
-
-                if (resultado.found && resultado.pago) {
+                
+                if (resultado.success && resultado.pago) {
                     const pago = resultado.pago;
 
-                    // Desbloqueamos el panel visual
+                    // Mostrar contenedor principal de resultados
                     wrapper.classList.remove('hidden');
 
-                    // Pintamos las tarjetas con los datos reales de la base de datos
+                    // Mapear los datos numéricos y etiquetas principales
                     document.getElementById('teamBadge').textContent = `${pago.teamName} · ${pago.liga.toUpperCase()}`;
                     document.getElementById('txtTotalAbonado').textContent = `$${Number(pago.montoAbonado).toFixed(2)}`;
                     document.getElementById('txtSaldoRestante').textContent = `$${Number(pago.saldoRestante).toFixed(2)}`;
 
+                    // Control de visualización del estado de cuenta
                     const est = document.getElementById('txtEstatusLiquidacion');
                     if (pago.saldoRestante <= 0) {
                         est.textContent = "Cuenta Liquidada";
@@ -151,29 +144,40 @@ const API = "https://ley57.onrender.com/api";
                         est.className = "text-[8px] text-red-500 font-bold uppercase tracking-wider";
                     }
 
-                    // Insertamos la información exacta en la sábana de la tabla
+                    // Formatear la estampa de tiempo ISO a formato legible mexicano
+                    const fechaLegible = new Date(pago.fechaHora).toLocaleString('es-MX', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    });
+
+                    // Renderizar el renglón dentro de la tabla de metadatos
                     const tbody = document.getElementById('tablaFianzasBody');
                     tbody.innerHTML = `
                         <tr class="bg-slate-900/20">
-                            <td class="p-4 font-mono text-blue-400 font-bold uppercase">${pago.folio}</td>
-                            <td class="p-4 text-slate-400">${pago.fechaHora}</td>
+                            <td class="p-4 font-mono text-blue-400 font-bold uppercase tracking-wider">${pago.folio}</td>
+                            <td class="p-4 text-slate-400">${fechaLegible}</td>
                             <td class="p-4 text-right text-emerald-400 font-bold">+$${Number(pago.montoAbonado).toFixed(2)}</td>
                             <td class="p-4 text-right text-slate-400">$${Number(pago.saldoRestante).toFixed(2)}</td>
                             <td class="p-4 text-center">
-                                <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">
-                                    <i class="fa fa-check-double mr-1"></i> Verificado por Caja
+                                <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] px-2.5 py-1 rounded-md font-bold uppercase tracking-wider inline-flex items-center gap-1">
+                                    <i class="fa fa-check-double text-[10px]"></i> Oficios Validado
                                 </span>
                             </td>
                         </tr>
                     `;
                 } else {
                     wrapper.classList.add('hidden');
-                    alert('El folio no arrojó coincidencias en los archivos de la liga.');
+                    alert(resultado.error || 'El folio no arrojó coincidencias en los archivos contables de la liga.');
                 }
 
             } catch (error) {
                 console.error("Error detectado en el rastreo:", error);
-                alert('Error en el sistema: No se pudo conectar con el servidor central de Render. Revisa tu consola (F12).');
+                wrapper.classList.add('hidden');
+                alert('Error de conexión: No se pudo enlazar con el cluster financiero de Render. Inténtelo de nuevo más tarde.');
             }
         }
     </script>
