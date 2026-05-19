@@ -117,7 +117,7 @@ const teamSchema = new mongoose.Schema({
         fecha: { type: Date, default: Date.now }
     }]
 });
-
+app.use('/api/fianzas', router);
 // --- RUTAS ---
 // A: Registrar Abono y Calcular automáticamente lo que falta
 router.post('/registrar', async (req, res) => {
