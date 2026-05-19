@@ -4,17 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendario Oficial | LEY 57 & ALV SPORT</title>
-    <link rel="icon" type="image/jpeg" href="logoalvnegro.jpeg">
+    <link rel="icon" type="image/png" href="alv_sport_logo.png.jpeg">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Oswald:wght@500;700&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #020617; color: white; }
         .bg-carbon { background-image: radial-gradient(circle at top right, #1e293b, transparent), url('https://www.transparenttextures.com/patterns/carbon-fibre.png'); }
         .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
         .filter-btn.active { background-color: #dc2626; color: white; box-shadow: 0 0 20px rgba(220, 38, 38, 0.4); }
         
+        /* Variaciones de estados activos por liga */
+        .filter-btn[data-liga="femenil"].active { background-color: #db2777; box-shadow: 0 0 20px rgba(219, 39, 119, 0.4); }
+        .filter-btn[data-liga="varonil"].active { background-color: #2563eb; box-shadow: 0 0 20px rgba(37, 99, 235, 0.4); }
+        .filter-btn[data-liga="easy_femenil"].active { background-color: #059669; box-shadow: 0 0 20px rgba(5, 150, 105, 0.4); }
+        .filter-btn[data-liga="slow_mixto"].active { background-color: #7e22ce; box-shadow: 0 0 20px rgba(126, 34, 206, 0.4); }
+
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -40,17 +46,19 @@
 
     <div class="max-w-4xl mx-auto px-6 mt-10">
         <div class="text-center mb-8 reveal" style="animation-delay: 0.2s">
-            <h1 class="text-4xl font-black italic uppercase tracking-tighter mb-2">Calendario <span class="text-red-600">ALV</span></h1>
+            <h1 class="text-4xl font-black italic uppercase tracking-tighter mb-2 font-oswald">Calendario <span class="text-red-600">Oficial</span></h1>
             <div class="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-full">
                 <i class="fa fa-mouse-pointer text-red-500 text-[10px]"></i>
-                <p class="text-slate-300 text-[9px] font-black uppercase tracking-widest italic">Haz clic en un juego para ver detalles</p>
+                <p class="text-slate-300 text-[9px] font-black uppercase tracking-widest italic">Haz clic en un juego para ver detalles y estadísticas</p>
             </div>
         </div>
 
-        <div class="flex justify-center gap-3 mb-10 reveal" style="animation-delay: 0.3s">
-            <button onclick="cambiarFiltro('all')" class="filter-btn active px-5 py-2 rounded-xl text-[9px] font-black uppercase glass-card">Todos</button>
-            <button onclick="cambiarFiltro('femenil')" class="filter-btn px-5 py-2 rounded-xl text-[9px] font-black uppercase glass-card text-pink-400">Femenil</button>
-            <button onclick="cambiarFiltro('varonil')" class="filter-btn px-5 py-2 rounded-xl text-[9px] font-black uppercase glass-card text-blue-400">Varonil</button>
+        <div class="flex flex-wrap justify-center gap-2 mb-10 reveal" style="animation-delay: 0.3s">
+            <button onclick="cambiarFiltro('all')" class="filter-btn active px-4 py-2 rounded-xl text-[9px] font-black uppercase glass-card">Todos</button>
+            <button onclick="cambiarFiltro('femenil')" data-liga="femenil" class="filter-btn px-4 py-2 rounded-xl text-[9px] font-black uppercase glass-card text-pink-400">Ley 57 Fem</button>
+            <button onclick="cambiarFiltro('varonil')" data-liga="varonil" class="filter-btn px-4 py-2 rounded-xl text-[9px] font-black uppercase glass-card text-blue-400">ALV Sport Var</button>
+            <button onclick="cambiarFiltro('easy_femenil')" data-liga="easy_femenil" class="filter-btn px-4 py-2 rounded-xl text-[9px] font-black uppercase glass-card text-emerald-400">Easy Femenil</button>
+            <button onclick="cambiarFiltro('slow_mixto')" data-liga="slow_mixto" class="filter-btn px-4 py-2 rounded-xl text-[9px] font-black uppercase glass-card text-purple-400">Slow Mixto</button>
         </div>
 
         <section class="mb-12">
@@ -69,46 +77,47 @@
     </div>
 
     <div id="modalDetails" class="fixed inset-0 flex items-center justify-center p-6 bg-black/90">
-        <div class="glass-card w-full max-w-sm rounded-[2.5rem] p-8 border-red-600/30 relative modal-anim">
-            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-red-600 rounded-b-full shadow-[0_0_15px_#dc2626]"></div>
+        <div id="modalBorderTrack" class="glass-card w-full max-w-sm rounded-[2.5rem] p-8 border-red-600/30 relative modal-anim">
+            <div id="modalTopLine" class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-red-600 rounded-b-full shadow-[0_0_15px_#dc2626]"></div>
             <button onclick="closeModal()" class="absolute top-6 right-6 text-slate-500 hover:text-white"><i class="fa fa-times"></i></button>
             
             <div class="text-center">
-                <img src="logoalvnegro.jpeg" class="h-16 mx-auto mb-4">
-                <span id="mSub" class="text-[8px] font-black uppercase tracking-[0.4em] text-red-500"></span>
-                <h3 id="mTeams" class="text-xl font-black italic uppercase text-white mt-1 leading-tight"></h3>
+                <img src="logoalvnegro.jpeg" class="h-16 mx-auto mb-4 rounded-xl">
+                <span id="mSub" class="text-[8px] font-black uppercase tracking-[0.25em] text-red-500 block"></span>
+                <h3 id="mTeams" class="text-xl font-black italic uppercase text-white mt-1 leading-tight font-oswald"></h3>
                 
-                        <div id="mScoreBox" class="my-6 h-40 bg-black/40 rounded-3xl border border-white/10 overflow-hidden relative flex items-center justify-center">
-    <div id="vsAnimContainer" class="w-full h-full flex items-center justify-center">
-        <img src="gifProx.gif" alt="VS" class="w-full h-full object-cover">
-    </div>
-    
-    <p id="mScore" class="text-6xl font-black tracking-tighter text-white hidden drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"></p>
-</div>
+                <div id="mScoreBox" class="my-6 h-40 bg-black/40 rounded-3xl border border-white/10 overflow-hidden relative flex items-center justify-center">
+                    <div id="vsAnimContainer" class="w-full h-full flex items-center justify-center">
+                        <img src="gifProx.gif" alt="VS" class="w-full h-full object-cover">
+                    </div>
+                    <p id="mScore" class="text-6xl font-black tracking-tighter text-white hidden font-oswald drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"></p>
+                </div>
 
-                <div class="space-y-4 text-left border-t border-white/5 pt-4">
+                <div class="space-y-4 text-left border-t border-white/5 pt-4 mb-6">
                     <div class="flex items-center gap-3">
-                        <i class="fa fa-calendar-day text-red-600 text-xs"></i>
+                        <i class="fa fa-calendar-day text-slate-500 text-xs shadow-icon"></i>
                         <div>
                             <span class="block text-[7px] text-slate-500 uppercase font-bold">Fecha y Hora</span>
                             <p id="mInfo" class="text-[10px] font-black text-white uppercase"></p>
                         </div>
                     </div>
                     <div class="flex items-center gap-3">
-                        <i class="fa fa-location-dot text-red-600 text-xs"></i>
+                        <i class="fa fa-location-dot text-slate-500 text-xs shadow-icon"></i>
                         <div>
                             <span class="block text-[7px] text-slate-500 uppercase font-bold">Campo</span>
                             <p class="text-[10px] font-black text-white uppercase tracking-tighter">Unidad Deportiva Ley 57</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-3">
-                        <i class="fa fa-id-badge text-red-600 text-xs"></i>
+                        <i class="fa fa-id-badge text-slate-500 text-xs shadow-icon"></i>
                         <div>
                             <span class="block text-[7px] text-slate-500 uppercase font-bold">Ampayer Oficial</span>
                             <p id="mAmpayer" class="text-[10px] font-black text-white uppercase tracking-tighter"></p>
                         </div>
                     </div>
                 </div>
+
+                <div id="containerBotonLiga" class="w-full"></div>
             </div>
         </div>
     </div>
@@ -127,58 +136,64 @@
                 const res = await fetch(`${API}/games`);
                 juegosBase = await res.json();
                 renderizarJuegos();
-            } catch (e) { console.error("Error sincronizando"); }
+            } catch (e) { console.error("Error sincronizando encuentros:", e); }
         }
 
-       // Actualiza esta parte en tu script de juegos.html
-function cambiarFiltro(l) {
-    filtroLiga = l;
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    // Buscamos el botón por su atributo onclick o texto
-    event.target.classList.add('active');
-    renderizarJuegos();
-}
+        function cambiarFiltro(l) {
+            filtroLiga = l;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+            renderizarJuegos();
+        }
 
-function renderizarJuegos() {
-    const containerP = document.getElementById('containerPendientes');
-    const containerF = document.getElementById('containerFinalizados');
-    containerP.innerHTML = ''; containerF.innerHTML = '';
+        function renderizarJuegos() {
+            const containerP = document.getElementById('containerPendientes');
+            const containerF = document.getElementById('containerFinalizados');
+            containerP.innerHTML = ''; containerF.innerHTML = '';
 
-    const coloresLigas = {
-        'femenil': 'border-pink-600/50',
-        'varonil': 'border-blue-600/50',
-        'easy_femenil': 'border-emerald-500/50',
-        'slow_mixto': 'border-purple-500/50'
-    };
+            const coloresLigas = {
+                'femenil': 'border-pink-600/60',
+                'varonil': 'border-blue-600/60',
+                'easy_femenil': 'border-emerald-500/60',
+                'slow_mixto': 'border-purple-500/60'
+            };
 
-    let filtrados = juegosBase
-        .filter(g => filtroLiga === 'all' || g.liga === filtroLiga)
-        .sort((a, b) => new Date(b.fecha) - new Date(a.fecha)); 
+            let filtrados = juegosBase
+                .filter(g => filtroLiga === 'all' || g.liga === filtroLiga)
+                .sort((a, b) => new Date(b.fecha) - new Date(a.fecha)); 
 
-    filtrados.forEach((j, index) => {
-        const esFinal = j.status === 'finalizado';
-        const borderColor = coloresLigas[j.liga] || 'border-slate-500/50';
+            if(filtrados.length === 0) {
+                containerP.innerHTML = `<p class="text-xs text-slate-500 font-bold uppercase italic p-4">No hay juegos agendados bajo este filtro.</p>`;
+                return;
+            }
 
-        const card = `
-            <div class="glass-card p-5 rounded-[1.5rem] border-l-4 ${borderColor} hover:scale-[1.02] flex items-center justify-between cursor-pointer transition-all reveal" 
-                 onclick='openModal(${JSON.stringify(j)})'>
-                <div class="flex items-center gap-4">
-                    <div class="text-center min-w-[40px] border-r border-white/5 pr-3">
-                        <span class="block text-red-600 font-black text-lg italic leading-none">${extraerDia(j.fecha)}</span>
-                        <span class="text-[7px] uppercase font-bold text-slate-500">${extraerMes(j.fecha)}</span>
-                    </div>
-                    <div>
-                        <p class="text-xs md:text-sm font-black italic uppercase tracking-tighter">
-                            ${j.local} <span class="text-red-600 mx-1">${esFinal ? j.resultado : 'VS'}</span> ${j.visita}
-                        </p>
-                        <span class="text-[7px] font-black uppercase text-slate-500">${j.liga.replace('_', ' ')}</span>
-                    </div>
-                </div>
-                <i class="fa fa-chevron-right text-[8px] text-slate-700"></i>
-            </div>`;
-        if (esFinal) containerF.innerHTML += card; else containerP.innerHTML += card;
-    });
-}
+            filtrados.forEach((j) => {
+                const esFinal = j.status === 'finalizado';
+                const borderColor = coloresLigas[j.liga] || 'border-slate-500/50';
+
+                const card = `
+                    <div class="glass-card p-5 rounded-[1.5rem] border-l-4 ${borderColor} hover:scale-[1.01] flex items-center justify-between cursor-pointer transition-all reveal" 
+                         onclick='openModal(${JSON.stringify(j)})' style="opacity: 1;">
+                        <div class="flex items-center gap-4">
+                            <div class="text-center min-w-[45px] border-r border-white/5 pr-3">
+                                <span class="block text-red-600 font-black text-lg italic leading-none font-oswald">${extraerDia(j.fecha)}</span>
+                                <span class="text-[7px] uppercase font-bold text-slate-500 block">${extraerMes(j.fecha)}</span>
+                            </div>
+                            <div>
+                                <p class="text-xs md:text-sm font-black italic uppercase tracking-tighter font-oswald">
+                                    ${j.local} <span class="text-red-600 mx-1">${esFinal ? j.resultado : 'VS'}</span> ${j.visita}
+                                </p>
+                                <span class="text-[7px] font-black uppercase text-slate-500 tracking-wider">${j.liga.replace('_', ' ')}</span>
+                            </div>
+                        </div>
+                        <i class="fa fa-chevron-right text-[8px] text-slate-700 mr-2"></i>
+                    </div>`;
+
+                if (esFinal) containerF.innerHTML += card; else containerP.innerHTML += card;
+            });
+        }
 
         function extraerDia(f) { return f.includes('-') ? f.split('-')[2] : f.split('/')[0]; }
         function extraerMes(f) { 
@@ -188,33 +203,84 @@ function renderizarJuegos() {
         }
 
         function openModal(j) {
-    const vsAnim = document.getElementById('vsAnimContainer');
-    const scoreTxt = document.getElementById('mScore');
-    
-    // Títulos y equipos
-    document.getElementById('mSub').innerText = j.liga === 'femenil' ? 'LEY 57 · FEMENIL' : 'ALV SPORT · VARONIL';
-    document.getElementById('mTeams').innerText = `${j.local} VS ${j.visita}`;
-    
-    // Lógica de visualización
-    if (j.status === 'finalizado') {
-        vsAnim.style.display = 'none'; // Escondemos el GIF
-        scoreTxt.style.display = 'block'; // Mostramos los números
-        scoreTxt.innerText = j.resultado; 
-    } else {
-        vsAnim.style.display = 'flex'; // Mostramos el GIF
-        scoreTxt.style.display = 'none'; // Escondemos los números
-    }
-    
-    // Información extra
-    document.getElementById('mInfo').innerText = `${j.fecha} | ${j.hora} HRS`;
-    document.getElementById('mAmpayer').innerText = (j.liga === 'femenil') 
-        ? "Javier Yocupicio" 
-        : "Javier Yocupicio / Staff ALV";
-    
-    // Mostrar modal
-    document.getElementById('modalDetails').style.display = 'flex';
-}
-        function closeModal() { document.getElementById('modalDetails').style.display = 'none'; }
+            const vsAnim = document.getElementById('vsAnimContainer');
+            const scoreTxt = document.getElementById('mScore');
+            const botonContainer = document.getElementById('containerBotonLiga');
+            const modalBorder = document.getElementById('modalBorderTrack');
+            const modalLine = document.getElementById('modalTopLine');
+            const iconElements = document.querySelectorAll('.space-y-4 .fa');
+            
+            // Configuración de metadatos, links y estilos visuales por tipo de liga
+            const mapeoLigas = {
+                'femenil': { 
+                    sub: 'LEY 57 · SLOW PITCH FEMENIL', 
+                    url: 'estadisticas.html', 
+                    color: '#db2777',
+                    btnClass: 'from-pink-600 to-pink-800 shadow-pink-900/40'
+                },
+                'varonil': { 
+                    sub: 'ALV SPORT · BOLA PUESTA VARONIL', 
+                    url: 'alv_sport.html', 
+                    color: '#2563eb',
+                    btnClass: 'from-blue-600 to-blue-800 shadow-blue-900/40'
+                },
+                'easy_femenil': { 
+                    sub: 'LEY 57 · EASY FEMENIL', 
+                    url: 'easy_femenil.html', 
+                    color: '#059669',
+                    btnClass: 'from-emerald-600 to-emerald-800 shadow-emerald-900/40'
+                },
+                'slow_mixto': { 
+                    sub: 'LEY 57 · SLOW PITCH MIXTO', 
+                    url: 'mixto.html', 
+                    color: '#7e22ce',
+                    btnClass: 'from-purple-600 to-purple-800 shadow-purple-900/40'
+                }
+            };
+
+            const config = mapeoLigas[j.liga] || { sub: 'LIGA GENERAL', url: 'index_post.html', color: '#dc2626', btnClass: 'from-slate-700 to-slate-900' };
+
+            // Inyectar títulos y cabeceras dinámicas
+            document.getElementById('mSub').innerText = config.sub;
+            document.getElementById('mSub').style.color = config.color;
+            document.getElementById('mTeams').innerText = `${j.local} VS ${j.visita}`;
+            
+            // Adaptación de colores de bordes e íconos para hacer juego temático con la liga seleccionada
+            modalBorder.style.borderColor = `${config.color}50`;
+            modalLine.style.backgroundColor = config.color;
+            modalLine.style.boxShadow = `0 0 15px ${config.color}`;
+            iconElements.forEach(i => i.style.color = config.color);
+
+            // Control de visibilidad del GIF vs los números oficiales de la pizarra
+            if (j.status === 'finalizado') {
+                vsAnim.style.display = 'none'; 
+                scoreTxt.style.display = 'block'; 
+                scoreTxt.innerText = j.resultado; 
+            } else {
+                vsAnim.style.display = 'flex'; 
+                scoreTxt.style.display = 'none'; 
+            }
+            
+            // Información del encuentro y oficiales de campo
+            document.getElementById('mInfo').innerText = `${j.fecha} | ${j.hora} HRS`;
+            document.getElementById('mAmpayer').innerText = (j.liga === 'varonil') 
+                ? "Javier Yocupicio / Staff ALV" 
+                : "Javier Yocupicio";
+            
+            // Construcción del Botón de Navegación Profesional Directo a la Tabla de la Liga
+            botonContainer.innerHTML = `
+                <a href="${config.url}" class="flex items-center justify-center gap-2 bg-gradient-to-r ${config.btnClass} text-white text-[10px] font-black py-4 rounded-2xl uppercase tracking-widest hover:scale-105 transition-transform shadow-lg">
+                    <i class="fa fa-chart-bar"></i> Ver Tabla de Posiciones
+                </a>
+            `;
+
+            // Desplegar el modal sobre el viewport
+            document.getElementById('modalDetails').style.display = 'flex';
+        }
+
+        function closeModal() { 
+            document.getElementById('modalDetails').style.display = 'none'; 
+        }
     </script>
 </body>
 </html>
