@@ -7,6 +7,8 @@
     <link rel="icon" type="image/png" href="alv_sport_logo.png.jpeg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <style>
         body { background-color: #020617; min-height: 100vh; font-family: sans-serif; }
         .glass-panel {
@@ -90,7 +92,7 @@
                     <table class="w-full text-left border-collapse text-[11px]">
                         <thead>
                             <tr class="bg-slate-950 text-slate-400 font-bold uppercase tracking-wider border-b border-slate-800">
-                                <th class="p-4">Folio de Recibo</th>
+                                <th class="p-4">Folio de Recibo (Haz clic para descargar)</th>
                                 <th class="p-4">Fecha y Hora</th>
                                 <th class="p-4 text-right">Monto Abonado</th>
                                 <th class="p-4 text-right">Saldo en Fecha</th>
@@ -108,9 +110,11 @@
     </div>
 
     <script>
-        // URL UNIFICADA HACIA TU SERVIDOR CENTRAL EN RENDER
+        // ENDPOINT DEL SERVIDOR CENTRAL DE PRODUCCIÓN
         const API_URL = "https://ley57.onrender.com/api";
+        let pagoActualCargado = null; // Almacenará la información en caché para el PDF
 
+        // FUNCIÓN PRINCIPAL DE RASTREO
         async function rastrearFolioFianza(event) {
             event.preventDefault();
             const folioInput = document.getElementById('inputFolioBusqueda').value.trim();
@@ -119,22 +123,23 @@
             if(!folioInput) return;
 
             try {
-                // Petición directa al servidor de Render con el folio sanitizado
+                // Petición directa a tu ruta del backend /fianzas/buscar/:folio
                 const response = await fetch(`${API_URL}/fianzas/buscar/${encodeURIComponent(folioInput)}`);
                 const resultado = await response.json();
                 
                 if (resultado.success && resultado.pago) {
                     const pago = resultado.pago;
+                    pagoActualCargado = pago; // Guardamos el objeto para la descarga de PDF
 
-                    // Mostrar contenedor principal de resultados
+                    // Mostrar contenedor visual
                     wrapper.classList.remove('hidden');
 
-                    // Mapear los datos numéricos y etiquetas principales
+                    // Mapear etiquetas y tarjetas numéricas
                     document.getElementById('teamBadge').textContent = `${pago.teamName} · ${pago.liga.toUpperCase()}`;
                     document.getElementById('txtTotalAbonado').textContent = `$${Number(pago.montoAbonado).toFixed(2)}`;
                     document.getElementById('txtSaldoRestante').textContent = `$${Number(pago.saldoRestante).toFixed(2)}`;
 
-                    // Control de visualización del estado de cuenta
+                    // Estatus visual de liquidación
                     const est = document.getElementById('txtEstatusLiquidacion');
                     if (pago.saldoRestante <= 0) {
                         est.textContent = "Cuenta Liquidada";
@@ -144,27 +149,24 @@
                         est.className = "text-[8px] text-red-500 font-bold uppercase tracking-wider";
                     }
 
-                    // Formatear la estampa de tiempo ISO a formato legible mexicano
-                    const fechaLegible = new Date(pago.fechaHora).toLocaleString('es-MX', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit'
-                    });
+                    // Formatear estampa de tiempo ISO a México
+                    const fechaLegible = new Date(pago.fechaHora).toLocaleString('es-MX');
 
-                    // Renderizar el renglón dentro de la tabla de metadatos
+                    // Inyectar el renglón interactivo. El folio tiene una acción click que dispara la descarga
                     const tbody = document.getElementById('tablaFianzasBody');
                     tbody.innerHTML = `
-                        <tr class="bg-slate-900/20">
-                            <td class="p-4 font-mono text-blue-400 font-bold uppercase tracking-wider">${pago.folio}</td>
+                        <tr class="bg-slate-900/20 hover:bg-slate-900/40 transition-colors">
+                            <td class="p-4">
+                                <button onclick="descargarReciboPDF()" class="font-mono text-blue-400 hover:text-blue-300 font-bold uppercase tracking-wider flex items-center gap-1 text-left outline-none group">
+                                    <i class="fa fa-file-pdf text-red-500 group-hover:scale-110 transition-transform"></i> ${pago.folio}
+                                </button>
+                            </td>
                             <td class="p-4 text-slate-400">${fechaLegible}</td>
                             <td class="p-4 text-right text-emerald-400 font-bold">+$${Number(pago.montoAbonado).toFixed(2)}</td>
                             <td class="p-4 text-right text-slate-400">$${Number(pago.saldoRestante).toFixed(2)}</td>
                             <td class="p-4 text-center">
                                 <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] px-2.5 py-1 rounded-md font-bold uppercase tracking-wider inline-flex items-center gap-1">
-                                    <i class="fa fa-check-double text-[10px]"></i> Oficios Validado
+                                    <i class="fa fa-check-double text-[10px]"></i> Oficial Validado
                                 </span>
                             </td>
                         </tr>
@@ -175,10 +177,66 @@
                 }
 
             } catch (error) {
-                console.error("Error detectado en el rastreo:", error);
+                console.error("Error en rastreo:", error);
                 wrapper.classList.add('hidden');
-                alert('Error de conexión: No se pudo enlazar con el cluster financiero de Render. Inténtelo de nuevo más tarde.');
+                alert('Error de conexión: No se pudo enlazar con el clúster financiero de Render.');
             }
+        }
+
+        // MOTOR GENERADOR DE COMPROBANTES PDF DESDE EL NAVEGADOR
+        function descargarReciboPDF() {
+            if (!pagoActualCargado) return;
+            
+            const datos = pagoActualCargado;
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+
+            // Bloque institucional del encabezado
+            doc.setFillColor(15, 23, 42); doc.rect(0, 0, 210, 38, 'F');
+            doc.setFillColor(239, 68, 68); doc.rect(0, 38, 210, 2, 'F');
+
+            doc.setTextColor(255, 255, 255);
+            doc.setFont("helvetica", "bold"); doc.setFontSize(16);
+            doc.text("LIGA DE SLOW PITCH LEY 57 & ALV SPORT", 14, 16);
+            
+            doc.setFontSize(10); doc.setTextColor(156, 163, 175);
+            doc.text("Recibo Oficial de Control Financiero - Comprobante de Caja", 14, 23);
+            doc.text(`FOLIO DE CONTROL: ${datos.folio}`, 14, 30); 
+
+            doc.setTextColor(30, 41, 59); doc.setFontSize(13);
+            doc.text("COMPROBANTE DE ABONO DE FIANZA", 14, 52);
+
+            doc.setFont("helvetica", "normal"); doc.setFontSize(10);
+            doc.text("Fecha de Registro: " + new Date(datos.fechaHora).toLocaleString("es-MX"), 14, 62);
+            doc.text(`Escuadra Deportiva: ${datos.teamName}`, 14, 68);
+            doc.text(`Categoría / Identificador: ${datos.liga.toUpperCase()}`, 14, 74);
+
+            // Tabla estructurada interna del recibo
+            doc.autoTable({
+                startY: 82,
+                head: [['CONCEPTO OPERATIVO', 'MONTOS EN MONEDA NACIONAL']],
+                body: [
+                    ['Fondo Obligatorio Total de Liga', '$10,000.00 MXN'],
+                    ['Cantidad Abonada en esta Transacción', `$${Number(datos.montoAbonado).toFixed(2)} MXN`],
+                    ['Saldo Restante Pendiente', `$${Number(datos.saldoRestante).toFixed(2)} MXN`]
+                ],
+                theme: 'grid',
+                headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255] }
+            });
+
+            let finalY = doc.lastAutoTable.finalY || 120;
+            let currentY = finalY + 30;
+            
+            // Línea de firma digitalizada
+            doc.setDrawColor(148, 163, 184); doc.line(45, currentY, 165, currentY);
+            
+            currentY += 5; doc.setFont("helvetica", "bold"); doc.setTextColor(15, 23, 42);
+            doc.text("Javier Yocupicio", 105, currentY, { align: "center" });
+            currentY += 4; doc.setFont("helvetica", "normal"); doc.setTextColor(100, 116, 139); doc.setFontSize(9);
+            doc.text("Director General - Encargado de Grupo Administrativo", 105, currentY, { align: "center" });
+
+            // Forzar descarga del archivo
+            doc.save(`Recibo_Fianza_${datos.folio}.pdf`);
         }
     </script>
 </body>
