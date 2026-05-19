@@ -153,7 +153,6 @@
     <script>
         const API_URL = "https://ley57.onrender.com/api";
 
-        // Mapeamos los IDs idénticos a los strings con los que guardaste las colecciones en MongoDB
         const mapeoLigasNativas = {
             "femenil": "femenil",
             "varonil": "varonil",
@@ -161,30 +160,21 @@
             "slow_mixto": "slow_mixto"
         };
 
-        // Función unificada que inyecta los equipos dinámicos sin importar la estructura de la respuesta
+        // Consulta dinámica de escuadras de forma segura
         async function obtenerEquiposDesdeServidor(ligaSeleccionada, selectElement) {
             if (!ligaSeleccionada) {
                 selectElement.innerHTML = '<option value="">-- Elige un Equipo --</option>';
                 return;
             }
-            
             selectElement.innerHTML = '<option value="">Cargando escuadras...</option>';
             const ligaIdMongo = mapeoLigasNativas[ligaSeleccionada] || ligaSeleccionada;
-            
             try {
-                // Petición directa al endpoint dinámico nativo de la app
                 const response = await fetch(`${API_URL}/equipos?liga=${encodeURIComponent(ligaIdMongo)}`);
-                if (!response.ok) throw new Error("Fallo en respuesta");
-                
                 const data = await response.json();
                 selectElement.innerHTML = '<option value="">-- Elige un Equipo --</option>';
-                
-                // Extrae la información ya sea si viene un array plano o un objeto envuelto
                 const listaFinal = Array.isArray(data) ? data : (data.equipos || data.teams || []);
-                
                 if (listaFinal && listaFinal.length > 0) {
                     listaFinal.forEach(eq => {
-                        // Tolera cualquier propiedad de guardado (.name, .nombre o .teamName)
                         const nombreEquipo = eq.nombre || eq.name || eq.teamName || (typeof eq === 'string' ? eq : '');
                         if (nombreEquipo) {
                             selectElement.innerHTML += `<option value="${nombreEquipo}">${nombreEquipo}</option>`;
@@ -194,7 +184,7 @@
                     selectElement.innerHTML = `<option value="">No hay equipos en la categoría '${ligaIdMongo}'</option>`;
                 }
             } catch (error) {
-                console.error("Error crítico de sincronización:", error);
+                console.error(error);
                 selectElement.innerHTML = '<option value="">Error al conectar con Render</option>';
             }
         }
@@ -227,7 +217,7 @@
             }
         }
 
-        // GUARDAR ABONOS EN MONGO
+        // CONTROL INTEGRADO DE INSERCIÓN MULTI-RUTA (FALLBACK INTELIGENTE)
         async function registrarAbonoAdmin(event) {
             event.preventDefault();
             const liga = document.getElementById('regLiga').value;
@@ -239,65 +229,101 @@
             if (!teamName) return alert("Por favor, selecciona una escuadra primero.");
             if (!isAuto && !folio) return alert("Ingresa un folio de control manual.");
 
-            try {
-                const response = await fetch(`${API_URL}/fianzas/registrar`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ liga, teamName, folio, montoAbonado, autoFolio: isAuto })
-                });
-                const resultado = await response.json();
+            const payload = { liga, teamName, folio, montoAbonado, autoFolio: isAuto };
 
-                if (resultado.success) {
-                    alert(`¡Abono registrado con éxito!\nFolio: ${resultado.datosPago.folio}\nSaldo Restante: $${resultado.datosPago.saldoRestante}`);
-                    generarFacturaPDFOficial(resultado.datosPago); 
-                    document.getElementById('registroAbonoForm').reset();
-                    toggleFolioManual();
-                } else {
-                    alert('Error detectado por la caja: ' + resultado.error);
+            // Definimos las dos rutas posibles de Express para interceptar de forma segura
+            let rutasABuscar = [
+                `${API_URL}/fianzas/registrar`,
+                `${API_URL}/registrar`
+            ];
+
+            let exito = false;
+            let resultado = null;
+
+            for (let url of rutasABuscar) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    if (response.status !== 404) {
+                        resultado = await response.json();
+                        exito = response.ok;
+                        break; // Salimos de la iteración si el endpoint procesó el cuerpo
+                    }
+                } catch (e) {
+                    console.error("Error en intento de ruta: " + url, e);
                 }
-            } catch (error) {
-                console.error(error);
-                alert('Fallo de respuesta: El servidor central de Render rechazó la inserción.');
+            }
+
+            if (exito && resultado && resultado.success) {
+                alert(`¡Transacción insertada en MongoDB con éxito!\nFolio: ${resultado.datosPago.folio}\nSaldo Restante: $${resultado.datosPago.saldoRestante}`);
+                generarFacturaPDFOficial(resultado.datosPago); 
+                document.getElementById('registroAbonoForm').reset();
+                toggleFolioManual();
+            } else {
+                alert('Error detectado: ' + (resultado && resultado.error ? resultado.error : 'Fallo en la comunicación con Express. Verifica tu consola.'));
             }
         }
 
-        // TRACKING DE FOLIO INDIVIDUAL
+        // BÚSQUEDA DE FOLIO CON SOPORTE MULTI-RUTA
         async function buscarPorFolioAdmin() {
             const folio = document.getElementById('searchFolio').value.trim();
             if(!folio) return alert('Por favor, escribe un folio.');
 
-            try {
-                const response = await fetch(`${API_URL}/fianzas/buscar/${encodeURIComponent(folio)}`);
-                const resultado = await response.json();
-                
-                if(resultado.success && resultado.pago) {
-                    pintarFilasAuditoria([resultado.pago]);
-                } else {
-                    alert(resultado.error || 'El folio solicitado no se encuentra en el sistema.');
-                    pintarFilasAuditoria([]);
-                }
-            } catch (error) {
-                alert('Fallo al conectar con el servidor.');
+            let rutasABuscar = [
+                `${API_URL}/fianzas/buscar/${encodeURIComponent(folio)}`,
+                `${API_URL}/buscar/${encodeURIComponent(folio)}`
+            ];
+
+            let resultado = null;
+            for (let url of rutasABuscar) {
+                try {
+                    const response = await fetch(url);
+                    if (response.status !== 404) {
+                        resultado = await response.json();
+                        break;
+                    }
+                } catch (e) {}
+            }
+            
+            if(resultado && resultado.success && resultado.pago) {
+                pintarFilasAuditoria([resultado.pago]);
+            } else {
+                alert(resultado && resultado.error ? resultado.error : 'El folio no se encuentra en el sistema contable.');
+                pintarFilasAuditoria([]);
             }
         }
 
-        // HISTORIAL DE AUDITORÍA COMPLETO
+        // HISTORIAL POR EQUIPO CON SOPORTE MULTI-RUTA
         async function buscarHistorialEquipoAdmin() {
             const liga = document.getElementById('filterLiga').value;
             const equipo = document.getElementById('filterEquipo').value;
 
             if(!liga || !equipo) return alert('Selecciona liga y equipo para desplegar la auditoría.');
 
-            try {
-                const response = await fetch(`${API_URL}/fianzas/historial?teamName=${encodeURIComponent(equipo)}&liga=${liga}`);
-                const resultado = await response.json();
-                if(resultado.success && resultado.historial) {
-                    pintarFilasAuditoria(resultado.historial);
-                } else {
-                    alert('Error en consulta: ' + resultado.error);
-                }
-            } catch (error) {
-                alert('Fallo de red al intentar descargar los abonos.');
+            let rutasABuscar = [
+                `${API_URL}/fianzas/historial?teamName=${encodeURIComponent(equipo)}&liga=${liga}`,
+                `${API_URL}/historial?teamName=${encodeURIComponent(equipo)}&liga=${liga}`
+            ];
+
+            let resultado = null;
+            for (let url of rutasABuscar) {
+                try {
+                    const response = await fetch(url);
+                    if (response.status !== 404) {
+                        resultado = await response.json();
+                        break;
+                    }
+                } catch (e) {}
+            }
+
+            if(resultado && resultado.success && resultado.historial) {
+                pintarFilasAuditoria(resultado.historial);
+            } else {
+                alert(resultado && resultado.error ? resultado.error : 'No se pudo descargar el historial de aportaciones.');
             }
         }
 
