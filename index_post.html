@@ -167,7 +167,7 @@
                     <div class="absolute top-6 left-6 z-20 bg-emerald-600 text-[9px] font-black px-3 py-1 rounded-full tracking-widest uppercase">MIXED</div>
                 </div>
                 <div class="p-8 glass-dark flex-1 border-t border-emerald-500/20 rounded-b-[2.5rem]">
-                    <h2 class="font-oswald text-2xl text-white uppercase italic leading-none">Slow <span class="text-emerald-500">Mixto</span></h2>
+                    <h2 class="font-oswald text-2xl text-white uppercase italic leading-none">Slow Pitch<span class="text-emerald-500">MIXED</span></h2>
                     <p class="text-emerald-300/50 text-[9px] font-bold uppercase tracking-widest mt-2">Categoría Libre</p>
                     <button class="mt-6 w-full py-3 rounded-xl bg-emerald-600/10 border border-emerald-600/50 text-emerald-500 font-black text-[10px] uppercase tracking-widest group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
                         Ver Standing
@@ -176,19 +176,33 @@
             </div>
         </div>
 
-        <div class="mt-16 flex justify-center">
-            <a href="lideres.html" class="group relative inline-flex items-center gap-6 bg-slate-900 border border-white/10 px-10 py-5 rounded-[2rem] overflow-hidden transition-all hover:border-indigo-500 shadow-2xl">
-                <div class="absolute inset-0 bg-gradient-to-r from-indigo-600/20 to-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <div class="bg-indigo-600 w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-600/40">
-                    <i class="fa fa-trophy text-white text-xl"></i>
-                </div>
-                <div class="text-left">
-                    <span class="block text-xs font-black text-indigo-400 uppercase tracking-widest">Estadísticas Individuales</span>
-                    <h3 class="font-oswald text-2xl uppercase italic text-white leading-none">Ranking General de Líderes</h3>
-                </div>
-                <i class="fa fa-chevron-right text-slate-600 group-hover:text-white group-hover:translate-x-2 transition-all"></i>
-            </a>
+        <div class="mt-16 grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto px-4">
+    
+    <a href="lideres.html" class="group relative flex items-center gap-6 bg-slate-900 border border-white/10 p-6 md:p-8 rounded-[2rem] overflow-hidden transition-all hover:border-indigo-500 shadow-2xl card-hover">
+        <div class="absolute inset-0 bg-gradient-to-r from-indigo-600/20 to-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <div class="bg-indigo-600 w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-600/40 shrink-0">
+            <i class="fa fa-trophy text-white text-xl"></i>
         </div>
+        <div class="text-left flex-1">
+            <span class="block text-xs font-black text-indigo-400 uppercase tracking-widest">Estadísticas Individuales</span>
+            <h3 class="font-oswald text-2xl uppercase italic text-white leading-none mt-1">Ranking General de Líderes</h3>
+        </div>
+        <i class="fa fa-chevron-right text-slate-600 group-hover:text-white group-hover:translate-x-2 transition-all shrink-0"></i>
+    </a>
+
+    <a href="juegos.html" class="group relative flex items-center gap-6 bg-slate-900 border border-white/10 p-6 md:p-8 rounded-[2rem] overflow-hidden transition-all hover:border-emerald-500 shadow-2xl card-hover">
+        <div class="absolute inset-0 bg-gradient-to-r from-emerald-600/20 to-teal-600/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <div class="bg-emerald-600 w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-600/40 shrink-0">
+            <i class="fa fa-calendar-alt text-white text-xl"></i>
+        </div>
+        <div class="text-left flex-1">
+            <span class="block text-xs font-black text-emerald-400 uppercase tracking-widest">Rol de Juegos</span>
+            <h3 class="font-oswald text-2xl uppercase italic text-white leading-none mt-1">Programación y Calendario</h3>
+        </div>
+        <i class="fa fa-chevron-right text-slate-600 group-hover:text-white group-hover:translate-x-2 transition-all shrink-0"></i>
+    </a>
+
+</div>
     </main>
 
     <footer class="relative mt-20 pb-20 px-6">
