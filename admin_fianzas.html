@@ -154,25 +154,20 @@
         // CONFIGURACIÓN DE TU API REAL EN RENDER
         const API_URL = "https://ley57.onrender.com/api";
 
-        // Función reutilizable para jalar los equipos reales del Servidor en Render
+        // Trae los equipos directamente filtrados desde tu base de datos de Render
         async function obtenerEquiposDesdeServidor(ligaSeleccionada, selectElement) {
             if (!ligaSeleccionada) {
                 selectElement.innerHTML = '<option value="">-- Elige un Equipo --</option>';
                 return;
             }
-            
             selectElement.innerHTML = '<option value="">Cargando escuadras...</option>';
-            
             try {
-                // Hacemos el fetch a tu ruta existente de equipos filtrados por liga
                 const response = await fetch(`${API_URL}/teams?liga=${ligaSeleccionada}`);
                 const equipos = await response.json();
                 
                 selectElement.innerHTML = '<option value="">-- Elige un Equipo --</option>';
-                
                 if (equipos && equipos.length > 0) {
                     equipos.forEach(eq => {
-                        // Se usa eq.name o eq.teamName dependiendo de cómo esté guardado en tu base de datos de MongoDB
                         const nombreEquipo = eq.name || eq.teamName;
                         selectElement.innerHTML += `<option value="${nombreEquipo}">${nombreEquipo}</option>`;
                     });
@@ -185,14 +180,12 @@
             }
         }
 
-        // Ejecución al cambiar categoría en el Formulario
         async function actualizarEquiposAdmin() {
             const liga = document.getElementById('regLiga').value;
             const select = document.getElementById('regEquipo');
             await obtenerEquiposDesdeServidor(liga, select);
         }
 
-        // Ejecución al cambiar categoría en el Filtro de Rastreo
         async function cargarEquiposFiltro() {
             const liga = document.getElementById('filterLiga').value;
             const select = document.getElementById('filterEquipo');
@@ -215,7 +208,7 @@
             }
         }
 
-        // ENVIAR EL ABONO A MONGO (RENDER)
+        // ENVIAR EL ABONO A MONGO
         async function registrarAbonoAdmin(event) {
             event.preventDefault();
             const liga = document.getElementById('regLiga').value;

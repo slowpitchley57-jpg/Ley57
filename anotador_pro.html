@@ -40,6 +40,8 @@
                     <option value="">-- SELECCIONAR LIGA --</option>
                     <option value="femenil">LEY 57 (FEMENIL)</option>
                     <option value="varonil">ALV SPORT (VARONIL)</option>
+                    <option value="easy_femenil">LEY 57 (EASY FEMENIL)</option>
+                    <option value="slow_mixto">SLOW PITCH (SLOW MIXTO)</option>
                 </select>
                 <select id="selJuego" class="w-full p-4 bg-slate-50 border rounded-2xl font-bold uppercase outline-none">
                     <option value="">-- ESPERANDO LIGA --</option>
@@ -162,14 +164,21 @@
         async function fetchGames() {
             const liga = document.getElementById('selLiga').value;
             if(!liga) return;
-            const res = await fetch(`${API}/games?liga=${liga}&status=pendiente`);
+            
+            // Jalar todos los juegos correspondientes a la liga (sin filtrar por status pendiente)
+            const res = await fetch(`${API}/games?liga=${liga}`);
             const data = await res.json();
-            document.getElementById('selJuego').innerHTML = data.map(g => `
+            
+            document.getElementById('selJuego').innerHTML = data.map(g => {
+                const badgeStatus = g.status === 'finalizado' ? '[JUGADO] ' : '[PENDIENTE] ';
+                return `
                 <option value="${g._id}" data-loc="${g.local}" data-vis="${g.visita}">
-                    ${g.local} VS ${g.visita} (${g.fecha || 'Sin fecha'})
-                </option>`).join('');
+                    ${badgeStatus}${g.local} VS ${g.visita} (${g.fecha || 'Sin fecha'} ${g.hora || ''})
+                </option>`;
+            }).join('');
+            
             if(data.length === 0) {
-                document.getElementById('selJuego').innerHTML = '<option value="">NO HAY JUEGOS PENDIENTES</option>';
+                document.getElementById('selJuego').innerHTML = '<option value="">NO SE ENCONTRARON ENCUENTROS</option>';
             }
         }
 
@@ -184,7 +193,7 @@
                 liga: document.getElementById('selLiga').value 
             };
             
-            // Cargar de forma automática los dos rosters en paralelo
+            // Cargar automáticamente ambos rosters en paralelo
             const [rL, rV] = await Promise.all([
                 fetch(`${API}/players?equipo=${encodeURIComponent(match.local)}`),
                 fetch(`${API}/players?equipo=${encodeURIComponent(match.visita)}`)
@@ -197,7 +206,7 @@
             setupTeamLineup('local');
         }
 
-        // FASE 2: PRECARGA INTELIGENTE Y RELLENO AUTOMÁTICO
+        // FASE 2: ARMADO AUTOMÁTICO DE LINEUP PROVISIONAL
         let currentSetup = 'local'; 
         let tempLineup = [];
 
@@ -205,10 +214,9 @@
             currentSetup = team;
             document.getElementById('txtTeamSetup').innerText = match[team].toUpperCase();
             
-            // AUTOMATIZACIÓN: Rellenamos por defecto el lineup con todo el roster para evitar añadir a mano
+            // Precarga automática de todo el roster al lineup para minimizar el trabajo manual
             tempLineup = rosters[team].map((p, idx) => ({ _id: p._id, nombre: p.nombre, pos: (idx + 1).toString() }));
             
-            // La banca inicialmente se queda vacía (pueden removerse del lineup y caer aquí)
             updatePoolView();
             updateSetupView();
         }
@@ -255,7 +263,7 @@
             if(currentSetup === 'local') {
                 setupTeamLineup('visita');
             } else {
-                // Inicializar matriz vacía para las estadísticas de la sesión
+                // Inicializar la matriz de celdas para cada bateador en la sesión
                 [...lineups.local, ...lineups.visita].forEach(p => {
                     sessionStats[p._id] = { ab: 0, h: 0, hr: 0, cels: Array(30).fill('') };
                 });
@@ -266,7 +274,6 @@
             }
         }
 
-        // RE-NAVEGACIÓN
         function regresarAFase1() {
             if(confirm("¿Seguro que deseas cambiar de juego? Se perderán las listas configuradas.")) {
                 document.getElementById('fase2').classList.add('hidden');
@@ -279,7 +286,7 @@
             }
         }
 
-        // FASE 3: LÓGICA DE JUEGO Y REPRODUCCIÓN DE HOJA
+        // FASE 3: IMPRESIÓN Y LÓGICA DE LA MATRIZ
         function renderSheet() {
             const bando = document.getElementById('switchView').value;
             const players = lineups[bando];
@@ -335,15 +342,14 @@
             document.getElementById('actionModal').classList.remove('hidden');
         }
 
+        // CONTROL DE JUEGO AUTOMATIZADO
         function closeModal() { document.getElementById('actionModal').classList.add('hidden'); }
 
-        // ADMINISTRACIÓN DE BOTONES Y REGISTROS INTELIGENTES
         function record(tipo) {
             const { pid, inn } = selectedAction;
             const nombre = document.getElementById('batterTarget').innerText;
             
             if(tipo === 'C') {
-                // Registra carrera anotada
                 sessionStats[pid].cels[inn] = sessionStats[pid].cels[inn] ? sessionStats[pid].cels[inn] + '/C' : 'C';
                 runScored();
             } else {
@@ -363,7 +369,6 @@
                         inning++; 
                     }
                 } else { 
-                    // BB, E, FC avanzan corredores por defecto
                     moverBases('H', nombre); 
                 }
             }
@@ -374,7 +379,7 @@
 
         function ghostRunner() {
             const nombre = document.getElementById('batterTarget').innerText;
-            bases[1] = nombre; // Poner corredor fantasma directo en segunda base
+            bases[1] = nombre; 
             updateUI(); 
             closeModal();
         }
@@ -422,12 +427,12 @@
             }
         }
 
-        // GUARDADO DE EXTREMO A EXTREMO EN MONGO (SINCRONIZACIÓN TOTAL)
+        // GUARDADO DE EXTREMO A EXTREMO EN LA BASE DE DATOS
         async function finalizarPartido() {
             if(!confirm(`¿Finalizar el encuentro de forma definitiva?\nMarcador final: ${score.L} - ${score.V}`)) return;
             
             try {
-                // 1. Sincronizar estadísticas individuales de cada jugadora/jugador
+                // 1. Sincronizar estadísticas individuales de cada bateador
                 for(let id in sessionStats) {
                     const s = sessionStats[id];
                     if(s.ab > 0) {
@@ -449,7 +454,7 @@
                     }
                 }
                 
-                // 2. Cambiar estatus de juego a 'finalizado' y estampar el score oficial
+                // 2. Cambiar estatus de juego y plasmar el score oficial
                 const ganador = score.L > score.V ? match.local : match.visita;
                 const perdedor = score.L > score.V ? match.visita : match.local;
                 
