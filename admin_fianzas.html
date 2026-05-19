@@ -151,39 +151,50 @@
     </div>
 
     <script>
-        // ENDPOINT UNIFICADO HACIA EN RENDER
+        // SERVIDOR DE PRODUCCIÓN CENTRAL EN RENDER
         const API_URL = "https://ley57.onrender.com/api";
 
-        // Función unificada que hace fetch dinámico a tu colección real de equipos en Render
+        // Mapeo seguro para transformar los IDs del select a la cadena exacta que filtra tu base de datos
+        const mapeoLigasReal = {
+            "femenil": "Femenil",
+            "varonil": "Varonil",
+            "easy_femenil": "Easy Femenil",
+            "slow_mixto": "Slow Mixto"
+        };
+
+        // Función unificada que consulta el endpoint correcto /api/equipos
         async function obtenerEquiposDesdeServidor(ligaSeleccionada, selectElement) {
             if (!ligaSeleccionada) {
                 selectElement.innerHTML = '<option value="">-- Elige un Equipo --</option>';
                 return;
             }
+            
             selectElement.innerHTML = '<option value="">Cargando escuadras...</option>';
+            const ligaReal = mapeoLigasReal[ligaSeleccionada] || ligaSeleccionada;
+            
             try {
-                // Consulta directa a la ruta base de equipos
-                const response = await fetch(`${API_URL}/teams?liga=${encodeURIComponent(ligaSeleccionada)}`);
-                const data = await response.json();
+                // CORRECCIÓN CLAVE: El endpoint real es /equipos, no /teams
+                const response = await fetch(`${API_URL}/equipos?liga=${encodeURIComponent(ligaReal)}`);
+                if (!response.ok) throw new Error("Fallo al contactar el listado");
                 
+                const data = await response.json();
                 selectElement.innerHTML = '<option value="">-- Elige un Equipo --</option>';
                 
-                // Mapeo seguro si los datos vienen limpios o anidados
-                const arrayEquipos = Array.isArray(data) ? data : (data.teams || []);
+                const arrayEquipos = Array.isArray(data) ? data : (data.equipos || data.teams || []);
                 
                 if (arrayEquipos && arrayEquipos.length > 0) {
                     arrayEquipos.forEach(eq => {
-                        const nombre = eq.name || eq.teamName || (typeof eq === 'string' ? eq : '');
+                        const nombre = eq.nombre || eq.name || eq.teamName || (typeof eq === 'string' ? eq : '');
                         if (nombre) {
                             selectElement.innerHTML += `<option value="${nombre}">${nombre}</option>`;
                         }
                     });
                 } else {
-                    selectElement.innerHTML = '<option value="">No se encontraron equipos</option>';
+                    selectElement.innerHTML = '<option value="">No hay equipos en esta categoría</option>';
                 }
             } catch (error) {
-                console.error("Error al jalar equipos desde Render:", error);
-                selectElement.innerHTML = '<option value="">Error al sincronizar datos</option>';
+                console.error("Error al sincronizar listado de escuadras:", error);
+                selectElement.innerHTML = '<option value="">Error al cargar datos</option>';
             }
         }
 
@@ -209,13 +220,13 @@
                 inputFolio.classList.replace("bg-slate-950", "bg-slate-900/50");
             } else {
                 inputFolio.disabled = false;
-                inputFolio.placeholder = "Ej: REC-5491";
+                inputFolio.placeholder = "Ej: REC-1025";
                 inputFolio.classList.replace("bg-slate-900/50", "bg-slate-950");
                 inputFolio.focus();
             }
         }
 
-        // ACCIÓN A: ENVIAR EL ABONO DEL ADMINISTRADOR AL BACKEND
+        // REGISTRAR TRANSACCIÓN EN MONGODB
         async function registrarAbonoAdmin(event) {
             event.preventDefault();
             const liga = document.getElementById('regLiga').value;
@@ -224,8 +235,8 @@
             let folio = document.getElementById('regFolio').value.trim();
             const montoAbonado = parseFloat(document.getElementById('regMonto').value);
 
-            if (!teamName) return alert("Por favor, selecciona una escuadra válida.");
-            if (!isAuto && !folio) return alert("Por favor, digita un número de folio personalizado.");
+            if (!teamName) return alert("Selecciona un equipo de la lista.");
+            if (!isAuto && !folio) return alert("Ingresa un folio de control manual.");
 
             try {
                 const response = await fetch(`${API_URL}/fianzas/registrar`, {
@@ -236,61 +247,59 @@
                 const resultado = await response.json();
 
                 if (resultado.success) {
-                    alert(`¡Transacción insertada exitosamente!\nFolio: ${resultado.datosPago.folio}\nSaldo Restante: $${resultado.datosPago.saldoRestante}`);
+                    alert(`¡Pago registrado con éxito!\nFolio: ${resultado.datosPago.folio}\nSaldo Pendiente: $${resultado.datosPago.saldoRestante}`);
                     generarFacturaPDFOficial(resultado.datosPago); 
                     document.getElementById('registroAbonoForm').reset();
                     toggleFolioManual();
                 } else {
-                    alert('Error reportado por la caja: ' + resultado.error);
+                    alert('Error en caja: ' + resultado.error);
                 }
             } catch (error) {
                 console.error(error);
-                alert('Fallo crítico en la comunicación con el clúster de Render.');
+                alert('Error al impactar los datos en el servidor de Render.');
             }
         }
 
-        // ACCIÓN B: BUSCAR CUALQUIER ESTRUCTURA DE FOLIO LIBRE
+        // BUSCAR POR FOLIO DIRECTO
         async function buscarPorFolioAdmin() {
             const folio = document.getElementById('searchFolio').value.trim();
-            if(!folio) return alert('Por favor, ingresa el folio a auditar.');
+            if(!folio) return alert('Escriba un folio antes de auditar.');
 
             try {
                 const response = await fetch(`${API_URL}/fianzas/buscar/${encodeURIComponent(folio)}`);
                 const resultado = await response.json();
                 
-                // Corrección de concordancia estructural basada en tu router.get('/buscar/:folio')
                 if(resultado.success && resultado.pago) {
                     pintarFilasAuditoria([resultado.pago]);
                 } else {
-                    alert(resultado.error || 'El folio solicitado no existe.');
+                    alert(resultado.error || 'El folio no arrojó coincidencias.');
                     pintarFilasAuditoria([]);
                 }
             } catch (error) {
-                alert('No se pudo establecer comunicación para recuperar el folio.');
+                alert('Error al jalar la información del folio.');
             }
         }
 
-        // ACCIÓN C: CONSULTAR EL HISTORIAL COMPLETO POR EQUIPO
+        // HISTORIAL COMPLETO
         async function buscarHistorialEquipoAdmin() {
             const liga = document.getElementById('filterLiga').value;
             const equipo = document.getElementById('filterEquipo').value;
 
-            if(!liga || !equipo) return alert('Selecciona liga y equipo para consultar la sábana de abonos.');
+            if(!liga || !equipo) return alert('Seleccione la liga y el equipo para auditar.');
 
             try {
                 const response = await fetch(`${API_URL}/fianzas/historial?teamName=${encodeURIComponent(equipo)}&liga=${liga}`);
                 const resultado = await response.json();
-                if(resultado.success && resultado.historial) {
+                if(resultado.success) {
                     pintarFilasAuditoria(resultado.historial);
                 } else {
                     alert('Error en consulta: ' + resultado.error);
                 }
             } catch (error) {
-                alert('Error de red al consultar el historial de operaciones.');
+                alert('Error al conectar con la base de datos de auditorías.');
             }
         }
 
-        // INYECTAR LAS FILAS EN LA TABLA DE AUDITORÍA
         function pintarFilasAuditoria(lista) {
             const tbody = document.getElementById('tablaAdminBody');
             document.getElementById('resultCount').textContent = `${lista.length} Operaciones`;
@@ -302,13 +311,13 @@
             }
 
             lista.forEach(pago => {
-                const fechaLegible = new Date(pago.fechaHora).toLocaleString('es-MX');
+                const dateParsed = new Date(pago.fechaHora).toLocaleString('es-MX');
                 const fila = document.createElement('tr');
                 fila.className = "hover:bg-slate-900/30 transition-colors";
                 fila.innerHTML = `
-                    <td class="p-4 font-mono font-bold text-blue-400 uppercase tracking-wider">${pago.folio}</td>
+                    <td class="p-4 font-mono font-bold text-blue-400 uppercase">${pago.folio}</td>
                     <td class="p-4"><p class="font-bold text-slate-200">${pago.teamName}</p><p class="text-[9px] text-slate-500 uppercase">${pago.liga}</p></td>
-                    <td class="p-4 text-slate-400">${fechaLegible}</td>
+                    <td class="p-4 text-slate-400">${dateParsed}</td>
                     <td class="p-4 text-right text-emerald-400 font-bold">+$${Number(pago.montoAbonado).toFixed(2)}</td>
                     <td class="p-4 text-right text-slate-400">$${Number(pago.saldoRestante).toFixed(2)}</td>
                     <td class="p-4 text-center">
@@ -325,7 +334,6 @@
             generarFacturaPDFOficial(pago);
         }
 
-        // MOTOR GENERADOR OFICIAL DE RECIBOS PDF EN CALIENTE
         function generarFacturaPDFOficial(datos) {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
